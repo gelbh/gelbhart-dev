@@ -1,24 +1,19 @@
-# README
+# Tomer Gelbhart's Website
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Personal website built with Ruby on Rails 8 and the Silicon Bootstrap theme.
 
-Things you may want to cover:
+## Technologies Used
 
-* Ruby version
+- Ruby 3.2.2
+- Rails 8.0.0
+- Bootstrap 5.3
+- Stimulus
+- Propshaft
+- SQLite3
 
-* System dependencies
+## Setup
 
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+1. Clone the repository
+```bash
+git clone git@github.com:YOUR_USERNAME/REPO_NAME.git
+cd REPO_NAME
