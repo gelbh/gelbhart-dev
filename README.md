@@ -14,6 +14,8 @@ Personal website built with Ruby on Rails 8 and the Silicon Bootstrap theme.
 ## Setup
 
 1. Clone the repository
+
 ```bash
 git clone git@github.com:gelbh/gelbhart-dev.git
-cd REPO_NAME
+cd gelbhart-dev
+```
