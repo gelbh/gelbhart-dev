@@ -1,0 +1,18 @@
+// Set Bootstrap variables first
+@import "theme/user-variables";
+@import "theme/variables";
+@import "theme/variables-dark";
+
+// Import Bootstrap from node_modules
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/variables-dark";
+@import "bootstrap/scss/maps";
+@import "bootstrap/scss/mixins";
+@import "bootstrap/scss/root";
+@import "bootstrap/scss/reboot";
+
+// Import theme components
+@import "theme/theme";
+@import "theme/utilities";
+@import "theme/components";

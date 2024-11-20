@@ -1,0 +1,61 @@
+# Ignore bundler config
+/.bundle
+
+# Ignore all logfiles and tempfiles
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+
+# Ignore pidfiles
+/tmp/pids/*
+!/tmp/pids/
+!/tmp/pids/.keep
+
+# Ignore uploaded files in development
+/storage/*
+!/storage/.keep
+/tmp/storage/*
+!/tmp/storage/
+!/tmp/storage/.keep
+
+# Ignore master key for decrypting credentials
+/config/master.key
+
+# Ignore assets
+/public/assets
+.byebug_history
+
+# Ignore environment files
+.env
+.env.*
+
+# Ignore database configuration
+/config/database.yml
+
+# Node modules
+/node_modules
+/yarn-error.log
+yarn-debug.log*
+.yarn-integrity
+
+# MacOS files
+.DS_Store
+
+# Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Ignore precompiled javascript packs
+/public/packs
+/public/packs-test
+
+# Ignore yarn files
+/yarn-error.log
+yarn-debug.log*
+.yarn-integrity
+
+# Ignore coverage files
+/coverage/

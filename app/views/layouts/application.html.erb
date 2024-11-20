@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title><%= content_for?(:title) ? yield(:title) : "Tomer Gelbhart" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="utf-8">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <!-- Theme fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <%= stylesheet_link_tag "application", data: { turbo_track: "reload" } %>
+    <%= javascript_importmap_tags %>
+</head>
+
+<body>
+    <!-- Page loading spinner -->
+    <div class="page-loading active">
+        <div class="page-loading-inner">
+            <div class="page-spinner"></div>
+            <span>Loading...</span>
+        </div>
+    </div>
+
+    <!-- Page wrapper -->
+    <main class="page-wrapper">
+        <%= render 'shared/header' %>
+
+        <!-- Main content -->
+        <div class="container pt-5 mt-5">
+            <%= yield %>
+        </div>
+
+        <%= render 'shared/footer' %>
+    </main>
+
+    <!-- Back to top button -->
+    <%= link_to "#top", class: "btn-scroll-top", data: { scroll: "" } do %>
+    <span class="btn-scroll-top-tooltip text-muted fs-sm me-2">Top</span>
+    <i class="btn-scroll-top-icon bx bx-chevron-up"></i>
+    <% end %>
+</body>
+
+</html>
