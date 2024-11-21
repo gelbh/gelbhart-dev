@@ -9,7 +9,7 @@ console_command = "/rails/bin/rails console"
     SERVER_COMMAND = "bin/rails fly:server"
 
 [deploy]
-  release_command = "bin/rails fly:release"
+  release_command = "bin/release"
 
 [env]
   PORT = "8080"
@@ -28,9 +28,9 @@ console_command = "/rails/bin/rails console"
   [[http_service.checks]]
     interval = "30s"
     timeout = "10s"
-    grace_period = "30s"
+    grace_period = "60s"
     method = "GET"
-    path = "/up"
+    path = "/health"
     protocol = "http"
     tls_skip_verify = true
 

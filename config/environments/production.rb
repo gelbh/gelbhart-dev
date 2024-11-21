@@ -67,14 +67,8 @@ Rails.application.configure do
 
   # Enable DNS rebinding protection and other `Host` header attacks.
   config.hosts.clear
-  config.hosts = [
-    "gelbhart.dev",
-    /.*\.gelbhart\.dev/,
-    ".fly.dev",
-    /[a-z0-9-]+\.fly\.dev/,
-    "172.19.0.0/16"
-
-  ]
+  # Allow all host names
+  config.hosts = nil
 
   # Asset pipeline configuration
   config.assets.css_compressor = nil
