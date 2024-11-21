@@ -2,20 +2,7 @@
 
 set -e
 
-echo "🚀 Running release tasks..."
+# Run database migrations
+bundle exec rails db:migrate
 
-# Create required directories
-echo "📁 Creating directories..."
-mkdir -p tmp/pids
-mkdir -p tmp/sockets
-mkdir -p tmp/cache
-chmod -R 777 tmp/
-chmod -R 777 log/
-
-echo "🗄️ Running database migrations..."
-bin/rails db:migrate
-
-echo "🔨 Precompiling assets..."
-bin/rails assets:precompile
-
-echo "✅ Release tasks completed!"
+# Any other release tasks can go here
