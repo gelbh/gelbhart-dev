@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" data-bs-theme="light">
 
 <head>
-    <title><%= content_for?(:title) ? yield(:title) : "Tomer Gelbhart" %></title>
+    <title><%= content_for?(:title) ? yield(:title) : "Gelbhart / Dev" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta charset="utf-8">
     <%= csrf_meta_tags %>
@@ -13,8 +13,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <%= stylesheet_link_tag "application", data: { turbo_track: "reload" } %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
 </head>
 
 <body>
@@ -27,7 +28,7 @@
     </div>
 
     <!-- Page wrapper -->
-    <main class="page-wrapper">
+    <main class="page-wrapper" data-controller="theme">
         <%= render 'shared/header' %>
 
         <!-- Main content -->

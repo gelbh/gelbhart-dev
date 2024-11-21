@@ -24,10 +24,14 @@
         </nav>
 
         <!-- Dark/Light mode toggle -->
-        <div class="form-check form-switch mode-switch pe-lg-1 ms-auto me-4" data-controller="theme" data-bs-toggle="mode">
-            <input type="checkbox" class="form-check-input" id="theme-mode">
-            <label class="form-check-label d-none d-sm-block" for="theme-mode">Light</label>
-            <label class="form-check-label d-none d-sm-block" for="theme-mode">Dark</label>
+        <div class="form-check form-switch mode-switch pe-lg-1 ms-auto me-4" data-controller="theme">
+            <input type="checkbox" class="form-check-input" id="theme-mode" data-theme-target="checkbox" data-action="theme#toggleTheme">
+            <label class="form-check-label d-none d-sm-block" for="theme-mode" data-theme-target="lightLabel">
+                Light
+            </label>
+            <label class="form-check-label d-none d-sm-block" for="theme-mode" data-theme-target="darkLabel">
+                Dark
+            </label>
         </div>
     </div>
 </header>

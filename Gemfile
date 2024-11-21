@@ -1,11 +1,11 @@
 source "https://rubygems.org"
 
 gem "rails", "~> 8.0.0"
-gem "propshaft"
+gem "sprockets-rails"
 gem "sassc-rails"
 gem "bootstrap", "~> 5.3.0"
 gem "terser"
-gem "sqlite3", ">= 2.1"
+gem "pg"
 gem "puma", ">= 5.0"
 gem "importmap-rails"
 gem "turbo-rails"
@@ -14,11 +14,12 @@ gem "jbuilder"
 
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
-gem "solid_cache"
-gem "solid_queue"
-gem "solid_cable"
-
+# gem "solid_cache"
+# gem "solid_queue"
+# gem "solid_cable"
+#
 gem "bootsnap", require: false
+gem "dockerfile-rails", ">= 1.6", group: :development
 
 gem "kamal", require: false
 
