@@ -11,6 +11,10 @@ services:
         fromDatabase:
           name: gelbhart_dev_db
           property: connectionString
+      - key: NODE_VERSION
+        value: 20.9.0
+      - key: EXECJS_RUNTIME
+        value: Node
 
 databases:
   - name: gelbhart_dev_db
