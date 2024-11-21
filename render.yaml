@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: gelbhart-dev
+    env: ruby
+    buildCommand: "./bin/render-build.sh"
+    startCommand: "bundle exec puma -C config/puma.rb"
+    envVars:
+      - key: RAILS_MASTER_KEY
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: gelbhart_dev_db
+          property: connectionString
+
+databases:
+  - name: gelbhart_dev_db
+    databaseName: gelbhart_dev
+    user: gelbhart
+    plan: free

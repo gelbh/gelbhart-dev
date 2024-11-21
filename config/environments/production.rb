@@ -1,3 +1,5 @@
+require "ipaddr"
+
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -67,8 +69,15 @@ Rails.application.configure do
 
   # Enable DNS rebinding protection and other `Host` header attacks.
   config.hosts.clear
-  # Allow all host names
-  config.hosts = nil
+
+  config.hosts = nil # Allow all host names
+  # config.hosts = [
+  #   IPAddr.new("0.0.0.0/0"),          # Allow all IPs temporarily
+  #   IPAddr.new("172.0.0.0/8"),        # Fly.io internal network
+  #   ".fly.dev",                        # Fly.io domains
+  #   "gelbhart.dev",                    # Your domain
+  #   /.*\.gelbhart\.dev/               # Subdomains
+  # ]
 
   # Asset pipeline configuration
   config.assets.css_compressor = nil
