@@ -1,6 +1,7 @@
 import "@hotwired/turbo-rails";
-import "./controllers";
+import "controllers";
 import * as bootstrap from "bootstrap";
 
-// Make Bootstrap available globally
 window.bootstrap = bootstrap;
+
+console.log("Application.js loaded");
