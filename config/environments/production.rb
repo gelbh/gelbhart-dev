@@ -71,13 +71,6 @@ Rails.application.configure do
   config.hosts.clear
 
   config.hosts = nil # Allow all host names
-  # config.hosts = [
-  #   IPAddr.new("0.0.0.0/0"),          # Allow all IPs temporarily
-  #   IPAddr.new("172.0.0.0/8"),        # Fly.io internal network
-  #   ".fly.dev",                        # Fly.io domains
-  #   "gelbhart.dev",                    # Your domain
-  #   /.*\.gelbhart\.dev/               # Subdomains
-  # ]
 
   # Asset pipeline configuration
   config.assets.css_compressor = nil
