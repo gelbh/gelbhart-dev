@@ -8,10 +8,17 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
+    <%= favicon_link_tag '/favicon.ico' %>
+    <%= favicon_link_tag '/apple-touch-icon.png', rel: 'apple-touch-icon', sizes: '180x180', type: 'image/png' %>
+    <%= favicon_link_tag '/favicon-32x32.png', rel: 'icon', sizes: '32x32', type: 'image/png' %>
+    <%= favicon_link_tag '/favicon-16x16.png', rel: 'icon', sizes: '16x16', type: 'image/png' %>
+    <%= tag :link, rel: 'manifest', href: asset_path('/site.webmanifest') %>
+
     <!-- Theme fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
