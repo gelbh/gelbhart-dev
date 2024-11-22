@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   get "oauth", to: "pages#oauth"
   get "terms", to: "pages#terms"
   get "privacy", to: "pages#privacy"
+  get "/robots.txt", to: "pages#robots"
 
   get "up" => "rails/health#show", as: :rails_health_check
   get "/health" => "rails/health#show"
