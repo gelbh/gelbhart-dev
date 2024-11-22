@@ -3,6 +3,8 @@
 // Use this to override Bootstrap and Silicon variables
 //
 
-// Example of a variable override to change Silicon background color
-// Remove the "//" to comment it in and see it in action!
-// $body-bg: #f3f6ff;
+// Override theme colors
+$primary: #a305b6;
+$link-color: $primary;
+$nav-link-hover-color: $primary;
+$nav-link-active-color: $primary;
