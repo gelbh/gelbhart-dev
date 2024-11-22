@@ -2,47 +2,72 @@
 <html lang="en">
 
 <head>
-    <title><%= content_for?(:title) ? yield(:title) : "Gelbhart / Dev" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%# Basic Meta Tags %>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title><%= content_for?(:title) ? yield(:title) : page_title("") %></title>
+
+    <%# SEO Meta Tags %>
+    <meta name="description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : 'Personal portfolio and development projects by Tomer Gelbhart. Full-stack developer specializing in Ruby on Rails and modern web applications.' %>">
+    <meta name="author" content="Tomer Gelbhart">
+    <meta name="language" content="English">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="<%= request.original_url %>">
+
+    <%# Open Graph Meta Tags %>
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<%= request.original_url %>">
+    <meta property="og:title" content="<%= content_for?(:title) ? yield(:title) : page_title("") %>">
+    <meta property="og:description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : 'Personal portfolio and development projects by Tomer Gelbhart. Full-stack developer specializing in Ruby on Rails and modern web applications.' %>">
+    <meta property="og:image" content="<%= asset_url('logos/logo_icon_only_transparent.png') %>">
+
+    <%# Twitter Card Meta Tags %>
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="<%= request.original_url %>">
+    <meta name="twitter:title" content="<%= content_for?(:title) ? yield(:title) : page_title("") %>">
+    <meta name="twitter:description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : 'Personal portfolio and development projects by Tomer Gelbhart. Full-stack developer specializing in Ruby on Rails and modern web applications.' %>">
+    <meta name="twitter:image" content="<%= asset_url('logos/logo_icon_only_transparent.png') %>">
+
+    <%# Security Tags %>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
+    <%# Favicon Links %>
     <%= favicon_link_tag '/favicon.ico' %>
     <%= favicon_link_tag '/apple-touch-icon.png', rel: 'apple-touch-icon', sizes: '180x180', type: 'image/png' %>
     <%= favicon_link_tag '/favicon-32x32.png', rel: 'icon', sizes: '32x32', type: 'image/png' %>
     <%= favicon_link_tag '/favicon-16x16.png', rel: 'icon', sizes: '16x16', type: 'image/png' %>
     <%= tag :link, rel: 'manifest', href: asset_path('/site.webmanifest') %>
 
-    <!-- Theme fonts -->
+    <%# Font Preloading %>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
+    <%# Stylesheets %>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+
+    <%# JavaScript %>
     <%= javascript_importmap_tags %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
 </head>
 
 <body>
-    <!-- Page wrapper -->
     <main class="page-wrapper" data-controller="theme">
         <%= render 'shared/header' %>
 
-        <!-- Main content -->
         <div class="container pt-5 mt-5 min-vh-100">
             <%= yield %>
         </div>
 
         <%= render 'shared/footer' %>
-    </main>
 
-    <!-- Back to top button -->
-    <%= link_to "#top", class: "btn-scroll-top", data: { scroll: "" } do %>
-    <span class="btn-scroll-top-tooltip text-muted fs-sm me-2">Top</span>
-    <i class="btn-scroll-top-icon bx bx-chevron-up"></i>
-    <% end %>
+        <%= link_to "#top", class: "btn-scroll-top", data: { scroll: "" } do %>
+        <span class="btn-scroll-top-tooltip text-muted fs-sm me-2">Top</span>
+        <i class="btn-scroll-top-icon bx bx-chevron-up"></i>
+        <% end %>
+    </main>
 </body>
 
 </html>
