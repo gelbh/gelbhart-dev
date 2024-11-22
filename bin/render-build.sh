@@ -5,9 +5,17 @@ set -o errexit
 # Install dependencies
 bundle install
 
-# Compile assets
-bundle exec rails assets:precompile
-bundle exec rails assets:clean
+# Install npm packages
+npm install
+
+# Clean existing precompiled assets
+bundle exec rake assets:clean
+
+# Clear any cached assets
+rm -rf tmp/cache/assets
+
+# Precompile assets
+RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompile
 
 # Run database migrations
-bundle exec rails db:migrate
+bundle exec rake db:migrate
