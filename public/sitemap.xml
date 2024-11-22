@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://gelbhart.dev/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <lastmod>2024-11-22</lastmod>
+  </url>
+  <url>
+    <loc>https://gelbhart.dev/oauth</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2024-11-22</lastmod>
+  </url>
+  <url>
+    <loc>https://gelbhart.dev/terms</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+    <lastmod>2024-11-22</lastmod>
+  </url>
+  <url>
+    <loc>https://gelbhart.dev/privacy</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+    <lastmod>2024-11-22</lastmod>
+  </url>
+</urlset>
