@@ -2,17 +2,16 @@
 # exit on error
 set -o errexit
 
+# Create necessary asset directories
+mkdir -p app/assets/builds
+mkdir -p app/assets/images
+mkdir -p app/assets/stylesheets/theme
+
 # Install dependencies
 bundle install
 
-# Install npm packages
-npm install
-
-# Clean existing precompiled assets
+# Clean assets
 bundle exec rake assets:clean
-
-# Clear any cached assets
-rm -rf tmp/cache/assets
 
 # Precompile assets
 RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompile
