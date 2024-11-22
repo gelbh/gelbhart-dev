@@ -4,9 +4,10 @@ Rails.application.config.assets.version = "1.0"
 # Add asset paths
 Rails.application.config.assets.paths << Rails.root.join("node_modules")
 Rails.application.config.assets.paths << Rails.root.join("app/assets/fonts")
-Rails.application.config.assets.paths << Rails.root.join("vendor/assets/javascripts")
+Rails.application.config.assets.paths << Rails.root.join("vendor/javascripts")
 Rails.application.config.assets.paths << Rails.root.join("vendor/assets/stylesheets")
 Rails.application.config.assets.paths << Rails.root.join("app/assets/builds")
+Rails.application.config.assets.paths << Rails.root.join("app/javascript")
 
 # Precompile additional assets
 Rails.application.config.assets.precompile += %w[
