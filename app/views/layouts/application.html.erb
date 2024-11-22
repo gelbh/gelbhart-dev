@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="light">
+<html lang="en">
 
 <head>
     <title><%= content_for?(:title) ? yield(:title) : "Gelbhart / Dev" %></title>
@@ -19,14 +19,6 @@
 </head>
 
 <body>
-    <!-- Page loading spinner -->
-    <div class="page-loading active">
-        <div class="page-loading-inner">
-            <div class="page-spinner"></div>
-            <span>Loading...</span>
-        </div>
-    </div>
-
     <!-- Page wrapper -->
     <main class="page-wrapper" data-controller="theme">
         <%= render 'shared/header' %>
@@ -36,7 +28,11 @@
             <%= yield %>
         </div>
 
+        <%
+=begin%>
         <%= render 'shared/footer' %>
+        <%
+=end%>
     </main>
 
     <!-- Back to top button -->
