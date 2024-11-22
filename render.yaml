@@ -20,3 +20,7 @@ services:
         sync: false
       - key: WEB_CONCURRENCY
         value: 2
+  - type: cron
+    name: sitemap-generator
+    schedule: "0 0 * * *"
+    command: bundle exec rake sitemap:generate
