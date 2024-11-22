@@ -1,7 +1,7 @@
 //= link_tree ../images
 //= link_tree ../../javascript .js
-//= link_tree ../../../vendor/javascript .js
-//= link_directory ../stylesheets .css
-//= link_directory ../builds
-//= link application.css
+//= link_tree ../builds
+//= link_tree ../fonts
+//= link_directory ../stylesheets/theme .scss
+//= link application.scss
 //= link application.js
