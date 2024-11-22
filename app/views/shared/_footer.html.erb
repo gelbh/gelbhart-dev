@@ -1,23 +1,29 @@
-<footer class="footer bg-dark border-top border-light pt-5 pb-4 pb-lg-5" data-bs-theme="dark">
-    <div class="container pt-lg-4">
-        <div class="row pb-5">
-            <div class="col-lg-4 col-md-6">
-                <div class="navbar-brand text-dark p-0 me-0 mb-3 mb-lg-4">
-                    <%= image_tag "logos/logo_icon_only_transparent.png", width: 47, alt: "Logo" %>
-                    gelbhart.dev
-                </div>
+<% unless current_page?(root_path) %>
+<footer class="footer bg-dark py-5" data-bs-theme="dark">
+    <div class="container">
+        <div class="row align-items-center pb-4">
+            <div class="col-md-6 text-center text-md-start mb-4 mb-md-0">
+                <%= link_to root_path, class: "navbar-brand d-inline-flex text-nav-dark mb-3" do %>
+                <%= image_tag "logos/logo_icon_only_transparent.png", width: 47, class: "me-2", alt: "Logo" %>
+                <span class="fs-4">gelbhart.dev</span>
+                <% end %>
             </div>
-            <div class="col-xl-6 col-lg-7 col-md-5 offset-xl-2 offset-md-1 pt-4 pt-md-1 pt-lg-0">
-                <div id="footer-links" class="row">
-                    <div class="col-xl-4 col-lg-5 pt-2 pt-lg-0">
-                        <h6 class="mb-2">Contact Us</h6>
-                        <a href="mailto:email@example.com" class="fw-medium">gelbharttomer@gmail.com</a>
-                    </div>
-                </div>
+            <div class="col-md-6">
+                <ul class="nav justify-content-center justify-content-md-end">
+                    <li class="nav-item">
+                        <%= link_to "Hevy Tracker", oauth_path, class: "nav-link py-2 px-3" %>
+                    </li>
+                    <%= link_to "Terms", terms_path, class: "nav-link py-2 px-3" %>
+                    <%= link_to "Privacy", privacy_path, class: "nav-link py-2 px-3" %>
+                    <li class="nav-item">
+                        <a href="mailto:gelbharttomer@gmail.com" class="nav-link py-2 px-3">Contact</a>
+                    </li>
+                </ul>
             </div>
         </div>
-        <p class="nav d-block fs-xs text-center text-md-start pb-2 pb-lg-0 mb-0">
-            <span class="text-light opacity-50">&copy; All rights reserved.</span>
+        <p class="text-center text-muted mb-0">
+            <span>&copy; <%= Time.current.year %> gelbhart.dev. All rights reserved.</span>
         </p>
     </div>
 </footer>
+<% end %>
