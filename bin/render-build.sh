@@ -2,6 +2,12 @@
 # exit on error
 set -o errexit
 
+# Create database.yml if it doesn't exist
+if [ ! -f config/database.yml ]; then
+  echo "Creating database.yml from example..."
+  cp config/database.yml.example config/database.yml
+fi
+
 # Install dependencies
 bundle install
 
