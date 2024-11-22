@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   get "oauth", to: "pages#oauth"
   get "terms", to: "pages#terms"
   get "privacy", to: "pages#privacy"
+
   get "/robots.txt", to: "pages#robots"
 
   get "up" => "rails/health#show", as: :rails_health_check
@@ -14,6 +15,7 @@ Rails.application.routes.draw do
   match "/404", to: "errors#not_found", via: :all
   match "/500", to: "errors#internal_server_error", via: :all
   match "/422", to: "errors#unprocessable_entity", via: :all
+  match "/406", to: "errors#unsupported_type", via: :all
 
   get "/sitemap.xml", to: redirect("/sitemap.xml.gz")
   get "/sitemap.xml.gz", to: "sitemaps#show"
