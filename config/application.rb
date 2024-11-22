@@ -29,5 +29,7 @@ module GelbhartDev
 
     # Use Sprockets for asset pipeline
     config.assets.initialize_on_precompile = false
+
+    config.exceptions_app = self.routes
   end
 end

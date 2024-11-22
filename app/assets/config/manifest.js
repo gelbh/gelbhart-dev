@@ -3,6 +3,7 @@
 //= link controllers/application.js
 
 //= link_tree ../images
+//= link_tree ../json .json
 
 //= link_tree ../../javascript/theme .js
 //= link_tree ../../javascript/theme/components js

@@ -1,0 +1,24 @@
+<section class="d-flex align-items-center min-vh-100 bg-light">
+    <div class="container text-md-start text-center">
+        <div class="row align-items-center">
+            <div class="col-xl-6 col-md-7 order-md-2 ms-n5">
+                <%= javascript_include_tag "https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.3/lottie.min.js" %>
+                <div id="animation-container"></div>
+                <script>
+                    var animation = bodymovin.loadAnimation({
+                        container: document.getElementById('animation-container'),
+                        renderer: 'svg',
+                        loop: true,
+                        autoplay: true,
+                        path: '<%= asset_path("error.json") %>'
+                    });
+                </script>
+            </div>
+            <div class="col-md-5 offset-xl-1 order-md-1">
+                <h1 class="display-1 mb-sm-4 mt-n4 mt-sm-n5">Error <%= @error_code %></h1>
+                <p class="mb-4"><%= @error_message %></p>
+                <%= link_to "Go to homepage", root_path, class: "btn btn-lg btn-primary shadow-primary w-sm-auto w-100" %>
+            </div>
+        </div>
+    </div>
+</section>
