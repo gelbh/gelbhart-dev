@@ -1,27 +1,85 @@
 <footer class="footer bg-dark py-5" data-bs-theme="dark">
     <div class="container">
-        <div class="row align-items-center flex-column flex-md-row pb-4">
-            <div class="col-md-6 text-center text-md-start mb-4 mb-md-0">
-                <%= link_to root_path, class: "navbar-brand d-inline-flex text-nav-dark mb-3" do %>
-                <%= image_tag "logos/logo_icon_only_transparent.png", width: "47", class: "me-2", alt: "Logo" %>
-                <span class="fs-4">gelbhart.dev</span>
-                <% end %>
+        <!-- Top row with logo -->
+        <div class="row pb-4 text-center">
+            <div class="col-12">
+                <a href="/" class="navbar-brand d-inline-flex flex-column align-items-center">
+                    <div class="logo-wrapper rounded p-3 mb-2">
+                        <img src="/assets/logos/logo_icon_only_transparent.png" width="47" alt="Logo">
+                    </div>
+                    <span class="fs-4 text-white mt-2">gelbhart.dev</span>
+                </a>
             </div>
-            <div class="col-md-6">
-                <ul class="nav flex-column flex-md-row justify-content-center justify-content-md-end">
-                    <li class="nav-item text-center">
-                        <%= link_to "Hevy Tracker", oauth_path, class: "nav-link py-2 px-3" %>
+        </div>
+
+        <!-- Middle row with social icons -->
+        <div class="row pb-4">
+            <div class="col-12 d-flex justify-content-center gap-2">
+                <a href="https://github.com/gelbh" class="btn btn-icon btn-secondary text-white" target="_blank" rel="noopener">
+                    <i class="bx bxl-github fs-5"></i>
+                </a>
+                <a href="https://linkedin.com/in/tomer-gelbhart" class="btn btn-icon btn-secondary text-white" target="_blank" rel="noopener">
+                    <i class="bx bxl-linkedin fs-5"></i>
+                </a>
+                <a href="mailto:gelbhart@dev.com" class="btn btn-icon btn-secondary text-white">
+                    <i class="bx bx-envelope fs-5"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Bottom row with links and copyright -->
+        <div class="row align-items-center">
+            <div class="col-md-6 col-12">
+                <ul class="nav justify-content-center justify-content-md-start mb-3 mb-md-0">
+                    <li class="nav-item">
+                        <a href="/hevy-tracker" class="nav-link text-white py-2 px-3">Hevy Tracker</a>
                     </li>
-                    <%= link_to "Terms", terms_path, class: "nav-link py-2 px-3" %>
-                    <%= link_to "Privacy", privacy_path, class: "nav-link py-2 px-3" %>
-                    <li class="nav-item text-center">
-                        <a href="mailto:gelbharttomer@gmail.com" class="nav-link py-2 px-3">Contact</a>
+                    <li class="nav-item">
+                        <a href="/terms" class="nav-link text-white py-2 px-3">Terms</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/privacy" class="nav-link text-white py-2 px-3">Privacy</a>
                     </li>
                 </ul>
             </div>
+            <div class="col-md-6 col-12 text-center text-md-end">
+                <p class="text-white-50 mb-0">
+                    <span>&copy; <%= Time.current.year %> gelbhart.dev. All rights reserved.</span>
+                </p>
+            </div>
         </div>
-        <p class="text-center text-muted mb-0">
-            <span>&copy; <%= Time.current.year %> gelbhart.dev. All rights reserved.</span>
-        </p>
     </div>
 </footer>
+
+
+<style>
+    .footer .logo-wrapper {
+        transition: all 0.3s ease-in-out;
+        background: rgba(30, 32, 40, 0.95);
+        border: 1px solid rgba(163, 5, 182, 0.15);
+        box-shadow:
+            0 4px 12px rgba(0, 0, 0, 0.15),
+            inset 0 0 20px rgba(163, 5, 182, 0.05);
+    }
+
+    .footer .navbar-brand:hover .logo-wrapper {
+        transform: translateY(-6px);
+        background: rgba(255, 255, 255, 0.95);
+        border-color: rgba(163, 5, 182, 0.4);
+        box-shadow:
+            0 8px 24px rgba(0, 0, 0, 0.2),
+            0 0 15px rgba(163, 5, 182, 0.3),
+            0 0 30px rgba(163, 5, 182, 0.2),
+            inset 0 0 20px rgba(163, 5, 182, 0.1);
+    }
+
+    .footer .navbar-brand span {
+        transition: all 0.3s ease-in-out;
+        opacity: 0.9;
+    }
+
+    .footer .navbar-brand:hover span {
+        opacity: 1;
+        text-shadow: 0 0 15px rgba(163, 5, 182, 0.3);
+    }
+</style>

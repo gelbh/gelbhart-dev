@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
   root "pages#home"
-  get "oauth", to: "pages#oauth"
+  get "hevy-tracker", to: "pages#hevy_tracker"
   get "terms", to: "pages#terms"
   get "privacy", to: "pages#privacy"
 

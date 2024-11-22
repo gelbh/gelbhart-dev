@@ -3,7 +3,7 @@ class PagesController < ApplicationController
   def home
   end
 
-  def oauth
+  def hevy_tracker
   end
 
   def terms
