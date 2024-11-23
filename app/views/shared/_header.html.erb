@@ -7,9 +7,9 @@
         <% end %>
 
         <!-- Center logo -->
-        <%= link_to root_path, class: "navbar-brand pe-3 position-absolute start-50 translate-middle-x" do %>
-        <%= image_tag "logos/logo_icon_only_transparent.png", width: 47, alt: "Logo" %>
-        gelbhart.dev
+        <%= link_to root_path, class: "navbar-brand pe-3 position-absolute start-50 translate-middle-x header-brand" do %>
+        <%= image_tag "logos/logo_icon_only_transparent.png", width: 47, alt: "Logo", class: "header-logo" %>
+        <span class="header-brand-text">gelbhart.dev</span>
         <% end %>
 
         <!-- Theme switcher -->
@@ -20,3 +20,41 @@
         </div>
     </div>
 </header>
+
+<style>
+    /* Logo and text styling */
+    .header-logo,
+    .header-brand-text {
+        transition: all 0.3s ease-in-out;
+        opacity: 0.9;
+    }
+
+    /* Header brand container */
+    .header-brand {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    /* Hover effects */
+    .header-brand:hover .header-logo {
+        transform: translateY(-4px);
+        opacity: 1;
+        filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 25px rgba(255, 255, 255, 0.3)) drop-shadow(0 0 35px rgba(255, 255, 255, 0.2));
+    }
+
+    .header-brand:hover .header-brand-text {
+        opacity: 1;
+        transform: translateY(-2px);
+        text-shadow:
+            0 0 15px rgba(163, 5, 182, 0.3),
+            0 0 30px rgba(163, 5, 182, 0.2);
+        color: rgba(255, 255, 255, 1);
+    }
+
+    /* Make sure the header stays above other content */
+    .header {
+        z-index: 1030;
+    }
+</style>

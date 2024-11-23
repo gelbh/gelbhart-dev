@@ -1,10 +1,71 @@
 //
-// user-variables.scss
+// _user-variables.scss
 // Use this to override Bootstrap and Silicon variables
 //
 
+// Custom color values
+$purple-primary: #a305b6; // Your main brand purple
+$purple-darker: #8a0599; // Darker shade for hover states
+$purple-lighter: #c206d9; // Lighter shade for gradients
+$purple-lightest: #e207ff; // Very light purple for subtle backgrounds
+
 // Override theme colors
-$primary: #a305b6;
+$primary: $purple-primary;
 $link-color: $primary;
 $nav-link-hover-color: $primary;
 $nav-link-active-color: $primary;
+
+// Border colors
+$border-colors: (
+  "primary": rgba($purple-primary, 0.35),
+);
+
+// Faded colors for backgrounds
+$theme-faded-colors: (
+  "primary": rgba($purple-primary, 0.12),
+);
+
+// Box shadows
+$box-shadow-primary: 0 0.5rem 1.125rem -0.5rem rgba($purple-primary, 0.9);
+
+// Gradient colors
+$theme-gradients: (
+  "primary":
+    linear-gradient(
+      90deg,
+      $purple-primary 0%,
+      $purple-lighter 50%,
+      $purple-lightest 100%
+    ),
+  "primary-translucent":
+    linear-gradient(
+      180deg,
+      rgba($purple-primary, 0) 0%,
+      rgba($purple-primary, 0.6) 120%
+    ),
+  "dark-translucent": linear-gradient(180deg),
+);
+
+// Forms
+$form-switch-checked-bg: $purple-primary;
+$form-switch-checked-box-shadow: $box-shadow-primary;
+
+// Input focus state
+$input-focus-border-color: rgba($purple-primary, 0.35);
+$input-focus-box-shadow: 0 0.5rem 1.125rem -0.5rem rgba($purple-primary, 0.2);
+
+// Additional utility classes
+.text-gradient-primary {
+  background: linear-gradient(
+    to right,
+    $purple-primary,
+    $purple-lighter,
+    $purple-lightest
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bg-faded-primary {
+  background-color: rgba($purple-primary, 0.12) !important;
+}
