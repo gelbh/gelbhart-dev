@@ -1,34 +1,33 @@
 <footer class="footer bg-dark py-5" data-bs-theme="dark">
     <div class="container">
-        <!-- Top row with logo -->
-        <div class="row pb-4 text-center">
-            <div class="col-12">
-                <a href="/" class="navbar-brand d-inline-flex flex-column align-items-center">
-                    <div class="logo-wrapper rounded p-3 mb-2">
+        <div class="row justify-content-center text-center">
+            <!-- Logo and Brand Column -->
+            <div class="col-12 col-md-6 col-lg-4 mb-4">
+                <!-- Logo Container -->
+                <a href="/" class="navbar-brand d-flex flex-column align-items-center text-decoration-none p-0 w-100">
+                    <div class="logo-wrapper rounded p-3">
                         <img src="/assets/logos/logo_icon_only_transparent.png" width="47" alt="Logo">
                     </div>
                     <span class="fs-4 text-white mt-2">gelbhart.dev</span>
                 </a>
-            </div>
-        </div>
 
-        <!-- Middle row with social icons -->
-        <div class="row pb-4">
-            <div class="col-12 d-flex justify-content-center gap-2">
-                <a href="https://github.com/gelbh" class="btn btn-icon btn-secondary text-white" target="_blank" rel="noopener">
-                    <i class="bx bxl-github fs-5"></i>
-                </a>
-                <a href="https://linkedin.com/in/tomer-gelbhart" class="btn btn-icon btn-secondary text-white" target="_blank" rel="noopener">
-                    <i class="bx bxl-linkedin fs-5"></i>
-                </a>
-                <a href="mailto:gelbhart@dev.com" class="btn btn-icon btn-secondary text-white">
-                    <i class="bx bx-envelope fs-5"></i>
-                </a>
+                <!-- Social Icons -->
+                <div class="d-flex justify-content-center gap-2 mt-3">
+                    <a href="https://github.com/gelbh" class="btn btn-icon btn-secondary text-white" target="_blank" rel="noopener">
+                        <i class="bx bxl-github fs-5"></i>
+                    </a>
+                    <a href="https://linkedin.com/in/tomer-gelbhart" class="btn btn-icon btn-secondary text-white" target="_blank" rel="noopener">
+                        <i class="bx bxl-linkedin fs-5"></i>
+                    </a>
+                    <a href="mailto:tomer@gelbhart.dev" class="btn btn-icon btn-secondary text-white">
+                        <i class="bx bx-envelope fs-5"></i>
+                    </a>
+                </div>
             </div>
         </div>
 
         <!-- Bottom row with links and copyright -->
-        <div class="row align-items-center">
+        <div class="row align-items-center mt-2">
             <div class="col-md-6 col-12">
                 <ul class="nav justify-content-center justify-content-md-start mb-3 mb-md-0">
                     <li class="nav-item">
@@ -51,15 +50,12 @@
     </div>
 </footer>
 
-
 <style>
     .footer .logo-wrapper {
         transition: all 0.3s ease-in-out;
-        background: rgba(30, 32, 40, 0.95);
-        border: 1px solid rgba(163, 5, 182, 0.15);
-        box-shadow:
-            0 4px 12px rgba(0, 0, 0, 0.15),
-            inset 0 0 20px rgba(163, 5, 182, 0.05);
+        background: rgba(30, 32, 40, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: none;
     }
 
     .footer .navbar-brand:hover .logo-wrapper {
