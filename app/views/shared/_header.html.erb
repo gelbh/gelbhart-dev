@@ -20,7 +20,7 @@
         <!-- Centered Logo + Site title -->
         <%= link_to root_path, class: "navbar-brand order-2 order-lg-2 flex-shrink-1 mx-auto header-brand" do %>
         <div class="d-flex align-items-center justify-content-center">
-            <%= image_tag "logos/logo_icon_only_transparent.png", width: 47, alt: "Logo", class: "header-logo" %>
+            <%= image_tag "logos/logo_icon_only_transparent.png", width: 47, height: 47, alt: "Logo", class: "header-logo", loading: "lazy", decoding: "async" %>
             <span class="header-brand-text d-none d-sm-inline ms-2">gelbhart.dev</span>
         </div>
         <% end %>

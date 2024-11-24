@@ -73,13 +73,31 @@ Rails.application.configure do
   config.hosts = nil # Allow all host names
 
   # Asset pipeline configuration
-  config.assets.css_compressor = nil
-  config.assets.js_compressor = :terser
   config.assets.compile = true
+  config.assets.css_compressor = :sass
+  config.assets.js_compressor = :terser
   config.assets.digest = true
   config.assets.version = "1.0"
   config.assets.debug = false
   config.assets.quiet = true
+
+  config.public_file_server.headers = {
+    "Cache-Control" => "public, max-age=31536000",
+    "Expires" => 1.year.from_now.to_formatted_s(:rfc822),
+    "Access-Control-Allow-Origin" => "*",
+    "Access-Control-Allow-Methods" => "GET",
+    "Access-Control-Allow-Headers" => "x-requested-with"
+  }
+
+  # Add CORS headers for font files
+  config.middleware.insert_before 0, Rack::Cors do
+    allow do
+      origins "*"
+      resource "/assets/*",
+        headers: :any,
+        methods: [ :get ]
+    end
+  end
 
   # Enable asset host for CDN support
   # config.asset_host = ENV['ASSET_HOST'] if ENV['ASSET_HOST']
