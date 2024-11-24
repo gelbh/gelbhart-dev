@@ -52,13 +52,21 @@
     <%= favicon_link_tag '/favicon-16x16.png', rel: 'icon', sizes: '16x16', type: 'image/png' %>
     <%= tag :link, rel: 'manifest', href: asset_path('/site.webmanifest') %>
 
-    <%# Font Preloading %>
+    <%# Preconnect to external domains %>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com">
 
-    <%# Stylesheets %>
+    <%# Critical CSS and fonts %>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <%# Boxicons %>
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
+    <%# Logo %>
+    <link rel="preload" href="/assets/logos/logo_icon_only_transparent.png" as="image">
+
+    <%# Application CSS %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
 
     <%# JavaScript %>
@@ -71,7 +79,9 @@
         <%= render 'shared/header' %>
 
         <div class="container mt-5 py-1 min-vh-100">
+            <%= content_tag :div, data: { controller: "performance" } do %>
             <%= yield %>
+            <% end %>
         </div>
 
         <%= render 'shared/footer' %>

@@ -11,6 +11,7 @@ gem "importmap-rails"
 gem "turbo-rails"
 gem "stimulus-rails"
 gem "jbuilder"
+gem "rack-cors"
 
 gem "mini_racer"
 
