@@ -1,28 +1,47 @@
-# Version of your assets
+# Asset version for cache busting
 Rails.application.config.assets.version = "1.0"
 
-# Add asset paths
-Rails.application.config.assets.paths << Rails.root.join("node_modules")
-Rails.application.config.assets.paths << Rails.root.join("node_modules/bootstrap/scss")
-
-Rails.application.config.assets.paths << Rails.root.join("app/javascript")
-Rails.application.config.assets.paths << Rails.root.join("app/assets/fonts")
-Rails.application.config.assets.paths << Rails.root.join("app/assets/builds")
-Rails.application.config.assets.paths << Rails.root.join("app/assets/json")
-
-Rails.application.config.assets.paths << Rails.root.join("vendor/javascripts")
-Rails.application.config.assets.paths << Rails.root.join("vendor/assets/stylesheets")
-
-# Precompile additional assets
-Rails.application.config.assets.precompile += %w[
-  .svg .eot .woff .ttf .woff2 .png .jpg .gif
-  application.js
-  bootstrap.min.js
-  theme/*.js
-  *.css
-  application.bootstrap.css
-]
-
-# Allow non-digest files for fonts
+# Configure asset pipeline behavior
 Rails.application.config.assets.compile = true
 Rails.application.config.assets.digest = true
+
+# Add asset paths grouped by type
+Rails.application.config.assets.paths += [
+  # Application assets
+  Rails.root.join("app/javascript"),
+  Rails.root.join("app/assets/fonts"),
+  Rails.root.join("app/assets/builds"),
+  Rails.root.join("app/assets/json"),
+
+  # NPM package assets
+  Rails.root.join("node_modules"),
+  Rails.root.join("node_modules/bootstrap/scss"),
+
+  # Vendor assets
+  Rails.root.join("vendor/javascripts"),
+  Rails.root.join("vendor/assets/stylesheets")
+]
+
+# Precompile rules grouped by type
+Rails.application.config.assets.precompile += [
+  # Font files
+  ".eot",
+  ".woff",
+  ".woff2",
+  ".ttf",
+
+  # Image files
+  ".svg",
+  ".png",
+  ".jpg",
+  ".gif",
+
+  # JavaScript files
+  "application.js",
+  "bootstrap.min.js",
+  "theme/*.js",
+
+  # CSS files
+  "*.css",
+  "application.bootstrap.css"
+].flatten

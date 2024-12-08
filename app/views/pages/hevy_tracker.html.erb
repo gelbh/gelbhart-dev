@@ -6,21 +6,23 @@
         <div class="col-lg-8">
             <div class="card shadow-sm">
                 <div class="card-body p-5">
+                    <!-- Header Section -->
                     <div class="text-center mb-4">
                         <%= image_tag "logos/hevy-tracker-logo.png", width: 64, height: 64, class: "mb-3", alt: "Hevy Tracker", loading: "lazy", decoding: "async" %>
-                        <h1 class="h3 mb-2">Hevy Tracker for Google Sheets</h1>
-                        <p class="text-muted">Connect your workout data from Hevy to Google Sheets</p>
+                        <h1 class="h3 mb-2 text-body">Hevy Tracker for Google Sheets</h1>
+                        <p class="text-body-secondary">Connect your workout data from Hevy to Google Sheets</p>
                     </div>
 
+                    <!-- Getting Started Section -->
                     <div class="mb-4">
-                        <h2 class="h5 mb-3">Getting Started</h2>
+                        <h2 class="h5 mb-3 text-body">Getting Started</h2>
                         <div class="alert alert-warning d-flex" role="alert">
                             <i class="bx bx-info-circle fs-4 me-2"></i>
                             <div>
                                 <strong>Important:</strong>
-                                <ol class="mb-0 ps-3">
-                                    <li>Get your API key from <%= link_to "Hevy Developer Settings", "https://hevy.com/settings?developer", target: "_blank", rel: "noopener", class: "fw-semibold" %></li>
-                                    <li>Make a copy of <%= link_to "this template spreadsheet", "https://bit.ly/hevy-app-spreadsheet", target: "_blank", rel: "noopener", class: "fw-semibold" %></li>
+                                <ol class="mb-0 ps-3 text-body-secondary">
+                                    <li>Get your API key from <%= link_to "Hevy Developer Settings", "https://hevy.com/settings?developer", target: "_blank", rel: "noopener", class: "fw-semibold text-primary" %></li>
+                                    <li>Make a copy of <%= link_to "this template spreadsheet", "https://bit.ly/hevy-app-spreadsheet", target: "_blank", rel: "noopener", class: "fw-semibold text-primary" %></li>
                                     <li>Find and install the Hevy Tracker add-on under "Extensions" menu in your copied spreadsheet</li>
                                     <li>Grant OAuth consent when prompted</li>
                                     <li>Open the Hevy Tracker sidebar from Extensions > Hevy Tracker</li>
@@ -29,53 +31,55 @@
                         </div>
                     </div>
 
+                    <!-- Required Access Section -->
                     <div class="mb-4">
                         <h2 class="h5 mb-3">Required Access</h2>
                         <ul class="list-group mb-4">
-                            <li class="list-group-item d-flex align-items-center">
+                            <li class="list-group-item d-flex align-items-center border-0 bg-transparent">
                                 <i class="bx bx-spreadsheet fs-4 me-3 text-primary"></i>
                                 <div>
                                     <strong>View and manage spreadsheets</strong>
-                                    <p class="text-muted mb-0 small">To update your workout tracking spreadsheet with Hevy data</p>
+                                    <p class="mb-0 small text-body-secondary">To update your workout tracking spreadsheet with Hevy data</p>
                                 </div>
                             </li>
-                            <li class="list-group-item d-flex align-items-center">
+                            <li class="list-group-item d-flex align-items-center border-0 bg-transparent">
                                 <i class="bx bx-cloud fs-4 me-3 text-primary"></i>
                                 <div>
                                     <strong>External API access</strong>
-                                    <p class="text-muted mb-0 small">To sync workout data from Hevy's servers</p>
+                                    <p class="mb-0 small text-body-secondary">To sync workout data from Hevy's servers</p>
                                 </div>
                             </li>
                         </ul>
                     </div>
 
+                    <!-- Requirements Section -->
                     <div class="mb-4">
-                        <h2 class="h5 mb-3">Requirements</h2>
+                        <h2 class="h5 mb-3 text-body">Requirements</h2>
                         <ul class="list-unstyled">
                             <li class="d-flex align-items-center mb-2">
                                 <i class="bx bx-check-circle text-success me-2"></i>
-                                Hevy Pro subscription
+                                <span class="text-body">Hevy Pro subscription</span>
                             </li>
                             <li class="d-flex align-items-center">
                                 <i class="bx bx-check-circle text-success me-2"></i>
-                                Hevy API key
+                                <span class="text-body">Hevy API key</span>
                             </li>
                         </ul>
                     </div>
 
+                    <!-- Privacy Notice -->
                     <div class="alert alert-info d-flex" role="alert">
                         <i class="bx bx-info-circle fs-4 me-2"></i>
                         <div>
-                            <strong>Privacy & Security</strong>
-                            <p class="mb-0 small">Your data is only used to sync between Hevy and your personal Google Sheets. We don't store or share your information with any third parties.</p>
+                            <strong class="text-body">Privacy & Security</strong>
+                            <p class="mb-0 small text-body-secondary">Your data is only used to sync between Hevy and your personal Google Sheets. We don't store or share your information with any third parties.</p>
                         </div>
                     </div>
 
+                    <!-- Footer Section -->
                     <div class="text-center mt-4">
-                        <p class="small text-muted">
-                            By continuing, you agree to our
-                            <%= link_to "Terms of Service", terms_path %> and
-                            <%= link_to "Privacy Policy", privacy_path %>
+                        <p class="small text-body-secondary">
+                            By continuing, you agree to our <%= link_to "Terms of Service", terms_path, class: "text-primary" %> and <%= link_to "Privacy Policy", privacy_path, class: "text-primary" %>
                         </p>
                     </div>
                 </div>
