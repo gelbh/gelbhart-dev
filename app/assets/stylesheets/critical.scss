@@ -1,0 +1,59 @@
+// Critical path CSS
+:root {
+  --si-primary: #6366f1;
+  --si-font-sans-serif: "Manrope", sans-serif;
+}
+
+body {
+  font-family: var(--si-font-sans-serif);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1030;
+  background-color: rgba(11, 15, 25, 0.8);
+  backdrop-filter: blur(8px);
+  transition: background-color 0.2s ease-in-out;
+}
+
+.container {
+  width: 100%;
+  padding-right: 1rem;
+  padding-left: 1rem;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+// Essential header styles
+.header-logo {
+  width: 47px;
+  height: 47px;
+  transition: transform 0.3s ease;
+}
+
+// Essential text styles
+.text-center {
+  text-align: center;
+}
+
+@media (min-width: 992px) {
+  .container {
+    max-width: 960px;
+  }
+
+  .text-lg-start {
+    text-align: left;
+  }
+}
