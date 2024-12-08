@@ -59,3 +59,7 @@ yarn-debug.log*
 
 # Ignore coverage files
 /coverage/
+
+# Ignore AI Digest
+.aidigestignore
+codebase.md
