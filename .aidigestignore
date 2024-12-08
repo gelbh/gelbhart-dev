@@ -1,0 +1,6 @@
+test/
+app/assets/images/theme/
+app/assets/json/
+public/assets/
+log/
+.yarn/
