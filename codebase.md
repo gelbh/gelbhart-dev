@@ -13,7 +13,7 @@ test/ app/assets/images/theme/ app/assets/json/ public/assets/ log/ .yarn/
 # .gitignore
 
 ```
-# Ignore bundler config /.bundle # Ignore all logfiles and tempfiles /log/* /tmp/* !/log/.keep !/tmp/.keep # Ignore pidfiles /tmp/pids/* !/tmp/pids/ !/tmp/pids/.keep # Ignore uploaded files in development /storage/* !/storage/.keep /tmp/storage/* !/tmp/storage/ !/tmp/storage/.keep # Ignore master key for decrypting credentials /config/master.key # Ignore assets /public/assets .byebug_history # Ignore environment files .env .env.* # Ignore database configuration /config/database.yml # Node modules /node_modules /yarn-error.log yarn-debug.log* .yarn-integrity # MacOS files .DS_Store # Editor files .idea/ .vscode/ *.swp *.swo # Ignore precompiled javascript packs /public/packs /public/packs-test # Ignore yarn files /yarn-error.log yarn-debug.log* .yarn-integrity # Ignore coverage files /coverage/
+# Ignore bundler config /.bundle # Ignore all logfiles and tempfiles /log/* /tmp/* !/log/.keep !/tmp/.keep # Ignore pidfiles /tmp/pids/* !/tmp/pids/ !/tmp/pids/.keep # Ignore uploaded files in development /storage/* !/storage/.keep /tmp/storage/* !/tmp/storage/ !/tmp/storage/.keep # Ignore master key for decrypting credentials /config/master.key # Ignore assets /public/assets .byebug_history # Ignore environment files .env .env.* # Ignore database configuration /config/database.yml # Node modules /node_modules /yarn-error.log yarn-debug.log* .yarn-integrity # MacOS files .DS_Store # Editor files .idea/ .vscode/ *.swp *.swo # Ignore precompiled javascript packs /public/packs /public/packs-test # Ignore yarn files /yarn-error.log yarn-debug.log* .yarn-integrity # Ignore coverage files /coverage/ # Ignore AI Digest .aidigestignore codebase.md
 ```
 
 # .node-version
@@ -372,12 +372,6 @@ This is a binary file of the type: Image
 class ApplicationController < ActionController::Base # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has. # allow_browser versions: :modern end
 ```
 
-# app/controllers/concerns/.keep
-
-```
-
-```
-
 # app/controllers/errors_controller.rb
 
 ```rb
@@ -402,12 +396,6 @@ class SitemapsController < ApplicationController def show respond_to do |format|
 module ApplicationHelper def page_title(title) base_title = "gelbhart.dev" title.empty? ? base_title : "#{title} | #{base_title}" end def meta_description(description) # Ensure description is under 160 characters for SEO content_for :meta_description, description.truncate(160) end end
 ```
 
-# app/helpers/pages_helper.rb
-
-```rb
-module PagesHelper end
-```
-
 # app/javascript/application.js
 
 ```js
@@ -418,12 +406,6 @@ import "@hotwired/turbo-rails"; import "controllers"; import * as bootstrap from
 
 ```js
 import { Application } from "@hotwired/stimulus"; const application = Application.start(); // Configure Stimulus development experience application.debug = false; window.Stimulus = application; export { application };
-```
-
-# app/javascript/controllers/hello_controller.js
-
-```js
-import { Controller } from "@hotwired/stimulus" export default class extends Controller { connect() { this.element.textContent = "Hello World!" } }
 ```
 
 # app/javascript/controllers/index.js
@@ -582,12 +564,6 @@ class ApplicationMailer < ActionMailer::Base default from: "from@example.com" la
 class ApplicationRecord < ActiveRecord::Base primary_abstract_class end
 ```
 
-# app/models/concerns/.keep
-
-```
-
-```
-
 # app/services/sitemap_generator.rb
 
 ```rb
@@ -633,7 +609,7 @@ require "zlib" require "builder" class SitemapGenerator def initialize @host = "
 # app/views/pages/privacy.html.erb
 
 ```erb
-<% content_for :title, page_title("Privacy Policy") %> <% meta_description "Privacy policy for Hevy Tracker for Google Sheets. Learn how we handle your data, protect your privacy, and ensure secure workout data synchronization." %> <div class="container mt-5 pt-5"> <div class="row justify-content-center"> <div class="col-lg-8"> <div class="card shadow-sm"> <div class="card-body p-5"> <h1 class="h3 mb-4">Privacy Policy</h1> <h2 class="h5 mb-3">Data Collection</h2> <p class="mb-4">We only access workout data from your Hevy account that is necessary to sync with Google Sheets. This data is not stored on our servers.</p> <h2 class="h5 mb-3">Data Usage</h2> <p class="mb-4">Your workout data is only used to populate and update your Google Sheets spreadsheet. We do not analyze, sell, or share your data with any third parties.</p> <h2 class="h5 mb-3">Data Security</h2> <p class="mb-4">We use industry-standard security measures to protect your API key and ensure secure data transmission between Hevy's servers and Google Sheets.</p> <h2 class="h5 mb-3">User Rights</h2> <p class="mb-4">You can revoke access to the addon at any time through your Google account settings. This will stop all data syncing.</p> <h2 class="h5 mb-3">Contact</h2> <p class="mb-4">If you have questions about this privacy policy, please contact us at privacy@example.com</p> </div> </div> </div> </div> </div>
+<% content_for :title, page_title("Privacy Policy") %> <% meta_description "Privacy policy for Hevy Tracker for Google Sheets. Learn how we handle your data, protect your privacy, and ensure secure workout data synchronization." %> <div class="container mt-5 pt-5"> <div class="row justify-content-center"> <div class="col-lg-8"> <div class="card shadow-sm"> <div class="card-body p-5"> <h1 class="h3 mb-4">Privacy Policy</h1> <h2 class="h5 mb-3">Data Collection</h2> <p class="mb-4">We only access workout data from your Hevy account that is necessary to sync with Google Sheets. This data is not stored on our servers. When you authorize our application through Google OAuth, we request only the minimum necessary permissions to write to your Google Sheets.</p> <h2 class="h5 mb-3">Data Usage</h2> <p class="mb-4">Your workout data is only used to populate and update your Google Sheets spreadsheet. We do not analyze, sell, or share your data with any third parties. The data flow is direct between Hevy's servers and your Google Sheets document.</p> <h2 class="h5 mb-3">Data Retention and Deletion</h2> <p class="mb-4">We maintain a minimal data retention policy:</p> <ul class="list-unstyled mb-4"> <li class="d-flex align-items-center mb-2"> <i class="bx bx-check text-primary me-2"></i> <span>We do not store any Google user data on our servers</span> </li> <li class="d-flex align-items-center mb-2"> <i class="bx bx-check text-primary me-2"></i> <span>Your Google account information is only used for authentication</span> </li> <li class="d-flex align-items-center mb-2"> <i class="bx bx-check text-primary me-2"></i> <span>Data is only processed in-memory during the sync operation</span> </li> <li class="d-flex align-items-center mb-2"> <i class="bx bx-check text-primary me-2"></i> <span>No logs or backups containing user data are maintained</span> </li> </ul> <p class="mb-3">You can delete your data at any time by:</p> <ul class="list-unstyled mb-4"> <li class="d-flex align-items-center mb-2"> <i class="bx bx-chevron-right text-primary me-2"></i> <span>Revoking access to the Hevy Tracker application in your <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">Google Account Settings</a></span> </li> <li class="d-flex align-items-center mb-2"> <i class="bx bx-chevron-right text-primary me-2"></i> <span>Deleting the Google Sheets document containing your workout data</span> </li> <li class="d-flex align-items-center mb-2"> <i class="bx bx-chevron-right text-primary me-2"></i> <span>Contacting us to confirm complete removal of any associated data</span> </li> </ul> <h2 class="h5 mb-3">Data Security</h2> <p class="mb-4">We use industry-standard security measures to protect your API key and ensure secure data transmission between Hevy's servers and Google Sheets. All data transfers are encrypted using HTTPS/TLS protocols.</p> <h2 class="h5 mb-3">User Rights</h2> <p class="mb-4">You have full control over your data. You can revoke access to the addon at any time through your Google account settings. This will immediately stop all data syncing and remove our access to your Google Sheets.</p> <h2 class="h5 mb-3">Updates to Privacy Policy</h2> <p class="mb-4">We may update this privacy policy as needed to comply with relevant regulations and reflect any changes to our data practices. Users will be notified of significant changes.</p> <h2 class="h5 mb-3">Contact</h2> <p class="mb-4">If you have questions about this privacy policy or need to request data deletion, please contact us at tomer@gelbhart.dev</p> </div> </div> </div> </div> </div>
 ```
 
 # app/views/pages/robots.text.erb
@@ -762,12 +738,6 @@ production:
   url: <%= ENV['DATABASE_URL'] %>
   database: gelbhart_dev_production
 
-```
-
-# config/database.yml.example
-
-```example
-default: &default adapter: postgresql encoding: unicode pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %> development: <<: *default database: gelbhart_dev_development test: <<: *default database: gelbhart_dev_test production: <<: *default url: <%= ENV['DATABASE_URL'] %> database: gelbhart_dev_production
 ```
 
 # config/deploy.yml
@@ -1135,12 +1105,6 @@ ActiveRecord::Schema[7.1].define(version: 1) do create_table "solid_queue_blocke
 source "https://rubygems.org" gem "rails", "~> 8.0.0" gem "sprockets-rails" gem "sassc-rails" gem "bootstrap", "~> 5.3.0" gem "terser" gem "pg" gem "puma", ">= 5.0" gem "importmap-rails" gem "turbo-rails" gem "stimulus-rails" gem "jbuilder" gem "rack-cors" gem "mini_racer" gem "tzinfo-data", platforms: %i[ windows jruby ] gem "bootsnap", require: false group :development, :test do gem "debug", platforms: %i[ mri windows ], require: "debug/prelude" gem "brakeman", require: false gem "rubocop-rails-omakase", require: false end group :development do gem "web-console" gem "error_highlight", ">= 0.4.0", platforms: [ :ruby ] end group :test do gem "capybara" gem "selenium-webdriver" end
 ```
 
-# lib/tasks/.keep
-
-```
-
-```
-
 # lib/tasks/sitemap.rake
 
 ```rake
@@ -1210,7 +1174,7 @@ This is a binary file of the type: Binary
 # README.md
 
 ```md
-# gelbhart.dev
+# https://gelbhart.dev
 ```
 
 # render.yaml
@@ -1244,24 +1208,4 @@ services:
     command: bundle exec rake sitemap:generate
 
 ```
-
-# script/.keep
-
-```
-
-```
-
-# storage/.keep
-
-```
-
-```
-
-# storage/development.sqlite3
-
-This is a binary file of the type: Binary
-
-# storage/test.sqlite3
-
-This is a binary file of the type: Binary
 
