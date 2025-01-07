@@ -24,8 +24,8 @@ services:
   - type: cron
     name: sitemap-generator
     runtime: ruby
-    plan: free
-    schedule: "0 0 * * *" # Run daily at midnight
+    plan: starter
+    schedule: "0 0 * * *"
     buildCommand: "bundle install"
     startCommand: "bundle exec rake sitemap:generate"
     envVars:
