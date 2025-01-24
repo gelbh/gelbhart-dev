@@ -3,10 +3,21 @@
 
 <div class="container mt-5 pt-5">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
+        <div class="col-lg-8 position-relative">
+            <%= link_to hevy_tracker_path, 
+               class: "btn btn-icon btn-outline-primary d-none d-lg-flex position-absolute", 
+               style: "left: -60px; margin-top: 5px;" do %>
+            <i class="bx bx-arrow-back fs-lg"></i>
+            <% end %>
             <div class="card shadow-sm">
                 <div class="card-body p-5">
-                    <h1 class="h3 mb-4">Terms of Service</h1>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h1 class="h3 mb-0">Terms of Service</h1>
+                        <%= link_to hevy_tracker_path, 
+                           class: "btn btn-icon btn-outline-primary d-lg-none m-2" do %>
+                        <i class="bx bx-arrow-back fs-lg"></i>
+                        <% end %>
+                    </div>
 
                     <h2 class="h5 mb-3">1. Terms</h2>
                     <p class="mb-4">By accessing Hevy Tracker for Google Sheets™, you agree to be bound by these terms of service. Please read them carefully.</p>
