@@ -4,12 +4,18 @@ class PagesController < ApplicationController
   end
 
   def hevy_tracker
+    render "pages/hevy_tracker/index"
   end
 
-  def terms
+  def hevy_tracker_privacy
+    render "pages/hevy_tracker/privacy"
   end
 
-  def privacy
+  def hevy_tracker_terms
+    render "pages/hevy_tracker/terms"
+  end
+
+  def contact
   end
 
   def robots

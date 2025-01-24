@@ -1,8 +1,10 @@
 Rails.application.routes.draw do
   root "pages#home"
+
   get "hevy-tracker", to: "pages#hevy_tracker"
-  get "terms", to: "pages#terms"
-  get "privacy", to: "pages#privacy"
+  get "hevy-tracker/privacy", to: "pages#hevy_tracker_privacy"
+  get "hevy-tracker/terms", to: "pages#hevy_tracker_terms"
+
   get "contact", to: "pages#contact"
 
   get "/robots.txt", to: "pages#robots"
