@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   get "hevy-tracker", to: "pages#hevy_tracker"
   get "hevy-tracker/privacy", to: "pages#hevy_tracker_privacy"
   get "hevy-tracker/terms", to: "pages#hevy_tracker_terms"
-  get "hevy-tracker/spreadsheet", to: redirect('https://docs.google.com/spreadsheets/d/1i0g1h1oBrwrw-L4-BW0YUHeZ50UATcehNrg2azkcyXk/copy')
+  get "hevy-tracker/spreadsheet", to: redirect("https://docs.google.com/spreadsheets/d/1i0g1h1oBrwrw-L4-BW0YUHeZ50UATcehNrg2azkcyXk/copy")
 
   get "contact", to: "pages#contact"
 
