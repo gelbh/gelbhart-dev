@@ -45,14 +45,16 @@ def download_youtube_video(url, output_dir):
             info = ydl.extract_info(url, download=True)
             filename = ydl.prepare_filename(info)
             title = info.get('title', 'video')
-            return filename, title
+            duration = info.get('duration', 0)
+            return filename, title, duration
     except Exception:
         ydl_opts['format'] = 'best[height<=720]/best'
         with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
             filename = ydl.prepare_filename(info)
             title = info.get('title', 'video')
-            return filename, title
+            duration = info.get('duration', 0)
+            return filename, title, duration
 
 
 def format_timestamp(seconds):
@@ -109,6 +111,7 @@ def generate_srt(segments, output_path, translate_to=None, source_lang=None):
 
 def burn_captions(video_path, srt_path, output_path):
     if shutil.which('ffmpeg') is None:
+        print("FFmpeg not found", file=sys.stderr)
         return False
 
     srt_path_escaped = srt_path.replace('\\', '/').replace(':', '\\:')
@@ -122,9 +125,10 @@ def burn_captions(video_path, srt_path, output_path):
     ]
 
     try:
-        subprocess.run(cmd, check=True, capture_output=True)
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
         return True
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError as e:
+        print(f"FFmpeg error: {e.stderr}", file=sys.stderr)
         return False
 
 
@@ -138,8 +142,9 @@ def main():
 
     with tempfile.TemporaryDirectory() as temp_dir:
         # Get video file
+        video_duration = 0
         if config['is_youtube']:
-            video_path, video_title = download_youtube_video(config['input'], temp_dir)
+            video_path, video_title, video_duration = download_youtube_video(config['input'], temp_dir)
         else:
             video_path = config['input']
             video_title = Path(video_path).stem
@@ -223,18 +228,36 @@ def main():
             output_path = os.path.join(output_dir, output_filename)
 
         # Output
+        result_data = {
+            "success": True,
+            "output": output_filename,
+            "detected_lang": detected_lang,
+            "video_title": video_title,
+            "duration": video_duration,
+            "subtitle_lang": config.get('translate_to', detected_lang)
+        }
+
         if config.get('burn'):
             success = burn_captions(video_path, srt_path, output_path)
             if success:
-                print(json.dumps({"success": True, "output": output_filename, "detected_lang": detected_lang}))
+                print(json.dumps(result_data))
             else:
-                fallback_srt = f"{safe_title}.srt"
-                fallback_path = os.path.join(output_dir, fallback_srt)
-                shutil.copy(srt_path, fallback_path)
-                print(json.dumps({"success": True, "output": fallback_srt, "detected_lang": detected_lang, "warning": "Burned captions failed, saved as SRT"}))
+                # Save both SRT and video file when burning fails
+                fallback_srt = f"{safe_title}{language_suffix}.srt"
+                fallback_video = f"{safe_title}_original.mp4"
+                fallback_srt_path = os.path.join(output_dir, fallback_srt)
+                fallback_video_path = os.path.join(output_dir, fallback_video)
+
+                shutil.copy(srt_path, fallback_srt_path)
+                shutil.copy(video_path, fallback_video_path)
+
+                result_data["output"] = fallback_srt
+                result_data["video_output"] = fallback_video
+                result_data["warning"] = "Burned captions failed. Saved as separate SRT and video files."
+                print(json.dumps(result_data))
         else:
             shutil.copy(srt_path, output_path)
-            print(json.dumps({"success": True, "output": output_filename, "detected_lang": detected_lang}))
+            print(json.dumps(result_data))
 
 
 if __name__ == '__main__':
