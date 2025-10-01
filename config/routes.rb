@@ -1,10 +1,13 @@
 Rails.application.routes.draw do
   root "pages#home"
 
-  get "hevy-tracker", to: "pages#hevy_tracker"
-  get "hevy-tracker/privacy", to: "pages#hevy_tracker_privacy"
-  get "hevy-tracker/terms", to: "pages#hevy_tracker_terms"
-  get "hevy-tracker/spreadsheet", to: redirect("https://docs.google.com/spreadsheets/d/1i0g1h1oBrwrw-L4-BW0YUHeZ50UATcehNrg2azkcyXk/copy")
+  # Hevy Tracker pages
+  scope path: "hevy-tracker", as: :hevy_tracker do
+    get "/", to: "pages#hevy_tracker"
+    get "privacy", to: "pages#hevy_tracker_privacy"
+    get "terms", to: "pages#hevy_tracker_terms"
+    get "spreadsheet", to: redirect("https://docs.google.com/spreadsheets/d/1i0g1h1oBrwrw-L4-BW0YUHeZ50UATcehNrg2azkcyXk/copy")
+  end
 
   get "contact", to: "pages#contact"
 
@@ -17,7 +20,6 @@ Rails.application.routes.draw do
   get "/.well-known/appspecific/*path", to: proc { [204, {}, []] }
 
   get "up" => "rails/health#show", as: :rails_health_check
-  get "/health" => "rails/health#show"
   get "/_up" => "health#show"
 
   get "/assets/manifest.json" => "rails/assets#show"

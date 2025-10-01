@@ -1,2 +1,0 @@
-# No Python dependencies required for this Rails application
-# Video Captioner runs as a desktop tool, not on the server

@@ -2,7 +2,6 @@
 Rails.application.config.assets.version = "1.0"
 
 # Configure asset pipeline behavior
-Rails.application.config.assets.compile = true
 Rails.application.config.assets.digest = true
 
 # Add asset paths grouped by type
@@ -15,11 +14,7 @@ Rails.application.config.assets.paths += [
 
   # NPM package assets
   Rails.root.join("node_modules"),
-  Rails.root.join("node_modules/bootstrap/scss"),
-
-  # Vendor assets
-  Rails.root.join("vendor/javascripts"),
-  Rails.root.join("vendor/assets/stylesheets")
+  Rails.root.join("node_modules/bootstrap/scss")
 ]
 
 # Precompile rules grouped by type
