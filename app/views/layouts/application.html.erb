@@ -79,9 +79,7 @@
         <%= render 'shared/header' %>
 
         <div class="container mt-5 py-1 min-vh-100">
-            <%= content_tag :div, data: { controller: "performance" } do %>
             <%= yield %>
-            <% end %>
         </div>
 
         <%= render 'shared/footer' %>

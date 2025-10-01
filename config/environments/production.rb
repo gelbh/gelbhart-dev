@@ -68,12 +68,15 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   # Enable DNS rebinding protection and other `Host` header attacks.
-  config.hosts.clear
-
-  config.hosts = nil # Allow all host names
+  config.hosts = [
+    "gelbhart.dev",
+    "www.gelbhart.dev",
+    /.*\.render\.com\z/,
+    /.*\.onrender\.com\z/
+  ]
 
   # Asset pipeline configuration
-  config.assets.compile = true
+  config.assets.compile = false
   config.assets.css_compressor = :sass
   config.assets.js_compressor = :terser
   config.assets.digest = true
@@ -92,7 +95,7 @@ Rails.application.configure do
   # Add CORS headers for font files
   config.middleware.insert_before 0, Rack::Cors do
     allow do
-      origins "*"
+      origins "gelbhart.dev", "www.gelbhart.dev", /https:\/\/.*\.render\.com\z/, /https:\/\/.*\.onrender\.com\z/
       resource "/assets/*",
         headers: :any,
         methods: [ :get ]
