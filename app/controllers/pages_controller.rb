@@ -18,6 +18,9 @@ class PagesController < ApplicationController
   def contact
   end
 
+  def video_captioner
+  end
+
   def robots
     respond_to :text
     expires_in 6.hours, public: true
