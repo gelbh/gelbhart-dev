@@ -8,7 +8,15 @@ Rails.application.routes.draw do
 
   get "contact", to: "pages#contact"
 
+  # Video Captioner
+  get "video-captioner", to: "video_captioner#index"
+  post "video-captioner/generate", to: "video_captioner#generate"
+  get "captions/:filename", to: "video_captioner#download", as: :caption_download
+
   get "/robots.txt", to: "pages#robots"
+
+  # Ignore Chrome DevTools requests
+  get "/.well-known/appspecific/*path", to: proc { [204, {}, []] }
 
   get "up" => "rails/health#show", as: :rails_health_check
   get "/health" => "rails/health#show"

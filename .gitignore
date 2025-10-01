@@ -62,4 +62,4 @@ yarn-debug.log*
 
 # Ignore AI Digest
 .aidigestignore
-codebase.md
+codebase.md/public/captions/
