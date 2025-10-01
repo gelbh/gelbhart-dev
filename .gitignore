@@ -64,6 +64,11 @@ yarn-debug.log*
 .aidigestignore
 codebase.md
 
+# Ignore AI assistant directories and files
+.claude/
+.github/copilot-instructions.md
+COPILOT_INSTRUCTIONS_SUMMARY.md
+
 # Ignore generated captions and sitemaps
 /public/captions/
 /public/sitemaps/
