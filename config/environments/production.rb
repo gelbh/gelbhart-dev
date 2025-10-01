@@ -76,7 +76,8 @@ Rails.application.configure do
   ]
 
   # Asset pipeline configuration
-  config.assets.compile = false
+  # Enable compilation as fallback for importmap JavaScript files
+  config.assets.compile = true
   config.assets.css_compressor = :sass
   config.assets.js_compressor = :terser
   config.assets.digest = true

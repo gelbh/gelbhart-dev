@@ -13,10 +13,8 @@ export default class extends Controller {
 
   initializeTheme() {
     const storedTheme = localStorage.getItem("theme");
-    const systemDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
-    const theme = storedTheme || (systemDark ? "dark" : "light");
+    // Default to dark mode if no stored preference
+    const theme = storedTheme || "dark";
     this.handleThemeChange(theme);
   }
 

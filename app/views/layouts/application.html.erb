@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 
 <head>
     <!-- Google tag (gtag.js) -->
@@ -63,8 +63,8 @@
     <%# Boxicons %>
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 
-    <%# Logo %>
-    <link rel="preload" href="/assets/logos/logo_icon_only_transparent.png" as="image">
+    <%# Logo - using asset_path for preloading %>
+    <link rel="preload" href="<%= asset_path('logos/logo_icon_only_transparent.png') %>" as="image">
 
     <%# Application CSS %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
