@@ -1,0 +1,573 @@
+// Custom styles for gelbhart.dev
+
+// Prevent horizontal scroll from full-bleed sections
+body {
+  overflow-x: hidden;
+}
+
+// ============================================
+// HERO SECTION ENHANCEMENTS
+// ============================================
+
+// Hero container - Full bleed (simplified)
+.hero-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-top: 5rem;
+}
+
+// Animated gradient background
+.hero-gradient-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  background-size: 200% 200%;
+  animation: gradientShift 15s ease infinite;
+  opacity: 0.04;
+  z-index: -2;
+}
+
+[data-bs-theme="dark"] .hero-gradient-bg {
+  opacity: 0.08;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+// Tech Grid Background (like circuit board / code editor)
+.tech-grid-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: 
+    linear-gradient(rgba(99, 102, 241, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.08) 1px, transparent 1px);
+  background-size: 50px 50px;
+  z-index: -1;
+  pointer-events: none;
+  animation: gridMove 20s linear infinite;
+}
+
+[data-bs-theme="dark"] .tech-grid-bg {
+  background-image: 
+    linear-gradient(rgba(99, 102, 241, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.12) 1px, transparent 1px);
+}
+
+@keyframes gridMove {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(50px, 50px);
+  }
+}
+
+// Floating code snippets
+.floating-code {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.code-snippet {
+  position: absolute;
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #6366f1;
+  opacity: 0.15;
+  animation: floatCode 25s ease-in-out infinite;
+}
+
+[data-bs-theme="dark"] .code-snippet {
+  opacity: 0.18;
+}
+
+.code-1 {
+  top: 10%;
+  left: 5%;
+  animation-delay: 0s;
+  animation-duration: 30s;
+}
+
+.code-2 {
+  top: 20%;
+  right: 10%;
+  animation-delay: 3s;
+  animation-duration: 28s;
+}
+
+.code-3 {
+  top: 40%;
+  left: 8%;
+  animation-delay: 6s;
+  animation-duration: 32s;
+}
+
+.code-4 {
+  top: 60%;
+  right: 15%;
+  animation-delay: 2s;
+  animation-duration: 26s;
+}
+
+.code-5 {
+  bottom: 20%;
+  left: 12%;
+  animation-delay: 8s;
+  animation-duration: 34s;
+}
+
+.code-6 {
+  top: 30%;
+  right: 8%;
+  animation-delay: 4s;
+  animation-duration: 29s;
+}
+
+.code-7 {
+  bottom: 30%;
+  right: 20%;
+  animation-delay: 7s;
+  animation-duration: 31s;
+}
+
+.code-8 {
+  top: 70%;
+  left: 20%;
+  animation-delay: 1s;
+  animation-duration: 27s;
+}
+
+@keyframes floatCode {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.15;
+  }
+  25% {
+    transform: translateY(-20px) rotate(5deg);
+    opacity: 0.20;
+  }
+  50% {
+    transform: translateY(-40px) rotate(-5deg);
+    opacity: 0.10;
+  }
+  75% {
+    transform: translateY(-20px) rotate(5deg);
+    opacity: 0.20;
+  }
+}
+
+[data-bs-theme="dark"] .code-snippet {
+  animation: floatCodeDark 25s ease-in-out infinite;
+}
+
+@keyframes floatCodeDark {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.18;
+  }
+  25% {
+    transform: translateY(-20px) rotate(5deg);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translateY(-40px) rotate(-5deg);
+    opacity: 0.12;
+  }
+  75% {
+    transform: translateY(-20px) rotate(5deg);
+    opacity: 0.25;
+  }
+}
+
+// Enhanced gradient text
+.text-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientText 8s ease infinite;
+  font-weight: 800;
+}
+
+@keyframes gradientText {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+// Fade in up animation
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+.delay-1 {
+  animation-delay: 0.2s;
+}
+
+.delay-2 {
+  animation-delay: 0.4s;
+}
+
+.delay-3 {
+  animation-delay: 0.6s;
+}
+
+.delay-4 {
+  animation-delay: 0.8s;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Button pulse effect
+.btn-pulse {
+  animation: pulse 2s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.btn-pulse:hover {
+  animation: none;
+}
+
+// Badge hover effect
+.badge-hover {
+  transition: all 0.3s ease;
+  cursor: default;
+  
+  &:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+  }
+}
+
+// Scroll indicator - Fixed positioning and centering
+.scroll-indicator {
+  position: absolute;
+  bottom: 2rem;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: fit-content;
+  text-align: center;
+  z-index: 10;
+  color: inherit;
+  
+  &:hover .scroll-indicator-arrow {
+    transform: translateY(5px);
+  }
+}
+
+.scroll-indicator-arrow {
+  font-size: 2rem;
+  animation: bounce 2s ease infinite;
+  transition: transform 0.3s ease;
+  color: #6366f1;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+// Hero heading enhancement
+.hero-heading {
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+// ============================================
+// TECHNOLOGIES & SKILLS SECTION
+// ============================================
+
+// Tech card container
+.tech-card {
+  background: var(--bs-body-bg);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: 1rem;
+  padding: 2rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  
+  &:hover {
+    transform: translateY(-8px);
+    border-color: rgba(99, 102, 241, 0.3);
+    box-shadow: 0 1rem 2rem rgba(99, 102, 241, 0.15);
+  }
+}
+
+[data-bs-theme="dark"] .tech-card {
+  border-color: rgba(99, 102, 241, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  
+  &:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 1rem 2rem rgba(99, 102, 241, 0.25);
+  }
+}
+
+// Tech card icon
+.tech-card-icon {
+  width: 4rem;
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  margin: 0 auto 1.5rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  i {
+    font-size: 2rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .tech-card:hover & {
+    transform: scale(1.1) rotate(5deg);
+    
+    i {
+      transform: scale(1.1);
+    }
+  }
+}
+
+// Tech items list
+.tech-item {
+  padding: 0.5rem 0;
+  font-size: 0.95rem;
+  color: var(--bs-body-color);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  i {
+    transition: transform 0.3s ease;
+  }
+  
+  &:hover {
+    color: #6366f1;
+    transform: translateX(5px);
+    
+    i {
+      transform: scale(1.2);
+    }
+  }
+}
+
+// Tech badges
+.tech-badge {
+  font-size: 0.85rem;
+  padding: 0.5rem 0.875rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  cursor: default;
+  
+  &:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+  }
+}
+
+// Purple color class (for security icon)
+.text-purple {
+  color: #764ba2 !important;
+}
+
+.bg-purple {
+  background-color: #764ba2 !important;
+}
+
+// ============================================
+// PROJECT CARDS ENHANCEMENTS
+// ============================================
+
+// Fade in when scrolling into view
+.fade-in-view {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+  
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  &.delay-1 {
+    transition-delay: 0.1s;
+  }
+  
+  &.delay-2 {
+    transition-delay: 0.2s;
+  }
+  
+  &.delay-3 {
+    transition-delay: 0.3s;
+  }
+}
+
+// Enhanced project card
+.project-card {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  background: var(--bs-body-bg);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  
+  &:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 1.5rem 3rem rgba(99, 102, 241, 0.15) !important;
+    border-color: rgba(99, 102, 241, 0.2);
+  }
+}
+
+[data-bs-theme="dark"] .project-card {
+  border-color: rgba(99, 102, 241, 0.15);
+  
+  &:hover {
+    box-shadow: 0 1.5rem 3rem rgba(99, 102, 241, 0.2) !important;
+    border-color: rgba(99, 102, 241, 0.3);
+  }
+}
+
+// Project icon with zoom effect
+.project-icon {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  
+  i {
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .project-card:hover & {
+    transform: scale(1.05);
+    
+    i {
+      transform: scale(1.1);
+    }
+  }
+}
+
+// Enhanced project badges
+.project-badge {
+  transition: all 0.3s ease;
+  cursor: default;
+  font-weight: 500;
+  
+  &:hover {
+    transform: translateY(-2px) scale(1.05);
+  }
+}
+
+// Project button with arrow animation
+.project-btn {
+  .arrow-icon {
+    display: inline-block;
+    transition: transform 0.3s ease;
+  }
+  
+  &:hover .arrow-icon {
+    transform: translateX(5px);
+  }
+}
+
+// Legacy card hover (for backwards compatibility)
+.card-hover {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+  }
+}
+
+// Primary button shadow
+.shadow-primary {
+  box-shadow: 0 0.5rem 1.125rem -0.5rem rgba(102, 126, 234, 0.9);
+  
+  &:hover {
+    box-shadow: 0 0.5rem 1.125rem -0.5rem rgba(102, 126, 234, 0.6);
+  }
+}
+
+// Smooth scroll behavior
+html {
+  scroll-behavior: smooth;
+}
+
+// Stretched link improvement
+.stretched-link::after {
+  z-index: 1;
+}
+
+// Ensure card content is above stretched link
+.card-body > * {
+  position: relative;
+  z-index: 2;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: auto;
+    padding: 3rem 0;
+  }
+  
+  .shape {
+    opacity: 0.05;
+  }
+  
+  .scroll-indicator {
+    bottom: 1rem;
+  }
+}

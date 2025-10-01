@@ -9,19 +9,19 @@
         <div class="collapse navbar-collapse order-lg-1" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <%= link_to hevy_tracker_path, class: "nav-link d-flex align-items-center" do %>
+                    <%= link_to hevy_tracker_path, class: "nav-link d-flex align-items-center #{current_page?(hevy_tracker_path) ? 'active' : ''}" do %>
                     <i class="bx bx-lock-open-alt fs-lg me-1"></i>
                     Hevy Tracker
                     <% end %>
                 </li>
                 <li class="nav-item">
-                    <%= link_to video_captioner_path, class: "nav-link d-flex align-items-center" do %>
+                    <%= link_to video_captioner_path, class: "nav-link d-flex align-items-center #{current_page?(video_captioner_path) ? 'active' : ''}" do %>
                     <i class="bx bx-video fs-lg me-1"></i>
                     Video Captioner
                     <% end %>
                 </li>
                 <li class="nav-item">
-                    <%= link_to contact_path, class: "nav-link d-flex align-items-center" do %>
+                    <%= link_to contact_path, class: "nav-link d-flex align-items-center #{current_page?(contact_path) ? 'active' : ''}" do %>
                     <i class="bx bx-envelope fs-lg me-1"></i> Contact
                     <% end %>
                 </li>
@@ -139,21 +139,51 @@
         font-size: 0.875rem;
         font-weight: 500;
         color: rgba(255, 255, 255, 0.75) !important;
-        transition: all 0.2s ease-in-out;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
+    }
+
+    /* Sliding underline effect */
+    .nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        transform: translateX(-50%);
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .nav-link:hover {
         color: rgba(255, 255, 255, 1) !important;
     }
 
-    .nav-link i {
-        opacity: 0.8;
-        transition: opacity 0.2s ease-in-out;
+    .nav-link:hover::after {
+        width: 100%;
     }
 
-    .nav-link:hover i {
+    /* Active link state */
+    .nav-link.active {
+        color: #6366f1 !important;
+    }
+
+    .nav-link.active::after {
+        width: 100%;
+        background: #6366f1;
+    }
+
+    .nav-link i {
+        opacity: 0.8;
+        transition: all 0.3s ease;
+    }
+
+    .nav-link:hover i,
+    .nav-link.active i {
         opacity: 1;
+        color: #6366f1;
+        transform: translateY(-2px);
     }
 
     /* Add subtle separator between nav items */

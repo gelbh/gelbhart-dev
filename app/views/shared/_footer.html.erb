@@ -13,13 +13,13 @@
 
                 <!-- Social Icons -->
                 <div class="d-flex justify-content-center gap-2 mt-3">
-                    <a href="https://github.com/gelbh" class="btn btn-icon btn-secondary text-white" target="_blank" rel="noopener">
+                    <a href="https://github.com/gelbh" class="btn btn-icon btn-secondary text-white social-btn social-github" target="_blank" rel="noopener" aria-label="GitHub">
                         <i class="bx bxl-github fs-5"></i>
                     </a>
-                    <a href="https://linkedin.com/in/tomer-gelbhart" class="btn btn-icon btn-secondary text-white" target="_blank" rel="noopener">
+                    <a href="https://linkedin.com/in/tomer-gelbhart" class="btn btn-icon btn-secondary text-white social-btn social-linkedin" target="_blank" rel="noopener" aria-label="LinkedIn">
                         <i class="bx bxl-linkedin fs-5"></i>
                     </a>
-                    <a href="mailto:tomer@gelbhart.dev" class="btn btn-icon btn-secondary text-white">
+                    <a href="mailto:tomer@gelbhart.dev" class="btn btn-icon btn-secondary text-white social-btn social-email" aria-label="Email">
                         <i class="bx bx-envelope fs-5"></i>
                     </a>
                 </div>
@@ -31,13 +31,13 @@
             <div class="col-md-6 col-12">
                 <ul class="nav justify-content-center justify-content-md-start mb-3 mb-md-0">
                     <li class="nav-item">
-                        <a href="/hevy-tracker" class="nav-link text-white py-2 px-3">Hevy Tracker</a>
+                        <a href="/hevy-tracker" class="nav-link text-white py-2 px-3 footer-link">Hevy Tracker</a>
                     </li>
                     <li class="nav-item">
-                        <a href="/video-captioner" class="nav-link text-white py-2 px-3">Video Captioner</a>
+                        <a href="/video-captioner" class="nav-link text-white py-2 px-3 footer-link">Video Captioner</a>
                     </li>
                     <li class="nav-item">
-                        <a href="/contact" class="nav-link text-white py-2 px-3">Contact</a>
+                        <a href="/contact" class="nav-link text-white py-2 px-3 footer-link">Contact</a>
                     </li>
                 </ul>
             </div>
@@ -49,6 +49,13 @@
         </div>
     </div>
 </footer>
+
+<!-- Back to Top Button -->
+<div data-controller="scroll-to-top">
+    <a href="#top" class="btn-scroll-top" data-scroll-to-top-target="button" data-action="click->scroll-to-top#scrollToTop" aria-label="Scroll to top">
+        <i class="bx bx-chevron-up"></i>
+    </a>
+</div>
 
 <style>
     .footer .logo-wrapper {
@@ -77,5 +84,135 @@
     .footer .navbar-brand:hover span {
         opacity: 1;
         text-shadow: 0 0 15px rgba(163, 5, 182, 0.3);
+    }
+
+    /* Social button enhancements with brand colors */
+    .social-btn {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .social-btn i {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        z-index: 1;
+    }
+
+    .social-btn:hover i {
+        transform: scale(1.2) rotate(5deg);
+    }
+
+    /* GitHub hover - dark gray/black */
+    .social-github:hover {
+        background-color: #333 !important;
+        border-color: #333 !important;
+        box-shadow: 0 4px 12px rgba(51, 51, 51, 0.4);
+        transform: translateY(-3px);
+    }
+
+    /* LinkedIn hover - LinkedIn blue */
+    .social-linkedin:hover {
+        background-color: #0077b5 !important;
+        border-color: #0077b5 !important;
+        box-shadow: 0 4px 12px rgba(0, 119, 181, 0.4);
+        transform: translateY(-3px);
+    }
+
+    /* Email hover - primary color */
+    .social-email:hover {
+        background-color: #6366f1 !important;
+        border-color: #6366f1 !important;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        transform: translateY(-3px);
+    }
+
+    /* Footer link hover with underline animation */
+    .footer-link {
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .footer-link::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: #6366f1;
+        transform: translateX(-50%);
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .footer-link:hover {
+        color: #6366f1 !important;
+    }
+
+    .footer-link:hover::after {
+        width: 80%;
+    }
+
+    /* Back to Top Button */
+    .btn-scroll-top {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        width: 3rem;
+        height: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        z-index: 1020;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(20px);
+        text-decoration: none;
+    }
+
+    .btn-scroll-top.visible {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .btn-scroll-top:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.6);
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+
+    .btn-scroll-top i {
+        font-size: 1.5rem;
+        animation: bounce-arrow 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce-arrow {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-5px);
+        }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .btn-scroll-top {
+            bottom: 1rem;
+            right: 1rem;
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+
+        .btn-scroll-top i {
+            font-size: 1.25rem;
+        }
     }
 </style>
