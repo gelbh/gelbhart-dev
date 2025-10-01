@@ -1,0 +1,299 @@
+<% content_for :title, page_title("Video Captioner") %>
+<% meta_description "Generate and translate video captions from YouTube videos or local files. Powered by AI transcription with support for multiple languages." %>
+
+<section class="container pt-5 mt-5">
+  <h1 class="display-4 text-center mb-4">
+    Video Captioner
+  </h1>
+  <p class="lead text-center text-muted mb-5">
+    Generate captions for videos with AI-powered transcription and translation
+  </p>
+
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <form id="captioner-form">
+            <!-- Video Input -->
+            <div class="mb-4">
+              <label for="video-url" class="form-label fw-bold">📹 Video Input</label>
+              <input
+                type="text"
+                class="form-control"
+                id="video-url"
+                placeholder="Enter YouTube URL or paste video file path"
+                required
+              >
+              <div class="form-text">YouTube URL or local video file path</div>
+            </div>
+
+            <!-- Language Settings -->
+            <div class="mb-4">
+              <label for="source-language" class="form-label fw-bold">🌍 Source Language (Optional)</label>
+              <select class="form-select" id="source-language">
+                <option value="">Auto-detect</option>
+              </select>
+              <div class="form-text">Select source language or leave as auto-detect</div>
+            </div>
+
+            <!-- Translation -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">🔄 Translation (Optional)</label>
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="enable-translation">
+                <label class="form-check-label" for="enable-translation">
+                  Translate captions to another language
+                </label>
+              </div>
+              <select class="form-select" id="target-language" disabled>
+                <option value="">Select a language</option>
+              </select>
+              <div class="form-text">Select target language for translation</div>
+            </div>
+
+            <!-- Output Format -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">💾 Output Format</label>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="output-format" id="format-srt" value="srt" checked>
+                <label class="form-check-label" for="format-srt">
+                  SRT file only (can be used with any video player)
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="output-format" id="format-burn" value="burn">
+                <label class="form-check-label" for="format-burn">
+                  Burn captions into video (creates new video with hardcoded subtitles)
+                </label>
+              </div>
+            </div>
+
+            <!-- Model Size -->
+            <div class="mb-4">
+              <label for="model-size" class="form-label fw-bold">🤖 Model Size</label>
+              <select class="form-select" id="model-size">
+                <option value="tiny">Tiny - Fastest, least accurate</option>
+                <option value="base" selected>Base - Good balance (recommended)</option>
+                <option value="small">Small - Better accuracy, slower</option>
+                <option value="medium">Medium - Very accurate, much slower</option>
+                <option value="large">Large - Best accuracy, slowest</option>
+              </select>
+            </div>
+
+            <!-- Progress/Status -->
+            <div id="status-area" class="mb-3" style="display: none;">
+              <div class="alert alert-info" role="alert">
+                <div class="d-flex align-items-center">
+                  <div class="spinner-border spinner-border-sm me-2" role="status">
+                    <span class="visually-hidden">Processing...</span>
+                  </div>
+                  <div id="status-text">Processing your video...</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Result Area -->
+            <div id="result-area" class="mb-3" style="display: none;">
+              <div class="alert alert-success" role="alert">
+                <h5>✅ Success!</h5>
+                <p id="result-message" class="mb-2"></p>
+                <a id="download-link" href="#" class="btn btn-success" download>
+                  Download File
+                </a>
+              </div>
+            </div>
+
+            <!-- Error Area -->
+            <div id="error-area" class="mb-3" style="display: none;">
+              <div class="alert alert-danger" role="alert">
+                <h5>❌ Error</h5>
+                <p id="error-message" class="mb-0"></p>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
+                Generate Captions
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Info Card -->
+      <div class="card mt-4">
+        <div class="card-body">
+          <h5 class="card-title">ℹ️ How it works</h5>
+          <ul class="mb-0">
+            <li>Paste a YouTube URL or provide a video file path</li>
+            <li>Choose source language or let AI auto-detect it</li>
+            <li>Optionally translate captions to another language</li>
+            <li>Select output format (SRT subtitle file or burn into video)</li>
+            <li>Choose model size (larger = more accurate but slower)</li>
+            <li>Download your captioned file!</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Fix dropdown options visibility in dark mode */
+  [data-bs-theme="dark"] .form-select option {
+    background-color: #1f2937;
+    color: rgba(255, 255, 255, 0.85);
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('captioner-form');
+  const enableTranslation = document.getElementById('enable-translation');
+  const sourceLanguage = document.getElementById('source-language');
+  const targetLanguage = document.getElementById('target-language');
+  const statusArea = document.getElementById('status-area');
+  const resultArea = document.getElementById('result-area');
+  const errorArea = document.getElementById('error-area');
+  const submitBtn = document.getElementById('submit-btn');
+
+  // Common languages - using codes compatible with both Whisper and Google Translate
+  const languages = [
+    { name: 'Afrikaans', code: 'af' },
+    { name: 'Arabic', code: 'ar' },
+    { name: 'Armenian', code: 'hy' },
+    { name: 'Azerbaijani', code: 'az' },
+    { name: 'Belarusian', code: 'be' },
+    { name: 'Bosnian', code: 'bs' },
+    { name: 'Bulgarian', code: 'bg' },
+    { name: 'Catalan', code: 'ca' },
+    { name: 'Chinese', code: 'zh-CN' },
+    { name: 'Croatian', code: 'hr' },
+    { name: 'Czech', code: 'cs' },
+    { name: 'Danish', code: 'da' },
+    { name: 'Dutch', code: 'nl' },
+    { name: 'English', code: 'en' },
+    { name: 'Estonian', code: 'et' },
+    { name: 'Finnish', code: 'fi' },
+    { name: 'French', code: 'fr' },
+    { name: 'Galician', code: 'gl' },
+    { name: 'German', code: 'de' },
+    { name: 'Greek', code: 'el' },
+    { name: 'Hebrew', code: 'iw' },
+    { name: 'Hindi', code: 'hi' },
+    { name: 'Hungarian', code: 'hu' },
+    { name: 'Icelandic', code: 'is' },
+    { name: 'Indonesian', code: 'id' },
+    { name: 'Italian', code: 'it' },
+    { name: 'Japanese', code: 'ja' },
+    { name: 'Kannada', code: 'kn' },
+    { name: 'Kazakh', code: 'kk' },
+    { name: 'Korean', code: 'ko' },
+    { name: 'Latvian', code: 'lv' },
+    { name: 'Lithuanian', code: 'lt' },
+    { name: 'Macedonian', code: 'mk' },
+    { name: 'Malay', code: 'ms' },
+    { name: 'Marathi', code: 'mr' },
+    { name: 'Maori', code: 'mi' },
+    { name: 'Nepali', code: 'ne' },
+    { name: 'Norwegian', code: 'no' },
+    { name: 'Persian', code: 'fa' },
+    { name: 'Polish', code: 'pl' },
+    { name: 'Portuguese', code: 'pt' },
+    { name: 'Romanian', code: 'ro' },
+    { name: 'Russian', code: 'ru' },
+    { name: 'Serbian', code: 'sr' },
+    { name: 'Slovak', code: 'sk' },
+    { name: 'Slovenian', code: 'sl' },
+    { name: 'Spanish', code: 'es' },
+    { name: 'Swahili', code: 'sw' },
+    { name: 'Swedish', code: 'sv' },
+    { name: 'Tagalog', code: 'tl' },
+    { name: 'Tamil', code: 'ta' },
+    { name: 'Thai', code: 'th' },
+    { name: 'Turkish', code: 'tr' },
+    { name: 'Ukrainian', code: 'uk' },
+    { name: 'Urdu', code: 'ur' },
+    { name: 'Vietnamese', code: 'vi' },
+    { name: 'Welsh', code: 'cy' }
+  ];
+
+  // Populate select dropdowns
+  const sourceSelect = document.getElementById('source-language');
+  const targetSelect = document.getElementById('target-language');
+
+  languages.forEach(lang => {
+    const sourceOption = document.createElement('option');
+    sourceOption.value = lang.code;
+    sourceOption.textContent = `${lang.name} (${lang.code})`;
+    sourceSelect.appendChild(sourceOption);
+
+    const targetOption = document.createElement('option');
+    targetOption.value = lang.code;
+    targetOption.textContent = `${lang.name} (${lang.code})`;
+    targetSelect.appendChild(targetOption);
+  });
+
+  // Toggle translation input
+  enableTranslation.addEventListener('change', function() {
+    targetLanguage.disabled = !this.checked;
+    if (!this.checked) {
+      targetLanguage.value = '';
+    }
+  });
+
+  // Form submission
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    // Hide previous results/errors
+    statusArea.style.display = 'none';
+    resultArea.style.display = 'none';
+    errorArea.style.display = 'none';
+
+    // Show loading
+    statusArea.style.display = 'block';
+    submitBtn.disabled = true;
+
+    const formData = new FormData();
+    formData.append('video_url', document.getElementById('video-url').value);
+    formData.append('language', sourceLanguage.value);
+    formData.append('translate_to', enableTranslation.checked ? targetLanguage.value : '');
+    formData.append('burn', document.querySelector('input[name="output-format"]:checked').value === 'burn');
+    formData.append('model', document.getElementById('model-size').value);
+
+    try {
+      const response = await fetch('/video-captioner/generate', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      statusArea.style.display = 'none';
+      submitBtn.disabled = false;
+
+      if (data.success) {
+        resultArea.style.display = 'block';
+
+        let message = `Detected language: ${data.detected_language}`;
+        if (data.warning) {
+          message += `\n⚠️ ${data.warning}`;
+        }
+
+        document.getElementById('result-message').textContent = message;
+        document.getElementById('download-link').href = data.download_url;
+      } else {
+        errorArea.style.display = 'block';
+        document.getElementById('error-message').textContent = data.error || 'An error occurred';
+      }
+    } catch (error) {
+      statusArea.style.display = 'none';
+      errorArea.style.display = 'block';
+      submitBtn.disabled = false;
+      document.getElementById('error-message').textContent = 'Failed to process video: ' + error.message;
+    }
+  });
+});
+</script>
