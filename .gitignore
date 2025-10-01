@@ -62,4 +62,8 @@ yarn-debug.log*
 
 # Ignore AI Digest
 .aidigestignore
-codebase.md/public/captions/
+codebase.md
+
+# Ignore generated captions and sitemaps
+/public/captions/
+/public/sitemaps/
