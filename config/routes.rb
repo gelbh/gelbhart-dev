@@ -8,10 +8,8 @@ Rails.application.routes.draw do
 
   get "contact", to: "pages#contact"
 
-  # Video Captioner
-  get "video-captioner", to: "video_captioner#index"
-  post "video-captioner/generate", to: "video_captioner#generate"
-  get "captions/:filename", to: "video_captioner#download", as: :caption_download
+  # Video Captioner (static page for desktop tool download)
+  get "video-captioner", to: "pages#video_captioner"
 
   get "/robots.txt", to: "pages#robots"
 

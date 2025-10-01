@@ -5,15 +5,90 @@
   <h1 class="display-4 text-center mb-4">
     Video Captioner
   </h1>
-  <p class="lead text-center text-muted mb-5">
-    Generate captions for videos with AI-powered transcription and translation
+  <p class="lead text-center text-muted mb-3">
+    Desktop Tool - Process videos locally on your computer
+  </p>
+  <p class="text-center text-muted mb-5">
+    <small>No server uploads, no file size limits, 100% private</small>
   </p>
 
   <div class="row justify-content-center">
     <div class="col-lg-8">
-      <div class="card shadow-sm">
+      <!-- Download Section -->
+      <div class="card shadow-sm mb-4 border-primary">
+        <div class="card-body p-4 text-center">
+          <i class="bx bx-download display-1 text-primary mb-3"></i>
+          <h3 class="mb-3">Download Desktop Tool</h3>
+          <p class="text-muted mb-4">Just double-click to launch! The app automatically installs everything it needs on first run.</p>
+          <a href="/downloads/video_captioner.pyw" download class="btn btn-primary btn-lg mb-2">
+            <i class="bx bx-download me-2"></i>Download GUI Version (Recommended)
+          </a>
+          <br>
+          <small class="text-muted d-block my-2">Windows users: Use .pyw (no terminal window) | Mac/Linux users: Use .py</small>
+          <a href="/downloads/video_captioner.py" download class="btn btn-outline-primary btn-sm me-2">
+            <i class="bx bx-download me-1"></i>.py version
+          </a>
+          <a href="/downloads/video_captioner_standalone.py" download class="btn btn-outline-secondary btn-sm">
+            <i class="bx bx-terminal me-1"></i>CLI Version
+          </a>
+        </div>
+      </div>
+
+      <!-- Requirements -->
+      <div class="card shadow-sm mb-4">
         <div class="card-body p-4">
-          <form id="captioner-form">
+          <h4 class="mb-3">📋 Requirements</h4>
+          <ul class="mb-0">
+            <li><strong>Python 3.8+</strong> - <a href="https://www.python.org/downloads/" target="_blank">Download here</a></li>
+          </ul>
+          <p class="text-muted mt-3 mb-0"><small>All dependencies (whisper, yt-dlp, deep-translator, FFmpeg) are automatically installed on first run. No manual installation needed!</small></p>
+        </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body p-4">
+          <h4 class="mb-3">🚀 How to Use</h4>
+
+          <div class="alert alert-warning mb-3">
+            <strong>Windows users (.pyw file):</strong> Just double-click the downloaded file!<br>
+            <strong>Windows users (.py file):</strong> Right-click → "Open with" → "Python"<br>
+            <strong>Mac/Linux users:</strong> Open Terminal, type <code>python3 </code> (with a space), then drag the file into Terminal and press Enter
+          </div>
+
+          <ol>
+            <li class="mb-2">Launch the downloaded file (double-click on Windows .pyw, or use Python for .py files)</li>
+            <li class="mb-2">On first run, a window will pop up asking to install required packages
+              <ul class="mt-2">
+                <li>Click the "Install" button</li>
+                <li>Wait 5-10 minutes for automatic installation</li>
+                <li>The app will restart automatically when done</li>
+              </ul>
+            </li>
+            <li class="mb-2">Use the friendly interface to:
+              <ul class="mt-2">
+                <li>Browse for a local video or paste a YouTube URL</li>
+                <li>Choose source language (or auto-detect)</li>
+                <li>Optionally translate to another language</li>
+                <li>Select output format (SRT file or burned captions)</li>
+                <li>Choose AI model size (base recommended)</li>
+              </ul>
+            </li>
+            <li class="mb-2">Click "Generate Captions" and watch the progress</li>
+            <li>Your captioned file will be saved to your chosen output folder!</li>
+          </ol>
+
+          <div class="alert alert-info mt-3">
+            <strong>Tip:</strong> After the first run, you can double-click the file to launch it directly (if Python is configured as the default app for .py files).
+          </div>
+        </div>
+      </div>
+
+      <!-- Old form (hidden for reference, can be removed) -->
+      <div style="display: none;">
+        <div class="card shadow-sm">
+          <div class="card-body p-4">
+            <form id="captioner-form">
             <!-- Video Input -->
             <div class="mb-4">
               <label for="video-url" class="form-label fw-bold">📹 Video Input</label>
