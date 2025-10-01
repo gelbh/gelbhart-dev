@@ -327,3 +327,71 @@
     </div>
   </div>
 </section>
+
+<!-- Call-to-Action Section -->
+<section class="position-relative py-5 my-5" data-controller="scroll-animation">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="cta-card fade-in-view">
+          <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+              <div class="cta-icon-wrapper mb-3">
+                <i class="bx bx-briefcase cta-icon"></i>
+              </div>
+              <h2 class="h2 mb-3">Ready to Work Together?</h2>
+              <p class="fs-lg mb-0 text-muted">
+                I'm actively seeking internship opportunities starting May 2026. 
+                Looking to strengthen my back-end development skills and contribute to innovative projects.
+              </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+              <div class="d-flex flex-column gap-3">
+                <%= link_to contact_path, class: "btn btn-lg btn-primary shadow-primary" do %>
+                  <i class="bx bx-envelope fs-5 me-2"></i>
+                  Get in Touch
+                <% end %>
+                <a href="mailto:tomer@gelbhart.dev" class="btn btn-lg btn-outline-primary">
+                  <i class="bx bx-send fs-5 me-2"></i>
+                  Email Me
+                </a>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Quick Stats/Info -->
+          <div class="row mt-4 pt-4 border-top">
+            <div class="col-6 col-md-3 text-center">
+              <div class="cta-stat">
+                <i class="bx bx-code-alt text-primary mb-2"></i>
+                <div class="fw-bold">Full-Stack</div>
+                <div class="fs-sm text-muted">Development</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3 text-center">
+              <div class="cta-stat">
+                <i class="bx bx-calendar text-success mb-2"></i>
+                <div class="fw-bold">May 2026</div>
+                <div class="fs-sm text-muted">Available From</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3 text-center">
+              <div class="cta-stat">
+                <i class="bx bx-map text-danger mb-2"></i>
+                <div class="fw-bold">Dublin, IE</div>
+                <div class="fs-sm text-muted">Location</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3 text-center">
+              <div class="cta-stat">
+                <i class="bx bx-user text-info mb-2"></i>
+                <div class="fw-bold">MSc Student</div>
+                <div class="fs-sm text-muted">UCD</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
