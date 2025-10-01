@@ -26,10 +26,17 @@ class VideoCaptionerController < ApplicationController
         render json: { error: response['error'] }, status: :unprocessable_entity
       else
         download_url = "/captions/#{response['output']}"
+        video_download_url = response['video_output'] ? "/captions/#{response['video_output']}" : nil
+
         render json: {
           success: true,
           download_url: download_url,
-          detected_language: response['detected_lang'],
+          video_download_url: video_download_url,
+          output: response['output'],
+          detected_lang: response['detected_lang'],
+          video_title: response['video_title'],
+          duration: response['duration'],
+          subtitle_lang: response['subtitle_lang'],
           warning: response['warning']
         }
       end

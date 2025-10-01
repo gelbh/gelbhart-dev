@@ -134,6 +134,44 @@
         }
     }
 
+    /* Navigation link styling */
+    .nav-link {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.75) !important;
+        transition: all 0.2s ease-in-out;
+        position: relative;
+    }
+
+    .nav-link:hover {
+        color: rgba(255, 255, 255, 1) !important;
+    }
+
+    .nav-link i {
+        opacity: 0.8;
+        transition: opacity 0.2s ease-in-out;
+    }
+
+    .nav-link:hover i {
+        opacity: 1;
+    }
+
+    /* Add subtle separator between nav items */
+    .navbar-nav .nav-item:not(:last-child) {
+        margin-right: 0.25rem;
+    }
+
+    .navbar-nav .nav-item:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 1.25rem;
+        width: 1px;
+        background: rgba(255, 255, 255, 0.15);
+    }
+
     /* Large screen optimizations */
     @media (min-width: 992px) {
         .navbar>.container {
@@ -146,7 +184,11 @@
         }
 
         .nav-link {
-            padding: 0.5rem 1.25rem;
+            padding: 0.5rem 0.875rem;
+        }
+
+        .navbar-nav .nav-item:not(:last-child) {
+            margin-right: 0.5rem;
         }
     }
 

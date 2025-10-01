@@ -92,16 +92,8 @@
               </div>
             </div>
 
-            <!-- Result Area -->
-            <div id="result-area" class="mb-3" style="display: none;">
-              <div class="alert alert-success" role="alert">
-                <h5>✅ Success!</h5>
-                <p id="result-message" class="mb-2"></p>
-                <a id="download-link" href="#" class="btn btn-success" download>
-                  Download File
-                </a>
-              </div>
-            </div>
+            <!-- Result Area - Hidden, will show as modal -->
+            <div id="result-area" style="display: none;"></div>
 
             <!-- Error Area -->
             <div id="error-area" class="mb-3" style="display: none;">
@@ -116,6 +108,15 @@
               <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
                 Generate Captions
               </button>
+            </div>
+
+            <!-- Reopen Result Button (hidden until success) -->
+            <div id="reopen-result-area" class="mt-3" style="display: none;">
+              <div class="d-grid">
+                <button type="button" class="btn btn-success btn-lg" id="reopen-result-btn">
+                  <i class="bx bx-check-circle me-2"></i>Show Results
+                </button>
+              </div>
             </div>
           </form>
         </div>
@@ -139,6 +140,51 @@
   </div>
 </section>
 
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-success" id="successModalLabel">✅ Caption Generation Complete!</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row mb-3">
+          <div class="col-md-6 mb-2">
+            <strong>📹 Video Title:</strong>
+            <p id="modal-video-title" class="mb-0 text-muted"></p>
+          </div>
+          <div class="col-md-6 mb-2">
+            <strong>⏱️ Duration:</strong>
+            <p id="modal-duration" class="mb-0 text-muted"></p>
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-6 mb-2">
+            <strong>🎙️ Audio Language:</strong>
+            <p id="modal-audio-lang" class="mb-0 text-muted"></p>
+          </div>
+          <div class="col-md-6 mb-2">
+            <strong>📝 Subtitle Language:</strong>
+            <p id="modal-subtitle-lang" class="mb-0 text-muted"></p>
+          </div>
+        </div>
+        <div id="modal-warning" class="alert alert-warning" style="display: none;">
+          <strong>⚠️ Warning:</strong> <span id="modal-warning-text"></span>
+        </div>
+      </div>
+      <div class="modal-footer" id="modal-footer-buttons">
+        <a id="modal-download-link" href="#" class="btn btn-success btn-lg" download>
+          <i class="bx bx-download me-2"></i>Download File
+        </a>
+        <a id="modal-video-download-link" href="#" class="btn btn-primary btn-lg" download style="display: none;">
+          <i class="bx bx-video me-2"></i>Download Video
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <style>
   /* Fix dropdown options visibility in dark mode */
   [data-bs-theme="dark"] .form-select option {
@@ -158,17 +204,22 @@ document.addEventListener('DOMContentLoaded', function() {
   const errorArea = document.getElementById('error-area');
   const submitBtn = document.getElementById('submit-btn');
 
-  // Common languages - using codes compatible with both Whisper and Google Translate
+  // Common languages - using exact codes from deep-translator GoogleTranslator
   const languages = [
     { name: 'Afrikaans', code: 'af' },
+    { name: 'Albanian', code: 'sq' },
+    { name: 'Amharic', code: 'am' },
     { name: 'Arabic', code: 'ar' },
     { name: 'Armenian', code: 'hy' },
     { name: 'Azerbaijani', code: 'az' },
+    { name: 'Basque', code: 'eu' },
     { name: 'Belarusian', code: 'be' },
+    { name: 'Bengali', code: 'bn' },
     { name: 'Bosnian', code: 'bs' },
     { name: 'Bulgarian', code: 'bg' },
     { name: 'Catalan', code: 'ca' },
-    { name: 'Chinese', code: 'zh-CN' },
+    { name: 'Chinese (Simplified)', code: 'zh-CN' },
+    { name: 'Chinese (Traditional)', code: 'zh-TW' },
     { name: 'Croatian', code: 'hr' },
     { name: 'Czech', code: 'cs' },
     { name: 'Danish', code: 'da' },
@@ -178,45 +229,64 @@ document.addEventListener('DOMContentLoaded', function() {
     { name: 'Finnish', code: 'fi' },
     { name: 'French', code: 'fr' },
     { name: 'Galician', code: 'gl' },
+    { name: 'Georgian', code: 'ka' },
     { name: 'German', code: 'de' },
     { name: 'Greek', code: 'el' },
+    { name: 'Gujarati', code: 'gu' },
     { name: 'Hebrew', code: 'iw' },
     { name: 'Hindi', code: 'hi' },
     { name: 'Hungarian', code: 'hu' },
     { name: 'Icelandic', code: 'is' },
     { name: 'Indonesian', code: 'id' },
+    { name: 'Irish', code: 'ga' },
     { name: 'Italian', code: 'it' },
     { name: 'Japanese', code: 'ja' },
+    { name: 'Javanese', code: 'jw' },
     { name: 'Kannada', code: 'kn' },
     { name: 'Kazakh', code: 'kk' },
+    { name: 'Khmer', code: 'km' },
     { name: 'Korean', code: 'ko' },
+    { name: 'Kurdish', code: 'ku' },
+    { name: 'Lao', code: 'lo' },
+    { name: 'Latin', code: 'la' },
     { name: 'Latvian', code: 'lv' },
     { name: 'Lithuanian', code: 'lt' },
     { name: 'Macedonian', code: 'mk' },
     { name: 'Malay', code: 'ms' },
-    { name: 'Marathi', code: 'mr' },
+    { name: 'Malayalam', code: 'ml' },
+    { name: 'Maltese', code: 'mt' },
     { name: 'Maori', code: 'mi' },
+    { name: 'Marathi', code: 'mr' },
+    { name: 'Mongolian', code: 'mn' },
+    { name: 'Myanmar', code: 'my' },
     { name: 'Nepali', code: 'ne' },
     { name: 'Norwegian', code: 'no' },
     { name: 'Persian', code: 'fa' },
     { name: 'Polish', code: 'pl' },
     { name: 'Portuguese', code: 'pt' },
+    { name: 'Punjabi', code: 'pa' },
     { name: 'Romanian', code: 'ro' },
     { name: 'Russian', code: 'ru' },
     { name: 'Serbian', code: 'sr' },
+    { name: 'Sinhala', code: 'si' },
     { name: 'Slovak', code: 'sk' },
     { name: 'Slovenian', code: 'sl' },
+    { name: 'Somali', code: 'so' },
     { name: 'Spanish', code: 'es' },
     { name: 'Swahili', code: 'sw' },
     { name: 'Swedish', code: 'sv' },
-    { name: 'Tagalog', code: 'tl' },
+    { name: 'Tajik', code: 'tg' },
     { name: 'Tamil', code: 'ta' },
+    { name: 'Telugu', code: 'te' },
     { name: 'Thai', code: 'th' },
     { name: 'Turkish', code: 'tr' },
     { name: 'Ukrainian', code: 'uk' },
     { name: 'Urdu', code: 'ur' },
+    { name: 'Uzbek', code: 'uz' },
     { name: 'Vietnamese', code: 'vi' },
-    { name: 'Welsh', code: 'cy' }
+    { name: 'Welsh', code: 'cy' },
+    { name: 'Yiddish', code: 'yi' },
+    { name: 'Yoruba', code: 'yo' }
   ];
 
   // Populate select dropdowns
@@ -251,6 +321,7 @@ document.addEventListener('DOMContentLoaded', function() {
     statusArea.style.display = 'none';
     resultArea.style.display = 'none';
     errorArea.style.display = 'none';
+    document.getElementById('reopen-result-area').style.display = 'none';
 
     // Show loading
     statusArea.style.display = 'block';
@@ -275,15 +346,61 @@ document.addEventListener('DOMContentLoaded', function() {
       submitBtn.disabled = false;
 
       if (data.success) {
-        resultArea.style.display = 'block';
+        // Format duration
+        const formatDuration = (seconds) => {
+          const hours = Math.floor(seconds / 3600);
+          const minutes = Math.floor((seconds % 3600) / 60);
+          const secs = Math.floor(seconds % 60);
+          if (hours > 0) {
+            return `${hours}h ${minutes}m ${secs}s`;
+          } else if (minutes > 0) {
+            return `${minutes}m ${secs}s`;
+          } else {
+            return `${secs}s`;
+          }
+        };
 
-        let message = `Detected language: ${data.detected_language}`;
-        if (data.warning) {
-          message += `\n⚠️ ${data.warning}`;
+        // Get language name from code
+        const getLanguageName = (code) => {
+          if (!code) return 'Unknown';
+          const lang = languages.find(l => l.code === code || l.code.toLowerCase() === code.toLowerCase());
+          return lang ? lang.name : code.toUpperCase();
+        };
+
+        // Populate modal
+        document.getElementById('modal-video-title').textContent = data.video_title || 'Unknown';
+        document.getElementById('modal-duration').textContent = data.duration ? formatDuration(data.duration) : 'Unknown';
+        document.getElementById('modal-audio-lang').textContent = getLanguageName(data.detected_lang);
+        document.getElementById('modal-subtitle-lang').textContent = getLanguageName(data.subtitle_lang);
+        document.getElementById('modal-download-link').href = data.download_url;
+        document.getElementById('modal-download-link').setAttribute('data-filename', data.output);
+
+        // Show video download button if separate video file exists
+        const videoDownloadLink = document.getElementById('modal-video-download-link');
+        if (data.video_download_url) {
+          videoDownloadLink.href = data.video_download_url;
+          videoDownloadLink.style.display = 'inline-block';
+          // Update main download button text to say "Download Subtitles"
+          document.getElementById('modal-download-link').innerHTML = '<i class="bx bx-download me-2"></i>Download Subtitles';
+        } else {
+          videoDownloadLink.style.display = 'none';
+          document.getElementById('modal-download-link').innerHTML = '<i class="bx bx-download me-2"></i>Download File';
         }
 
-        document.getElementById('result-message').textContent = message;
-        document.getElementById('download-link').href = data.download_url;
+        // Show warning if exists
+        if (data.warning) {
+          document.getElementById('modal-warning').style.display = 'block';
+          document.getElementById('modal-warning-text').textContent = data.warning;
+        } else {
+          document.getElementById('modal-warning').style.display = 'none';
+        }
+
+        // Show modal
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        successModal.show();
+
+        // Show "View Result Again" button
+        document.getElementById('reopen-result-area').style.display = 'block';
       } else {
         errorArea.style.display = 'block';
         document.getElementById('error-message').textContent = data.error || 'An error occurred';
@@ -294,6 +411,12 @@ document.addEventListener('DOMContentLoaded', function() {
       submitBtn.disabled = false;
       document.getElementById('error-message').textContent = 'Failed to process video: ' + error.message;
     }
+  });
+
+  // Reopen modal functionality
+  document.getElementById('reopen-result-btn').addEventListener('click', function() {
+    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+    successModal.show();
   });
 });
 </script>
