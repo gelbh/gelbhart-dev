@@ -165,13 +165,61 @@ def main():
         safe_title = "".join(c for c in video_title if c.isalnum() or c in (' ', '-', '_')).strip()
         safe_title = safe_title.replace(' ', '_')
 
+        # Add language suffix if translated
+        language_suffix = ""
+        if config.get('translate_to'):
+            # Create a reverse mapping to get language name from code
+            lang_map = {
+                'iw': 'hebrew', 'he': 'hebrew',
+                'en': 'english',
+                'es': 'spanish',
+                'fr': 'french',
+                'de': 'german',
+                'it': 'italian',
+                'pt': 'portuguese',
+                'ru': 'russian',
+                'ja': 'japanese',
+                'ko': 'korean',
+                'zh-CN': 'chinese', 'zh': 'chinese',
+                'ar': 'arabic',
+                'hi': 'hindi',
+                'tr': 'turkish',
+                'nl': 'dutch',
+                'pl': 'polish',
+                'sv': 'swedish',
+                'da': 'danish',
+                'fi': 'finnish',
+                'no': 'norwegian',
+                'cs': 'czech',
+                'el': 'greek',
+                'hu': 'hungarian',
+                'ro': 'romanian',
+                'th': 'thai',
+                'id': 'indonesian',
+                'vi': 'vietnamese',
+                'uk': 'ukrainian',
+                'bg': 'bulgarian',
+                'hr': 'croatian',
+                'sr': 'serbian',
+                'sk': 'slovak',
+                'sl': 'slovenian',
+                'fa': 'persian',
+                'ur': 'urdu',
+                'ta': 'tamil',
+                'te': 'telugu',
+                'mr': 'marathi',
+                'bn': 'bengali',
+            }
+            lang_code = config.get('translate_to')
+            language_suffix = f"_{lang_map.get(lang_code, lang_code)}"
+
         os.makedirs(output_dir, exist_ok=True)
 
         if config.get('burn'):
-            output_filename = f"{safe_title}_captioned.mp4"
+            output_filename = f"{safe_title}{language_suffix}_captioned.mp4"
             output_path = os.path.join(output_dir, output_filename)
         else:
-            output_filename = f"{safe_title}.srt"
+            output_filename = f"{safe_title}{language_suffix}.srt"
             output_path = os.path.join(output_dir, output_filename)
 
         # Output
