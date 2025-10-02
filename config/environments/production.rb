@@ -79,7 +79,22 @@ Rails.application.configure do
   # Enable compilation as fallback for importmap JavaScript files
   config.assets.compile = true
   config.assets.css_compressor = :sass
-  config.assets.js_compressor = :terser
+  
+  # Configure Terser to support modern ES6+ syntax
+  config.assets.js_compressor = Terser.new(
+    compress: {
+      ecma: 2015,  # Support ES6/ES2015 syntax
+      warnings: false
+    },
+    mangle: {
+      eval: true
+    },
+    output: {
+      ecma: 2015,  # Support ES6/ES2015 syntax in output
+      comments: false
+    }
+  )
+  
   config.assets.digest = true
   config.assets.version = "1.0"
   config.assets.debug = false
