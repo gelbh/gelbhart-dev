@@ -5,6 +5,15 @@ module PacmanHelper
       'pacman/pacman_open_more.png' => asset_path('pacman-game/pacman/pacman_open_more.png'),
       'pacman/pacman_open_less.png' => asset_path('pacman-game/pacman/pacman_open_less.png'),
       'pacman/pacman_closed.png' => asset_path('pacman-game/pacman/pacman_closed.png'),
+
+      # Audio files
+      'sounds/pacman_beginning.wav' => asset_path('pacman-game/sounds/pacman_beginning.wav'),
+      'sounds/pacman_chomp.wav' => asset_path('pacman-game/sounds/pacman_chomp.wav'),
+      'sounds/pacman_death.wav' => asset_path('pacman-game/sounds/pacman_death.wav'),
+      'sounds/pacman_eatfruit.wav' => asset_path('pacman-game/sounds/pacman_eatfruit.wav'),
+      'sounds/pacman_eatghost.wav' => asset_path('pacman-game/sounds/pacman_eatghost.wav'),
+      'sounds/pacman_extrapac.wav' => asset_path('pacman-game/sounds/pacman_extrapac.wav'),
+      'sounds/pacman_intermission.wav' => asset_path('pacman-game/sounds/pacman_intermission.wav'),
       
       # Blinky (red ghost) sprites
       'ghosts/blinky-right-1.png' => asset_path('pacman-game/ghosts/blinky-right-1.png'),
