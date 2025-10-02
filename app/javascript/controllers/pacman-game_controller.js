@@ -101,8 +101,9 @@ export default class extends Controller {
     const getAudioPath = (filename) => {
       // In production, use the digested asset path from manifest
       const assetKey = `pacman-game/sounds/${filename}`
-      if (this.assetPaths[assetKey]) {
-        return `/assets/${this.assetPaths[assetKey]}`
+      if (this.assetPaths && this.assetPaths[assetKey]) {
+        // Rails asset_path() already includes /assets/ prefix
+        return this.assetPaths[assetKey]
       }
       // In development, use direct path
       return `/assets/pacman-game/sounds/${filename}`
@@ -708,10 +709,10 @@ export default class extends Controller {
     // Build the key to lookup in the manifest
     const assetKey = `pacman-game/${filename}`
 
-    // Use asset manifest for production fingerprinted paths, fallback to direct path for development
+    // Use asset manifest for production fingerprinted paths (Rails asset_path already includes /assets/)
     if (this.assetPaths && this.assetPaths[assetKey]) {
-      // The manifest returns the path with hash, prepend /assets/
-      return `/assets/${this.assetPaths[assetKey]}`
+      // The manifest value from Rails asset_path() already includes /assets/ prefix
+      return this.assetPaths[assetKey]
     }
     // Fallback to direct asset path (for development)
     return `/assets/${assetKey}`
