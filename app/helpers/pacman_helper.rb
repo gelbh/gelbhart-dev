@@ -47,11 +47,7 @@ module PacmanHelper
       # Ghost eyes sprites
       'ghosts/eyes-right.png' => asset_path('pacman-game/ghosts/eyes-right.png'),
       'ghosts/eyes-down.png' => asset_path('pacman-game/ghosts/eyes-down.png'),
-      'ghosts/eyes-up.png' => asset_path('pacman-game/ghosts/eyes-up.png'),
-      
-      # Dot and power pellet
-      'dot.svg' => asset_path('pacman-game/dot.svg'),
-      'power-pellet.svg' => asset_path('pacman-game/power-pellet.svg')
+      'ghosts/eyes-up.png' => asset_path('pacman-game/ghosts/eyes-up.png')
     }
   end
 end
