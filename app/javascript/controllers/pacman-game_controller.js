@@ -18,11 +18,15 @@ import { Controller } from "@hotwired/stimulus"
  */
 export default class extends Controller {
   static targets = ["gameContainer", "pacman", "hud", "score", "lives", "startHint"]
+  static values = { assetManifest: Object }
 
   /**
    * Initialize game state and setup
    */
   connect() {
+    // Store asset manifest for production asset paths
+    this.assetPaths = this.hasAssetManifestValue ? this.assetManifestValue : {}
+    
     console.log("🎮 Pac-Man game controller connected!")
     
     // Game state
@@ -544,7 +548,11 @@ export default class extends Controller {
    * Get asset path for Pac-Man game sprites
    */
   getAssetPath(filename) {
-    // Helper to get asset path for pacman-game folder
+    // Use asset manifest for production fingerprinted paths, fallback to direct path for development
+    if (this.assetPaths && this.assetPaths[filename]) {
+      return this.assetPaths[filename]
+    }
+    // Fallback to direct asset path (for development)
     return `/assets/pacman-game/${filename}`
   }
   
