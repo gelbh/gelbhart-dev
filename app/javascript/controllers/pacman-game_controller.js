@@ -971,9 +971,27 @@ export default class extends Controller {
         }
       }
       
-      // Calculate direction to target with smoother pathfinding
-      const dx = targetX - ghost.x
+      // Calculate direction to target with wraparound consideration
+      // Check both direct path and wraparound path, use the shorter one
+      let dx = targetX - ghost.x
       const dy = targetY - ghost.y
+      
+      // Consider horizontal wraparound (tunnel mechanic)
+      const screenWidth = window.innerWidth
+      const margin = 30
+      const dxDirect = dx
+      const dxWrapLeft = (targetX + screenWidth) - ghost.x  // Target wraps from right
+      const dxWrapRight = (targetX - screenWidth) - ghost.x // Target wraps from left
+      
+      // Choose the shortest horizontal path
+      const distances = [
+        { dx: dxDirect, dist: Math.abs(dxDirect) },
+        { dx: dxWrapLeft, dist: Math.abs(dxWrapLeft) },
+        { dx: dxWrapRight, dist: Math.abs(dxWrapRight) }
+      ]
+      const shortest = distances.reduce((min, curr) => curr.dist < min.dist ? curr : min)
+      dx = shortest.dx
+      
       const distance = Math.sqrt(dx * dx + dy * dy)
       
       if (distance > 0) {
