@@ -31,6 +31,7 @@ export default class extends Controller {
     
     // Game state
     this.isGameActive = false
+    this.isStarting = false // Flag to track if game is in starting phase (waiting for intro music)
     this.score = 0
     this.lives = 3
     this.extraLifeAwarded = false // Track if extra life at 10,000 has been awarded
@@ -381,12 +382,20 @@ export default class extends Controller {
     // Auto-start game on first movement key press
     const movementKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'W', 'a', 'A', 's', 'S', 'd', 'D']
     
-    if (movementKeys.includes(event.key) && !this.isGameActive) {
+    if (movementKeys.includes(event.key) && !this.isGameActive && !this.isStarting) {
       this.startGame()
-      // Don't return - process the movement immediately
+      // Don't process movement yet - wait for intro music
+      event.preventDefault()
+      return
     }
     
-    if (!this.isGameActive || this.isDying) return
+    // Prevent movement during intro music
+    if (this.isStarting || !this.isGameActive || this.isDying) {
+      if (movementKeys.includes(event.key)) {
+        event.preventDefault()
+      }
+      return
+    }
     
     // Immediately apply movement for responsive controls
     switch(event.key) {
@@ -434,13 +443,11 @@ export default class extends Controller {
    * Initializes game state, generates dots/ghosts, starts game loop
    */
   startGame() {
-    if (this.isGameActive) return
+    if (this.isGameActive || this.isStarting) return
     
     console.log("🎮 Starting Pac-Man game!")
-    this.isGameActive = true
-    
-    // Play beginning sound
-    this.playSound('beginning', true)
+    this.isStarting = true // Flag to prevent multiple start attempts
+    this.isGameActive = false // Game is not yet active (waiting for intro music)
     
     // Disable page scrolling during game
     document.body.style.overflow = 'hidden'
@@ -471,13 +478,53 @@ export default class extends Controller {
     this.generateDots()
     this.createGhosts()
     
-    // Start game loop
-    this.gameLoop()
+    // Play beginning sound and wait for it to finish
+    console.log("🎵 Playing intro music...")
+    this.playSound('beginning', true)
+    
+    // Wait for the beginning sound to finish before starting gameplay
+    const beginningAudio = this.audioFiles.beginning
+    
+    const onBeginningEnded = () => {
+      console.log("🎵 Intro music finished, starting gameplay!")
+      this.isGameActive = true
+      this.isStarting = false
+      
+      // Start chomp sound when game actually begins
+      if (this.pacmanVelocity.x !== 0 || this.pacmanVelocity.y !== 0) {
+        this.startChompSound()
+      }
+      
+      // Start game loop
+      this.gameLoop()
+      
+      // Remove event listener
+      beginningAudio.removeEventListener('ended', onBeginningEnded)
+    }
+    
+    beginningAudio.addEventListener('ended', onBeginningEnded)
+    
+    // Fallback: Start anyway after 5 seconds if sound doesn't fire ended event
+    setTimeout(() => {
+      if (!this.isGameActive && this.isStarting) {
+        console.log("⚠️ Intro music timeout, starting gameplay anyway")
+        beginningAudio.removeEventListener('ended', onBeginningEnded)
+        this.isGameActive = true
+        this.isStarting = false
+        
+        if (this.pacmanVelocity.x !== 0 || this.pacmanVelocity.y !== 0) {
+          this.startChompSound()
+        }
+        
+        this.gameLoop()
+      }
+    }, 5000)
   }
 
   stopGame() {
     console.log("🛑 Stopping Pac-Man game!")
     this.isGameActive = false
+    this.isStarting = false
     this.gameContainerTarget.classList.remove('active')
     this.hudTarget.classList.remove('active')
     
