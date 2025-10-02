@@ -100,12 +100,12 @@ export default class extends Controller {
     // Helper function to get asset path (handles both dev and production)
     const getAudioPath = (filename) => {
       // In production, use the digested asset path from manifest
-      const assetKey = `pacman-game/${filename}`
+      const assetKey = `pacman-game/sounds/${filename}`
       if (this.assetPaths[assetKey]) {
         return `/assets/${this.assetPaths[assetKey]}`
       }
       // In development, use direct path
-      return `/assets/pacman-game/${filename}`
+      return `/assets/pacman-game/sounds/${filename}`
     }
 
     try {
