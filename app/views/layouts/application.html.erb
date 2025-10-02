@@ -71,14 +71,13 @@
 
     <%# JavaScript %>
     <%= javascript_importmap_tags %>
-    <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
 </head>
 
 <body>
     <main class="page-wrapper" data-controller="theme">
         <%= render 'shared/header' %>
 
-        <div class="container mt-5 py-1 min-vh-100">
+        <div class="container mt-1 py-1 min-vh-100">
             <%= yield %>
         </div>
 
