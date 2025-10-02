@@ -955,14 +955,12 @@ export default class extends Controller {
         this.score += dot.points
         this.updateHUD()
         
-        // Play appropriate sound
+        // Play appropriate sound for power pellets only
+        // (regular chomp is continuous while moving)
         if (dot.isPowerPellet) {
-          // Power pellet sound (eat fruit is close enough)
+          // Power pellet sound
           this.playSound('eatFruit', true)
           this.activatePowerMode()
-        } else {
-          // Regular dot - play chomp sound
-          this.playChompSound()
         }
         
         // Remove dot immediately without animation for better performance
@@ -1648,6 +1646,7 @@ export default class extends Controller {
     // Reset game state
     this.score = 0
     this.lives = 3
+    this.extraLifeAwarded = false // Reset extra life flag
     this.powerMode = false
     this.isDying = true // Set to true during restart to prevent movement
     this.isGameActive = true // Keep game active
