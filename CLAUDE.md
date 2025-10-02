@@ -267,7 +267,7 @@ The homepage includes a fully interactive Pac-Man game that players can activate
    - Displays "Use WASD or ↑←↓→ to play" message
    - Hides when game starts
 
-2. **`pacman-game_controller.js`** (Large, ~1500+ lines)
+2. **`pacman-game_controller.js`** (Large, ~2000+ lines)
    - Full Pac-Man game implementation
    - Game loop with requestAnimationFrame
    - Collision detection, scoring, lives system
@@ -276,15 +276,22 @@ The homepage includes a fully interactive Pac-Man game that players can activate
    - Smooth scrolling to keep Pac-Man centered
    - Respawn system with countdown
    - Game over modal with replay functionality
+   - **Section progression system** with key-based unlocking
+   - Persistent dot tracking across section unlocks
 
 #### Game Mechanics
-- **Controls**: WASD or Arrow Keys to move Pac-Man
-- **Objective**: Eat all dots while avoiding ghosts
-- **Lives**: 3 lives (displayed as Pac-Man icons in HUD)
+- **Controls**: WASD or Arrow Keys to move Pac-Man (Desktop only - hidden on mobile)
+- **Objective**: Unlock all sections and eat all dots while avoiding ghosts
+- **Lives**: 3 lives (displayed as heart icons in HUD)
 - **Score**: 10 points per dot, 50 points per power pellet, 200 points per ghost
 - **Power Mode**: Eating power pellets makes ghosts frightened (blue) for 10 seconds
 - **Wrapping**: Pac-Man and ghosts can wrap around screen edges
 - **Scrolling**: Page auto-scrolls to keep Pac-Man centered vertically
+- **Section Progression**:
+  - Reach point thresholds to spawn keys (Projects: 300pts, Technologies: 600pts, Contact: 1000pts)
+  - Collect keys to unlock sections and access new areas
+  - Glass barriers with blur effect block locked sections
+  - Physical boundaries prevent entry until unlocked
 
 #### Ghost AI Behaviors
 - **Blinky (Red)**: Directly chases Pac-Man (aggressive)
@@ -306,7 +313,9 @@ All sprites located in `app/assets/images/pacman-game/`:
   - `ghosts/inky-*.png` (cyan)
   - `ghosts/clyde-*.png` (orange)
 - **Frightened Mode**: `ghosts/frightened-1.png`, `ghosts/frightened-2.png` (blue, animated)
+- **Items**: `items/key.png` - Golden key for unlocking sections
 - **Dots & Pellets**: Created dynamically via canvas rendering (not image files)
+  - Power pellets: Randomized placement (3 per section, 200px minimum spacing)
 
 #### Sound Effects
 All sounds located in `app/assets/images/pacman-game/sounds/` (in images dir for proper asset pipeline compilation):
@@ -335,8 +344,12 @@ All sounds located in `app/assets/images/pacman-game/sounds/` (in images dir for
 #### HUD (Heads-Up Display)
 - **Position**: Fixed to viewport, moves with scroll
 - **Score**: Current score display
-- **Lives**: Visual Pac-Man icons (❤️ symbols currently)
-- **Styling**: Semi-transparent dark background, rounded corners
+- **Lives**: Visual heart icons (❤️ symbols)
+- **Progress Indicator**: Shows points needed for next unlock
+  - "Need: X pts" - Points needed to spawn key
+  - "Unlock: 🔑 Get Key!" - Key available (golden glow)
+  - "Goal: Clear All Dots!" - All sections unlocked (green glow)
+- **Styling**: Semi-transparent dark background, rounded corners, golden border
 
 #### Respawn System
 - 3-second countdown (3... 2... 1...)
@@ -352,10 +365,12 @@ All sounds located in `app/assets/images/pacman-game/sounds/` (in images dir for
 - **Dot Collection**: 
   - Regular dots: 10 points, removed from game
   - Power pellets: 50 points, triggers power mode
-- **Boundary Detection**: 
-  - Header and footer are hard boundaries
+- **Boundary Detection**:
+  - Header and footer are hard boundaries (flash red on hit)
+  - Locked sections have glass barriers (flash red on hit)
   - Left/right edges wrap around
-  - Page content doesn't block movement (Pac-Man passes over it)
+  - Section bottom buffers prevent dot overlap (80px zones)
+  - Pac-Man and ghosts cannot enter locked sections
 
 #### Performance Optimizations
 - Dots generated in sections for better performance
@@ -363,6 +378,8 @@ All sounds located in `app/assets/images/pacman-game/sounds/` (in images dir for
 - RequestAnimationFrame for smooth 60fps gameplay
 - Asset preloading to prevent lag
 - Mouse scroll disabled during gameplay
+- Persistent dot tracking prevents re-collection (collectedDotPositions Set)
+- Regeneration flag prevents false win conditions during dot respawn
 
 #### Integration with Homepage
 Located in `app/views/pages/home.html.erb`:
@@ -384,19 +401,35 @@ Located in `app/views/pages/home.html.erb`:
 ```
 
 ### Styling (in `_custom.scss`)
-- `.pacman-idle-hint`: Animated preview with bounce effect
-- `.pacman-game-hud`: Fixed HUD positioning and styling  
+- `.pacman-idle-hint`: Animated preview with bounce effect (desktop only: `d-none d-lg-inline-block`)
+- `.pacman-game-container`: Game overlay (desktop only: `d-none d-lg-block`)
+- `.pacman-game-hud`: Fixed HUD positioning and styling
 - `.pacman-sprite`, `.ghost-sprite`: Positioned absolutely, smooth transitions
-- `.game-modal`: Game over modal styling
+- `.game-modal`: Game over modal styling with progress bar
 - `.dot`, `.power-pellet`: Canvas-rendered collectibles
+- `.pacman-section-lock`: Glass barrier overlay with glassmorphic effect
+- `.section-locked`: Blur filter on locked sections
+- `.boundary-flash`: Red flash animation on boundary collision
+- `.pacman-key`: Floating, rotating key sprite with sparkle effect
+
+### Section Progression System
+- **4 Sections**: Hero (unlocked), Projects (300pts), Technologies (600pts), Contact (1000pts)
+- **Glass Barriers**: Translucent gradient overlay with blur and shine animations
+- **Lock Icons**: Giant golden pulsing locks with glow effect
+- **Key Mechanics**:
+  - Key spawns at center when threshold reached
+  - All remaining dots cleared when key spawns
+  - Floating/rotating animation with golden sparkle
+  - Collecting key unlocks section with shatter animation
+- **Section Locks**: Only active during gameplay, normal browsing unaffected
+- **Persistent Progress**: Collected dots never respawn across unlocks
 
 ### Known Issues & Future Enhancements
-- No level progression (infinite game on single level)
 - No fruit bonuses yet
-- No bonus life at 10,000 points
-- Could add more sound effects for power mode, ghost eaten
+- Extra life at 10,000 points awarded but no visual feedback
+- Could add more sound effects for power mode transitions
 - Could add high score persistence (localStorage)
-- Could add mobile touch controls
+- Mobile version disabled (game hidden on mobile devices)
 
 ## Silicon Theme Integration
 

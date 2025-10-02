@@ -23,7 +23,7 @@
     </div>
 
     <!-- Pac-Man Game Overlay -->
-    <div class="pacman-game-container" data-pacman-game-target="gameContainer">
+    <div class="pacman-game-container d-none d-lg-block" data-pacman-game-target="gameContainer">
         <!-- Pac-Man character -->
         <div class="pacman-character" data-pacman-game-target="pacman">
             <%= image_tag 'pacman-game/pacman/pacman_open_more.png', alt: 'Pac-Man', class: 'pacman-sprite' %>
@@ -50,8 +50,8 @@
         <div class="row pt-3 pb-3 py-lg-4">
             <div class="col-lg-10 col-xl-9 mx-auto text-center">
 
-                <!-- Pac-Man Game Start Hint (visible by default) -->
-                <div class="pacman-idle-hint mb-3" data-pacman-game-target="startHint" data-controller="pacman-preview">
+                <!-- Pac-Man Game Start Hint -->
+                <div class="pacman-idle-hint mb-3 d-none d-lg-inline-block" data-pacman-game-target="startHint" data-controller="pacman-preview">
                     <div class="d-flex align-items-center justify-content-center gap-3 flex-wrap">
                         <div class="pacman-preview">
                             <%= image_tag 'pacman-game/pacman/pacman_open_more.png', alt: 'Pac-Man', class: 'pacman-preview-sprite', data: { pacman_preview_target: 'sprite' } %>
