@@ -841,9 +841,9 @@ body {
   }
 }
 
-// Smooth scroll behavior
+// Disable smooth scroll for Pac-Man game to work properly
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 
 // Stretched link improvement
@@ -889,5 +889,784 @@ html {
   
   .social-link-card:hover & {
     transform: scale(1.1) rotate(5deg);
+  }
+}
+
+// ============================================
+// PAC-MAN GAME STYLES
+// ============================================
+
+// Game container - overlays the entire page
+.pacman-game-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  
+  &.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+// Pac-Man character
+.pacman-character {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  z-index: 10001;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.6));
+  
+  .pacman-sprite {
+    width: 100%;
+    height: 100%;
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    transition: transform 0.05s ease;
+  }
+  
+  &.powered {
+    filter: drop-shadow(0 0 25px rgba(255, 215, 0, 1));
+    animation: powerPulse 0.3s ease-in-out infinite;
+  }
+  
+  &.invincible {
+    animation: invincibleBlink 0.2s ease-in-out infinite;
+  }
+}
+
+@keyframes powerPulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+}
+
+@keyframes invincibleBlink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+// Countdown animations
+@keyframes countdownPulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes countdownGo {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}
+
+// Countdown overlay styling
+.pacman-countdown {
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  letter-spacing: 0.1em;
+  user-select: none;
+  
+  [data-bs-theme="dark"] & {
+    text-shadow: 0 0 30px rgba(255, 215, 0, 1), 0 0 60px rgba(255, 215, 0, 0.8);
+  }
+}
+
+// Dots to collect - Semi-transparent to show content beneath
+.pacman-dot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.5));
+  opacity: 0.7;
+  
+  .dot-sprite {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  
+  &.collected {
+    display: none; // Instant removal for performance
+  }
+  
+  [data-bs-theme="dark"] & {
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+    opacity: 0.8;
+  }
+}
+
+// Power pellets - Semi-transparent
+.pacman-power-pellet {
+  width: 20px;
+  height: 20px;
+  animation: pelletPulse 1.2s ease-in-out infinite;
+  filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.5));
+  opacity: 0.75; // More transparent
+  
+  .pellet-sprite {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  
+  [data-bs-theme="dark"] & {
+    filter: drop-shadow(0 0 12px rgba(102, 126, 234, 0.6));
+    opacity: 0.85; // Slightly more visible in dark mode
+  }
+}
+
+@keyframes pelletPulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.75;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.15);
+    opacity: 0.9;
+  }
+}
+
+// Game Over Modal
+.pacman-game-over-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10004;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  
+  &.show {
+    opacity: 1;
+    
+    .modal-content {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  .modal-content {
+    background: linear-gradient(135deg, rgba(20, 20, 30, 0.98) 0%, rgba(30, 30, 50, 0.98) 100%);
+    border: 3px solid rgba(255, 215, 0, 0.5);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 215, 0, 0.2);
+    transform: scale(0.8) translateY(20px);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    
+    [data-bs-theme="dark"] & {
+      background: linear-gradient(135deg, rgba(15, 15, 25, 0.98) 0%, rgba(25, 25, 40, 0.98) 100%);
+      border-color: rgba(255, 215, 0, 0.6);
+    }
+  }
+  
+  .modal-emoji {
+    font-size: 5rem;
+    margin-bottom: 20px;
+    animation: emojiPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+  }
+  
+  .modal-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #ffd700;
+    margin-bottom: 10px;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    animation: titleSlide 0.5s ease 0.3s both;
+  }
+  
+  .modal-message {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 30px;
+    animation: messageSlide 0.5s ease 0.4s both;
+  }
+  
+  .modal-score {
+    background: rgba(255, 215, 0, 0.1);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 30px;
+    animation: scoreSlide 0.5s ease 0.5s both;
+    
+    .score-label {
+      display: block;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    .score-value {
+      display: block;
+      font-size: 3rem;
+      font-weight: 800;
+      color: #ffd700;
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+    }
+  }
+  
+  .modal-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    animation: buttonsSlide 0.5s ease 0.6s both;
+  }
+  
+  .modal-btn {
+    padding: 15px 30px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    i {
+      font-size: 1.3rem;
+    }
+    
+    &:hover {
+      transform: translateY(-3px);
+    }
+    
+    &:active {
+      transform: translateY(-1px);
+    }
+  }
+  
+  .modal-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    
+    &:hover {
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+    }
+  }
+  
+  .modal-btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: white;
+    }
+  }
+}
+
+@keyframes emojiPop {
+  from {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes titleSlide {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes messageSlide {
+  from {
+    transform: translateY(-15px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scoreSlide {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes buttonsSlide {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// Ghosts
+.pacman-ghost {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+  transition: filter 0.3s ease;
+  
+  .ghost-sprite {
+    width: 100%;
+    height: 100%;
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    transition: transform 0.1s ease;
+    
+    &.flip-horizontal {
+      transform: scaleX(-1);
+    }
+  }
+  
+  &.ghost-red {
+    filter: drop-shadow(0 0 12px rgba(255, 0, 0, 0.6));
+  }
+  
+  &.ghost-pink {
+    filter: drop-shadow(0 0 12px rgba(255, 184, 209, 0.6));
+  }
+  
+  &.ghost-cyan {
+    filter: drop-shadow(0 0 12px rgba(0, 255, 255, 0.6));
+  }
+  
+  &.ghost-orange {
+    filter: drop-shadow(0 0 12px rgba(255, 165, 0, 0.6));
+  }
+  
+  &.frightened {
+    filter: drop-shadow(0 0 15px rgba(0, 102, 255, 0.8));
+    animation: frightenedShake 0.15s ease-in-out infinite;
+  }
+  
+  &.eaten {
+    filter: drop-shadow(0 0 8px rgba(200, 200, 255, 0.6));
+  }
+}
+
+@keyframes frightenedShake {
+  0%, 100% {
+    transform: translate(-50%, -50%) translateX(0);
+  }
+  25% {
+    transform: translate(-50%, -50%) translateX(-3px);
+  }
+  75% {
+    transform: translate(-50%, -50%) translateX(3px);
+  }
+}
+
+// Game HUD (score, lives, instructions) - Follows Pac-Man
+.pacman-hud {
+  position: fixed; // Fixed to viewport so it stays visible
+  top: 20px; // Will be updated via JavaScript
+  right: 20px;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(15px);
+  border-radius: 12px;
+  padding: 15px 20px;
+  z-index: 10002;
+  min-width: 150px;
+  opacity: 0;
+  transform: translateY(-20px) scale(0.9);
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  
+  &.active {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+  
+  [data-bs-theme="dark"] & {
+    background: rgba(20, 20, 30, 0.95);
+    border-color: rgba(255, 215, 0, 0.6);
+  }
+  
+  .hud-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+    
+    .hud-label {
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-right: 10px;
+    }
+    
+    .hud-value {
+      color: #ffd700;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+  }
+}
+
+// Pac-Man idle hint (visible by default, between header and heading)
+.pacman-idle-hint {
+  display: inline-block;
+  background: rgba(255, 215, 0, 0.08);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: 50px;
+  padding: 8px 20px;
+  transition: all 0.3s ease;
+  animation: gentlePulse 3s ease-in-out infinite;
+  
+  &:hover {
+    background: rgba(255, 215, 0, 0.12);
+    border-color: rgba(255, 215, 0, 0.5);
+    transform: scale(1.02);
+  }
+  
+  [data-bs-theme="dark"] & {
+    background: rgba(255, 215, 0, 0.05);
+    border-color: rgba(255, 215, 0, 0.4);
+  }
+  
+  .pacman-preview {
+    flex-shrink: 0;
+  }
+  
+  .pacman-preview-sprite {
+    width: 28px;
+    height: 28px;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+  }
+  
+  .hint-text {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .hint-label {
+    color: #ffd700;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+  
+  .kbd-key {
+    background: rgba(255, 215, 0, 0.15);
+    border: 2px solid rgba(255, 215, 0, 0.4);
+    border-bottom-width: 3px;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-weight: 700;
+    color: #ffd700;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    font-size: 0.75rem;
+    min-width: 28px;
+    text-align: center;
+    display: inline-block;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+
+@keyframes gentlePulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.35);
+  }
+}
+
+// ============================================
+// PAC-MAN HOVER EFFECTS
+// ============================================
+
+// When Pac-Man is over an element, apply these hover effects
+.pacman-hover {
+  // Project cards glow and lift when Pac-Man is over them
+  &.project-card {
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: 0 1.5rem 3rem rgba(255, 215, 0, 0.25) !important;
+    border-color: rgba(255, 215, 0, 0.4) !important;
+    
+    .project-icon {
+      transform: scale(1.1) rotate(5deg);
+      
+      i {
+        transform: scale(1.15);
+        animation: iconBounce 0.6s ease-in-out infinite;
+      }
+    }
+  }
+  
+  // Tech cards glow with Pac-Man color
+  &.tech-card {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 1rem 2rem rgba(255, 215, 0, 0.2) !important;
+    border-color: rgba(255, 215, 0, 0.3) !important;
+    
+    .tech-card-icon {
+      transform: scale(1.1) rotate(-5deg);
+      animation: iconWiggle 0.5s ease-in-out infinite;
+    }
+  }
+  
+  // Buttons pulse when Pac-Man is over them
+  &.btn {
+    transform: scale(1.05);
+    box-shadow: 0 0.5rem 1.5rem rgba(255, 215, 0, 0.3) !important;
+    animation: pacmanButtonPulse 0.8s ease-in-out infinite;
+  }
+  
+  // Badges glow
+  &.badge-hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+    animation: badgeGlow 0.6s ease-in-out infinite;
+  }
+}
+
+@keyframes iconBounce {
+  0%, 100% {
+    transform: scale(1.15) translateY(0);
+  }
+  50% {
+    transform: scale(1.15) translateY(-4px);
+  }
+}
+
+@keyframes iconWiggle {
+  0%, 100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+}
+
+@keyframes pacmanButtonPulse {
+  0%, 100% {
+    box-shadow: 0 0.5rem 1.5rem rgba(255, 215, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0.5rem 2rem rgba(255, 215, 0, 0.5);
+  }
+}
+
+@keyframes badgeGlow {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 16px rgba(255, 215, 0, 0.6);
+  }
+}
+
+// ============================================
+// END PAC-MAN HOVER EFFECTS
+// ============================================
+
+// Old start hint (now hidden when game starts)
+.pacman-start-hint {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 215, 0, 0.15);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  border-radius: 15px;
+  padding: 15px 30px;
+  text-align: center;
+  animation: hintPulse 2s ease-in-out infinite;
+  z-index: 10;
+  
+  [data-bs-theme="dark"] & {
+    background: rgba(255, 215, 0, 0.1);
+    border-color: rgba(255, 215, 0, 0.5);
+  }
+  
+  i {
+    color: #ffd700;
+    display: block;
+  }
+  
+  p {
+    color: #ffd700;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  }
+  
+  kbd {
+    background: rgba(255, 215, 0, 0.2);
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    color: #ffd700;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+}
+
+@keyframes hintPulse {
+  0%, 100% {
+    transform: translateX(-50%) scale(1);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.05);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+  }
+}
+
+
+// Mobile responsive adjustments
+@media (max-width: 768px) {
+  .pacman-hud {
+    top: 15px;
+    right: 10px;
+    padding: 12px 15px;
+    min-width: 130px;
+    font-size: 0.85rem;
+  }
+  
+  .pacman-idle-hint {
+    padding: 6px 14px;
+    
+    .pacman-preview-sprite {
+      width: 22px;
+      height: 22px;
+    }
+    
+    .hint-text {
+      gap: 3px;
+    }
+    
+    .hint-label {
+      font-size: 0.7rem;
+    }
+    
+    .kbd-key {
+      padding: 2px 6px;
+      font-size: 0.7rem;
+      min-width: 24px;
+    }
+  }
+  
+  .pacman-start-hint {
+    top: -120px;
+    padding: 12px 20px;
+    max-width: 90%;
+    
+    i {
+      font-size: 1.5rem;
+    }
+    
+    p {
+      font-size: 0.85rem;
+    }
+  }
+  
+  .pacman-character {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .pacman-ghost {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .pacman-dot {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .pacman-power-pellet {
+    width: 12px;
+    height: 12px;
   }
 }
