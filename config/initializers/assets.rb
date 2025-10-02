@@ -11,6 +11,7 @@ Rails.application.config.assets.paths += [
   Rails.root.join("app/assets/fonts"),
   Rails.root.join("app/assets/builds"),
   Rails.root.join("app/assets/json"),
+  Rails.root.join("app/assets/audio"),
 
   # NPM package assets
   Rails.root.join("node_modules"),
@@ -30,6 +31,11 @@ Rails.application.config.assets.precompile += [
   ".png",
   ".jpg",
   ".gif",
+
+  # Audio files
+  ".wav",
+  ".mp3",
+  ".ogg",
 
   # JavaScript files
   "application.js",

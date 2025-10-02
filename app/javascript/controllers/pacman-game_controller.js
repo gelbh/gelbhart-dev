@@ -33,6 +33,7 @@ export default class extends Controller {
     this.isGameActive = false
     this.score = 0
     this.lives = 3
+    this.extraLifeAwarded = false // Track if extra life at 10,000 has been awarded
     this.powerMode = false
     this.powerModeEnding = false
     this.dots = []
@@ -66,6 +67,9 @@ export default class extends Controller {
     this.hoveredElement = null
     this.collisionPadding = 10
     
+    // Initialize sound system
+    this.initializeSoundSystem()
+    
     // Setup keyboard controls
     this.keydownHandler = this.handleKeydown.bind(this)
     document.addEventListener('keydown', this.keydownHandler)
@@ -79,7 +83,153 @@ export default class extends Controller {
    */
   disconnect() {
     this.stopGame()
+    this.stopAllSounds()
     document.removeEventListener('keydown', this.keydownHandler)
+  }
+
+  // ============================================
+  // SOUND SYSTEM
+  // ============================================
+
+  /**
+   * Initialize audio system with preloaded sound effects
+   * Uses authentic Pac-Man arcade sounds
+   */
+  initializeSoundSystem() {
+    // Helper function to get asset path (handles both dev and production)
+    const getAudioPath = (filename) => {
+      // In production, use the digested asset path from manifest
+      const assetKey = `pacman-game/${filename}`
+      if (this.assetPaths[assetKey]) {
+        return `/assets/${this.assetPaths[assetKey]}`
+      }
+      // In development, use direct path
+      return `/assets/pacman-game/${filename}`
+    }
+
+    try {
+      // Create Audio objects for each sound effect
+      this.audioFiles = {
+        beginning: new Audio(getAudioPath('pacman_beginning.wav')),
+        chomp: new Audio(getAudioPath('pacman_chomp.wav')),
+        death: new Audio(getAudioPath('pacman_death.wav')),
+        eatFruit: new Audio(getAudioPath('pacman_eatfruit.wav')),
+        eatGhost: new Audio(getAudioPath('pacman_eatghost.wav')),
+        extraPac: new Audio(getAudioPath('pacman_extrapac.wav')),
+        intermission: new Audio(getAudioPath('pacman_intermission.wav'))
+      }
+
+      // Configure audio properties
+      Object.values(this.audioFiles).forEach(audio => {
+        audio.volume = 0.4 // Set volume to 40% (not too loud)
+        audio.preload = 'auto' // Preload for instant playback
+      })
+
+      // Chomp sound should loop while eating dots
+      this.audioFiles.chomp.loop = true
+      
+      // Track sound state
+      this.soundsEnabled = true
+      this.chompPlaying = false
+      
+      console.log("🔊 Sound system initialized with authentic Pac-Man sounds!")
+    } catch (error) {
+      console.warn("⚠️ Could not initialize audio system:", error)
+      this.soundsEnabled = false
+    }
+  }
+
+  /**
+   * Play a sound effect
+   * @param {string} soundName - Name of the sound to play
+   * @param {boolean} restart - Whether to restart if already playing
+   */
+  playSound(soundName, restart = false) {
+    if (!this.soundsEnabled || !this.audioFiles[soundName]) return
+
+    try {
+      const audio = this.audioFiles[soundName]
+      
+      if (restart) {
+        audio.currentTime = 0
+      }
+      
+      // Only play if not already playing or if restart is requested
+      if (audio.paused || restart) {
+        audio.play().catch(err => {
+          // Silently handle autoplay policy restrictions
+          console.warn(`Could not play ${soundName}:`, err.message)
+        })
+      }
+    } catch (error) {
+      console.warn(`Error playing ${soundName}:`, error)
+    }
+  }
+
+  /**
+   * Stop a specific sound
+   * @param {string} soundName - Name of the sound to stop
+   */
+  stopSound(soundName) {
+    if (!this.soundsEnabled || !this.audioFiles[soundName]) return
+
+    try {
+      const audio = this.audioFiles[soundName]
+      audio.pause()
+      audio.currentTime = 0
+    } catch (error) {
+      console.warn(`Error stopping ${soundName}:`, error)
+    }
+  }
+
+  /**
+   * Stop all currently playing sounds
+   */
+  stopAllSounds() {
+    if (!this.soundsEnabled) return
+
+    try {
+      Object.values(this.audioFiles).forEach(audio => {
+        audio.pause()
+        audio.currentTime = 0
+      })
+      this.chompPlaying = false
+    } catch (error) {
+      console.warn("Error stopping sounds:", error)
+    }
+  }
+
+  /**
+   * Start the continuous wakawaka chomp sound when moving
+   */
+  startChompSound() {
+    if (!this.soundsEnabled || !this.audioFiles.chomp) return
+    
+    try {
+      const audio = this.audioFiles.chomp
+      if (audio.paused) {
+        audio.play().catch(err => {
+          console.warn('Could not play chomp:', err.message)
+        })
+      }
+    } catch (error) {
+      console.warn('Error starting chomp:', error)
+    }
+  }
+
+  /**
+   * Stop the wakawaka chomp sound when not moving
+   */
+  stopChompSound() {
+    if (!this.soundsEnabled || !this.audioFiles.chomp) return
+    
+    try {
+      const audio = this.audioFiles.chomp
+      audio.pause()
+      audio.currentTime = 0
+    } catch (error) {
+      console.warn('Error stopping chomp:', error)
+    }
   }
 
   // ============================================
@@ -289,6 +439,9 @@ export default class extends Controller {
     console.log("🎮 Starting Pac-Man game!")
     this.isGameActive = true
     
+    // Play beginning sound
+    this.playSound('beginning', true)
+    
     // Disable page scrolling during game
     document.body.style.overflow = 'hidden'
     
@@ -327,6 +480,9 @@ export default class extends Controller {
     this.isGameActive = false
     this.gameContainerTarget.classList.remove('active')
     this.hudTarget.classList.remove('active')
+    
+    // Stop all sounds
+    this.stopAllSounds()
     
     // Re-enable page scrolling
     document.body.style.overflow = ''
@@ -548,12 +704,16 @@ export default class extends Controller {
    * Get asset path for Pac-Man game sprites
    */
   getAssetPath(filename) {
+    // Build the key to lookup in the manifest
+    const assetKey = `pacman-game/${filename}`
+
     // Use asset manifest for production fingerprinted paths, fallback to direct path for development
-    if (this.assetPaths && this.assetPaths[filename]) {
-      return this.assetPaths[filename]
+    if (this.assetPaths && this.assetPaths[assetKey]) {
+      // The manifest returns the path with hash, prepend /assets/
+      return `/assets/${this.assetPaths[assetKey]}`
     }
     // Fallback to direct asset path (for development)
-    return `/assets/pacman-game/${filename}`
+    return `/assets/${assetKey}`
   }
   
   getPacmanSprite() {
@@ -600,8 +760,16 @@ export default class extends Controller {
     
     // Don't allow movement during death/respawn
     if (this.isDying) {
+      this.stopChompSound() // Stop chomp if dying
       this.gameLoopId = requestAnimationFrame(() => this.gameLoop())
       return
+    }
+
+    // Play chomp sound continuously while moving
+    if (this.pacmanVelocity.x !== 0 || this.pacmanVelocity.y !== 0) {
+      this.startChompSound()
+    } else {
+      this.stopChompSound()
     }
 
     // Free movement - no collision detection!
@@ -787,9 +955,14 @@ export default class extends Controller {
         this.score += dot.points
         this.updateHUD()
         
-        // Power pellet effect
+        // Play appropriate sound
         if (dot.isPowerPellet) {
+          // Power pellet sound (eat fruit is close enough)
+          this.playSound('eatFruit', true)
           this.activatePowerMode()
+        } else {
+          // Regular dot - play chomp sound
+          this.playChompSound()
         }
         
         // Remove dot immediately without animation for better performance
@@ -1115,6 +1288,9 @@ export default class extends Controller {
           ghost.element.classList.remove('frightened')
           ghost.element.classList.add('eaten')
           
+          // Play eat ghost sound
+          this.playSound('eatGhost', true)
+          
           // Respawn after reaching home
           setTimeout(() => {
             this.respawnGhost(ghost)
@@ -1165,6 +1341,9 @@ export default class extends Controller {
     this.pacmanVelocity = { x: 0, y: 0 }
     this.lives--
     this.updateHUD()
+    
+    // Play death sound
+    this.playSound('death', true)
     
     // Play death animation
     this.playDeathAnimation().then(() => {
@@ -1400,6 +1579,10 @@ export default class extends Controller {
   }
 
   winGame() {
+    // Play intermission sound for victory
+    this.stopAllSounds()
+    this.playSound('intermission', true)
+    
     setTimeout(() => {
       // Ensure game is stopped
       this.isGameActive = false
@@ -1523,6 +1706,15 @@ export default class extends Controller {
     if (this.hasScoreTarget) {
       this.scoreTarget.textContent = this.score
     }
+    
+    // Award extra life at 10,000 points (classic Pac-Man)
+    if (!this.extraLifeAwarded && this.score >= 10000) {
+      this.extraLifeAwarded = true
+      this.lives++
+      this.playSound('extraPac', true)
+      console.log("🎉 Extra life awarded!")
+    }
+    
     if (this.hasLivesTarget) {
       // Prevent negative lives display
       const livesCount = Math.max(0, this.lives)
