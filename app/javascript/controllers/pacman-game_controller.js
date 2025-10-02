@@ -126,12 +126,8 @@ export default class extends Controller {
         audio.preload = 'auto' // Preload for instant playback
       })
 
-      // Chomp sound should loop while eating dots
-      this.audioFiles.chomp.loop = true
-      
       // Track sound state
       this.soundsEnabled = true
-      this.chompPlaying = false
       
       console.log("🔊 Sound system initialized with authentic Pac-Man sounds!")
     } catch (error) {
@@ -197,39 +193,6 @@ export default class extends Controller {
       this.chompPlaying = false
     } catch (error) {
       console.warn("Error stopping sounds:", error)
-    }
-  }
-
-  /**
-   * Start the continuous wakawaka chomp sound when moving
-   */
-  startChompSound() {
-    if (!this.soundsEnabled || !this.audioFiles.chomp) return
-    
-    try {
-      const audio = this.audioFiles.chomp
-      if (audio.paused) {
-        audio.play().catch(err => {
-          console.warn('Could not play chomp:', err.message)
-        })
-      }
-    } catch (error) {
-      console.warn('Error starting chomp:', error)
-    }
-  }
-
-  /**
-   * Stop the wakawaka chomp sound when not moving
-   */
-  stopChompSound() {
-    if (!this.soundsEnabled || !this.audioFiles.chomp) return
-    
-    try {
-      const audio = this.audioFiles.chomp
-      audio.pause()
-      audio.currentTime = 0
-    } catch (error) {
-      console.warn('Error stopping chomp:', error)
     }
   }
 
@@ -489,21 +452,16 @@ export default class extends Controller {
       console.log("🎵 Intro music finished, starting gameplay!")
       this.isGameActive = true
       this.isStarting = false
-      
-      // Start chomp sound when game actually begins
-      if (this.pacmanVelocity.x !== 0 || this.pacmanVelocity.y !== 0) {
-        this.startChompSound()
-      }
-      
+
       // Start game loop
       this.gameLoop()
-      
+
       // Remove event listener
       beginningAudio.removeEventListener('ended', onBeginningEnded)
     }
-    
+
     beginningAudio.addEventListener('ended', onBeginningEnded)
-    
+
     // Fallback: Start anyway after 5 seconds if sound doesn't fire ended event
     setTimeout(() => {
       if (!this.isGameActive && this.isStarting) {
@@ -511,11 +469,7 @@ export default class extends Controller {
         beginningAudio.removeEventListener('ended', onBeginningEnded)
         this.isGameActive = true
         this.isStarting = false
-        
-        if (this.pacmanVelocity.x !== 0 || this.pacmanVelocity.y !== 0) {
-          this.startChompSound()
-        }
-        
+
         this.gameLoop()
       }
     }, 5000)
@@ -807,16 +761,8 @@ export default class extends Controller {
     
     // Don't allow movement during death/respawn
     if (this.isDying) {
-      this.stopChompSound() // Stop chomp if dying
       this.gameLoopId = requestAnimationFrame(() => this.gameLoop())
       return
-    }
-
-    // Play chomp sound continuously while moving
-    if (this.pacmanVelocity.x !== 0 || this.pacmanVelocity.y !== 0) {
-      this.startChompSound()
-    } else {
-      this.stopChompSound()
     }
 
     // Free movement - no collision detection!
@@ -1001,15 +947,17 @@ export default class extends Controller {
         dot.element.classList.add('collected')
         this.score += dot.points
         this.updateHUD()
-        
-        // Play appropriate sound for power pellets only
-        // (regular chomp is continuous while moving)
+
+        // Play appropriate sound
         if (dot.isPowerPellet) {
           // Power pellet sound
           this.playSound('eatFruit', true)
           this.activatePowerMode()
+        } else {
+          // Regular dot - play chomp sound
+          this.playSound('chomp', true)
         }
-        
+
         // Remove dot immediately without animation for better performance
         if (dot.element && dot.element.parentNode) {
           dot.element.remove()
