@@ -1,8 +1,8 @@
-import { Controller } from "@hotwired/stimulus"
+import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-  static targets = ["output"]
-  
+  static targets = ["output"];
+
   connect() {
     // Multiple C code snippets to cycle through for infinite effect
     this.codeSnippets = [
@@ -96,78 +96,82 @@ void swap(int* a, int* b) {
     int t = *a;
     *a = *b;
     *b = t;
-}`
-    ]
-    
-    this.currentSnippetIndex = 0
-    this.currentIndex = 0
-    this.typingSpeed = 35 // milliseconds per character (slower)
-    this.maxLines = 25 // Keep approximately this many lines visible
-    
-    this.startTyping()
+}`,
+    ];
+
+    this.currentSnippetIndex = 0;
+    this.currentIndex = 0;
+    this.typingSpeed = 35; // milliseconds per character (slower)
+    this.maxLines = 35; // Keep approximately this many lines visible
+
+    this.startTyping();
   }
-  
+
   disconnect() {
     if (this.typingInterval) {
-      clearInterval(this.typingInterval)
+      clearInterval(this.typingInterval);
     }
   }
-  
+
   startTyping() {
-    this.outputTarget.innerHTML = '<span class="typing-cursor"></span>'
-    
+    this.outputTarget.innerHTML = '<span class="typing-cursor"></span>';
+
     this.typingInterval = setInterval(() => {
-      const currentSnippet = this.codeSnippets[this.currentSnippetIndex]
-      
+      const currentSnippet = this.codeSnippets[this.currentSnippetIndex];
+
       if (this.currentIndex < currentSnippet.length) {
-        const char = currentSnippet[this.currentIndex]
-        const textNode = document.createTextNode(char)
-        
+        const char = currentSnippet[this.currentIndex];
+        const textNode = document.createTextNode(char);
+
         // Insert text before cursor
-        const cursor = this.outputTarget.querySelector('.typing-cursor')
-        this.outputTarget.insertBefore(textNode, cursor)
-        
-        this.currentIndex++
-        
+        const cursor = this.outputTarget.querySelector(".typing-cursor");
+        this.outputTarget.insertBefore(textNode, cursor);
+
+        this.currentIndex++;
+
         // Remove old lines to keep it looking infinite
-        this.trimOldLines()
+        this.trimOldLines();
       } else {
         // Finished current snippet, seamlessly move to next
-        this.currentSnippetIndex = (this.currentSnippetIndex + 1) % this.codeSnippets.length
-        this.currentIndex = 0
-        
+        this.currentSnippetIndex =
+          (this.currentSnippetIndex + 1) % this.codeSnippets.length;
+        this.currentIndex = 0;
+
         // Add some newlines for separation
-        const separator = document.createTextNode('\n\n')
-        const cursor = this.outputTarget.querySelector('.typing-cursor')
-        this.outputTarget.insertBefore(separator, cursor)
-        
-        this.trimOldLines()
+        const separator = document.createTextNode("\n\n");
+        const cursor = this.outputTarget.querySelector(".typing-cursor");
+        this.outputTarget.insertBefore(separator, cursor);
+
+        this.trimOldLines();
       }
-    }, this.typingSpeed)
+    }, this.typingSpeed);
   }
-  
+
   trimOldLines() {
     // Keep the display to about maxLines by removing old content
-    const text = this.outputTarget.textContent.replace('█', '') // Remove cursor from count
-    const lines = text.split('\n')
-    
+    const text = this.outputTarget.textContent.replace("█", ""); // Remove cursor from count
+    const lines = text.split("\n");
+
     if (lines.length > this.maxLines) {
       // Remove oldest lines
-      const linesToRemove = lines.length - this.maxLines
-      let charsToRemove = 0
-      
+      const linesToRemove = lines.length - this.maxLines;
+      let charsToRemove = 0;
+
       for (let i = 0; i < linesToRemove; i++) {
-        charsToRemove += lines[i].length + 1 // +1 for newline
+        charsToRemove += lines[i].length + 1; // +1 for newline
       }
-      
+
       // Remove nodes from beginning
-      let removed = 0
-      while (removed < charsToRemove && this.outputTarget.childNodes.length > 1) {
-        const firstNode = this.outputTarget.childNodes[0]
+      let removed = 0;
+      while (
+        removed < charsToRemove &&
+        this.outputTarget.childNodes.length > 1
+      ) {
+        const firstNode = this.outputTarget.childNodes[0];
         if (firstNode.nodeType === Node.TEXT_NODE) {
-          removed += firstNode.textContent.length
+          removed += firstNode.textContent.length;
         }
-        this.outputTarget.removeChild(firstNode)
+        this.outputTarget.removeChild(firstNode);
       }
     }
   }
