@@ -101,11 +101,13 @@ Rails.application.configure do
   config.assets.quiet = true
 
   config.public_file_server.headers = {
-    "Cache-Control" => "public, max-age=31536000",
+    "Cache-Control" => "public, max-age=31536000, immutable",
     "Expires" => 1.year.from_now.to_formatted_s(:rfc822),
     "Access-Control-Allow-Origin" => "*",
     "Access-Control-Allow-Methods" => "GET",
-    "Access-Control-Allow-Headers" => "x-requested-with"
+    "Access-Control-Allow-Headers" => "x-requested-with",
+    "Connection" => "keep-alive",
+    "Keep-Alive" => "timeout=5, max=100"
   }
 
   # Add CORS headers for font files
@@ -119,7 +121,12 @@ Rails.application.configure do
   end
 
   # Enable asset host for CDN support
-  # config.asset_host = ENV['ASSET_HOST'] if ENV['ASSET_HOST']
+  # Use CDN for assets to reduce load on the main server
+  config.asset_host = ENV['ASSET_HOST'] if ENV['ASSET_HOST'].present?
+
+  # Alternative: Use the main domain with Cloudflare caching
+  # Cloudflare will automatically cache /assets/* paths
+  # No additional configuration needed if using Cloudflare as your DNS
 
   # Enable Rack::Cache to put a simple HTTP cache in front of your application
   # Add `rack-cache` to your Gemfile before enabling this.
