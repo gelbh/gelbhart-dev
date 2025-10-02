@@ -85,9 +85,6 @@ export default class extends Controller {
   /**
    * Initialize Pac-Man's starting position from the preview hint
    */
-    document.removeEventListener('keydown', this.keydownHandler)
-  }
-
   initializePacmanPosition() {
     // Position Pac-Man exactly where the preview Pac-Man is in the hint element
     const hintElement = document.querySelector('.pacman-idle-hint')
