@@ -11,7 +11,6 @@ Rails.application.config.assets.paths += [
   Rails.root.join("app/assets/fonts"),
   Rails.root.join("app/assets/builds"),
   Rails.root.join("app/assets/json"),
-  Rails.root.join("app/assets/audio"),
 
   # NPM package assets
   Rails.root.join("node_modules"),
