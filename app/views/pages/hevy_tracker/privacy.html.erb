@@ -1,80 +1,170 @@
 <% content_for :title, page_title("Hevy Tracker | Privacy Policy") %>
 <% meta_description "Privacy policy for Hevy Tracker for Google Sheets™. Learn how we handle your data, protect your privacy, and ensure secure workout data synchronization." %>
 
-<div class="container mt-5 pt-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 position-relative">
-            <%= link_to hevy_tracker_path, 
-               class: "btn btn-icon btn-outline-primary d-none d-lg-flex position-absolute", 
-               style: "left: -60px; margin-top: 5px;" do %>
-            <i class="bx bx-arrow-back fs-lg"></i>
-            <% end %>
-            <div class="card shadow-sm">
-                <div class="card-body p-5">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h1 class="h3 mb-0">Privacy Policy</h1>
-                        <%= link_to hevy_tracker_path, 
-                           class: "btn btn-icon btn-outline-primary d-lg-none m-2" do %>
-                        <i class="bx bx-arrow-back fs-lg"></i>
-                        <% end %>
-                    </div>
+<!-- Hero Section -->
+<section class="position-relative hevy-tracker-hero" data-controller="scroll-animation" style="min-height: 40vh; padding-top: 6rem; padding-bottom: 2rem;">
+    <div class="hevy-tracker-gradient-bg"></div>
 
-                    <h2 class="h5 mb-3">Data Collection</h2>
-                    <p class="mb-4">We only access workout data from your Hevy account that is necessary to sync with Google Sheets™. This data is not stored on our servers. When you authorize our application through Google OAuth™, we request only the minimum necessary permissions to write to your Google Sheets™.</p>
-
-                    <h2 class="h5 mb-3">Data Usage</h2>
-                    <p class="mb-4">Your workout data is only used to populate and update your Google Sheets™ spreadsheet. We do not analyze, sell, or share your data with any third parties. The data flow is direct between Hevy's servers and your Google Sheets™ document.</p>
-
-                    <h2 class="h5 mb-3">Data Retention and Deletion</h2>
-                    <p class="mb-4">We maintain a minimal data retention policy:</p>
-                    <ul class="list-unstyled mb-4">
-                        <li class="d-flex align-items-center mb-2">
-                            <i class="bx bx-check text-primary me-2"></i>
-                            <span>We do not store any Google user data on our servers</span>
-                        </li>
-                        <li class="d-flex align-items-center mb-2">
-                            <i class="bx bx-check text-primary me-2"></i>
-                            <span>Your Google account information is only used for authentication</span>
-                        </li>
-                        <li class="d-flex align-items-center mb-2">
-                            <i class="bx bx-check text-primary me-2"></i>
-                            <span>Data is only processed in-memory during the sync operation</span>
-                        </li>
-                        <li class="d-flex align-items-center mb-2">
-                            <i class="bx bx-check text-primary me-2"></i>
-                            <span>No logs or backups containing user data are maintained</span>
-                        </li>
-                    </ul>
-
-                    <p class="mb-3">You can delete your data at any time by:</p>
-                    <ul class="list-unstyled mb-4">
-                        <li class="d-flex align-items-center mb-2">
-                            <i class="bx bx-chevron-right text-primary me-2"></i>
-                            <span>Revoking access to the Hevy Tracker application in your <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">Google Account Settings</a></span>
-                        </li>
-                        <li class="d-flex align-items-center mb-2">
-                            <i class="bx bx-chevron-right text-primary me-2"></i>
-                            <span>Deleting the Google Sheets™ document containing your workout data</span>
-                        </li>
-                        <li class="d-flex align-items-center mb-2">
-                            <i class="bx bx-chevron-right text-primary me-2"></i>
-                            <span>Contacting us to confirm complete removal of any associated data</span>
-                        </li>
-                    </ul>
-
-                    <h2 class="h5 mb-3">Data Security</h2>
-                    <p class="mb-4">We use industry-standard security measures to protect your API key and ensure secure data transmission between Hevy's servers and Google Sheets™. All data transfers are encrypted using HTTPS/TLS protocols.</p>
-
-                    <h2 class="h5 mb-3">User Rights</h2>
-                    <p class="mb-4">You have full control over your data. You can revoke access to the addon at any time through your Google account settings. This will immediately stop all data syncing and remove our access to your Google Sheets.</p>
-
-                    <h2 class="h5 mb-3">Updates to Privacy Policy</h2>
-                    <p class="mb-4">We may update this privacy policy as needed to comply with relevant regulations and reflect any changes to our data practices. Users will be notified of significant changes.</p>
-
-                    <h2 class="h5 mb-3">Contact</h2>
-                    <p class="mb-4">If you have questions about this privacy policy or need to request data deletion, please contact us at tomer@gelbhart.dev</p>
+    <div class="container py-3 position-relative zindex-5">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-8 fade-in-view">
+                <div class="bg-success bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
+                    <i class="bx bx-shield-alt-2 fs-1 text-success"></i>
                 </div>
+                <h1 class="display-6 mb-2">Privacy Policy</h1>
+                <p class="text-light opacity-75 mb-0">Hevy Tracker for Google Sheets™</p>
             </div>
         </div>
     </div>
-</div>
+</section>
+
+<!-- Main Content -->
+<section class="container py-5 mt-4" data-controller="scroll-animation">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Back Button (Desktop) -->
+            <%= link_to hevy_tracker_path,
+               class: "btn btn-outline-primary mb-4 d-none d-lg-inline-flex align-items-center" do %>
+                <i class="bx bx-arrow-back me-2"></i>Back to Hevy Tracker
+            <% end %>
+
+            <!-- Back Button (Mobile) -->
+            <%= link_to hevy_tracker_path,
+               class: "btn btn-outline-primary mb-4 d-lg-none d-flex align-items-center justify-content-center" do %>
+                <i class="bx bx-arrow-back me-2"></i>Back
+            <% end %>
+
+            <!-- Data Collection -->
+            <div class="card hevy-tracker-card border-0 shadow-lg mb-4 fade-in-view delay-1">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                            <i class="bx bx-data fs-4 text-primary"></i>
+                        </div>
+                        <h2 class="h4 mb-0">Data Collection</h2>
+                    </div>
+                    <p class="text-muted mb-0">We only access workout data from your Hevy account that is necessary to sync with Google Sheets™. This data is not stored on our servers. When you authorize our application through Google OAuth™, we request only the minimum necessary permissions to write to your Google Sheets™.</p>
+                </div>
+            </div>
+
+            <!-- Data Usage -->
+            <div class="card hevy-tracker-card border-0 shadow-lg mb-4 fade-in-view delay-2">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-info bg-opacity-10 rounded-circle p-2 me-3">
+                            <i class="bx bx-bar-chart-alt-2 fs-4 text-info"></i>
+                        </div>
+                        <h2 class="h4 mb-0">Data Usage</h2>
+                    </div>
+                    <p class="text-muted mb-0">Your workout data is only used to populate and update your Google Sheets™ spreadsheet. We do not analyze, sell, or share your data with any third parties. The data flow is direct between Hevy's servers and your Google Sheets™ document.</p>
+                </div>
+            </div>
+
+            <!-- Data Retention and Deletion -->
+            <div class="card hevy-tracker-card border-0 shadow-lg mb-4 fade-in-view delay-3">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-warning bg-opacity-10 rounded-circle p-2 me-3">
+                            <i class="bx bx-trash fs-4 text-warning"></i>
+                        </div>
+                        <h2 class="h4 mb-0">Data Retention and Deletion</h2>
+                    </div>
+                    <p class="text-muted mb-3">We maintain a minimal data retention policy:</p>
+                    <ul class="list-unstyled mb-4">
+                        <li class="d-flex align-items-start mb-2">
+                            <i class="bx bx-check-circle text-success me-2 mt-1 fs-5"></i>
+                            <span class="text-muted">We do not store any Google user data on our servers</span>
+                        </li>
+                        <li class="d-flex align-items-start mb-2">
+                            <i class="bx bx-check-circle text-success me-2 mt-1 fs-5"></i>
+                            <span class="text-muted">Your Google account information is only used for authentication</span>
+                        </li>
+                        <li class="d-flex align-items-start mb-2">
+                            <i class="bx bx-check-circle text-success me-2 mt-1 fs-5"></i>
+                            <span class="text-muted">Data is only processed in-memory during the sync operation</span>
+                        </li>
+                        <li class="d-flex align-items-start mb-2">
+                            <i class="bx bx-check-circle text-success me-2 mt-1 fs-5"></i>
+                            <span class="text-muted">No logs or backups containing user data are maintained</span>
+                        </li>
+                    </ul>
+
+                    <p class="text-muted mb-3"><strong>You can delete your data at any time by:</strong></p>
+                    <ul class="list-unstyled mb-0">
+                        <li class="d-flex align-items-start mb-2">
+                            <i class="bx bx-right-arrow-alt text-primary me-2 mt-1"></i>
+                            <span class="text-muted">Revoking access to the Hevy Tracker application in your <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener" class="text-primary">Google Account Settings</a></span>
+                        </li>
+                        <li class="d-flex align-items-start mb-2">
+                            <i class="bx bx-right-arrow-alt text-primary me-2 mt-1"></i>
+                            <span class="text-muted">Deleting the Google Sheets™ document containing your workout data</span>
+                        </li>
+                        <li class="d-flex align-items-start mb-2">
+                            <i class="bx bx-right-arrow-alt text-primary me-2 mt-1"></i>
+                            <span class="text-muted">Contacting us to confirm complete removal of any associated data</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Data Security -->
+            <div class="card hevy-tracker-card border-0 shadow-lg mb-4 fade-in-view delay-4">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                            <i class="bx bx-lock-alt fs-4 text-success"></i>
+                        </div>
+                        <h2 class="h4 mb-0">Data Security</h2>
+                    </div>
+                    <p class="text-muted mb-0">We use industry-standard security measures to protect your API key and ensure secure data transmission between Hevy's servers and Google Sheets™. All data transfers are encrypted using HTTPS/TLS protocols.</p>
+                </div>
+            </div>
+
+            <!-- User Rights -->
+            <div class="card hevy-tracker-card border-0 shadow-lg mb-4 fade-in-view delay-5">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-danger bg-opacity-10 rounded-circle p-2 me-3">
+                            <i class="bx bx-user-check fs-4 text-danger"></i>
+                        </div>
+                        <h2 class="h4 mb-0">User Rights</h2>
+                    </div>
+                    <p class="text-muted mb-0">You have full control over your data. You can revoke access to the addon at any time through your Google account settings. This will immediately stop all data syncing and remove our access to your Google Sheets.</p>
+                </div>
+            </div>
+
+            <!-- Updates to Privacy Policy -->
+            <div class="card hevy-tracker-card border-0 shadow-lg mb-4 fade-in-view delay-6">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                            <i class="bx bx-refresh fs-4 text-primary"></i>
+                        </div>
+                        <h2 class="h4 mb-0">Updates to Privacy Policy</h2>
+                    </div>
+                    <p class="text-muted mb-0">We may update this privacy policy as needed to comply with relevant regulations and reflect any changes to our data practices. Users will be notified of significant changes.</p>
+                </div>
+            </div>
+
+            <!-- Contact -->
+            <div class="card hevy-tracker-card border-0 shadow-lg mb-4 fade-in-view delay-7">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-info bg-opacity-10 rounded-circle p-2 me-3">
+                            <i class="bx bx-envelope fs-4 text-info"></i>
+                        </div>
+                        <h2 class="h4 mb-0">Contact</h2>
+                    </div>
+                    <p class="text-muted mb-0">If you have questions about this privacy policy or need to request data deletion, please contact us at <a href="mailto:tomer@gelbhart.dev" class="text-primary">tomer@gelbhart.dev</a></p>
+                </div>
+            </div>
+
+            <!-- Footer Links -->
+            <div class="text-center mt-5 fade-in-view delay-8">
+                <p class="text-muted">
+                    Need more information? <%= link_to "Contact us", contact_path, class: "text-primary" %> or read our <%= link_to "Terms of Service", hevy_tracker_terms_path, class: "text-primary" %>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
