@@ -67,7 +67,7 @@ codebase.md
 # Ignore AI assistant directories and files
 .claude/
 .github/copilot-instructions.md
-COPILOT_INSTRUCTIONS_SUMMARY.md
+CLAUDE.MD
 
 # Ignore generated captions and sitemaps
 /public/captions/
