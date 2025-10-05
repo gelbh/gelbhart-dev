@@ -148,13 +148,13 @@ Rails.application.configure do
   
   # SMTP settings - configure via environment variables
   # Set these in your Render dashboard or hosting platform:
-  # SMTP_ADDRESS, SMTP_PORT, SMTP_DOMAIN, SMTP_USERNAME, SMTP_PASSWORD
+  # SMTP_ADDRESS, SMTP_PORT, SMTP_DOMAIN, SMTP_USERNAME (or SMTP_USER), SMTP_PASSWORD (or SMTP_PASS)
   config.action_mailer.smtp_settings = {
     address: ENV.fetch("SMTP_ADDRESS", "smtp.gmail.com"),
     port: ENV.fetch("SMTP_PORT", 587).to_i,
     domain: ENV.fetch("SMTP_DOMAIN", "gelbhart.dev"),
-    user_name: ENV.fetch("SMTP_USERNAME", nil),
-    password: ENV.fetch("SMTP_PASSWORD", nil),
+    user_name: ENV["SMTP_USERNAME"] || ENV["SMTP_USER"],
+    password: ENV["SMTP_PASSWORD"] || ENV["SMTP_PASS"],
     authentication: :plain,
     enable_starttls_auto: true
   }
