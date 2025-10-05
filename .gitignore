@@ -31,9 +31,11 @@
 .env.*
 
 # Ignore Google Analytics credentials
-/config/google-analytics-credentials.json
 /config/google-oauth-credentials.json
 /config/analytics-tokens.yaml
+
+# Ignore Windows metadata files
+*:Zone.Identifier
 
 # Ignore database configuration
 /config/database.yml
