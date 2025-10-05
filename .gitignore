@@ -60,11 +60,9 @@ yarn-debug.log*
 # Ignore coverage files
 /coverage/
 
-# Ignore AI Digest
+# Ignore documentation files
 .aidigestignore
 codebase.md
-
-# Ignore AI assistant directories and files
 .claude/
 .github/copilot-instructions.md
 CLAUDE.md
