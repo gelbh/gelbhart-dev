@@ -1,6 +1,11 @@
 Rails.application.routes.draw do
   root "pages#home"
 
+  # API endpoints
+  namespace :api do
+    get 'analytics/hevy-tracker', to: 'analytics#hevy_tracker_stats'
+  end
+
   # Hevy Tracker pages
   scope path: "hevy-tracker", as: :hevy_tracker do
     get "/", to: "pages#hevy_tracker"

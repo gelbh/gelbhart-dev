@@ -12,6 +12,9 @@ gem "turbo-rails"
 gem "stimulus-rails"
 gem "jbuilder"
 gem "rack-cors"
+gem "google-analytics-data"
+gem "googleauth"
+gem "webrick"
 
 gem "mini_racer"
 
@@ -22,6 +25,7 @@ group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
   gem "brakeman", require: false
   gem "rubocop-rails-omakase", require: false
+  gem "dotenv-rails"
 end
 
 group :development do

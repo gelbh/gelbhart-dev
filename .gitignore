@@ -30,6 +30,11 @@
 .env
 .env.*
 
+# Ignore Google Analytics credentials
+/config/google-analytics-credentials.json
+/config/google-oauth-credentials.json
+/config/analytics-tokens.yaml
+
 # Ignore database configuration
 /config/database.yml
 
