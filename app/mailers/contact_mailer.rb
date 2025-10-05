@@ -1,5 +1,5 @@
 class ContactMailer < ApplicationMailer
-  default from: "noreply@gelbhart.dev"
+  default from: "gelbharttomer@gmail.com"
 
   def contact_message(name:, email:, message:)
     @name = name
@@ -7,7 +7,7 @@ class ContactMailer < ApplicationMailer
     @message = message
 
     mail(
-      to: "tomer@gelbhart.dev",
+      to: "gelbharttomer@gmail.com",
       subject: "New Contact Form Message from #{@name}",
       reply_to: @email
     )
