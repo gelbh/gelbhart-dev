@@ -54,7 +54,7 @@ class GoogleAnalyticsService
   private
 
   def credentials_present?
-    PROPERTY_ID.present? && (oauth_credentials_present? || service_account_present?)
+    PROPERTY_ID.present? && oauth_credentials_present?
   end
 
   def oauth_credentials_present?
@@ -69,20 +69,8 @@ class GoogleAnalyticsService
     env_vars_present || files_present
   end
 
-  def service_account_present?
-    ENV['GOOGLE_APPLICATION_CREDENTIALS'].present?
-  end
-
   def get_credentials
-    # Try OAuth first (simpler for personal use)
-    if oauth_credentials_present?
-      get_oauth_credentials
-    # Fall back to service account
-    elsif service_account_present?
-      ENV['GOOGLE_APPLICATION_CREDENTIALS']
-    else
-      nil
-    end
+    get_oauth_credentials if oauth_credentials_present?
   end
 
   def get_oauth_credentials
