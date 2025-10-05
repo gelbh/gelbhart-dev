@@ -164,23 +164,95 @@ export default class extends Controller {
   }
 
   getCountryCode(countryName) {
-    // Map of common country names to ISO 2-letter codes
+    // Comprehensive map of country names to ISO 3166-1 alpha-2 codes
     const codes = {
-      'United States': 'us', 'United Kingdom': 'gb', 'India': 'in',
-      'Canada': 'ca', 'Australia': 'au', 'Germany': 'de', 'Brazil': 'br',
-      'France': 'fr', 'Netherlands': 'nl', 'Spain': 'es', 'Italy': 'it',
-      'Mexico': 'mx', 'Poland': 'pl', 'Sweden': 'se', 'Switzerland': 'ch',
-      'Belgium': 'be', 'Austria': 'at', 'Norway': 'no', 'Denmark': 'dk',
-      'Finland': 'fi', 'Ireland': 'ie', 'Portugal': 'pt', 'Greece': 'gr',
-      'Czech Republic': 'cz', 'Romania': 'ro', 'Hungary': 'hu',
-      'New Zealand': 'nz', 'Singapore': 'sg', 'Japan': 'jp', 'South Korea': 'kr',
-      'China': 'cn', 'Hong Kong': 'hk', 'Taiwan': 'tw', 'Thailand': 'th',
-      'Indonesia': 'id', 'Philippines': 'ph', 'Vietnam': 'vn', 'Malaysia': 'my',
-      'South Africa': 'za', 'Egypt': 'eg', 'Nigeria': 'ng', 'Kenya': 'ke',
-      'Argentina': 'ar', 'Chile': 'cl', 'Colombia': 'co', 'Peru': 'pe',
-      'Israel': 'il', 'Turkey': 'tr', 'Saudi Arabia': 'sa', 'United Arab Emirates': 'ae',
-      'Russia': 'ru', 'Ukraine': 'ua', 'Pakistan': 'pk', 'Bangladesh': 'bd'
+      // North America
+      'United States': 'us', 'Canada': 'ca', 'Mexico': 'mx',
+      'Guatemala': 'gt', 'Honduras': 'hn', 'El Salvador': 'sv',
+      'Nicaragua': 'ni', 'Costa Rica': 'cr', 'Panama': 'pa',
+      'Bahamas': 'bs', 'Cuba': 'cu', 'Jamaica': 'jm',
+      'Haiti': 'ht', 'Dominican Republic': 'do', 'Puerto Rico': 'pr',
+      'Trinidad and Tobago': 'tt', 'Barbados': 'bb', 'Grenada': 'gd',
+      'Dominica': 'dm', 'Saint Lucia': 'lc', 'Antigua and Barbuda': 'ag',
+      'Belize': 'bz', 'Bermuda': 'bm',
+
+      // South America
+      'Brazil': 'br', 'Argentina': 'ar', 'Chile': 'cl',
+      'Colombia': 'co', 'Peru': 'pe', 'Venezuela': 've',
+      'Ecuador': 'ec', 'Bolivia': 'bo', 'Paraguay': 'py',
+      'Uruguay': 'uy', 'Guyana': 'gy', 'Suriname': 'sr',
+      'French Guiana': 'gf',
+
+      // Europe
+      'United Kingdom': 'gb', 'Germany': 'de', 'France': 'fr',
+      'Italy': 'it', 'Spain': 'es', 'Portugal': 'pt',
+      'Netherlands': 'nl', 'Belgium': 'be', 'Switzerland': 'ch',
+      'Austria': 'at', 'Sweden': 'se', 'Norway': 'no',
+      'Denmark': 'dk', 'Finland': 'fi', 'Iceland': 'is',
+      'Ireland': 'ie', 'Poland': 'pl', 'Czech Republic': 'cz',
+      'Czechia': 'cz', 'Slovakia': 'sk', 'Hungary': 'hu',
+      'Romania': 'ro', 'Bulgaria': 'bg', 'Greece': 'gr',
+      'Croatia': 'hr', 'Serbia': 'rs', 'Slovenia': 'si',
+      'Bosnia and Herzegovina': 'ba', 'Montenegro': 'me', 'North Macedonia': 'mk',
+      'Albania': 'al', 'Kosovo': 'xk', 'Estonia': 'ee',
+      'Latvia': 'lv', 'Lithuania': 'lt', 'Belarus': 'by',
+      'Ukraine': 'ua', 'Moldova': 'md', 'Luxembourg': 'lu',
+      'Monaco': 'mc', 'Liechtenstein': 'li', 'Malta': 'mt',
+      'Cyprus': 'cy', 'Andorra': 'ad', 'San Marino': 'sm',
+      'Vatican City': 'va',
+
+      // Asia
+      'China': 'cn', 'Japan': 'jp', 'South Korea': 'kr',
+      'North Korea': 'kp', 'India': 'in', 'Pakistan': 'pk',
+      'Bangladesh': 'bd', 'Sri Lanka': 'lk', 'Nepal': 'np',
+      'Bhutan': 'bt', 'Maldives': 'mv', 'Afghanistan': 'af',
+      'Iran': 'ir', 'Iraq': 'iq', 'Syria': 'sy',
+      'Lebanon': 'lb', 'Jordan': 'jo', 'Israel': 'il',
+      'Palestine': 'ps', 'Saudi Arabia': 'sa', 'Yemen': 'ye',
+      'Oman': 'om', 'United Arab Emirates': 'ae', 'Qatar': 'qa',
+      'Bahrain': 'bh', 'Kuwait': 'kw', 'Turkey': 'tr',
+      'Armenia': 'am', 'Azerbaijan': 'az', 'Georgia': 'ge',
+      'Kazakhstan': 'kz', 'Uzbekistan': 'uz', 'Turkmenistan': 'tm',
+      'Kyrgyzstan': 'kg', 'Tajikistan': 'tj', 'Mongolia': 'mn',
+      'Thailand': 'th', 'Vietnam': 'vn', 'Laos': 'la',
+      'Cambodia': 'kh', 'Myanmar': 'mm', 'Malaysia': 'my',
+      'Singapore': 'sg', 'Indonesia': 'id', 'Philippines': 'ph',
+      'Brunei': 'bn', 'Timor-Leste': 'tl', 'Hong Kong': 'hk',
+      'Macau': 'mo', 'Taiwan': 'tw',
+
+      // Africa
+      'South Africa': 'za', 'Egypt': 'eg', 'Nigeria': 'ng',
+      'Kenya': 'ke', 'Ethiopia': 'et', 'Ghana': 'gh',
+      'Tanzania': 'tz', 'Uganda': 'ug', 'Algeria': 'dz',
+      'Morocco': 'ma', 'Tunisia': 'tn', 'Libya': 'ly',
+      'Sudan': 'sd', 'South Sudan': 'ss', 'Somalia': 'so',
+      'Eritrea': 'er', 'Djibouti': 'dj', 'Senegal': 'sn',
+      'Mali': 'ml', 'Mauritania': 'mr', 'Niger': 'ne',
+      'Chad': 'td', 'Burkina Faso': 'bf', 'Ivory Coast': 'ci',
+      'Côte d\'Ivoire': 'ci', 'Cameroon': 'cm', 'Central African Republic': 'cf',
+      'Congo': 'cg', 'Democratic Republic of the Congo': 'cd',
+      'Gabon': 'ga', 'Equatorial Guinea': 'gq', 'Zambia': 'zm',
+      'Zimbabwe': 'zw', 'Botswana': 'bw', 'Namibia': 'na',
+      'Angola': 'ao', 'Mozambique': 'mz', 'Madagascar': 'mg',
+      'Malawi': 'mw', 'Rwanda': 'rw', 'Burundi': 'bi',
+      'Mauritius': 'mu', 'Seychelles': 'sc', 'Comoros': 'km',
+      'Cape Verde': 'cv', 'São Tomé and Príncipe': 'st',
+      'Benin': 'bj', 'Togo': 'tg', 'Sierra Leone': 'sl',
+      'Liberia': 'lr', 'Guinea': 'gn', 'Guinea-Bissau': 'gw',
+      'Gambia': 'gm', 'Lesotho': 'ls', 'Eswatini': 'sz',
+      'Swaziland': 'sz',
+
+      // Oceania
+      'Australia': 'au', 'New Zealand': 'nz', 'Papua New Guinea': 'pg',
+      'Fiji': 'fj', 'Solomon Islands': 'sb', 'Vanuatu': 'vu',
+      'Samoa': 'ws', 'Kiribati': 'ki', 'Tonga': 'to',
+      'Micronesia': 'fm', 'Palau': 'pw', 'Marshall Islands': 'mh',
+      'Nauru': 'nr', 'Tuvalu': 'tv',
+
+      // Russia & Former Soviet
+      'Russia': 'ru', 'Russian Federation': 'ru'
     }
-    return codes[countryName] || 'xx'
+
+    return codes[countryName] || codes[countryName.toLowerCase()] || 'xx'
   }
 }
