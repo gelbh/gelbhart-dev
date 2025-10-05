@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="<%= local_assigns[:width] || 80 %>" height="<%= local_assigns[:height] || 40 %>" class="<%= local_assigns[:css_class] %>">
+    <defs>
+        <filter id="glow-<%= local_assigns[:id] || 'logo' %>" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+            <feOffset dx="0" dy="0" result="offsetblur"/>
+            <feComponentTransfer>
+                <feFuncA type="linear" slope="0.5"/>
+            </feComponentTransfer>
+            <feMerge>
+                <feMergeNode/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+    </defs>
+    <text fill="#6366f1" font-family="'Courier New', Courier, monospace" font-size="64" font-weight="700" filter="url(#glow-<%= local_assigns[:id] || 'logo' %>)" x="100" y="72" text-anchor="middle">&lt;G/&gt;</text>
+</svg>

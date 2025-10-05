@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <defs>
+    <!-- Strong glow effect -->
+    <filter id="glow-square" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="0" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.6"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Dark circular background -->
+  <circle cx="120" cy="120" r="120" fill="#0b0f19"/>
+
+  <!-- Bright purple logo matching logo_social -->
+  <text fill="#6366f1" font-family="'Courier New', Courier, monospace" font-size="95" font-weight="900" filter="url(#glow-square)" x="120" y="155" text-anchor="middle">&lt;G/&gt;</text>
+</svg>
