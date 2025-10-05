@@ -32,6 +32,14 @@ export default class extends Controller {
         ? '<i class="bx bx-chevron-up me-1"></i>Show Less'
         : '<i class="bx bx-chevron-down me-1"></i>Show All Countries'
     }
+
+    // Scroll to top of countries section when collapsing
+    if (!this.expanded) {
+      const countriesSection = this.element.querySelector('.border-top.pt-4')
+      if (countriesSection) {
+        countriesSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }
   }
 
   async fetchStats() {
