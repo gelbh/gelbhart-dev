@@ -140,7 +140,22 @@ Rails.application.configure do
   # config.action_cable.mount_path = nil
 
   # Disable Action Mailer's delivery method setting
-  # config.action_mailer.delivery_method = :smtp
-  # config.action_mailer.perform_deliveries = true
-  # config.action_mailer.raise_delivery_errors = false
+  # Configure Action Mailer for production
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.raise_delivery_errors = true
+  config.action_mailer.default_url_options = { host: "gelbhart.dev", protocol: "https" }
+  
+  # SMTP settings - configure via environment variables
+  # Set these in your Render dashboard or hosting platform:
+  # SMTP_ADDRESS, SMTP_PORT, SMTP_DOMAIN, SMTP_USERNAME, SMTP_PASSWORD
+  config.action_mailer.smtp_settings = {
+    address: ENV.fetch("SMTP_ADDRESS", "smtp.gmail.com"),
+    port: ENV.fetch("SMTP_PORT", 587).to_i,
+    domain: ENV.fetch("SMTP_DOMAIN", "gelbhart.dev"),
+    user_name: ENV.fetch("SMTP_USERNAME", nil),
+    password: ENV.fetch("SMTP_PASSWORD", nil),
+    authentication: :plain,
+    enable_starttls_auto: true
+  }
 end

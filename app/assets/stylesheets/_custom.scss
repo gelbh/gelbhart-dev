@@ -2456,3 +2456,24 @@ html {
   }
 }
 
+// Contact form styles
+.contact-form {
+  .form-control {
+    &:focus {
+      background-color: rgba(0, 0, 0, 0.6) !important;
+      border-color: var(--bs-primary);
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+      color: #fff;
+    }
+    
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+  }
+  
+  .form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+}
+

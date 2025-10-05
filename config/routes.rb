@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   end
 
   get "contact", to: "pages#contact"
+  post "contact", to: "contacts#create"
 
   # Video Captioner (static page for desktop tool download)
   get "video-captioner", to: "pages#video_captioner"
