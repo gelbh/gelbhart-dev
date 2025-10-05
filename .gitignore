@@ -68,8 +68,6 @@ yarn-debug.log*
 /coverage/
 
 # Ignore documentation files
-.aidigestignore
-codebase.md
 .claude/
 .github/copilot-instructions.md
 CLAUDE.md

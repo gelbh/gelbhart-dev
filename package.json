@@ -1,9 +1,6 @@
 {
   "name": "gelbhart-dev",
   "private": true,
-  "scripts": {
-    "codebase": "npx ai-digest -i . -o codebase.md --whitespace-removal --show-output-files"
-  },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.3"
