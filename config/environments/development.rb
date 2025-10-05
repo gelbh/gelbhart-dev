@@ -42,6 +42,12 @@ Rails.application.configure do
 
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false
+  
+  # Use :letter_opener to preview emails in browser during development
+  # Install with: gem 'letter_opener', group: :development
+  # Or use :test to not send emails
+  config.action_mailer.delivery_method = :test
+  config.action_mailer.perform_deliveries = true
 
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false
