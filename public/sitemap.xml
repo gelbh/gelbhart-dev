@@ -4,24 +4,36 @@
     <loc>https://gelbhart.dev/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <lastmod>2024-11-22</lastmod>
+    <lastmod>2025-10-05</lastmod>
   </url>
   <url>
     <loc>https://gelbhart.dev/hevy-tracker</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2024-11-22</lastmod>
+    <lastmod>2025-10-05</lastmod>
   </url>
   <url>
-    <loc>https://gelbhart.dev/terms</loc>
+    <loc>https://gelbhart.dev/hevy-tracker/privacy</loc>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
-    <lastmod>2024-11-22</lastmod>
+    <lastmod>2025-10-05</lastmod>
   </url>
   <url>
-    <loc>https://gelbhart.dev/privacy</loc>
+    <loc>https://gelbhart.dev/hevy-tracker/terms</loc>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
-    <lastmod>2024-11-22</lastmod>
+    <lastmod>2025-10-05</lastmod>
+  </url>
+  <url>
+    <loc>https://gelbhart.dev/contact</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-10-05</lastmod>
+  </url>
+  <url>
+    <loc>https://gelbhart.dev/video-captioner</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2025-10-05</lastmod>
   </url>
 </urlset>
