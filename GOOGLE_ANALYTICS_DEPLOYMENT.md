@@ -38,65 +38,66 @@ All stats update automatically via API, cached for 5 minutes.
 
 ## Deploying to Production (Render.com)
 
-### Step 1: Prepare Credentials
+### Step 1: Extract Credential Values
 
-You have two files that need to be in production:
-- `config/google-oauth-credentials.json` (OAuth client credentials)
-- `config/analytics-tokens.yaml` (your authorized token)
+First, let's get the values from your local credential files:
+
+```bash
+# 1. Get OAuth Client ID and Secret
+cat config/google-oauth-credentials.json
+```
+
+Copy these values:
+- `client_id`
+- `client_secret`
+
+```bash
+# 2. Get Refresh Token and Access Token
+cat config/analytics-tokens.yaml
+```
+
+Copy these values from the JSON string:
+- `refresh_token`
+- `access_token` (optional, will be auto-refreshed)
 
 ### Step 2: Set Environment Variables in Render
 
-Go to your Render dashboard > Environment tab and add:
+Go to your Render dashboard > Environment tab and add these variables:
 
 ```bash
 # Required - Your GA4 Property ID
 GA4_PROPERTY_ID=468479218
 
-# Required - Path to OAuth credentials
-GOOGLE_OAUTH_CREDENTIALS=config/google-oauth-credentials.json
+# Required - OAuth Client Credentials
+GOOGLE_OAUTH_CLIENT_ID=your-client-id-here
+GOOGLE_OAUTH_CLIENT_SECRET=your-client-secret-here
+
+# Required - OAuth Refresh Token
+GOOGLE_OAUTH_REFRESH_TOKEN=your-refresh-token-here
+
+# Optional - Access Token (will be auto-refreshed if not provided)
+GOOGLE_OAUTH_ACCESS_TOKEN=your-access-token-here
 ```
 
-### Step 3: Deploy Credential Files
+**Example values** (from your `google-oauth-credentials.json`):
+```bash
+GOOGLE_OAUTH_CLIENT_ID=221696974247-xxxxx.apps.googleusercontent.com
+GOOGLE_OAUTH_CLIENT_SECRET=GOCSPX-xxxxx
+```
 
-**Option A: Commit temporarily (simplest for first deployment)**
+**Example values** (from your `analytics-tokens.yaml`):
+```bash
+GOOGLE_OAUTH_REFRESH_TOKEN=1//03xxxxxxxxxxxxxx
+GOOGLE_OAUTH_ACCESS_TOKEN=ya29.xxxxxxxxxxxxxx
+```
+
+### Step 3: Push Your Code
 
 ```bash
-# 1. Remove credentials from gitignore TEMPORARILY
-git rm --cached .gitignore
-# Edit .gitignore and comment out these two lines:
-# /config/google-oauth-credentials.json
-# /config/analytics-tokens.yaml
-
-# 2. Commit and push
-git add config/google-oauth-credentials.json config/analytics-tokens.yaml
-git commit -m "Add Google Analytics credentials for deployment"
-git push
-
-# 3. After successful deployment, IMMEDIATELY:
-# - Revert the .gitignore changes
-# - Remove credentials from repo
-git rm config/google-oauth-credentials.json config/analytics-tokens.yaml
-# Restore .gitignore
-git checkout .gitignore
-git commit -m "Remove credentials from repo (now in production)"
 git push
 ```
 
-**Option B: Use Render Shell (more secure, but requires manual setup)**
-
-1. Deploy your code without credentials
-2. Access Render Shell from dashboard
-3. Create the files manually:
-   ```bash
-   cat > config/google-oauth-credentials.json << 'EOF'
-   [paste JSON contents here]
-   EOF
-
-   cat > config/analytics-tokens.yaml << 'EOF'
-   [paste YAML contents here]
-   EOF
-   ```
-4. Restart the service
+Render will automatically deploy. No credential files needed in the repo! ✅
 
 ### Step 4: Verify
 

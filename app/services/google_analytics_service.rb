@@ -58,7 +58,15 @@ class GoogleAnalyticsService
   end
 
   def oauth_credentials_present?
-    ENV['GOOGLE_OAUTH_CREDENTIALS'].present? && File.exist?(Rails.root.join('config', 'analytics-tokens.yaml'))
+    # Check for environment variables (production) or files (development)
+    env_vars_present = ENV['GOOGLE_OAUTH_CLIENT_ID'].present? &&
+                       ENV['GOOGLE_OAUTH_CLIENT_SECRET'].present? &&
+                       ENV['GOOGLE_OAUTH_REFRESH_TOKEN'].present?
+
+    files_present = ENV['GOOGLE_OAUTH_CREDENTIALS'].present? &&
+                    File.exist?(Rails.root.join('config', 'analytics-tokens.yaml'))
+
+    env_vars_present || files_present
   end
 
   def service_account_present?
@@ -78,6 +86,15 @@ class GoogleAnalyticsService
   end
 
   def get_oauth_credentials
+    # Try environment variables first (for production)
+    if ENV['GOOGLE_OAUTH_CLIENT_ID'].present? && ENV['GOOGLE_OAUTH_CLIENT_SECRET'].present? && ENV['GOOGLE_OAUTH_REFRESH_TOKEN'].present?
+      return get_oauth_credentials_from_env
+    end
+
+    # Fall back to file-based credentials (for development)
+    return nil unless ENV['GOOGLE_OAUTH_CREDENTIALS'].present?
+    return nil unless File.exist?(ENV['GOOGLE_OAUTH_CREDENTIALS'])
+
     # Load credentials and handle both web and installed app formats
     creds_data = JSON.parse(File.read(ENV['GOOGLE_OAUTH_CREDENTIALS']))
     client_info = creds_data['web'] || creds_data['installed']
@@ -93,6 +110,33 @@ class GoogleAnalyticsService
     )
 
     authorizer = Google::Auth::UserAuthorizer.new(client_id, SCOPE, token_store)
+    authorizer.get_credentials('default')
+  end
+
+  def get_oauth_credentials_from_env
+    # Create credentials directly from environment variables
+    token_data = {
+      'client_id' => ENV['GOOGLE_OAUTH_CLIENT_ID'],
+      'access_token' => ENV['GOOGLE_OAUTH_ACCESS_TOKEN'],
+      'refresh_token' => ENV['GOOGLE_OAUTH_REFRESH_TOKEN'],
+      'scope' => [SCOPE],
+      'expiration_time_millis' => (Time.now + 3600).to_i * 1000
+    }
+
+    # Create a mock token store that returns our env-based credentials
+    mock_store = Object.new
+    def mock_store.load(id)
+      # Return the token JSON that was set in the instance variable
+      @token_json
+    end
+    mock_store.instance_variable_set(:@token_json, token_data.to_json)
+
+    client_id = Google::Auth::ClientId.new(
+      ENV['GOOGLE_OAUTH_CLIENT_ID'],
+      ENV['GOOGLE_OAUTH_CLIENT_SECRET']
+    )
+
+    authorizer = Google::Auth::UserAuthorizer.new(client_id, SCOPE, mock_store)
     authorizer.get_credentials('default')
   end
 
