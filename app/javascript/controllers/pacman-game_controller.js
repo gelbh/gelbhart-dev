@@ -32,13 +32,36 @@ export default class extends Controller {
     // Game state
     this.isGameActive = false
     this.isStarting = false // Flag to track if game is in starting phase (waiting for intro music)
+    this.isPaused = false // Flag to track if game is paused
     this.score = 0
+    this.dotsScore = 0 // Score from dots only (for section unlocking)
     this.lives = 3
     this.extraLifeAwarded = false // Track if extra life at 10,000 has been awarded
     this.powerMode = false
     this.powerModeEnding = false
     this.dots = []
     this.ghosts = []
+    this.items = [] // Special powerup items
+
+    // Active powerup effects
+    this.activeEffects = {
+      speedBoost: false,
+      slowDown: false,
+      shield: false,
+      freeze: false,
+      doublePoints: false
+    }
+    this.effectTimers = {}
+
+    // Item types configuration
+    this.itemTypes = {
+      speedBoost: { emoji: '⚡', name: 'Speed Boost', color: '#FFD700', points: 100, duration: 5000, positive: true },
+      slowDown: { emoji: '🐌', name: 'Slow Down', color: '#8B4513', points: -50, duration: 4000, positive: false },
+      shield: { emoji: '🛡️', name: 'Shield', color: '#00CED1', points: 150, duration: 6000, positive: true },
+      freeze: { emoji: '❄️', name: 'Ghost Freeze', color: '#87CEEB', points: 200, duration: 3000, positive: true },
+      doublePoints: { emoji: '⭐', name: 'Double Points', color: '#FF69B4', points: 100, duration: 10000, positive: true },
+      extraLife: { emoji: '❤️', name: 'Extra Life', color: '#FF0000', points: 500, duration: 0, positive: true }
+    }
 
     // Section progression system
     this.sections = [
@@ -66,6 +89,10 @@ export default class extends Controller {
     // Ghosts: 75% of Pac-Man ≈ 1.44 pixels/frame
     this.pacmanSpeed = 1.9
     this.ghostSpeed = 1.4
+
+    // Power mode durations (will be reduced as difficulty increases)
+    this.powerModeDuration = 7000 // 7 seconds base
+    this.powerModeWarningDuration = 2000 // 2 seconds warning
     
     // Animation and death state
     this.isDying = false
@@ -329,7 +356,8 @@ export default class extends Controller {
         lockOverlay.innerHTML = `
           <div class="lock-content">
             <i class="bx bxs-lock-alt lock-icon"></i>
-            <div class="lock-text">Collect ${section.threshold} points to unlock</div>
+            <div class="lock-text">Collect more dots to unlock</div>
+            <div class="lock-subtext">${section.threshold} points needed</div>
           </div>
         `
 
@@ -385,6 +413,26 @@ export default class extends Controller {
         sectionElement.classList.remove('section-locked')
       }
     })
+  }
+
+  /**
+   * Increase difficulty as sections are unlocked
+   * Makes ghosts faster and reduces power mode duration
+   */
+  increaseDifficulty() {
+    // Increase ghost speed by 15% per section unlocked
+    const speedMultiplier = 1 + (this.currentSection * 0.15)
+    this.ghostSpeed = 1.4 * speedMultiplier
+    
+    // Cap ghost speed to 85% of Pac-Man's speed to keep game winnable
+    const maxGhostSpeed = this.pacmanSpeed * 0.85 // 1.615 max
+    this.ghostSpeed = Math.min(this.ghostSpeed, maxGhostSpeed)
+
+    // Reduce power mode duration (7s base, -1s per section, minimum 3s)
+    this.powerModeDuration = Math.max(3000, 7000 - (this.currentSection * 1000))
+    this.powerModeWarningDuration = Math.max(1500, 2000 - (this.currentSection * 300))
+
+    console.log(`⚡ Difficulty increased! Ghost speed: ${this.ghostSpeed.toFixed(2)}, Power mode: ${this.powerModeDuration/1000}s`)
   }
 
   /**
@@ -551,24 +599,46 @@ export default class extends Controller {
    * Supports WASD and arrow keys
    */
   handleKeydown(event) {
+    // Handle pause toggle (P key)
+    if ((event.key === 'p' || event.key === 'P') && this.isGameActive && !this.isStarting && !this.isDying) {
+      this.togglePause()
+      event.preventDefault()
+      return
+    }
+
+    // Handle quit (Escape key)
+    if (event.key === 'Escape') {
+      if (this.isPaused) {
+        // If paused, unpause first (without countdown), then quit
+        this.isPaused = false
+        const pauseOverlay = document.querySelector('.pacman-pause-overlay')
+        if (pauseOverlay) {
+          pauseOverlay.remove()
+        }
+      }
+      this.stopGame()
+      event.preventDefault()
+      return
+    }
+
     // Auto-start game on first movement key press
     const movementKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'W', 'a', 'A', 's', 'S', 'd', 'D']
-    
+
     if (movementKeys.includes(event.key) && !this.isGameActive && !this.isStarting) {
       this.startGame()
       // Don't process movement yet - wait for intro music
       event.preventDefault()
       return
     }
-    
-    // Prevent movement during intro music
-    if (this.isStarting || !this.isGameActive || this.isDying) {
+
+    // Prevent movement during intro music, pause, or death
+    if (this.isStarting || !this.isGameActive || this.isDying || this.isPaused) {
       if (movementKeys.includes(event.key)) {
         event.preventDefault()
       }
       return
     }
-    
+
     // Immediately apply movement for responsive controls
     switch(event.key) {
       case 'ArrowUp':
@@ -599,10 +669,6 @@ export default class extends Controller {
         this.pacmanDirection = 'right'
         event.preventDefault()
         break
-      case 'Escape':
-        this.stopGame()
-        event.preventDefault()
-        break
     }
   }
 
@@ -614,7 +680,7 @@ export default class extends Controller {
    * Start the game
    * Initializes game state, generates dots/ghosts, starts game loop
    */
-  startGame() {
+  async startGame() {
     if (this.isGameActive || this.isStarting) return
     
     console.log("🎮 Starting Pac-Man game!")
@@ -633,15 +699,29 @@ export default class extends Controller {
         this.startHintTarget.style.display = 'none'
       }, 300)
     }
-    
+
     // Show game container
     this.gameContainerTarget.classList.add('active')
     this.hudTarget.classList.add('active')
-    
+
     // Reset game state
     this.score = 0
+    this.dotsScore = 0
     this.lives = 3
     this.updateHUD()
+
+    // Reset difficulty settings
+    this.ghostSpeed = 1.4
+    this.powerModeDuration = 7000
+    this.powerModeWarningDuration = 2000
+
+    // Reset Pac-Man position to initial position
+    this.pacmanPosition = { ...this.initialPacmanPosition }
+    this.pacmanVelocity = { x: 0, y: 0 }
+    this.updatePacmanPosition()
+
+    // Clear collected dot positions for fresh start
+    this.collectedDotPositions.clear()
 
     // Initialize locked sections (only when game starts)
     this.initializeLockedSections()
@@ -653,9 +733,22 @@ export default class extends Controller {
     this.generateDots()
     this.createGhosts()
     
-    // Play beginning sound and wait for it to finish
+    // Smoothly scroll to starting position before beginning
+    const targetScrollY = this.initialPacmanPosition.y - (window.innerHeight / 2)
+    const clampedTargetY = Math.max(0, Math.min(targetScrollY, document.documentElement.scrollHeight - window.innerHeight))
+    
+    // Only scroll if we're not already near the starting position
+    if (Math.abs(window.scrollY - clampedTargetY) > 100) {
+      console.log("📜 Scrolling to starting position...")
+      await this.smoothScrollTo(clampedTargetY, 800)
+    }
+    
+    // Play beginning sound
     console.log("🎵 Playing intro music...")
     this.playSound('beginning', true)
+    
+    // Show countdown while intro music plays
+    await this.showCountdown()
     
     // Wait for the beginning sound to finish before starting gameplay
     const beginningAudio = this.audioFiles.beginning
@@ -691,8 +784,30 @@ export default class extends Controller {
     console.log("🛑 Stopping Pac-Man game!")
     this.isGameActive = false
     this.isStarting = false
+    this.isPaused = false
     this.gameContainerTarget.classList.remove('active')
     this.hudTarget.classList.remove('active')
+
+    // Remove pause overlay if it exists
+    const pauseOverlay = document.querySelector('.pacman-pause-overlay')
+    if (pauseOverlay) {
+      pauseOverlay.remove()
+    }
+    
+    // Clear any active hover effects
+    if (this.hoveredElement) {
+      this.hoveredElement.classList.remove('pacman-hover')
+      const leaveEvent = new CustomEvent('pacman:leave', { 
+        detail: { element: this.hoveredElement }
+      })
+      this.hoveredElement.dispatchEvent(leaveEvent)
+      this.hoveredElement = null
+    }
+    
+    // Remove all pacman-hover classes from any elements
+    document.querySelectorAll('.pacman-hover').forEach(el => {
+      el.classList.remove('pacman-hover')
+    })
 
     // Stop all sounds
     this.stopAllSounds()
@@ -720,15 +835,101 @@ export default class extends Controller {
     // Remove section locks
     this.removeAllSectionLocks()
 
-    // Clean up dots and ghosts
+    // Clean up dots, items, and ghosts
     this.dots.forEach(dot => dot.element && dot.element.remove())
-    this.ghosts.forEach(ghost => ghost.element && ghost.element.remove())
+    this.items.forEach(item => item.element && item.element.remove())
+    this.ghosts.forEach(ghost => {
+      if (ghost.element) ghost.element.remove()
+      if (ghost.indicator) ghost.indicator.remove()
+    })
     this.dots = []
+    this.items = []
     this.ghosts = []
+
+    // Clear all effect timers
+    Object.keys(this.effectTimers).forEach(key => {
+      clearTimeout(this.effectTimers[key])
+    })
+    this.effectTimers = {}
+
+    // Reset active effects
+    this.activeEffects = {
+      speedBoost: false,
+      slowDown: false,
+      shield: false,
+      freeze: false,
+      doublePoints: false
+    }
 
     if (this.gameLoopId) {
       cancelAnimationFrame(this.gameLoopId)
     }
+  }
+
+  async togglePause() {
+    if (this.isPaused) {
+      // Unpausing - keep paused during countdown
+      console.log("▶️ Game resuming...")
+      await this.hidePauseOverlay()
+      // Show countdown before resuming (game stays paused)
+      await this.showCountdown()
+      // Only unpause after countdown completes
+      this.isPaused = false
+      console.log("▶️ Game resumed")
+    } else {
+      // Pausing
+      this.isPaused = true
+      console.log("⏸️ Game paused")
+      this.showPauseOverlay()
+    }
+  }
+
+  showPauseOverlay() {
+    // Create pause overlay
+    const pauseOverlay = document.createElement('div')
+    pauseOverlay.className = 'pacman-pause-overlay'
+    pauseOverlay.innerHTML = `
+      <div class="pause-content">
+        <div class="pause-title">⏸️ PAUSED</div>
+        <div class="pause-message">Press P to resume</div>
+        <div class="pause-controls">
+          <div class="control-row">
+            <span class="control-key">WASD / Arrows</span>
+            <span class="control-desc">Move</span>
+          </div>
+          <div class="control-row">
+            <span class="control-key">P</span>
+            <span class="control-desc">Pause/Resume</span>
+          </div>
+          <div class="control-row">
+            <span class="control-key">Esc</span>
+            <span class="control-desc">Quit Game</span>
+          </div>
+        </div>
+      </div>
+    `
+
+    document.body.appendChild(pauseOverlay)
+
+    // Animate in
+    requestAnimationFrame(() => {
+      pauseOverlay.classList.add('show')
+    })
+  }
+
+  hidePauseOverlay() {
+    return new Promise((resolve) => {
+      const pauseOverlay = document.querySelector('.pacman-pause-overlay')
+      if (pauseOverlay) {
+        pauseOverlay.classList.remove('show')
+        setTimeout(() => {
+          pauseOverlay.remove()
+          resolve()
+        }, 300)
+      } else {
+        resolve()
+      }
+    })
   }
 
   // ============================================
@@ -851,6 +1052,117 @@ export default class extends Controller {
     }
 
     console.log(`Generated ${this.dots.length} dots in playable area (${sections} sections, excluding locked zones) - optimized for performance`)
+
+    // Spawn initial items after dots are generated
+    this.spawnRandomItems()
+  }
+
+  /**
+   * Spawn random powerup items across the playable area
+   * Avoids locked sections
+   */
+  spawnRandomItems() {
+    const viewportWidth = window.innerWidth
+    const pageHeight = document.documentElement.scrollHeight
+
+    // Get playable boundaries (same as dots)
+    const header = document.querySelector('.header')
+    const footer = document.querySelector('.footer')
+
+    let minY = 50
+    let maxY = pageHeight - 50
+
+    if (header) {
+      const headerRect = header.getBoundingClientRect()
+      minY = headerRect.top + window.scrollY + headerRect.height + 50
+    }
+
+    if (footer) {
+      const footerRect = footer.getBoundingClientRect()
+      maxY = footerRect.top + window.scrollY - 50
+    }
+
+    // Spawn 3-5 random items across the playable area
+    const itemCount = 3 + Math.floor(Math.random() * 3)
+    let spawned = 0
+    let attempts = 0
+    const maxAttempts = 50 // Prevent infinite loop
+
+    while (spawned < itemCount && attempts < maxAttempts) {
+      attempts++
+
+      // Random position
+      const x = 80 + Math.random() * (viewportWidth - 160)
+      const y = minY + Math.random() * (maxY - minY)
+
+      // Check if position is in a locked section
+      const isInLockedSection = this.sections.some(section => {
+        if (section.unlocked) return false // Skip unlocked sections
+
+        const sectionElement = document.getElementById(section.id)
+        if (!sectionElement) return false
+
+        const rect = sectionElement.getBoundingClientRect()
+        const sectionTop = rect.top + window.scrollY
+        const sectionBottom = sectionTop + rect.height
+
+        // Add 100px buffer above and below locked section
+        return y >= (sectionTop - 100) && y <= (sectionBottom + 100)
+      })
+
+      // Skip this position if it's in a locked section
+      if (isInLockedSection) {
+        continue
+      }
+
+      // Random item type (weighted probabilities)
+      const itemTypeKeys = Object.keys(this.itemTypes)
+      const weights = [25, 10, 15, 20, 20, 10] // Speed, Slow, Shield, Freeze, Double, Life
+
+      let totalWeight = weights.reduce((a, b) => a + b, 0)
+      let random = Math.random() * totalWeight
+
+      let selectedType = itemTypeKeys[0]
+      for (let j = 0; j < weights.length; j++) {
+        if (random < weights[j]) {
+          selectedType = itemTypeKeys[j]
+          break
+        }
+        random -= weights[j]
+      }
+
+      this.createItem(x, y, selectedType)
+      spawned++
+    }
+
+    console.log(`🎁 Spawned ${spawned} powerup items (avoided locked sections)`)
+  }
+
+  /**
+   * Create a powerup item at specified position
+   */
+  createItem(x, y, type) {
+    const itemConfig = this.itemTypes[type]
+    if (!itemConfig) return
+
+    const item = document.createElement('div')
+    item.className = `pacman-item ${itemConfig.positive ? 'item-positive' : 'item-negative'}`
+    item.innerHTML = `
+      <div class="item-emoji" style="color: ${itemConfig.color}">${itemConfig.emoji}</div>
+      <div class="item-label" style="color: ${itemConfig.color}">${itemConfig.name}</div>
+    `
+    item.style.left = `${x}px`
+    item.style.top = `${y}px`
+    this.gameContainerTarget.appendChild(item)
+
+    this.items.push({
+      element: item,
+      x: x,
+      y: y,
+      type: type,
+      config: itemConfig,
+      collected: false
+    })
   }
 
   /**
@@ -1025,9 +1337,9 @@ export default class extends Controller {
    */
   gameLoop() {
     if (!this.isGameActive) return
-    
-    // Don't allow movement during death/respawn
-    if (this.isDying) {
+
+    // Don't allow movement during death/respawn or pause
+    if (this.isDying || this.isPaused) {
       this.gameLoopId = requestAnimationFrame(() => this.gameLoop())
       return
     }
@@ -1104,11 +1416,17 @@ export default class extends Controller {
     // Check dot collisions
     this.checkDotCollisions()
 
+    // Check item collisions
+    this.checkItemCollisions()
+
     // Check key collection
     this.checkKeyCollection()
 
     // Update ghosts
     this.updateGhosts()
+
+    // Update off-screen ghost indicators
+    this.updateGhostIndicators()
 
     // Check ghost collisions
     this.checkGhostCollisions()
@@ -1236,6 +1554,7 @@ export default class extends Controller {
         dot.collected = true
         dot.element.classList.add('collected')
         this.score += dot.points
+        this.dotsScore += dot.points // Track dots score separately for section unlocking
         this.updateHUD()
 
         // Track this dot position as collected (to prevent regeneration)
@@ -1263,6 +1582,260 @@ export default class extends Controller {
     })
   }
 
+  checkItemCollisions() {
+    const collisionRadius = 30
+
+    this.items.forEach(item => {
+      if (item.collected) return
+
+      const distance = Math.sqrt(
+        Math.pow(this.pacmanPosition.x - item.x, 2) +
+        Math.pow(this.pacmanPosition.y - item.y, 2)
+      )
+
+      if (distance < collisionRadius) {
+        item.collected = true
+        item.element.classList.add('collected')
+
+        // Add points (can be negative for bad items!)
+        const pointsEarned = item.config.points * (this.activeEffects.doublePoints ? 2 : 1)
+        this.score += pointsEarned
+        this.updateHUD()
+
+        // Show pickup notification
+        this.showItemNotification(item)
+
+        // Apply item effect
+        this.applyItemEffect(item.type, item.config)
+
+        // Play sound
+        if (item.config.positive) {
+          this.playSound('eatFruit', true)
+        } else {
+          this.playSound('death', true) // Use death sound for negative items
+        }
+
+        // Remove item with animation
+        setTimeout(() => {
+          if (item.element && item.element.parentNode) {
+            item.element.remove()
+          }
+        }, 300)
+      }
+    })
+  }
+
+  applyItemEffect(type, config) {
+    switch (type) {
+      case 'speedBoost':
+        this.activateSpeedBoost(config.duration)
+        break
+      case 'slowDown':
+        this.activateSlowDown(config.duration)
+        break
+      case 'shield':
+        this.activateShield(config.duration)
+        break
+      case 'freeze':
+        this.activateGhostFreeze(config.duration)
+        break
+      case 'doublePoints':
+        this.activateDoublePoints(config.duration)
+        break
+      case 'extraLife':
+        this.lives++
+        this.updateHUD()
+        this.playSound('extraPac', true)
+        console.log("❤️ Extra life gained!")
+        break
+    }
+  }
+
+  activateSpeedBoost(duration) {
+    this.activeEffects.speedBoost = true
+    this.pacmanSpeed = 1.9 * 1.5 // 50% faster
+    this.pacmanTarget.classList.add('speed-boost')
+    
+    // Create cooldown bar under Pac-Man
+    this.showEffectCooldown('speedBoost', duration)
+
+    this.clearEffectTimer('speedBoost')
+    this.effectTimers.speedBoost = setTimeout(() => {
+      this.activeEffects.speedBoost = false
+      this.pacmanSpeed = 1.9
+      this.pacmanTarget.classList.remove('speed-boost')
+      this.removeEffectCooldown('speedBoost')
+    }, duration)
+
+    console.log(`⚡ Speed boost activated for ${duration / 1000}s!`)
+  }
+
+  activateSlowDown(duration) {
+    this.activeEffects.slowDown = true
+    this.pacmanSpeed = 1.9 * 0.6 // 40% slower
+    this.pacmanTarget.classList.add('slow-down')
+    
+    // Create cooldown bar under Pac-Man
+    this.showEffectCooldown('slowDown', duration)
+
+    this.clearEffectTimer('slowDown')
+    this.effectTimers.slowDown = setTimeout(() => {
+      this.activeEffects.slowDown = false
+      this.pacmanSpeed = 1.9
+      this.pacmanTarget.classList.remove('slow-down')
+      this.removeEffectCooldown('slowDown')
+    }, duration)
+
+    console.log(`🐌 Slowed down for ${duration / 1000}s!`)
+  }
+
+  activateShield(duration) {
+    this.activeEffects.shield = true
+    this.pacmanTarget.classList.add('shielded')
+    
+    // Create cooldown bar under Pac-Man
+    this.showEffectCooldown('shield', duration)
+
+    this.clearEffectTimer('shield')
+    this.effectTimers.shield = setTimeout(() => {
+      this.activeEffects.shield = false
+      this.pacmanTarget.classList.remove('shielded')
+      this.removeEffectCooldown('shield')
+    }, duration)
+
+    console.log(`🛡️ Shield activated for ${duration / 1000}s!`)
+  }
+  
+  /**
+   * Show effect cooldown bar under Pac-Man
+   */
+  showEffectCooldown(effectName, duration) {
+    // Remove existing cooldown bar if any
+    this.removeEffectCooldown(effectName)
+    
+    const config = this.itemTypes[effectName]
+    const cooldownBar = document.createElement('div')
+    cooldownBar.className = 'pacman-effect-cooldown'
+    cooldownBar.dataset.effect = effectName
+    cooldownBar.style.cssText = `
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 6px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 3px;
+      overflow: hidden;
+      z-index: 10;
+    `
+    
+    const fill = document.createElement('div')
+    fill.className = 'effect-cooldown-fill'
+    fill.style.cssText = `
+      width: 100%;
+      height: 100%;
+      background: ${config.color};
+      box-shadow: 0 0 8px ${config.color};
+      border-radius: 3px;
+      transition: width ${duration}ms linear;
+    `
+    
+    cooldownBar.appendChild(fill)
+    this.pacmanTarget.appendChild(cooldownBar)
+    
+    // Animate fill to 0
+    requestAnimationFrame(() => {
+      fill.style.width = '0%'
+    })
+  }
+  
+  /**
+   * Remove effect cooldown bar
+   */
+  removeEffectCooldown(effectName) {
+    const existingBar = this.pacmanTarget.querySelector(`[data-effect="${effectName}"]`)
+    if (existingBar) {
+      existingBar.remove()
+    }
+  }
+
+  activateGhostFreeze(duration) {
+    this.activeEffects.freeze = true
+    
+    // Create cooldown bar under Pac-Man
+    this.showEffectCooldown('freeze', duration)
+
+    // Freeze all ghosts
+    this.ghosts.forEach(ghost => {
+      if (!ghost.frozen) {
+        ghost.frozen = true
+        ghost.element.classList.add('frozen')
+      }
+    })
+
+    this.clearEffectTimer('freeze')
+    this.effectTimers.freeze = setTimeout(() => {
+      this.activeEffects.freeze = false
+      this.removeEffectCooldown('freeze')
+      this.ghosts.forEach(ghost => {
+        ghost.frozen = false
+        ghost.element.classList.remove('frozen')
+      })
+    }, duration)
+
+    console.log(`❄️ Ghosts frozen for ${duration / 1000}s!`)
+  }
+
+  activateDoublePoints(duration) {
+    this.activeEffects.doublePoints = true
+    this.pacmanTarget.classList.add('double-points')
+    
+    // Create cooldown bar under Pac-Man
+    this.showEffectCooldown('doublePoints', duration)
+
+    this.clearEffectTimer('doublePoints')
+    this.effectTimers.doublePoints = setTimeout(() => {
+      this.activeEffects.doublePoints = false
+      this.pacmanTarget.classList.remove('double-points')
+      this.removeEffectCooldown('doublePoints')
+    }, duration)
+
+    console.log(`⭐ Double points activated for ${duration / 1000}s!`)
+  }
+
+  clearEffectTimer(effectType) {
+    if (this.effectTimers[effectType]) {
+      clearTimeout(this.effectTimers[effectType])
+      delete this.effectTimers[effectType]
+    }
+  }
+
+  showItemNotification(item) {
+    const notification = document.createElement('div')
+    notification.className = 'item-notification'
+    notification.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: ${item.config.color};
+      text-shadow: 0 0 20px ${item.config.color}, 0 0 40px ${item.config.color};
+      z-index: 10005;
+      animation: itemNotification 1.5s ease-out forwards;
+      pointer-events: none;
+    `
+    notification.textContent = `${item.config.emoji} ${item.config.name}`
+
+    document.body.appendChild(notification)
+
+    setTimeout(() => {
+      notification.remove()
+    }, 1500)
+  }
+
   /**
    * Check if score reached a section threshold and spawn key
    */
@@ -1272,7 +1845,7 @@ export default class extends Controller {
 
     const section = this.sections[this.currentSection]
 
-    if (this.score >= section.threshold) {
+    if (this.dotsScore >= section.threshold) {
       // Clear ALL dots (collected and uncollected) to prepare for key
       this.dots.forEach(dot => {
         if (dot.element && dot.element.parentNode) {
@@ -1359,6 +1932,9 @@ export default class extends Controller {
       this.keySpawned = false
       this.keyCollected = false
 
+      // Increase difficulty as sections unlock
+      this.increaseDifficulty()
+
       // Regenerate dots for next section
       if (this.currentSection < this.sections.length) {
         this.regeneratingDots = true // Flag to prevent win condition during regeneration
@@ -1383,7 +1959,7 @@ export default class extends Controller {
     this.powerMode = true
     this.powerModeEnding = false
     this.pacmanTarget.classList.add('powered')
-    
+
     // Make ghosts frightened (not eaten ones)
     this.ghosts.forEach(ghost => {
       if (!ghost.eaten) {
@@ -1396,7 +1972,7 @@ export default class extends Controller {
         }
       }
     })
-    
+
     // Clear existing timers
     if (this.powerModeTimer) {
       clearTimeout(this.powerModeTimer)
@@ -1404,18 +1980,22 @@ export default class extends Controller {
     if (this.powerModeEndingTimer) {
       clearTimeout(this.powerModeEndingTimer)
     }
-    
-    // Start flashing 2 seconds before ending (total 7 seconds of power)
+
+    // Use dynamic durations based on current difficulty
+    const totalDuration = this.powerModeDuration || 7000
+    const warningDuration = this.powerModeWarningDuration || 2000
+
+    // Start flashing before ending
     this.powerModeEndingTimer = setTimeout(() => {
       this.powerModeEnding = true
-    }, 5000)
-    
-    // Deactivate after 7 seconds total
+    }, totalDuration - warningDuration)
+
+    // Deactivate after duration
     this.powerModeTimer = setTimeout(() => {
       this.powerMode = false
       this.powerModeEnding = false
       this.pacmanTarget.classList.remove('powered')
-      
+
       this.ghosts.forEach(ghost => {
         if (!ghost.eaten) {
           ghost.frightened = false
@@ -1427,7 +2007,7 @@ export default class extends Controller {
           }
         }
       })
-    }, 7000)
+    }, totalDuration)
   }
 
   // ============================================
@@ -1442,8 +2022,11 @@ export default class extends Controller {
    */
   updateGhosts() {
     this.animationFrame++
-    
+
     this.ghosts.forEach((ghost, index) => {
+      // Skip frozen ghosts
+      if (ghost.frozen) return
+
       // Update scatter timer for mode switching
       ghost.scatterTimer = (ghost.scatterTimer || 0) + 1
       
@@ -1487,9 +2070,12 @@ export default class extends Controller {
       } else {
         // Chase mode (default) - use personality-based AI
         switch (ghost.personality) {
-          case 'chase': // Blinky - ALWAYS aggressive, direct chase (never scatters!)
-            targetX = this.pacmanPosition.x
-            targetY = this.pacmanPosition.y
+          case 'chase': // Blinky - Relentless pursuer with prediction
+            // Direct chase with slight prediction based on Pac-Man's momentum
+            const predictionFrames = 20
+            targetX = this.pacmanPosition.x + (this.pacmanVelocity.x * predictionFrames)
+            targetY = this.pacmanPosition.y + (this.pacmanVelocity.y * predictionFrames)
+
             // Speed boost when few dots remain (Cruise Elroy mode)
             const dotsRemaining = this.dots.filter(d => !d.collected).length
             const totalDots = this.dots.length
@@ -1500,47 +2086,97 @@ export default class extends Controller {
             } else {
               ghost.speedBoost = 1
             }
-            break
-            
-          case 'ambush': // Pinky - Targets ahead of Pac-Man (ambush strategy)
-            const lookAhead = 120 // 4 tiles ahead
-            let predictX = this.pacmanPosition.x
-            let predictY = this.pacmanPosition.y
-            
-            switch(this.pacmanDirection) {
-              case 'right': predictX += lookAhead; break
-              case 'left': predictX -= lookAhead; break
-              case 'down': predictY += lookAhead; break
-              case 'up': predictY -= lookAhead; break
+
+            // Add slight randomness to prevent perfect prediction avoidance
+            if (Math.random() < 0.1) { // 10% chance every frame
+              targetX += (Math.random() - 0.5) * 100
+              targetY += (Math.random() - 0.5) * 100
             }
-            
-            targetX = predictX
-            targetY = predictY
             break
             
-          case 'patrol': // Inky - Unpredictable flanking (uses Blinky's position)
+          case 'ambush': // Pinky - Advanced prediction ambush
+            // Predict Pac-Man's position based on velocity AND acceleration
+            const lookAheadFrames = 60 // Predict 1 second ahead
+            const velocityMagnitude = Math.sqrt(
+              Math.pow(this.pacmanVelocity.x, 2) +
+              Math.pow(this.pacmanVelocity.y, 2)
+            )
+
+            // If Pac-Man is moving, predict future position
+            if (velocityMagnitude > 0) {
+              targetX = this.pacmanPosition.x + (this.pacmanVelocity.x * lookAheadFrames)
+              targetY = this.pacmanPosition.y + (this.pacmanVelocity.y * lookAheadFrames)
+
+              // Add flanking behavior - try to cut off from the side
+              const angleToIntercept = Math.atan2(
+                targetY - ghost.y,
+                targetX - ghost.x
+              )
+              const flankOffset = 150
+              targetX += Math.cos(angleToIntercept + Math.PI / 2) * flankOffset
+              targetY += Math.sin(angleToIntercept + Math.PI / 2) * flankOffset
+            } else {
+              // If Pac-Man is stationary, circle around to cut off escape
+              const circleAngle = (ghost.scatterTimer * 0.02) + (Math.PI / 2)
+              targetX = this.pacmanPosition.x + Math.cos(circleAngle) * 150
+              targetY = this.pacmanPosition.y + Math.sin(circleAngle) * 150
+            }
+            break
+            
+          case 'patrol': // Inky - Coordinated flanking with Blinky
             const blinky = this.ghosts[0]
-            // Create a vector from Blinky to Pac-Man, then double it
-            const vectorX = (this.pacmanPosition.x - blinky.x) * 2
-            const vectorY = (this.pacmanPosition.y - blinky.y) * 2
-            targetX = blinky.x + vectorX
-            targetY = blinky.y + vectorY
+
+            // Calculate where Pac-Man is trying to escape
+            const escapeAngle = Math.atan2(
+              this.pacmanPosition.y - blinky.y,
+              this.pacmanPosition.x - blinky.x
+            )
+
+            // Position perpendicular to Blinky's chase to create a pincer attack
+            const distanceFromPacman = 100
+            const perpAngle = escapeAngle + Math.PI / 2
+
+            // Alternate sides based on timer for unpredictability
+            const side = Math.floor(ghost.scatterTimer / 180) % 2 === 0 ? 1 : -1
+
+            targetX = this.pacmanPosition.x + Math.cos(perpAngle) * distanceFromPacman * side
+            targetY = this.pacmanPosition.y + Math.sin(perpAngle) * distanceFromPacman * side
+
+            // Add vertical advantage - prefer being above Pac-Man in open field
+            if (Math.abs(ghost.y - this.pacmanPosition.y) < 100) {
+              targetY = this.pacmanPosition.y - 200 // Position above
+            }
             break
             
-          case 'scatter': // Clyde - Shy ghost (chases when far, retreats when close)
+          case 'scatter': // Clyde - Unpredictable ambusher with zone control
             const distanceToPacman = Math.sqrt(
-              Math.pow(this.pacmanPosition.x - ghost.x, 2) + 
+              Math.pow(this.pacmanPosition.x - ghost.x, 2) +
               Math.pow(this.pacmanPosition.y - ghost.y, 2)
             )
-            
-            if (distanceToPacman < 200) {
-              // Too close, retreat to home corner (bottom left)
-              targetX = window.innerWidth * 0.1
-              targetY = this.pacmanPosition.y + 500
-            } else {
-              // Far enough, chase
+
+            // Zone-based behavior: Chase from optimal distance
+            if (distanceToPacman < 150) {
+              // Too close, maintain distance while cutting off escape
+              const retreatAngle = Math.atan2(ghost.y - this.pacmanPosition.y, ghost.x - this.pacmanPosition.x)
+              const maintainDistance = 200
+
+              // Don't just flee - position to block escape routes
+              const blockAngle = retreatAngle + (Math.sin(ghost.scatterTimer * 0.05) * Math.PI / 3)
+              targetX = this.pacmanPosition.x + Math.cos(blockAngle) * maintainDistance
+              targetY = this.pacmanPosition.y + Math.sin(blockAngle) * maintainDistance
+            } else if (distanceToPacman > 400) {
+              // Too far, close in aggressively
               targetX = this.pacmanPosition.x
               targetY = this.pacmanPosition.y
+            } else {
+              // Optimal zone - orbit and wait for opportunity
+              const orbitAngle = Math.atan2(this.pacmanPosition.y - ghost.y, this.pacmanPosition.x - ghost.x)
+              const orbitSpeed = 0.03
+              const newAngle = orbitAngle + orbitSpeed
+
+              const orbitRadius = 250
+              targetX = this.pacmanPosition.x + Math.cos(newAngle) * orbitRadius
+              targetY = this.pacmanPosition.y + Math.sin(newAngle) * orbitRadius
             }
             break
             
@@ -1576,6 +2212,11 @@ export default class extends Controller {
       if (distance > 0) {
         // Speed modifiers based on state
         let speed = this.ghostSpeed * (ghost.speedBoost || 1)
+        
+        // Cap ghost speed to always be slower than Pac-Man (90% max)
+        // This ensures the game remains winnable even with Cruise Elroy mode
+        const maxSpeed = this.pacmanSpeed * 0.9
+        speed = Math.min(speed, maxSpeed)
         
         if (ghost.eaten) {
           speed = this.pacmanSpeed * 1.5 // Eyes move faster
@@ -1678,6 +2319,114 @@ export default class extends Controller {
     })
   }
 
+  /**
+   * Update off-screen ghost indicators
+   * Shows arrows at screen edges pointing to ghosts that are off-screen
+   */
+  updateGhostIndicators() {
+    const viewportTop = window.scrollY
+    const viewportBottom = viewportTop + window.innerHeight
+    const viewportLeft = 0
+    const viewportRight = window.innerWidth
+    const edgeMargin = 30 // Distance from edge to show indicator
+
+    this.ghosts.forEach((ghost, index) => {
+      // Check if ghost is off-screen
+      const isOffScreenTop = ghost.y < viewportTop - 50
+      const isOffScreenBottom = ghost.y > viewportBottom + 50
+      const isOffScreenLeft = ghost.x < viewportLeft - 50
+      const isOffScreenRight = ghost.x > viewportRight + 50
+
+      const isOffScreen = isOffScreenTop || isOffScreenBottom || isOffScreenLeft || isOffScreenRight
+
+      // Get or create indicator for this ghost
+      let indicator = ghost.indicator
+      if (!indicator) {
+        indicator = document.createElement('div')
+        indicator.className = 'ghost-indicator'
+        indicator.innerHTML = `
+          <div class="indicator-arrow"></div>
+          <div class="indicator-dot" style="background: ${this.getGhostColor(ghost.color)}"></div>
+        `
+        this.gameContainerTarget.appendChild(indicator)
+        ghost.indicator = indicator
+      }
+
+      if (isOffScreen && !ghost.eaten) {
+        // Calculate direction angle from center of screen to ghost
+        const centerX = viewportLeft + (viewportRight - viewportLeft) / 2
+        const centerY = viewportTop + window.innerHeight / 2
+
+        const angle = Math.atan2(ghost.y - centerY, ghost.x - centerX)
+
+        // Calculate position on screen edge
+        let indicatorX, indicatorY
+
+        // Determine which edge and position
+        const absAngle = Math.abs(angle)
+        const isMoreVertical = absAngle > Math.PI / 4 && absAngle < (3 * Math.PI) / 4
+
+        if (isMoreVertical) {
+          // Top or bottom edge
+          if (angle < 0) {
+            // Top edge
+            indicatorY = edgeMargin
+            indicatorX = Math.max(edgeMargin, Math.min(viewportRight - edgeMargin, ghost.x))
+          } else {
+            // Bottom edge
+            indicatorY = window.innerHeight - edgeMargin
+            indicatorX = Math.max(edgeMargin, Math.min(viewportRight - edgeMargin, ghost.x))
+          }
+        } else {
+          // Left or right edge
+          if (angle > -Math.PI / 2 && angle < Math.PI / 2) {
+            // Right edge
+            indicatorX = viewportRight - edgeMargin
+            indicatorY = Math.max(edgeMargin, Math.min(window.innerHeight - edgeMargin, ghost.y - viewportTop))
+          } else {
+            // Left edge
+            indicatorX = edgeMargin
+            indicatorY = Math.max(edgeMargin, Math.min(window.innerHeight - edgeMargin, ghost.y - viewportTop))
+          }
+        }
+
+        // Update indicator position and rotation
+        indicator.style.display = 'flex'
+        indicator.style.left = `${indicatorX}px`
+        indicator.style.top = `${indicatorY + viewportTop}px`
+
+        // Rotate arrow to point towards ghost
+        const arrowRotation = (angle * 180 / Math.PI) + 90 // +90 because arrow points up by default
+        const arrow = indicator.querySelector('.indicator-arrow')
+        if (arrow) {
+          arrow.style.transform = `rotate(${arrowRotation}deg)`
+        }
+
+        // Add pulsing for frightened ghosts
+        if (ghost.frightened) {
+          indicator.classList.add('frightened')
+        } else {
+          indicator.classList.remove('frightened')
+        }
+      } else {
+        // Ghost is on screen, hide indicator
+        if (indicator) {
+          indicator.style.display = 'none'
+        }
+      }
+    })
+  }
+
+  getGhostColor(colorName) {
+    const colors = {
+      'red': '#FF0000',
+      'pink': '#FFB8D1',
+      'cyan': '#00FFFF',
+      'orange': '#FFA500'
+    }
+    return colors[colorName] || '#FFFFFF'
+  }
+
   // ============================================
   // COLLISION DETECTION
   // ============================================
@@ -1700,23 +2449,27 @@ export default class extends Controller {
       if (distance < collisionRadius) {
         if (ghost.frightened) {
           // Eat the ghost
-          this.score += 200
+          const ghostPoints = 200 * (this.activeEffects.doublePoints ? 2 : 1)
+          this.score += ghostPoints
           this.updateHUD()
           ghost.eaten = true
           ghost.frightened = false
           ghost.element.classList.remove('frightened')
           ghost.element.classList.add('eaten')
-          
+
           // Play eat ghost sound
           this.playSound('eatGhost', true)
-          
+
           // Respawn after reaching home
           setTimeout(() => {
             this.respawnGhost(ghost)
           }, 3000)
-        } else {
-          // Lose a life
+        } else if (!this.activeEffects.shield) {
+          // Lose a life (unless shielded)
           this.loseLife()
+        } else {
+          // Shield deflects ghost
+          console.log("🛡️ Shield deflected ghost!")
         }
       }
     })
@@ -1781,6 +2534,10 @@ export default class extends Controller {
     // Stop all movement during respawn
     this.pacmanVelocity = { x: 0, y: 0 }
     
+    // Hide game assets during respawn to prevent visual glitches
+    this.gameContainerTarget.style.opacity = '0'
+    this.pacmanTarget.style.opacity = '0'
+    
     // Smoothly scroll back to starting position
     const targetScrollY = this.initialPacmanPosition.y - (window.innerHeight / 2)
     
@@ -1798,6 +2555,12 @@ export default class extends Controller {
     
     // Show countdown overlay (now visible since we're at top)
     await this.showCountdown()
+    
+    // Show game assets again with fade in
+    this.gameContainerTarget.style.transition = 'opacity 0.3s ease'
+    this.pacmanTarget.style.transition = 'opacity 0.3s ease'
+    this.gameContainerTarget.style.opacity = '1'
+    this.pacmanTarget.style.opacity = '1'
     
     // Resume game after countdown
     this.isDying = false
@@ -1993,6 +2756,26 @@ export default class extends Controller {
         cancelAnimationFrame(this.gameLoopId)
         this.gameLoopId = null
       }
+      
+      // Clear any active hover effects
+      if (this.hoveredElement) {
+        this.hoveredElement.classList.remove('pacman-hover')
+        const leaveEvent = new CustomEvent('pacman:leave', { 
+          detail: { element: this.hoveredElement }
+        })
+        this.hoveredElement.dispatchEvent(leaveEvent)
+        this.hoveredElement = null
+      }
+      
+      // Remove all pacman-hover classes
+      document.querySelectorAll('.pacman-hover').forEach(el => {
+        el.classList.remove('pacman-hover')
+      })
+      
+      // Hide game assets
+      this.gameContainerTarget.classList.remove('active')
+      this.pacmanTarget.style.opacity = '0'
+      
       this.showGameOverModal(false)
     }, 100)
   }
@@ -2009,6 +2792,26 @@ export default class extends Controller {
         cancelAnimationFrame(this.gameLoopId)
         this.gameLoopId = null
       }
+      
+      // Clear any active hover effects
+      if (this.hoveredElement) {
+        this.hoveredElement.classList.remove('pacman-hover')
+        const leaveEvent = new CustomEvent('pacman:leave', { 
+          detail: { element: this.hoveredElement }
+        })
+        this.hoveredElement.dispatchEvent(leaveEvent)
+        this.hoveredElement = null
+      }
+      
+      // Remove all pacman-hover classes
+      document.querySelectorAll('.pacman-hover').forEach(el => {
+        el.classList.remove('pacman-hover')
+      })
+      
+      // Hide game assets
+      this.gameContainerTarget.classList.remove('active')
+      this.pacmanTarget.style.opacity = '0'
+      
       this.showGameOverModal(true)
     }, 100)
   }
@@ -2022,26 +2825,6 @@ export default class extends Controller {
     const message = isWin ? 'Congratulations! You unlocked all sections!' : 'Better luck next time!'
     const emoji = isWin ? '🏆' : '👾'
 
-    // Calculate progress to next section
-    let progressHTML = ''
-    if (!isWin && this.currentSection < this.sections.length) {
-      const nextSection = this.sections[this.currentSection]
-      const pointsNeeded = nextSection.threshold - this.score
-      const progressPercent = Math.min(100, (this.score / nextSection.threshold) * 100)
-
-      progressHTML = `
-        <div class="modal-progress">
-          <div class="progress-header">
-            <span class="progress-label">Next Section: ${nextSection.name}</span>
-            <span class="progress-points">${pointsNeeded} points needed</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: ${progressPercent}%"></div>
-          </div>
-        </div>
-      `
-    }
-
     modal.innerHTML = `
       <div class="modal-content">
         <div class="modal-emoji">${emoji}</div>
@@ -2051,7 +2834,6 @@ export default class extends Controller {
           <span class="score-label">Final Score</span>
           <span class="score-value">${this.score}</span>
         </div>
-        ${progressHTML}
         <div class="modal-buttons">
           <button class="modal-btn modal-btn-primary" data-action="restart">
             <i class="bx bx-refresh"></i>
@@ -2087,11 +2869,17 @@ export default class extends Controller {
   restartGame() {
     // Reset game state
     this.score = 0
+    this.dotsScore = 0
     this.lives = 3
     this.extraLifeAwarded = false // Reset extra life flag
     this.powerMode = false
     this.isDying = true // Set to true during restart to prevent movement
     this.isGameActive = true // Keep game active
+
+    // Reset difficulty settings
+    this.ghostSpeed = 1.4
+    this.powerModeDuration = 7000
+    this.powerModeWarningDuration = 2000
 
     // Reset section progression
     this.currentSection = 0
@@ -2106,13 +2894,34 @@ export default class extends Controller {
 
     // Clear existing elements
     this.dots.forEach(dot => dot.element && dot.element.remove())
-    this.ghosts.forEach(ghost => ghost.element && ghost.element.remove())
+    this.items.forEach(item => item.element && item.element.remove())
+    this.ghosts.forEach(ghost => {
+      if (ghost.element) ghost.element.remove()
+      if (ghost.indicator) ghost.indicator.remove()
+    })
     if (this.key && this.key.element) {
       this.key.element.remove()
     }
     this.dots = []
+    this.items = []
     this.ghosts = []
     this.key = null
+
+    // Clear all effect timers
+    Object.keys(this.effectTimers).forEach(key => {
+      clearTimeout(this.effectTimers[key])
+    })
+    this.effectTimers = {}
+
+    // Reset active effects
+    this.activeEffects = {
+      speedBoost: false,
+      slowDown: false,
+      shield: false,
+      freeze: false,
+      doublePoints: false
+    }
+    this.pacmanSpeed = 1.9 // Reset speed
 
     // Re-lock all sections
     this.initializeLockedSections()
@@ -2192,7 +3001,7 @@ export default class extends Controller {
       } else {
         this.progressItemTarget.style.display = 'flex'
         const nextSection = this.sections[this.currentSection]
-        const pointsNeeded = Math.max(0, nextSection.threshold - this.score)
+        const pointsNeeded = Math.max(0, nextSection.threshold - this.dotsScore)
 
         if (pointsNeeded === 0) {
           // Key available
@@ -2201,7 +3010,7 @@ export default class extends Controller {
           this.progressValueTarget.style.color = '#ffd700'
           this.progressValueTarget.style.textShadow = '0 0 10px rgba(255, 215, 0, 0.8)'
         } else {
-          // Show points needed
+          // Show points needed (dots only)
           this.progressLabelTarget.textContent = 'Need:'
           this.progressValueTarget.textContent = `${pointsNeeded} pts`
           this.progressValueTarget.style.color = ''

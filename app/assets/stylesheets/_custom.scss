@@ -941,6 +941,99 @@ html {
   &.invincible {
     animation: invincibleBlink 0.2s ease-in-out infinite;
   }
+
+  &.speed-boost {
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.9)) drop-shadow(0 0 30px rgba(255, 255, 0, 0.6));
+    animation: speedTrail 0.15s ease-in-out infinite;
+  }
+
+  &.slow-down {
+    filter: drop-shadow(0 0 15px rgba(139, 69, 19, 0.7)) brightness(0.7);
+    animation: slowPulse 1s ease-in-out infinite;
+  }
+
+  &.shielded {
+    filter: drop-shadow(0 0 25px rgba(0, 206, 209, 1)) drop-shadow(0 0 40px rgba(0, 206, 209, 0.6));
+    animation: shieldPulse 1s ease-in-out infinite;
+    
+    // Add visible shield bubble
+    &::after {
+      content: '🛡️';
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      font-size: 1.2rem;
+      animation: shieldFloat 2s ease-in-out infinite;
+      z-index: 10;
+      filter: drop-shadow(0 0 8px rgba(0, 206, 209, 1));
+    }
+    
+    // Shield circle effect
+    &::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 65px;
+      height: 65px;
+      border: 3px solid rgba(0, 206, 209, 0.6);
+      border-radius: 50%;
+      animation: shieldRing 1.5s ease-in-out infinite;
+      z-index: -1;
+    }
+  }
+
+  &.double-points {
+    filter: drop-shadow(0 0 20px rgba(255, 105, 180, 0.9)) drop-shadow(0 0 35px rgba(255, 105, 180, 0.6));
+    animation: starSparkle 0.5s ease-in-out infinite;
+  }
+}
+
+@keyframes speedTrail {
+  0%, 100% { transform: translate(-50%, -50%) scaleX(1.0); }
+  50% { transform: translate(-50%, -50%) scaleX(1.1); }
+}
+
+@keyframes slowPulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+@keyframes shieldPulse {
+  0%, 100% { 
+    filter: drop-shadow(0 0 25px rgba(0, 206, 209, 1)) drop-shadow(0 0 40px rgba(0, 206, 209, 0.6)); 
+  }
+  50% { 
+    filter: drop-shadow(0 0 35px rgba(0, 206, 209, 1)) drop-shadow(0 0 55px rgba(0, 206, 209, 0.9)); 
+  }
+}
+
+@keyframes shieldFloat {
+  0%, 100% {
+    transform: translateY(0px);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-5px);
+    opacity: 0.8;
+  }
+}
+
+@keyframes shieldRing {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.3);
+    opacity: 0;
+  }
+}
+
+@keyframes starSparkle {
+  0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+  50% { transform: translate(-50%, -50%) rotate(10deg); }
 }
 
 @keyframes powerPulse {
@@ -1310,6 +1403,17 @@ html {
   &.eaten {
     filter: drop-shadow(0 0 8px rgba(200, 200, 255, 0.6));
   }
+
+  &.frozen {
+    filter: brightness(0.7) hue-rotate(180deg) drop-shadow(0 0 15px rgba(135, 206, 235, 0.9));
+    animation: frozenShake 0.5s ease-in-out infinite;
+  }
+}
+
+@keyframes frozenShake {
+  0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+  25% { transform: translate(-50%, -50%) translateX(-2px); }
+  75% { transform: translate(-50%, -50%) translateX(2px); }
 }
 
 @keyframes frightenedShake {
@@ -1390,6 +1494,126 @@ html {
       .hud-value {
         font-size: 0.95rem;
       }
+    }
+  }
+
+  // HUD Controls section
+  .hud-controls {
+    border-top: 1px solid rgba(255, 215, 0, 0.2);
+    padding-top: 10px;
+    margin-top: 10px;
+
+    .hud-control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    .hud-key {
+      background: rgba(255, 215, 0, 0.15);
+      color: #ffd700;
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: 'Courier New', monospace;
+      min-width: 45px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .hud-control-label {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+  }
+}
+
+// Pac-Man pause overlay
+.pacman-pause-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10004;
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.show {
+    opacity: 1;
+  }
+
+  .pause-content {
+    text-align: center;
+    color: white;
+    max-width: 400px;
+    padding: 40px;
+    background: rgba(20, 20, 30, 0.8);
+    border-radius: 20px;
+    border: 2px solid rgba(255, 215, 0, 0.4);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+
+  .pause-title {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #ffd700;
+    margin-bottom: 15px;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+  }
+
+  .pause-message {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 30px;
+  }
+
+  .pause-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .control-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+    background: rgba(255, 215, 0, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+
+    .control-key {
+      background: rgba(255, 215, 0, 0.2);
+      color: #ffd700;
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: 'Courier New', monospace;
+      min-width: 100px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .control-desc {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.95rem;
+      font-weight: 500;
     }
   }
 }
@@ -1733,8 +1957,9 @@ html {
   backdrop-filter: blur(20px) saturate(180%);
   z-index: 100;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  padding-top: 100px; // Position lock higher up for better visibility
   transition: opacity 0.6s ease;
   border-top: 3px solid rgba(255, 215, 0, 0.6);
   border-bottom: 3px solid rgba(255, 215, 0, 0.3);
@@ -1820,6 +2045,18 @@ html {
   padding: 0.5rem 1.5rem;
   border-radius: 50px;
   backdrop-filter: blur(10px);
+  margin-bottom: 0.5rem;
+}
+
+.lock-subtext {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: rgba(255, 215, 0, 0.9);
+  text-shadow: 0 0 15px rgba(255, 215, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.4rem 1.2rem;
+  border-radius: 50px;
+  backdrop-filter: blur(10px);
 }
 
 @keyframes lockPulse {
@@ -1852,6 +2089,145 @@ html {
     opacity: 0;
     transform: scale(1.1) translateY(-20px);
     filter: blur(10px);
+  }
+}
+
+// Pac-Man items (powerups)
+.pacman-item {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: itemFloat 2s ease-in-out infinite;
+
+  &.item-positive {
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.4));
+  }
+
+  &.item-negative {
+    filter: drop-shadow(0 0 10px rgba(139, 69, 19, 0.4));
+  }
+
+  .item-emoji {
+    font-size: 2rem;
+    line-height: 1;
+    margin-bottom: 4px;
+    text-shadow: 0 0 8px currentColor;
+  }
+
+  .item-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    white-space: nowrap;
+    text-shadow: 0 0 6px currentColor, 0 1px 2px rgba(0, 0, 0, 0.5);
+    letter-spacing: 0.5px;
+  }
+
+  &.collected {
+    animation: itemCollected 0.3s ease-out forwards;
+  }
+}
+
+@keyframes itemFloat {
+  0%, 100% {
+    transform: translate(-50%, -50%) translateY(0);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateY(-8px);
+  }
+}
+
+@keyframes itemCollected {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2) translateY(-30px);
+    opacity: 0;
+  }
+}
+
+// Item notification popup
+@keyframes itemNotification {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+  }
+  20% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 1;
+  }
+  80% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.8) translateY(-50px);
+    opacity: 0;
+  }
+}
+
+// Ghost off-screen indicators
+.ghost-indicator {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 10003;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+  animation: indicatorPulse 1s ease-in-out infinite;
+
+  .indicator-arrow {
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 15px solid rgba(255, 255, 255, 0.9);
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+    transition: transform 0.2s ease;
+  }
+
+  .indicator-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+  }
+
+  &.frightened {
+    .indicator-arrow {
+      border-bottom-color: rgba(0, 102, 255, 0.9);
+    }
+
+    .indicator-dot {
+      background: #0066FF !important;
+      border-color: rgba(255, 255, 255, 0.9);
+      animation: frightenedIndicator 0.3s ease-in-out infinite;
+    }
+  }
+}
+
+@keyframes indicatorPulse {
+  0%, 100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes frightenedIndicator {
+  0%, 100% {
+    box-shadow: 0 0 10px #0066FF, 0 0 20px #0066FF;
+  }
+  50% {
+    box-shadow: 0 0 15px #0066FF, 0 0 30px #0066FF, 0 0 40px #0066FF;
   }
 }
 
