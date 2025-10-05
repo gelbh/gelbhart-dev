@@ -2420,3 +2420,39 @@ html {
   box-shadow: 0 10px 40px rgba(240, 147, 251, 0.3) !important;
   border-color: rgba(240, 147, 251, 0.3);
 }
+
+// Gallery item with hover effect for Hevy Tracker
+.gallery-item {
+  cursor: zoom-in;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.02);
+  }
+}
+
+// Fix active tab styling for better contrast
+#spreadsheetTabs {
+  .nav-link {
+    &.active {
+      color: var(--bs-primary) !important;
+      font-weight: 600;
+    }
+  }
+}
+
+// Smaller, compact steps for Hevy Tracker
+.steps-sm {
+  .step-body {
+    h5 {
+      font-size: 0.938rem;
+      font-weight: 600;
+    }
+    
+    p {
+      font-size: 0.813rem;
+      line-height: 1.4;
+    }
+  }
+}
+
