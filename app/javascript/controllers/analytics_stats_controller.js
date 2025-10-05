@@ -8,7 +8,8 @@ export default class extends Controller {
     "installCount",
     "countries",
     "engagementRate",
-    "countriesList"
+    "countriesList",
+    "expandButton"
   ]
 
   static values = {
@@ -16,7 +17,21 @@ export default class extends Controller {
   }
 
   connect() {
+    this.expanded = false
+    this.allCountries = []
+    this.totalUsers = 0
     this.fetchStats()
+  }
+
+  toggleCountries() {
+    this.expanded = !this.expanded
+    this.renderCountries()
+
+    if (this.hasExpandButtonTarget) {
+      this.expandButtonTarget.innerHTML = this.expanded
+        ? '<i class="bx bx-chevron-up me-1"></i>Show Less'
+        : '<i class="bx bx-chevron-down me-1"></i>Show All Countries'
+    }
   }
 
   async fetchStats() {
@@ -86,10 +101,19 @@ export default class extends Controller {
       this.engagementRateTarget.textContent = `${data.engagement_rate}%`
     }
 
-    // Update countries list if we have the target
+    // Store countries data and update list
     if (this.hasCountriesListTarget && data.countries.list) {
-      this.updateCountriesList(data.countries.list, data.active_users)
+      this.allCountries = data.countries.list
+      this.totalUsers = data.active_users
+      this.renderCountries()
     }
+  }
+
+  renderCountries() {
+    if (!this.hasCountriesListTarget || this.allCountries.length === 0) return
+
+    const countriesToShow = this.expanded ? this.allCountries : this.allCountries.slice(0, 6)
+    this.updateCountriesList(countriesToShow, this.totalUsers)
   }
 
   updateCountriesList(countries, totalUsers) {
@@ -99,14 +123,21 @@ export default class extends Controller {
       'India': { code: 'in', color: 'info' },
       'Canada': { code: 'ca', color: 'warning' },
       'Australia': { code: 'au', color: 'danger' },
-      'Germany': { code: 'de', color: 'primary' }
+      'Germany': { code: 'de', color: 'primary' },
+      'Brazil': { code: 'br', color: 'success' },
+      'France': { code: 'fr', color: 'info' },
+      'Netherlands': { code: 'nl', color: 'warning' },
+      'Spain': { code: 'es', color: 'danger' }
     }
 
-    const topCountries = countries.slice(0, 6)
+    const colors = ['primary', 'success', 'info', 'warning', 'danger', 'secondary']
 
     let html = ''
-    topCountries.forEach(country => {
-      const countryInfo = countryMap[country.name] || { code: 'xx', color: 'secondary' }
+    countries.forEach((country, index) => {
+      const countryInfo = countryMap[country.name] || {
+        code: this.getCountryCode(country.name),
+        color: colors[index % colors.length]
+      }
       const percentage = ((country.users / totalUsers) * 100).toFixed(1)
 
       html += `
@@ -130,5 +161,26 @@ export default class extends Controller {
     })
 
     this.countriesListTarget.innerHTML = html
+  }
+
+  getCountryCode(countryName) {
+    // Map of common country names to ISO 2-letter codes
+    const codes = {
+      'United States': 'us', 'United Kingdom': 'gb', 'India': 'in',
+      'Canada': 'ca', 'Australia': 'au', 'Germany': 'de', 'Brazil': 'br',
+      'France': 'fr', 'Netherlands': 'nl', 'Spain': 'es', 'Italy': 'it',
+      'Mexico': 'mx', 'Poland': 'pl', 'Sweden': 'se', 'Switzerland': 'ch',
+      'Belgium': 'be', 'Austria': 'at', 'Norway': 'no', 'Denmark': 'dk',
+      'Finland': 'fi', 'Ireland': 'ie', 'Portugal': 'pt', 'Greece': 'gr',
+      'Czech Republic': 'cz', 'Romania': 'ro', 'Hungary': 'hu',
+      'New Zealand': 'nz', 'Singapore': 'sg', 'Japan': 'jp', 'South Korea': 'kr',
+      'China': 'cn', 'Hong Kong': 'hk', 'Taiwan': 'tw', 'Thailand': 'th',
+      'Indonesia': 'id', 'Philippines': 'ph', 'Vietnam': 'vn', 'Malaysia': 'my',
+      'South Africa': 'za', 'Egypt': 'eg', 'Nigeria': 'ng', 'Kenya': 'ke',
+      'Argentina': 'ar', 'Chile': 'cl', 'Colombia': 'co', 'Peru': 'pe',
+      'Israel': 'il', 'Turkey': 'tr', 'Saudi Arabia': 'sa', 'United Arab Emirates': 'ae',
+      'Russia': 'ru', 'Ukraine': 'ua', 'Pakistan': 'pk', 'Bangladesh': 'bd'
+    }
+    return codes[countryName] || 'xx'
   }
 }
