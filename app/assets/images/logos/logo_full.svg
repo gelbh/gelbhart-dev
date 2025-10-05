@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 100">
+  <defs>
+    <!-- Glow effect for logo -->
+    <filter id="glow-full-logo" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+      <feOffset dx="0" dy="0" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.5"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Subtle glow for text -->
+    <filter id="glow-full-text" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1"/>
+      <feOffset dx="0" dy="0" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Logo <G/> on the left with more padding -->
+  <text fill="#6366f1" font-family="'Courier New', Courier, monospace" font-size="64" font-weight="700" filter="url(#glow-full-logo)" x="80" y="72" text-anchor="middle">&lt;G/&gt;</text>
+
+  <!-- Brand text on the right -->
+  <text fill="#ffffff" font-family="'Courier New', Courier, monospace" font-size="36" font-weight="600" filter="url(#glow-full-text)" x="175" y="67" text-anchor="start">gelbhart.dev</text>
+</svg>
