@@ -84,11 +84,13 @@ export default class extends Controller {
     this.pacmanDirection = 'right'
     this.pacmanNextDirection = null
     
-    // Speed settings (matching original arcade at 60 FPS)
-    // Pac-Man: 80% max speed ≈ 1.92 pixels/frame
-    // Ghosts: 75% of Pac-Man ≈ 1.44 pixels/frame
-    this.pacmanSpeed = 1.9
-    this.ghostSpeed = 1.4
+    // Speed settings (pixels per second for delta-time based movement)
+    // Increased from original arcade (1.9 px/frame = 114 px/s) for snappier web gameplay
+    this.pacmanSpeed = 180 // pixels/second (was 114)
+    this.ghostSpeed = 135  // pixels/second (was 84)
+
+    // Delta time tracking for frame-rate independent movement
+    this.lastFrameTime = null
 
     // Power mode durations (will be reduced as difficulty increases)
     this.powerModeDuration = 7000 // 7 seconds base
@@ -101,7 +103,7 @@ export default class extends Controller {
     
     // Animation frame counters
     this.animationFrame = 0
-    this.animationCounter = 0
+    this.animationTimer = 0 // Time-based animation timer (seconds)
     this.pacmanAnimationState = 0
     
     // Hover detection (no collision detection for movement)
@@ -422,17 +424,17 @@ export default class extends Controller {
   increaseDifficulty() {
     // Increase ghost speed by 15% per section unlocked
     const speedMultiplier = 1 + (this.currentSection * 0.15)
-    this.ghostSpeed = 1.4 * speedMultiplier
-    
+    this.ghostSpeed = 135 * speedMultiplier // Base 135 pixels/second
+
     // Cap ghost speed to 85% of Pac-Man's speed to keep game winnable
-    const maxGhostSpeed = this.pacmanSpeed * 0.85 // 1.615 max
+    const maxGhostSpeed = this.pacmanSpeed * 0.85
     this.ghostSpeed = Math.min(this.ghostSpeed, maxGhostSpeed)
 
     // Reduce power mode duration (7s base, -1s per section, minimum 3s)
     this.powerModeDuration = Math.max(3000, 7000 - (this.currentSection * 1000))
     this.powerModeWarningDuration = Math.max(1500, 2000 - (this.currentSection * 300))
 
-    console.log(`⚡ Difficulty increased! Ghost speed: ${this.ghostSpeed.toFixed(2)}, Power mode: ${this.powerModeDuration/1000}s`)
+    console.log(`⚡ Difficulty increased! Ghost speed: ${this.ghostSpeed.toFixed(0)} px/s, Power mode: ${this.powerModeDuration/1000}s`)
   }
 
   /**
@@ -711,7 +713,7 @@ export default class extends Controller {
     this.updateHUD()
 
     // Reset difficulty settings
-    this.ghostSpeed = 1.4
+    this.ghostSpeed = 135 // pixels/second
     this.powerModeDuration = 7000
     this.powerModeWarningDuration = 2000
 
@@ -1332,21 +1334,36 @@ export default class extends Controller {
   // ============================================
 
   /**
-   * Main game loop - runs at 60 FPS
+   * Main game loop - frame-rate independent using delta time
    * Handles all game logic, movement, collisions, and rendering
    */
-  gameLoop() {
+  gameLoop(timestamp = performance.now()) {
     if (!this.isGameActive) return
 
     // Don't allow movement during death/respawn or pause
     if (this.isDying || this.isPaused) {
-      this.gameLoopId = requestAnimationFrame(() => this.gameLoop())
+      this.lastFrameTime = null // Reset time tracking when paused
+      this.gameLoopId = requestAnimationFrame((ts) => this.gameLoop(ts))
       return
     }
 
-    // Calculate next position
-    const nextX = this.pacmanPosition.x + this.pacmanVelocity.x
-    const nextY = this.pacmanPosition.y + this.pacmanVelocity.y
+    // Calculate delta time (time since last frame in seconds)
+    if (this.lastFrameTime === null) {
+      this.lastFrameTime = timestamp
+      // Skip first frame to avoid deltaTime = 0
+      this.gameLoopId = requestAnimationFrame((ts) => this.gameLoop(ts))
+      return
+    }
+
+    const deltaTime = (timestamp - this.lastFrameTime) / 1000 // Convert to seconds
+    this.lastFrameTime = timestamp
+
+    // Cap delta time to prevent huge jumps (e.g., when tab loses focus)
+    const cappedDelta = Math.min(deltaTime, 0.1) // Max 100ms per frame
+
+    // Calculate next position with delta-time based movement
+    const nextX = this.pacmanPosition.x + (this.pacmanVelocity.x * cappedDelta)
+    const nextY = this.pacmanPosition.y + (this.pacmanVelocity.y * cappedDelta)
 
     // Check if next position would enter a locked section
     const sectionBoundary = this.checkSectionBoundary(nextX, nextY)
@@ -1411,7 +1428,7 @@ export default class extends Controller {
     this.updateContainerTransform()
 
     this.updatePacmanPosition()
-    this.animatePacmanMouth()
+    this.animatePacmanMouth(cappedDelta)
 
     // Check dot collisions
     this.checkDotCollisions()
@@ -1422,8 +1439,8 @@ export default class extends Controller {
     // Check key collection
     this.checkKeyCollection()
 
-    // Update ghosts
-    this.updateGhosts()
+    // Update ghosts with delta time for frame-rate independent movement
+    this.updateGhosts(cappedDelta)
 
     // Update off-screen ghost indicators
     this.updateGhostIndicators()
@@ -1441,7 +1458,7 @@ export default class extends Controller {
     }
 
     // Continue game loop
-    this.gameLoopId = requestAnimationFrame(() => this.gameLoop())
+    this.gameLoopId = requestAnimationFrame((ts) => this.gameLoop(ts))
   }
 
   updateContainerTransform() {
@@ -1487,15 +1504,19 @@ export default class extends Controller {
     }
   }
 
-  animatePacmanMouth() {
+  animatePacmanMouth(deltaTime) {
     // Animate mouth opening/closing through all frames
     // Only animate when moving
     if (this.pacmanVelocity.x === 0 && this.pacmanVelocity.y === 0) {
       return
     }
-    
-    this.animationCounter++
-    if (this.animationCounter % 5 === 0) { // Cycle every 5 frames for smooth animation
+
+    // Update animation timer (cycle every 0.083 seconds = 12 times per second)
+    this.animationTimer += deltaTime
+    const animationInterval = 0.083 // 5 frames at 60fps
+
+    if (this.animationTimer >= animationInterval) {
+      this.animationTimer -= animationInterval // Subtract instead of reset to avoid drift
       this.pacmanAnimationState = (this.pacmanAnimationState + 1) % 3
       const sprite = this.pacmanTarget.querySelector('.pacman-sprite')
       if (sprite) {
@@ -1653,16 +1674,16 @@ export default class extends Controller {
 
   activateSpeedBoost(duration) {
     this.activeEffects.speedBoost = true
-    this.pacmanSpeed = 1.9 * 1.5 // 50% faster
+    this.pacmanSpeed = 180 * 1.5 // 50% faster (270 pixels/second)
     this.pacmanTarget.classList.add('speed-boost')
-    
+
     // Create cooldown bar under Pac-Man
     this.showEffectCooldown('speedBoost', duration)
 
     this.clearEffectTimer('speedBoost')
     this.effectTimers.speedBoost = setTimeout(() => {
       this.activeEffects.speedBoost = false
-      this.pacmanSpeed = 1.9
+      this.pacmanSpeed = 180 // Reset to normal speed
       this.pacmanTarget.classList.remove('speed-boost')
       this.removeEffectCooldown('speedBoost')
     }, duration)
@@ -1672,16 +1693,16 @@ export default class extends Controller {
 
   activateSlowDown(duration) {
     this.activeEffects.slowDown = true
-    this.pacmanSpeed = 1.9 * 0.6 // 40% slower
+    this.pacmanSpeed = 180 * 0.6 // 40% slower (108 pixels/second)
     this.pacmanTarget.classList.add('slow-down')
-    
+
     // Create cooldown bar under Pac-Man
     this.showEffectCooldown('slowDown', duration)
 
     this.clearEffectTimer('slowDown')
     this.effectTimers.slowDown = setTimeout(() => {
       this.activeEffects.slowDown = false
-      this.pacmanSpeed = 1.9
+      this.pacmanSpeed = 180 // Reset to normal speed
       this.pacmanTarget.classList.remove('slow-down')
       this.removeEffectCooldown('slowDown')
     }, duration)
@@ -2019,26 +2040,22 @@ export default class extends Controller {
    * Implements scatter/chase modes and unique personalities
    * Scatter: 5 seconds (17% of time)
    * Chase: 25 seconds (83% of time)
+   * @param {number} deltaTime - Time since last frame in seconds
    */
-  updateGhosts() {
+  updateGhosts(deltaTime = 1/60) {
     this.animationFrame++
 
     this.ghosts.forEach((ghost, index) => {
       // Skip frozen ghosts
       if (ghost.frozen) return
 
-      // Update scatter timer for mode switching
-      ghost.scatterTimer = (ghost.scatterTimer || 0) + 1
-      
-      // Original Pac-Man scatter/chase pattern:
-      // Scatter for 7 seconds, Chase for 20 seconds, Scatter for 7s, Chase for 20s, 
-      // Scatter for 5s, Chase for 20s, Scatter for 5s, then Chase FOREVER
-      // At 60 FPS: 420 frames = 7s, 1200 frames = 20s, 300 frames = 5s
-      
+      // Update scatter timer for mode switching (time-based, not frame-based)
+      ghost.scatterTimer = (ghost.scatterTimer || 0) + deltaTime
+
       // Simplified: Short scatter periods, mostly chase (makes game harder)
-      // Scatter: 5 seconds (300 frames), Chase: 25 seconds (1500 frames)
-      const totalCycle = 1800 // 30 seconds total cycle
-      const scatterDuration = 300 // 5 seconds scatter
+      // Scatter: 5 seconds, Chase: 25 seconds
+      const totalCycle = 30 // 30 seconds total cycle
+      const scatterDuration = 5 // 5 seconds scatter
       const currentPhase = ghost.scatterTimer % totalCycle
       const isScatterMode = currentPhase < scatterDuration // Only scatter for first 5 seconds of each 30s cycle
       
@@ -2072,9 +2089,9 @@ export default class extends Controller {
         switch (ghost.personality) {
           case 'chase': // Blinky - Relentless pursuer with prediction
             // Direct chase with slight prediction based on Pac-Man's momentum
-            const predictionFrames = 20
-            targetX = this.pacmanPosition.x + (this.pacmanVelocity.x * predictionFrames)
-            targetY = this.pacmanPosition.y + (this.pacmanVelocity.y * predictionFrames)
+            const predictionTime = 0.33 // Predict 0.33 seconds ahead (20 frames at 60fps)
+            targetX = this.pacmanPosition.x + (this.pacmanVelocity.x * predictionTime)
+            targetY = this.pacmanPosition.y + (this.pacmanVelocity.y * predictionTime)
 
             // Speed boost when few dots remain (Cruise Elroy mode)
             const dotsRemaining = this.dots.filter(d => !d.collected).length
@@ -2096,7 +2113,7 @@ export default class extends Controller {
             
           case 'ambush': // Pinky - Advanced prediction ambush
             // Predict Pac-Man's position based on velocity AND acceleration
-            const lookAheadFrames = 60 // Predict 1 second ahead
+            const lookAheadTime = 1.0 // Predict 1 second ahead
             const velocityMagnitude = Math.sqrt(
               Math.pow(this.pacmanVelocity.x, 2) +
               Math.pow(this.pacmanVelocity.y, 2)
@@ -2104,8 +2121,8 @@ export default class extends Controller {
 
             // If Pac-Man is moving, predict future position
             if (velocityMagnitude > 0) {
-              targetX = this.pacmanPosition.x + (this.pacmanVelocity.x * lookAheadFrames)
-              targetY = this.pacmanPosition.y + (this.pacmanVelocity.y * lookAheadFrames)
+              targetX = this.pacmanPosition.x + (this.pacmanVelocity.x * lookAheadTime)
+              targetY = this.pacmanPosition.y + (this.pacmanVelocity.y * lookAheadTime)
 
               // Add flanking behavior - try to cut off from the side
               const angleToIntercept = Math.atan2(
@@ -2117,7 +2134,7 @@ export default class extends Controller {
               targetY += Math.sin(angleToIntercept + Math.PI / 2) * flankOffset
             } else {
               // If Pac-Man is stationary, circle around to cut off escape
-              const circleAngle = (ghost.scatterTimer * 0.02) + (Math.PI / 2)
+              const circleAngle = (ghost.scatterTimer * 1.2) + (Math.PI / 2) // 0.02 * 60 = 1.2 rad/s
               targetX = this.pacmanPosition.x + Math.cos(circleAngle) * 150
               targetY = this.pacmanPosition.y + Math.sin(circleAngle) * 150
             }
@@ -2136,8 +2153,8 @@ export default class extends Controller {
             const distanceFromPacman = 100
             const perpAngle = escapeAngle + Math.PI / 2
 
-            // Alternate sides based on timer for unpredictability
-            const side = Math.floor(ghost.scatterTimer / 180) % 2 === 0 ? 1 : -1
+            // Alternate sides based on timer for unpredictability (every 3 seconds)
+            const side = Math.floor(ghost.scatterTimer / 3) % 2 === 0 ? 1 : -1
 
             targetX = this.pacmanPosition.x + Math.cos(perpAngle) * distanceFromPacman * side
             targetY = this.pacmanPosition.y + Math.sin(perpAngle) * distanceFromPacman * side
@@ -2161,7 +2178,7 @@ export default class extends Controller {
               const maintainDistance = 200
 
               // Don't just flee - position to block escape routes
-              const blockAngle = retreatAngle + (Math.sin(ghost.scatterTimer * 0.05) * Math.PI / 3)
+              const blockAngle = retreatAngle + (Math.sin(ghost.scatterTimer * 3) * Math.PI / 3) // 0.05 * 60 = 3 rad/s
               targetX = this.pacmanPosition.x + Math.cos(blockAngle) * maintainDistance
               targetY = this.pacmanPosition.y + Math.sin(blockAngle) * maintainDistance
             } else if (distanceToPacman > 400) {
@@ -2170,13 +2187,15 @@ export default class extends Controller {
               targetY = this.pacmanPosition.y
             } else {
               // Optimal zone - orbit and wait for opportunity
-              const orbitAngle = Math.atan2(this.pacmanPosition.y - ghost.y, this.pacmanPosition.x - ghost.x)
-              const orbitSpeed = 0.03
-              const newAngle = orbitAngle + orbitSpeed
+              // Initialize orbit angle if not set
+              if (!ghost.orbitAngle) ghost.orbitAngle = Math.atan2(this.pacmanPosition.y - ghost.y, this.pacmanPosition.x - ghost.x)
+
+              // Rotate orbit angle at constant angular velocity (1.8 rad/s)
+              ghost.orbitAngle += 1.8 * deltaTime
 
               const orbitRadius = 250
-              targetX = this.pacmanPosition.x + Math.cos(newAngle) * orbitRadius
-              targetY = this.pacmanPosition.y + Math.sin(newAngle) * orbitRadius
+              targetX = this.pacmanPosition.x + Math.cos(ghost.orbitAngle) * orbitRadius
+              targetY = this.pacmanPosition.y + Math.sin(ghost.orbitAngle) * orbitRadius
             }
             break
             
@@ -2227,15 +2246,17 @@ export default class extends Controller {
         // Smooth acceleration instead of instant direction changes
         const targetVelX = (dx / distance) * speed
         const targetVelY = (dy / distance) * speed
-        
-        // Lerp towards target velocity for smoother movement
-        const smoothing = ghost.eaten ? 0.3 : 0.15 // Eyes turn faster
+
+        // Time-based lerp for frame-rate independent smoothing
+        // Higher smoothing rate = faster response (10 ≈ 0.15 smoothing at 60fps)
+        const smoothingRate = ghost.eaten ? 20 : 12 // Eyes turn faster
+        const smoothing = 1 - Math.exp(-smoothingRate * deltaTime)
         ghost.velocityX = ghost.velocityX * (1 - smoothing) + targetVelX * smoothing
         ghost.velocityY = ghost.velocityY * (1 - smoothing) + targetVelY * smoothing
-        
-        // Calculate next position
-        const nextX = ghost.x + ghost.velocityX
-        const nextY = ghost.y + ghost.velocityY
+
+        // Calculate next position with delta-time based movement
+        const nextX = ghost.x + (ghost.velocityX * deltaTime)
+        const nextY = ghost.y + (ghost.velocityY * deltaTime)
 
         // Check if next position would enter a locked section
         const ghostBoundary = this.checkSectionBoundary(nextX, nextY)
@@ -2877,7 +2898,7 @@ export default class extends Controller {
     this.isGameActive = true // Keep game active
 
     // Reset difficulty settings
-    this.ghostSpeed = 1.4
+    this.ghostSpeed = 135 // pixels/second
     this.powerModeDuration = 7000
     this.powerModeWarningDuration = 2000
 
@@ -2921,32 +2942,32 @@ export default class extends Controller {
       freeze: false,
       doublePoints: false
     }
-    this.pacmanSpeed = 1.9 // Reset speed
+    this.pacmanSpeed = 180 // Reset speed (pixels/second)
 
     // Re-lock all sections
     this.initializeLockedSections()
-    
+
     // Reset to starting position
     this.pacmanPosition = { ...this.initialPacmanPosition }
     this.pacmanVelocity = { x: 0, y: 0 }
     this.updatePacmanPosition()
     this.updateHUD()
-    
+
     // Smooth scroll to start
     this.smoothScrollTo(this.initialPacmanPosition.y - (window.innerHeight / 2), 600).then(async () => {
       // Regenerate game elements
       this.generateDots()
       this.createGhosts()
-      
+
       // Add invincibility
       this.pacmanTarget.classList.add('invincible')
-      
+
       // Show countdown before starting
       await this.showCountdown()
-      
+
       // Start the game
       this.isDying = false
-      
+
       // Start Pac-Man moving in a random direction
       const directions = [
         { x: this.pacmanSpeed, y: 0, dir: 'right' },
