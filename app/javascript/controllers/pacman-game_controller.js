@@ -17,7 +17,7 @@ import { Controller } from "@hotwired/stimulus"
  * @extends Controller
  */
 export default class extends Controller {
-  static targets = ["gameContainer", "pacman", "hud", "score", "lives", "startHint", "progressItem", "progressLabel", "progressValue"]
+  static targets = ["gameContainer", "pacman", "hud", "score", "lives", "startHint", "progressItem", "progressLabel", "progressValue", "pageTint"]
   static values = { assetManifest: Object }
 
   /**
@@ -702,9 +702,12 @@ export default class extends Controller {
       }, 300)
     }
 
-    // Show game container
+    // Show game container and page tint
     this.gameContainerTarget.classList.add('active')
     this.hudTarget.classList.add('active')
+    if (this.hasPageTintTarget) {
+      this.pageTintTarget.classList.add('active')
+    }
 
     // Reset game state
     this.score = 0
@@ -789,6 +792,9 @@ export default class extends Controller {
     this.isPaused = false
     this.gameContainerTarget.classList.remove('active')
     this.hudTarget.classList.remove('active')
+    if (this.hasPageTintTarget) {
+      this.pageTintTarget.classList.remove('active')
+    }
 
     // Remove pause overlay if it exists
     const pauseOverlay = document.querySelector('.pacman-pause-overlay')

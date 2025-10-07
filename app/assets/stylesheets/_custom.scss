@@ -896,6 +896,29 @@ html {
 // PAC-MAN GAME STYLES
 // ============================================
 
+// Page tint overlay when game is active
+.pacman-page-tint {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  z-index: 9998;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+
+  &.active {
+    opacity: 1;
+  }
+}
+
+[data-bs-theme="dark"] .pacman-page-tint {
+  background: rgba(0, 0, 0, 0.4);
+}
+
 // Game container - overlays the entire page
 .pacman-game-container {
   position: fixed;
@@ -907,7 +930,7 @@ html {
   z-index: 9999;
   opacity: 0;
   transition: opacity 0.3s ease;
-  
+
   &.active {
     opacity: 1;
     pointer-events: auto;
@@ -1433,29 +1456,29 @@ html {
   position: fixed; // Fixed to viewport so it stays visible
   top: 20px; // Will be updated via JavaScript
   right: 20px;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(15px);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
   border-radius: 12px;
   padding: 15px 20px;
   z-index: 10002;
   min-width: 150px;
   opacity: 0;
   transform: translateY(-20px) scale(0.9);
-  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
               transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
-  border: 2px solid rgba(255, 215, 0, 0.4);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  
+  border: 2px solid rgba(255, 215, 0, 0.25);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
   &.active {
-    opacity: 1;
+    opacity: 0.85;
     transform: translateY(0) scale(1);
     pointer-events: auto;
   }
-  
+
   [data-bs-theme="dark"] & {
-    background: rgba(20, 20, 30, 0.95);
-    border-color: rgba(255, 215, 0, 0.6);
+    background: rgba(20, 20, 30, 0.6);
+    border-color: rgba(255, 215, 0, 0.35);
   }
   
   .hud-item {
