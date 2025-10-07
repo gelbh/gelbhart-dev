@@ -1956,8 +1956,8 @@ html {
 // SECTION LOCKING SYSTEM
 // ============================================
 
-// Locked section styles
-.section-locked {
+// Locked section content wrapper (blurred)
+.section-locked-content {
   filter: blur(8px);
   transition: filter 0.8s ease;
   pointer-events: none;
@@ -2049,7 +2049,6 @@ html {
   color: #fff;
   z-index: 1;
   position: relative;
-  filter: blur(0); // Override parent section blur
 }
 
 .lock-icon {
