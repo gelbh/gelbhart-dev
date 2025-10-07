@@ -74,8 +74,8 @@ export default class extends Controller {
 
     // Speed settings (pixels per second for delta-time based movement)
     // Increased from original arcade (1.9 px/frame = 114 px/s) for snappier web gameplay
-    this.pacmanSpeed = 180 // pixels/second (was 114)
-    this.ghostSpeed = 135  // pixels/second (was 84)
+    this.pacmanSpeed = 220 // pixels/second (was 180)
+    this.ghostSpeed = 165  // pixels/second (was 135)
 
     // Delta time tracking for frame-rate independent movement
     this.lastFrameTime = null
@@ -314,7 +314,7 @@ export default class extends Controller {
     this.updateHUD()
 
     // Reset difficulty settings
-    this.ghostSpeed = 135 // pixels/second
+    this.ghostSpeed = 165 // pixels/second
     this.powerModeDuration = 7000
     this.powerModeWarningDuration = 2000
 
