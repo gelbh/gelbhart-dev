@@ -32,7 +32,19 @@ export class SectionManager {
     this.sections.forEach(section => {
       const sectionElement = document.getElementById(section.id)
       if (sectionElement && !section.unlocked) {
-        // Create lock overlay
+        // Wrap section content in a blur container
+        const contentWrapper = document.createElement('div')
+        contentWrapper.className = 'section-locked-content'
+
+        // Move all existing children into the wrapper
+        while (sectionElement.firstChild) {
+          contentWrapper.appendChild(sectionElement.firstChild)
+        }
+
+        // Add wrapper back to section
+        sectionElement.appendChild(contentWrapper)
+
+        // Create lock overlay (as sibling to blurred content)
         const lockOverlay = document.createElement('div')
         lockOverlay.className = 'pacman-section-lock'
         lockOverlay.dataset.sectionId = section.id
@@ -44,11 +56,10 @@ export class SectionManager {
           </div>
         `
 
-        // Add blur effect to section
-        sectionElement.classList.add('section-locked')
+        // Set section as positioned container
         sectionElement.style.position = 'relative'
 
-        // Append lock overlay
+        // Append lock overlay (as sibling to blurred content, not child)
         sectionElement.appendChild(lockOverlay)
 
         console.log(`🔒 Section "${section.name}" locked (requires ${section.threshold} points)`)
@@ -68,11 +79,20 @@ export class SectionManager {
 
       // Remove lock overlay with animation
       const lockOverlay = sectionElement.querySelector('.pacman-section-lock')
+      const contentWrapper = sectionElement.querySelector('.section-locked-content')
+
       if (lockOverlay) {
         lockOverlay.classList.add('unlocking')
         setTimeout(() => {
           lockOverlay.remove()
-          sectionElement.classList.remove('section-locked')
+
+          // Unwrap the content
+          if (contentWrapper) {
+            while (contentWrapper.firstChild) {
+              sectionElement.insertBefore(contentWrapper.firstChild, contentWrapper)
+            }
+            contentWrapper.remove()
+          }
         }, 600)
       }
 
