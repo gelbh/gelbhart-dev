@@ -68,7 +68,7 @@
             <div class="col-lg-10 col-xl-9 mx-auto text-center">
 
                 <!-- Pac-Man Game Start Hint -->
-                <div class="pacman-idle-hint mb-3 d-none d-lg-inline-block" data-pacman-game-target="startHint" data-controller="pacman-preview">
+                <div class="pacman-idle-hint mb-3 d-none d-lg-inline-block" data-pacman-game-target="startHint" data-controller="pacman-preview" data-pacman-preview-asset-manifest-value="<%= pacman_asset_manifest.to_json %>">
                     <div class="d-flex align-items-center justify-content-center gap-3 flex-wrap">
                         <div class="pacman-preview">
                             <%= image_tag 'pacman-game/pacman/pacman_open_more.png', alt: 'Pac-Man', class: 'pacman-preview-sprite', data: { pacman_preview_target: 'sprite' } %>
