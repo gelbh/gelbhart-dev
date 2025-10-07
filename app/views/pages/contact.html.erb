@@ -54,6 +54,14 @@
                     <% end %>
 
                     <%= form_with url: contact_path, method: :post, local: true, class: "contact-form" do |f| %>
+                    <!-- Honeypot field - hidden from users, bots will fill it -->
+                    <div style="position: absolute; left: -5000px;" aria-hidden="true">
+                        <%= f.text_field :website, tabindex: "-1", autocomplete: "off" %>
+                    </div>
+
+                    <!-- Timestamp for time-based validation -->
+                    <%= f.hidden_field :form_timestamp, value: Time.now.to_i %>
+
                     <div class="mb-3">
                         <%= f.label :name, "Name", class: "form-label text-light" %>
                         <%= f.text_field :name, class: "form-control bg-dark bg-opacity-50 text-light border-secondary", placeholder: "Your name", required: true %>
