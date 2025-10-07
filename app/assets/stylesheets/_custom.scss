@@ -2049,6 +2049,7 @@ html {
   color: #fff;
   z-index: 1;
   position: relative;
+  filter: blur(0); // Override parent section blur
 }
 
 .lock-icon {
