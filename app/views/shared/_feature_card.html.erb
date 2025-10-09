@@ -1,0 +1,23 @@
+<%
+# Reusable feature card component
+# Usage: <%= render 'shared/feature_card', icon: 'bx-lock-alt', color: 'success', title: '100% Private', description: 'All processing happens locally' %>
+#
+# Parameters:
+# - icon: boxicons class (required)
+# - color: Bootstrap color (required)
+# - title: Card title (required)
+# - description: Card description (required)
+# - card_classes: Additional CSS classes for the card (optional)
+# - animation_delay: fade-in animation delay class (optional, e.g., 'delay-1')
+
+card_classes ||= ''
+animation_delay ||= ''
+%>
+
+<div class="card <%= card_classes %> border-0 shadow h-100 <%= animation_delay %>">
+  <div class="card-body p-4">
+    <%= render 'shared/icon_circle', icon: icon, color: color, size: 'md' %>
+    <h4 class="h5 mb-3 mt-3"><%= title %></h4>
+    <p class="text-muted mb-0"><%= description %></p>
+  </div>
+</div>
