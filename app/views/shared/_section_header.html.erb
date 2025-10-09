@@ -1,23 +1,12 @@
-<%
-# Reusable section header component
-# Usage: <%= render 'shared/section_header', title: 'Featured Projects', subtitle: 'Check out my latest work', animation_delay: 'delay-1' %>
-#
-# Parameters:
-# - title: Section title (required)
-# - subtitle: Section subtitle (optional)
-# - text_align: 'start', 'center', 'end' (optional, default: 'center')
-# - animation_delay: fade-in animation delay class (optional)
-
-text_align = local_assigns.fetch(:text_align, 'center')
-animation_delay = local_assigns.fetch(:animation_delay, '')
-subtitle = local_assigns[:subtitle]
-%>
+<% text_align = local_assigns.fetch(:text_align, 'center') %>
+<% animation_delay = local_assigns.fetch(:animation_delay, '') %>
+<% subtitle = local_assigns[:subtitle] %>
 
 <div class="text-<%= text_align %> mb-5">
-  <h2 class="h1 mb-3 fade-in-view <%= animation_delay %>"><%= title %></h2>
-  <% if subtitle.present? %>
+    <h2 class="h1 mb-3 fade-in-view <%= animation_delay %>"><%= title %></h2>
+    <% if subtitle.present? %>
     <p class="fs-lg text-muted fade-in-view <%= animation_delay.present? ? "#{animation_delay.split('-').first}-#{animation_delay.split('-').last.to_i + 1}" : 'delay-1' %>">
-      <%= subtitle %>
+        <%= subtitle %>
     </p>
-  <% end %>
+    <% end %>
 </div>

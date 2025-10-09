@@ -1,34 +1,10 @@
-<%
-# Reusable icon circle component
-# Usage: <%= render 'shared/icon_circle', icon: 'bx-download', color: 'primary', size: 'lg' %>
-#
-# Parameters:
-# - icon: boxicons class (required)
-# - color: Bootstrap color (default: 'primary')
-# - size: 'sm', 'md', 'lg', 'xl' (default: 'md')
-
-color = local_assigns.fetch(:color, 'primary')
-size = local_assigns.fetch(:size, 'md')
-
-# Size classes
-size_classes = {
-  'sm' => 'p-2',
-  'md' => 'p-3',
-  'lg' => 'p-4',
-  'xl' => 'p-5'
-}
-
-icon_sizes = {
-  'sm' => 'fs-5',
-  'md' => 'fs-3',
-  'lg' => 'fs-1',
-  'xl' => 'display-4'
-}
-
-padding_class = size_classes[size] || size_classes['md']
-icon_size = icon_sizes[size] || icon_sizes['md']
-%>
+<% color = local_assigns.fetch(:color, 'primary') %>
+<% size = local_assigns.fetch(:size, 'md') %>
+<% size_classes = {'sm' => 'p-2', 'md' => 'p-3', 'lg' => 'p-4', 'xl' => 'p-5'} %>
+<% icon_sizes = {'sm' => 'fs-5', 'md' => 'fs-3', 'lg' => 'fs-1', 'xl' => 'display-4'} %>
+<% padding_class = size_classes[size] || size_classes['md'] %>
+<% icon_size = icon_sizes[size] || icon_sizes['md'] %>
 
 <div class="bg-<%= color %> bg-opacity-10 rounded-circle <%= padding_class %> d-inline-flex">
-  <i class="bx <%= icon %> <%= icon_size %> text-<%= color %>"></i>
+    <i class="bx <%= icon %> <%= icon_size %> text-<%= color %>"></i>
 </div>

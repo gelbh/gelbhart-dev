@@ -1,30 +1,11 @@
-<%
-# Reusable tech badge component
-# Usage: <%= render 'shared/tech_badge', text: 'JavaScript', color: 'warning', icon: 'bxl-javascript' %>
-#
-# Parameters:
-# - text: Badge text (required)
-# - color: Bootstrap color (required)
-# - icon: boxicons class (optional)
-# - size: 'sm', 'md', 'lg' (optional, default: 'md')
-# - badge_class: 'tech-badge' or 'project-badge' (optional, default: 'project-badge')
+<% size = local_assigns.fetch(:size, 'md') %>
+<% icon = local_assigns[:icon] %>
+<% size_classes = {'sm' => 'fs-xs', 'md' => '', 'lg' => 'fs-6'} %>
+<% size_class = size_classes[size] || '' %>
 
-size = local_assigns.fetch(:size, 'md')
-badge_class = local_assigns.fetch(:badge_class, 'project-badge')
-icon = local_assigns[:icon]
-
-size_classes = {
-  'sm' => 'fs-xs',
-  'md' => '',
-  'lg' => 'fs-6'
-}
-
-size_class = size_classes[size] || ''
-%>
-
-<span class="badge <%= badge_class %> bg-<%= color %> bg-opacity-10 text-<%= color %> <%= size_class %>">
-  <% if icon.present? %>
+<span class="badge project-badge bg-<%= color %> bg-opacity-10 text-<%= color %> <%= size_class %>">
+    <% if icon.present? %>
     <i class="bx <%= icon %> me-1"></i>
-  <% end %>
-  <%= text %>
+    <% end %>
+    <%= text %>
 </span>
