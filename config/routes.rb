@@ -4,6 +4,11 @@ Rails.application.routes.draw do
   # API endpoints
   namespace :api do
     get 'analytics/hevy-tracker', to: 'analytics#hevy_tracker_stats'
+
+    # Pac-Man leaderboard
+    resources :pacman_scores, only: [:create]
+    get 'pacman_scores/global', to: 'pacman_scores#global'
+    get 'pacman_scores/player/:player_name', to: 'pacman_scores#player'
   end
 
   # Hevy Tracker pages

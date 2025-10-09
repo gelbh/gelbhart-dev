@@ -130,6 +130,43 @@ export class AudioManager {
   }
 
   /**
+   * Pause all currently playing sounds (without resetting position)
+   */
+  pauseAll() {
+    if (!this.soundsEnabled) return
+
+    try {
+      Object.values(this.audioFiles).forEach(audio => {
+        if (!audio.paused) {
+          audio.pause()
+        }
+      })
+    } catch (error) {
+      console.warn("Error pausing sounds:", error)
+    }
+  }
+
+  /**
+   * Resume all paused sounds
+   */
+  resumeAll() {
+    if (!this.soundsEnabled) return
+
+    try {
+      Object.values(this.audioFiles).forEach(audio => {
+        // Only resume if the audio has a current time (was playing before)
+        if (audio.paused && audio.currentTime > 0) {
+          audio.play().catch(err => {
+            console.warn("Could not resume audio:", err.message)
+          })
+        }
+      })
+    } catch (error) {
+      console.warn("Error resuming sounds:", error)
+    }
+  }
+
+  /**
    * Get a specific audio element (for event listeners)
    */
   getAudio(soundName) {

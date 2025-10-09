@@ -10,8 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 0) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_07_183416) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
+  create_table "pacman_scores", force: :cascade do |t|
+    t.string "player_name"
+    t.integer "score"
+    t.boolean "is_win"
+    t.datetime "played_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["player_name"], name: "index_pacman_scores_on_player_name"
+    t.index ["score"], name: "index_pacman_scores_on_score"
+  end
 end

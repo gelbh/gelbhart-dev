@@ -1207,7 +1207,7 @@ html {
     border-radius: 20px;
     padding: 40px;
     text-align: center;
-    max-width: 500px;
+    max-width: 600px;
     width: 90%;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 215, 0, 0.2);
     transform: scale(0.8) translateY(20px);
@@ -1315,12 +1315,54 @@ html {
     color: rgba(255, 255, 255, 0.8);
     border: 2px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    
+
     &:hover {
       background: rgba(255, 255, 255, 0.15);
       border-color: rgba(255, 255, 255, 0.3);
       color: white;
     }
+  }
+}
+
+// Confirmation modal specific styles (warning/urgent look)
+.confirmation-modal {
+  .modal-content {
+    border-color: rgba(255, 165, 0, 0.6);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 165, 0, 0.3);
+
+    [data-bs-theme="dark"] & {
+      border-color: rgba(255, 165, 0, 0.7);
+    }
+  }
+
+  .modal-emoji {
+    animation: warningPulse 1s ease-in-out infinite;
+  }
+
+  .modal-title {
+    color: #ff9500;
+    text-shadow: 0 0 20px rgba(255, 149, 0, 0.6);
+  }
+
+  .modal-btn-primary {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+
+    &:hover {
+      box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
+      background: linear-gradient(135deg, #ff5252 0%, #dc4d5f 100%);
+    }
+  }
+}
+
+@keyframes warningPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
   }
 }
 
@@ -2488,15 +2530,514 @@ html {
       box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
       color: #fff;
     }
-    
+
     &::placeholder {
       color: rgba(255, 255, 255, 0.5);
     }
   }
-  
+
   .form-label {
     font-weight: 500;
     margin-bottom: 0.5rem;
+  }
+}
+
+// ============================================
+// PAC-MAN LEADERBOARD STYLES
+// ============================================
+
+// Player name input modal
+.modal-input-group {
+  margin: 25px 0;
+
+  .modal-input {
+    width: 100%;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 12px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-align: center;
+    transition: all 0.3s ease;
+
+    &:focus {
+      outline: none;
+      border-color: rgba(255, 215, 0, 0.6);
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    }
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    &.error {
+      animation: inputShake 0.5s ease;
+      border-color: rgba(255, 50, 50, 0.6);
+    }
+  }
+}
+
+@keyframes inputShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+// Leaderboard modal styles
+.leaderboard-modal {
+  .modal-content {
+    max-width: 650px;
+    max-height: 85vh;
+    overflow-y: auto;
+
+    // Custom scrollbar for modal content
+    &::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: linear-gradient(to bottom, rgba(20, 20, 30, 0.95), rgba(30, 30, 50, 0.95));
+      border-radius: 6px;
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: linear-gradient(to bottom, #ffd700, #ffed4e);
+      border-radius: 6px;
+      border: 2px solid rgba(0, 0, 0, 0.3);
+      box-shadow:
+        0 2px 8px rgba(255, 215, 0, 0.6),
+        inset 0 1px 2px rgba(255, 255, 255, 0.4);
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: linear-gradient(to bottom, #ffed4e, #ffd700);
+        box-shadow:
+          0 4px 12px rgba(255, 215, 0, 0.8),
+          inset 0 1px 2px rgba(255, 255, 255, 0.5);
+        border-color: rgba(255, 215, 0, 0.5);
+      }
+
+      &:active {
+        background: linear-gradient(to bottom, #ffc700, #ffe34e);
+        box-shadow:
+          0 2px 6px rgba(255, 215, 0, 0.9),
+          inset 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+    }
+
+    // Firefox scrollbar styling
+    scrollbar-width: thin;
+    scrollbar-color: #ffd700 rgba(20, 20, 30, 0.95);
+  }
+
+  .leaderboard-content {
+    padding: 30px;
+  }
+}
+
+// Leaderboard tabs
+.leaderboard-tabs {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+  border-bottom: 2px solid rgba(255, 215, 0, 0.2);
+  padding-bottom: 0;
+
+  .leaderboard-tab {
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 215, 0, 0.2);
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    bottom: -2px;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    &.active {
+      background: rgba(255, 215, 0, 0.15);
+      border-color: rgba(255, 215, 0, 0.6);
+      color: #ffd700;
+      box-shadow: 0 -4px 15px rgba(255, 215, 0, 0.2);
+    }
+  }
+}
+
+// Leaderboard container
+.leaderboard-container {
+  position: relative;
+  min-height: 400px;
+  margin-bottom: 20px;
+}
+
+// Leaderboard panels
+.leaderboard-panel {
+  display: none;
+  animation: fadeInPanel 0.3s ease;
+
+  &.active {
+    display: block;
+  }
+}
+
+@keyframes fadeInPanel {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Leaderboard header
+.leaderboard-header {
+  display: grid;
+  grid-template-columns: 60px 1fr 60px 120px;
+  gap: 10px;
+  padding: 12px 15px;
+  background: rgba(255, 215, 0, 0.1);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #ffd700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &.player-header {
+    grid-template-columns: 60px 110px 60px 120px;
+  }
+
+  span {
+    text-align: left;
+
+    // Rank column - centered
+    &:first-child {
+      text-align: center;
+    }
+
+    // Player name column - centered for global
+    &:nth-child(2) {
+      text-align: center;
+    }
+
+    // Badge and Score columns - right aligned for global, centered for player
+    &:nth-child(3) {
+      text-align: center;
+    }
+    
+    &:nth-child(4) {
+      text-align: right;
+    }
+  }
+
+  // For player header, center align score
+  &.player-header span:nth-child(2) {
+    text-align: center;
+  }
+}
+
+// Leaderboard list
+.leaderboard-list {
+  max-height: 450px;
+  overflow-y: auto;
+  padding-right: 5px;
+
+  // Custom scrollbar styling - Pac-Man theme
+  &::-webkit-scrollbar {
+    width: 12px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: linear-gradient(to bottom, rgba(20, 20, 30, 0.95), rgba(30, 30, 50, 0.95));
+    border-radius: 6px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #ffd700, #ffed4e);
+    border-radius: 6px;
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    box-shadow:
+      0 2px 8px rgba(255, 215, 0, 0.6),
+      inset 0 1px 2px rgba(255, 255, 255, 0.4);
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: linear-gradient(to bottom, #ffed4e, #ffd700);
+      box-shadow:
+        0 4px 12px rgba(255, 215, 0, 0.8),
+        inset 0 1px 2px rgba(255, 255, 255, 0.5);
+      border-color: rgba(255, 215, 0, 0.5);
+    }
+
+    &:active {
+      background: linear-gradient(to bottom, #ffc700, #ffe34e);
+      box-shadow:
+        0 2px 6px rgba(255, 215, 0, 0.9),
+        inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  // Firefox scrollbar styling
+  scrollbar-width: thin;
+  scrollbar-color: #ffd700 rgba(20, 20, 30, 0.95);
+}
+
+// Leaderboard row
+.leaderboard-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 60px 120px;
+  gap: 10px;
+  padding: 12px 15px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateX(5px);
+    border-color: rgba(255, 215, 0, 0.2);
+  }
+
+  &.highlighted {
+    background: rgba(255, 215, 0, 0.15);
+    border: 2px solid rgba(255, 215, 0, 0.4);
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+
+    .rank, .player-name, .score {
+      color: #ffd700;
+      font-weight: 700;
+    }
+  }
+
+  .rank {
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+    text-align: center;
+    font-size: 1rem;
+  }
+
+  .player-name {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  .score {
+    color: #ffd700;
+    font-weight: 700;
+    text-align: right;
+    font-size: 1.1rem;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+  }
+
+  .win-badge {
+    text-align: center;
+    font-size: 1.3rem;
+    animation: winBadgeSpin 2s ease-in-out infinite;
+  }
+
+  .date {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+    text-align: right;
+  }
+
+  // Player scores panel layout
+  .leaderboard-panel[data-panel="player"] & {
+    grid-template-columns: 60px 110px 60px 120px;
+
+    // In player panel, score should be center-aligned
+    .score {
+      text-align: center;
+    }
+  }
+}
+
+@keyframes winBadgeSpin {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(20deg);
+  }
+}
+
+// No scores message
+.no-scores {
+  text-align: center;
+  padding: 60px 20px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 1.1rem;
+  font-style: italic;
+}
+
+// Rank color styling - Medal positions
+.leaderboard-row {
+  // 1st Place - Gold
+  &:nth-child(1) {
+    .rank {
+      color: #FFD700;
+      font-size: 1.2rem;
+      text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+      font-weight: 900;
+
+      &::before {
+        content: '🥇';
+        margin-right: 4px;
+      }
+    }
+
+    .score {
+      color: #FFD700;
+      text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+    }
+  }
+
+  // 2nd Place - Silver
+  &:nth-child(2) {
+    .rank {
+      color: #C0C0C0;
+      font-size: 1.15rem;
+      text-shadow: 0 0 12px rgba(192, 192, 192, 0.8);
+      font-weight: 900;
+
+      &::before {
+        content: '🥈';
+        margin-right: 4px;
+      }
+    }
+
+    .score {
+      color: #C0C0C0;
+      text-shadow: 0 0 12px rgba(192, 192, 192, 0.6);
+    }
+  }
+
+  // 3rd Place - Bronze
+  &:nth-child(3) {
+    .rank {
+      color: #CD7F32;
+      font-size: 1.1rem;
+      text-shadow: 0 0 10px rgba(205, 127, 50, 0.8);
+      font-weight: 900;
+
+      &::before {
+        content: '🥉';
+        margin-right: 4px;
+      }
+    }
+
+    .score {
+      color: #CD7F32;
+      text-shadow: 0 0 10px rgba(205, 127, 50, 0.6);
+    }
+  }
+
+  // 4th place and onwards - Subtle white/blue tint
+  &:nth-child(n+4) {
+    .rank {
+      color: rgba(150, 200, 255, 0.9);
+      text-shadow: 0 0 8px rgba(150, 200, 255, 0.4);
+    }
+
+    .score {
+      color: rgba(150, 200, 255, 0.95);
+      text-shadow: 0 0 8px rgba(150, 200, 255, 0.3);
+    }
+  }
+}
+
+// Mobile responsive
+@media (max-width: 768px) {
+  .leaderboard-modal {
+    .modal-content {
+      max-width: 95vw;
+      padding: 20px;
+    }
+
+    .leaderboard-content {
+      padding: 20px 15px;
+    }
+  }
+
+  .leaderboard-tabs {
+    .leaderboard-tab {
+      padding: 10px 16px;
+      font-size: 0.85rem;
+    }
+  }
+
+  .leaderboard-header {
+    grid-template-columns: 50px 1fr 50px 100px;
+    padding: 10px 12px;
+    font-size: 0.75rem;
+
+    &.player-header {
+      grid-template-columns: 50px 90px 50px 100px;
+    }
+  }
+
+  .leaderboard-row {
+    grid-template-columns: 50px 1fr 50px 100px;
+    padding: 10px 12px;
+
+    .rank {
+      font-size: 0.9rem;
+    }
+
+    .player-name {
+      font-size: 0.9rem;
+    }
+
+    .score {
+      font-size: 1rem;
+    }
+
+    .win-badge {
+      font-size: 1.1rem;
+    }
+
+    .date {
+      font-size: 0.75rem;
+    }
+
+    .leaderboard-panel[data-panel="player"] & {
+      grid-template-columns: 50px 90px 50px 100px;
+    }
+
+    &:nth-child(1), &:nth-child(2), &:nth-child(3) {
+      .rank {
+        font-size: 1rem;
+
+        &::before {
+          margin-right: 2px;
+        }
+      }
+    }
   }
 }
 

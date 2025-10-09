@@ -74,8 +74,9 @@ export default class extends Controller {
 
     // Speed settings (pixels per second for delta-time based movement)
     // Increased from original arcade (1.9 px/frame = 114 px/s) for snappier web gameplay
-    this.pacmanSpeed = 220 // pixels/second (was 180)
-    this.ghostSpeed = 165  // pixels/second (was 135)
+    // Speed increases by 15% per section unlocked for progressive difficulty
+    this.pacmanSpeed = 280 // pixels/second (base speed)
+    this.ghostSpeed = 210  // pixels/second (base speed)
 
     // Delta time tracking for frame-rate independent movement
     this.lastFrameTime = null
@@ -87,6 +88,10 @@ export default class extends Controller {
     // Animation and death state
     this.isDying = false
     this.deathAnimationFrame = 0
+
+    // Track intro music event listener for cleanup
+    this.introMusicListener = null
+    this.introMusicTimeout = null
     this.lastScrollUpdate = 0
 
     // Animation frame counters
@@ -187,19 +192,21 @@ export default class extends Controller {
       return
     }
 
-    // Handle quit (Escape key)
-    if (event.key === 'Escape') {
-      if (this.isPaused) {
-        // If paused, unpause first (without countdown), then quit
-        this.isPaused = false
-        const pauseOverlay = document.querySelector('.pacman-pause-overlay')
-        if (pauseOverlay) {
-          pauseOverlay.remove()
-        }
-      }
-      this.stopGame()
+    // Handle leaderboard (L key)
+    if ((event.key === 'l' || event.key === 'L') && this.isGameActive && !this.isStarting && !this.isDying) {
+      this.showLeaderboardDuringGame()
       event.preventDefault()
       return
+    }
+
+    // Handle quit (Escape key)
+    if (event.key === 'Escape') {
+      if (this.isGameActive || this.isStarting) {
+        // Show confirmation modal
+        this.showQuitConfirmation()
+        event.preventDefault()
+        return
+      }
     }
 
     // Auto-start game on first movement key press
@@ -313,8 +320,9 @@ export default class extends Controller {
     this.extraLifeAwarded = false
     this.updateHUD()
 
-    // Reset difficulty settings
-    this.ghostSpeed = 165 // pixels/second
+    // Reset difficulty settings to base speeds
+    this.pacmanSpeed = 280 // pixels/second
+    this.ghostSpeed = 210 // pixels/second
     this.powerModeDuration = 7000
     this.powerModeWarningDuration = 2000
 
@@ -374,12 +382,16 @@ export default class extends Controller {
 
       // Remove event listener
       beginningAudio.removeEventListener('ended', onBeginningEnded)
+      this.introMusicListener = null
+      this.introMusicTimeout = null
     }
 
+    // Store listener for cleanup
+    this.introMusicListener = { audio: beginningAudio, handler: onBeginningEnded }
     beginningAudio.addEventListener('ended', onBeginningEnded)
 
     // Fallback: Start anyway after 5 seconds if sound doesn't fire ended event
-    setTimeout(() => {
+    this.introMusicTimeout = setTimeout(() => {
       if (!this.isGameActive && this.isStarting) {
         console.log("⚠️ Intro music timeout, starting gameplay anyway")
         beginningAudio.removeEventListener('ended', onBeginningEnded)
@@ -387,6 +399,8 @@ export default class extends Controller {
         this.isStarting = false
 
         this.gameLoop()
+        this.introMusicListener = null
+        this.introMusicTimeout = null
       }
     }, 5000)
   }
@@ -399,6 +413,23 @@ export default class extends Controller {
     this.isGameActive = false
     this.isStarting = false
     this.isPaused = false
+
+    // Clean up intro music listener and timeout if they exist
+    if (this.introMusicListener) {
+      this.introMusicListener.audio.removeEventListener('ended', this.introMusicListener.handler)
+      this.introMusicListener = null
+    }
+    if (this.introMusicTimeout) {
+      clearTimeout(this.introMusicTimeout)
+      this.introMusicTimeout = null
+    }
+
+    // Remove countdown overlay if it exists
+    const countdownOverlay = document.querySelector('.pacman-countdown')
+    if (countdownOverlay) {
+      countdownOverlay.remove()
+    }
+
     this.gameContainerTarget.classList.remove('active')
     this.hudTarget.classList.remove('active')
     if (this.hasPageTintTarget) {
@@ -473,6 +504,7 @@ export default class extends Controller {
    */
   gameLoop(timestamp = performance.now()) {
     // Exit if game is no longer active or paused
+    // Important: Check BEFORE scheduling next frame to prevent multiple loops
     if (!this.isGameActive || this.isPaused) return
 
     // Calculate delta time in seconds (for frame-rate independent movement)
@@ -543,8 +575,11 @@ export default class extends Controller {
     // Check win condition
     this.checkWinCondition()
 
-    // Continue game loop
-    requestAnimationFrame((ts) => this.gameLoop(ts))
+    // Continue game loop - only if still active and not paused
+    // This prevents duplicate loops when resuming from pause
+    if (this.isGameActive && !this.isPaused) {
+      requestAnimationFrame((ts) => this.gameLoop(ts))
+    }
   }
 
   /**
@@ -743,32 +778,74 @@ export default class extends Controller {
   /**
    * Game over - player lost
    */
-  gameOver() {
+  async gameOver() {
     console.log("💀 Game Over!")
     this.isGameActive = false
     this.isDying = false
 
-    // Show game over modal
-    this.uiManager.showGameOverModal(false, this.score, {
-      onRestart: () => this.restartGame(),
-      onQuit: () => this.stopGame()
-    })
+    // Handle score submission
+    await this.handleGameEnd(false)
   }
 
   /**
    * Win game - player cleared all dots
    */
-  winGame() {
+  async winGame() {
     console.log("🎉 You win!")
     this.isGameActive = false
 
-    // Play celebration sound
-    this.audioManager.play('intermission', true)
+    // Handle score submission (celebration sound played in handleGameEnd)
+    await this.handleGameEnd(true)
+  }
 
-    // Show win modal
-    this.uiManager.showGameOverModal(true, this.score, {
+  /**
+   * Handle game end - prompt for name if needed, submit score, show modal
+   */
+  async handleGameEnd(isWin) {
+    // Hide game visuals (but keep game state for potential restart)
+    this.gameContainerTarget.classList.remove('active')
+    this.hudTarget.classList.remove('active')
+    if (this.hasPageTintTarget) {
+      this.pageTintTarget.classList.remove('active')
+    }
+
+    // Stop all sounds
+    this.audioManager.stopAll()
+
+    // Play celebration sound if win
+    if (isWin) {
+      this.audioManager.play('intermission', true)
+    }
+
+    // Check if player name exists
+    let playerName = this.getPlayerName()
+
+    // If no player name, prompt for it
+    if (!playerName) {
+      playerName = await this.uiManager.showPlayerNamePrompt()
+      this.savePlayerName(playerName)
+    }
+
+    // Submit score to leaderboard
+    await this.submitScore(playerName, this.score, isWin)
+
+    // Show game over modal with leaderboard option
+    this.uiManager.showGameOverModal(isWin, this.score, {
       onRestart: () => this.restartGame(),
-      onQuit: () => this.stopGame()
+      onQuit: () => this.stopGame(),
+      onViewLeaderboard: () => this.showLeaderboardFromGameEnd()
+    })
+  }
+
+  /**
+   * Show leaderboard after game ends (calls stopGame when closed)
+   */
+  async showLeaderboardFromGameEnd() {
+    console.log('📊 Loading leaderboard...')
+    const data = await this.fetchLeaderboardData()
+    this.uiManager.showLeaderboardModal(data, () => {
+      console.log('Leaderboard closed')
+      this.stopGame()
     })
   }
 
@@ -832,5 +909,200 @@ export default class extends Controller {
    */
   getGhostSprite(color, direction, frame) {
     return this.spriteManager.getGhostSprite(color, direction, frame)
+  }
+
+  // ============================================
+  // LEADERBOARD METHODS
+  // ============================================
+
+  /**
+   * Get player name from localStorage
+   */
+  getPlayerName() {
+    try {
+      return localStorage.getItem('pacman_player_name')
+    } catch (e) {
+      console.error('Error reading player name from localStorage:', e)
+      return null
+    }
+  }
+
+  /**
+   * Save player name to localStorage
+   */
+  savePlayerName(name) {
+    try {
+      localStorage.setItem('pacman_player_name', name)
+      console.log(`💾 Saved player name: ${name}`)
+    } catch (e) {
+      console.error('Error saving player name to localStorage:', e)
+    }
+  }
+
+  /**
+   * Submit score to leaderboard API
+   */
+  async submitScore(playerName, score, isWin) {
+    try {
+      const response = await fetch('/api/pacman_scores', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          pacman_score: {
+            player_name: playerName,
+            score: score,
+            is_win: isWin
+          }
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        console.log('✅ Score submitted successfully!')
+        if (data.is_high_score) {
+          console.log('🎉 New high score on global leaderboard!')
+        }
+      } else {
+        console.error('❌ Error submitting score:', data.errors)
+      }
+
+      return data
+    } catch (error) {
+      console.error('❌ Error submitting score:', error)
+      return { success: false, error: error.message }
+    }
+  }
+
+  /**
+   * Fetch leaderboard data from API
+   */
+  async fetchLeaderboardData() {
+    try {
+      const playerName = this.getPlayerName()
+
+      // Fetch global leaderboard
+      const globalResponse = await fetch('/api/pacman_scores/global')
+      const globalData = await globalResponse.json()
+
+      let playerData = null
+      if (playerName) {
+        // Fetch player scores
+        const playerResponse = await fetch(`/api/pacman_scores/player/${encodeURIComponent(playerName)}`)
+        const playerScoreData = await playerResponse.json()
+        playerData = {
+          name: playerName,
+          scores: playerScoreData.scores || []
+        }
+      }
+
+      return {
+        global: globalData.leaderboard || [],
+        player: playerData
+      }
+    } catch (error) {
+      console.error('❌ Error fetching leaderboard:', error)
+      return {
+        global: [],
+        player: null
+      }
+    }
+  }
+
+  /**
+   * Show leaderboard modal
+   */
+  async showLeaderboard() {
+    console.log('📊 Loading leaderboard...')
+    const data = await this.fetchLeaderboardData()
+    this.uiManager.showLeaderboardModal(data, () => {
+      console.log('Leaderboard closed')
+    })
+  }
+
+  /**
+   * Show leaderboard during game (pauses game)
+   */
+  async showLeaderboardDuringGame() {
+    // Pause the game first
+    if (!this.isPaused) {
+      this.isPaused = true
+      this.uiManager.showPauseOverlay()
+    }
+
+    console.log('📊 Loading leaderboard...')
+    const data = await this.fetchLeaderboardData()
+    this.uiManager.showLeaderboardModal(data, () => {
+      console.log('Leaderboard closed, resuming game')
+      // Resume game when leaderboard is closed
+      if (this.isPaused) {
+        this.uiManager.hidePauseOverlay().then(() => {
+          this.isPaused = false
+          this.lastFrameTime = null // Reset frame time to prevent huge delta
+          this.gameLoop()
+        })
+      }
+    })
+  }
+
+  /**
+   * Show quit confirmation modal
+   */
+  showQuitConfirmation() {
+    // Store state for proper restoration if cancelled
+    const wasPaused = this.isPaused
+    const wasStarting = this.isStarting
+
+    // IMMEDIATELY pause the game - set flag FIRST before any async operations
+    // This ensures the game loop will stop on the next frame check
+    this.isPaused = true
+
+    // Pause all audio immediately (including intro music)
+    this.audioManager.pauseAll()
+
+    // Then show visual pause overlay if in active gameplay
+    if (this.isGameActive && !wasStarting && !wasPaused) {
+      this.uiManager.showPauseOverlay()
+    }
+
+    this.uiManager.showConfirmationModal(
+      'Quit Game',
+      'Are you sure you want to quit? Your progress will be lost.',
+      () => {
+        // User confirmed quit
+        this.isPaused = false
+        const pauseOverlay = document.querySelector('.pacman-pause-overlay')
+        if (pauseOverlay) {
+          pauseOverlay.remove()
+        }
+        this.stopGame()
+      },
+      () => {
+        // User cancelled - resume game
+        if (!wasPaused) {
+          // Resume audio
+          this.audioManager.resumeAll()
+
+          // If was in active gameplay, hide pause overlay and resume
+          if (!wasStarting) {
+            this.uiManager.hidePauseOverlay().then(() => {
+              this.isPaused = false
+              this.lastFrameTime = null // Reset frame time to prevent huge delta
+              this.gameLoop()
+            })
+          } else {
+            // If was starting, just unpause (countdown/intro continues)
+            this.isPaused = false
+          }
+        } else if (wasStarting) {
+          // Was starting, unpause to let intro continue
+          this.isPaused = false
+          this.audioManager.resumeAll()
+        }
+        // If wasPaused and not wasStarting, keep pause state and keep pause overlay
+      }
+    )
   }
 }

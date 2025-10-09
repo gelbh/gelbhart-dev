@@ -122,6 +122,10 @@ export class UIManager {
             <span class="control-desc">Pause/Resume</span>
           </div>
           <div class="control-row">
+            <span class="control-key">L</span>
+            <span class="control-desc">Leaderboard</span>
+          </div>
+          <div class="control-row">
             <span class="control-key">Esc</span>
             <span class="control-desc">Quit Game</span>
           </div>
@@ -160,10 +164,10 @@ export class UIManager {
    * Show game over modal
    * @param {boolean} isWin - Whether the player won or lost
    * @param {number} finalScore - The final score
-   * @param {Object} callbacks - Callback functions { onRestart, onQuit }
+   * @param {Object} callbacks - Callback functions { onRestart, onQuit, onViewLeaderboard }
    */
   showGameOverModal(isWin, finalScore, callbacks = {}) {
-    const { onRestart, onQuit } = callbacks
+    const { onRestart, onQuit, onViewLeaderboard } = callbacks
 
     // Create modal overlay
     const modal = document.createElement('div')
@@ -187,6 +191,12 @@ export class UIManager {
             <i class="bx bx-refresh"></i>
             Play Again
           </button>
+          ${onViewLeaderboard ? `
+            <button class="modal-btn modal-btn-secondary" data-action="leaderboard">
+              <i class="bx bx-trophy"></i>
+              Leaderboard
+            </button>
+          ` : ''}
           <button class="modal-btn modal-btn-secondary" data-action="quit">
             <i class="bx bx-x"></i>
             Quit
@@ -208,6 +218,16 @@ export class UIManager {
         modal.remove()
         onRestart()
       })
+    }
+
+    if (onViewLeaderboard) {
+      const leaderboardBtn = modal.querySelector('[data-action="leaderboard"]')
+      if (leaderboardBtn) {
+        leaderboardBtn.addEventListener('click', () => {
+          modal.remove()
+          onViewLeaderboard()
+        })
+      }
     }
 
     if (onQuit) {
@@ -354,5 +374,269 @@ export class UIManager {
     if (existingBar) {
       existingBar.remove()
     }
+  }
+
+  /**
+   * Show player name prompt modal
+   * @returns {Promise<string>} Resolves with player name when submitted
+   */
+  showPlayerNamePrompt() {
+    return new Promise((resolve) => {
+      const modal = document.createElement('div')
+      modal.className = 'pacman-game-over-modal'
+
+      modal.innerHTML = `
+        <div class="modal-content">
+          <div class="modal-emoji">🎮</div>
+          <h2 class="modal-title">Welcome!</h2>
+          <p class="modal-message">Enter your name to save your scores to the leaderboard</p>
+          <div class="modal-input-group">
+            <input
+              type="text"
+              id="playerNameInput"
+              class="modal-input"
+              placeholder="Your Name"
+              maxlength="50"
+              autocomplete="off"
+            />
+          </div>
+          <div class="modal-buttons">
+            <button class="modal-btn modal-btn-primary" data-action="submit">
+              <i class="bx bx-check"></i>
+              Continue
+            </button>
+          </div>
+        </div>
+      `
+
+      document.body.appendChild(modal)
+
+      // Animate in
+      requestAnimationFrame(() => {
+        modal.classList.add('show')
+      })
+
+      const input = modal.querySelector('#playerNameInput')
+      const submitBtn = modal.querySelector('[data-action="submit"]')
+
+      // Focus input
+      setTimeout(() => input.focus(), 300)
+
+      const handleSubmit = () => {
+        const name = input.value.trim()
+        if (name.length > 0) {
+          modal.remove()
+          resolve(name)
+        } else {
+          input.classList.add('error')
+          setTimeout(() => input.classList.remove('error'), 500)
+        }
+      }
+
+      // Handle submit button click
+      submitBtn.addEventListener('click', handleSubmit)
+
+      // Handle enter key
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          handleSubmit()
+        }
+      })
+    })
+  }
+
+  /**
+   * Show leaderboard modal
+   * @param {Object} leaderboardData - { global: [], player: { name, scores: [] } }
+   * @param {Function} onClose - Callback when modal is closed
+   */
+  async showLeaderboardModal(leaderboardData, onClose) {
+    const modal = document.createElement('div')
+    modal.className = 'pacman-game-over-modal leaderboard-modal'
+
+    const { global, player } = leaderboardData
+
+    // Create global leaderboard HTML
+    const globalHTML = global.length > 0 ? global.map((entry, index) => `
+      <div class="leaderboard-row ${player && entry.player_name === player.name ? 'highlighted' : ''}">
+        <span class="rank">#${index + 1}</span>
+        <span class="player-name">${this.escapeHtml(entry.player_name)}</span>
+        <span class="win-badge">${entry.is_win ? '🏆' : ''}</span>
+        <span class="score">${entry.score}</span>
+      </div>
+    `).join('') : '<div class="no-scores">No scores yet. Be the first!</div>'
+
+    // Create player leaderboard HTML
+    const playerHTML = player && player.scores.length > 0 ? player.scores.map((entry, index) => `
+      <div class="leaderboard-row">
+        <span class="rank">#${index + 1}</span>
+        <span class="score">${entry.score}</span>
+        <span class="win-badge">${entry.is_win ? '🏆' : ''}</span>
+        <span class="date">${this.formatDate(entry.played_at)}</span>
+      </div>
+    `).join('') : '<div class="no-scores">Play to see your scores here!</div>'
+
+    modal.innerHTML = `
+      <div class="modal-content leaderboard-content">
+        <div class="modal-emoji">🏆</div>
+        <h2 class="modal-title">Leaderboard</h2>
+
+        <div class="leaderboard-tabs">
+          <button class="leaderboard-tab active" data-tab="global">Global Top 100</button>
+          ${player ? `<button class="leaderboard-tab" data-tab="player">My Scores</button>` : ''}
+        </div>
+
+        <div class="leaderboard-container">
+          <div class="leaderboard-panel active" data-panel="global">
+            <div class="leaderboard-header">
+              <span>Rank</span>
+              <span>Player</span>
+              <span></span>
+              <span>Score</span>
+            </div>
+            <div class="leaderboard-list">
+              ${globalHTML}
+            </div>
+          </div>
+
+          ${player ? `
+            <div class="leaderboard-panel" data-panel="player">
+              <div class="leaderboard-header player-header">
+                <span>Rank</span>
+                <span>Score</span>
+                <span></span>
+                <span>Date</span>
+              </div>
+              <div class="leaderboard-list">
+                ${playerHTML}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+
+        <div class="modal-buttons">
+          <button class="modal-btn modal-btn-secondary" data-action="close">
+            <i class="bx bx-x"></i>
+            Close
+          </button>
+        </div>
+      </div>
+    `
+
+    document.body.appendChild(modal)
+
+    // Animate in
+    requestAnimationFrame(() => {
+      modal.classList.add('show')
+    })
+
+    // Tab switching
+    const tabs = modal.querySelectorAll('.leaderboard-tab')
+    const panels = modal.querySelectorAll('.leaderboard-panel')
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const targetTab = tab.dataset.tab
+
+        tabs.forEach(t => t.classList.remove('active'))
+        panels.forEach(p => p.classList.remove('active'))
+
+        tab.classList.add('active')
+        modal.querySelector(`[data-panel="${targetTab}"]`).classList.add('active')
+      })
+    })
+
+    // Close button
+    modal.querySelector('[data-action="close"]').addEventListener('click', () => {
+      modal.remove()
+      if (onClose) onClose()
+    })
+  }
+
+  /**
+   * Escape HTML to prevent XSS
+   */
+  escapeHtml(text) {
+    const div = document.createElement('div')
+    div.textContent = text
+    return div.innerHTML
+  }
+
+  /**
+   * Format date for display
+   */
+  formatDate(dateString) {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now - date
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+    if (diffDays === 0) {
+      return 'Today'
+    } else if (diffDays === 1) {
+      return 'Yesterday'
+    } else if (diffDays < 7) {
+      return `${diffDays}d ago`
+    } else {
+      return date.toLocaleDateString()
+    }
+  }
+
+  /**
+   * Show confirmation modal
+   * @param {string} title - Modal title
+   * @param {string} message - Confirmation message
+   * @param {Function} onConfirm - Callback when user confirms
+   * @param {Function} onCancel - Callback when user cancels
+   */
+  showConfirmationModal(title, message, onConfirm, onCancel) {
+    const modal = document.createElement('div')
+    modal.className = 'pacman-game-over-modal confirmation-modal'
+
+    modal.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-emoji">⚠️</div>
+        <h2 class="modal-title">${this.escapeHtml(title)}</h2>
+        <p class="modal-message">${this.escapeHtml(message)}</p>
+        <div class="modal-buttons">
+          <button class="modal-btn modal-btn-primary" data-action="confirm">
+            <i class="bx bx-check"></i>
+            Yes, Quit
+          </button>
+          <button class="modal-btn modal-btn-secondary" data-action="cancel">
+            <i class="bx bx-x"></i>
+            Cancel
+          </button>
+        </div>
+      </div>
+    `
+
+    document.body.appendChild(modal)
+
+    // Animate in
+    requestAnimationFrame(() => {
+      modal.classList.add('show')
+    })
+
+    // Add event listeners
+    modal.querySelector('[data-action="confirm"]').addEventListener('click', () => {
+      modal.remove()
+      if (onConfirm) onConfirm()
+    })
+
+    modal.querySelector('[data-action="cancel"]').addEventListener('click', () => {
+      modal.remove()
+      if (onCancel) onCancel()
+    })
+
+    // Allow Escape key to cancel
+    const escapeHandler = (e) => {
+      if (e.key === 'Escape') {
+        modal.remove()
+        if (onCancel) onCancel()
+        document.removeEventListener('keydown', escapeHandler)
+      }
+    }
+    document.addEventListener('keydown', escapeHandler)
   }
 }

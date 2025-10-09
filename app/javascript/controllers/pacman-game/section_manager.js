@@ -112,8 +112,20 @@ export class SectionManager {
         if (lockOverlay) {
           lockOverlay.remove()
         }
-        // Remove blur effect
-        sectionElement.classList.remove('section-locked')
+
+        // Unwrap the blurred content wrapper
+        const contentWrapper = sectionElement.querySelector('.section-locked-content')
+        if (contentWrapper) {
+          while (contentWrapper.firstChild) {
+            sectionElement.insertBefore(contentWrapper.firstChild, contentWrapper)
+          }
+          contentWrapper.remove()
+        }
+
+        // Reset section position style if it was set
+        if (sectionElement.style.position === 'relative') {
+          sectionElement.style.position = ''
+        }
       }
     })
   }
@@ -239,14 +251,23 @@ export class SectionManager {
 
   /**
    * Increase difficulty as sections are unlocked
-   * Makes ghosts faster and reduces power mode duration
+   * Makes game progressively faster and reduces power mode duration
    */
   increaseDifficulty() {
-    // Increase ghost speed by 15% per section unlocked
-    const speedMultiplier = 1 + (this.currentSection * 0.15)
-    this.controller.ghostSpeed = 135 * speedMultiplier // Base 135 pixels/second
+    // Base speeds
+    const basePacmanSpeed = 220 // pixels/second
+    const baseGhostSpeed = 165   // pixels/second
 
-    // Cap ghost speed to 85% of Pac-Man's speed to keep game winnable
+    // Increase overall game speed by 15% per section unlocked
+    const speedMultiplier = 1 + (this.currentSection * 0.15)
+
+    // Increase Pac-Man speed
+    this.controller.pacmanSpeed = basePacmanSpeed * speedMultiplier
+
+    // Increase ghost speed (maintaining relative speed difference)
+    this.controller.ghostSpeed = baseGhostSpeed * speedMultiplier
+
+    // Cap ghost speed at 85% of Pac-Man's speed to keep game winnable
     const maxGhostSpeed = this.controller.pacmanSpeed * 0.85
     this.controller.ghostSpeed = Math.min(this.controller.ghostSpeed, maxGhostSpeed)
 
@@ -254,6 +275,6 @@ export class SectionManager {
     this.controller.powerModeDuration = Math.max(3000, 7000 - (this.currentSection * 1000))
     this.controller.powerModeWarningDuration = Math.max(1500, 2000 - (this.currentSection * 300))
 
-    console.log(`⚡ Difficulty increased! Ghost speed: ${this.controller.ghostSpeed.toFixed(0)} px/s, Power mode: ${this.controller.powerModeDuration/1000}s`)
+    console.log(`⚡ Difficulty increased! Pac-Man: ${this.controller.pacmanSpeed.toFixed(0)} px/s, Ghosts: ${this.controller.ghostSpeed.toFixed(0)} px/s, Power mode: ${this.controller.powerModeDuration/1000}s`)
   }
 }
