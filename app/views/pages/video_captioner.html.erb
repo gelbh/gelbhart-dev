@@ -30,6 +30,12 @@
             <!-- Download Section - Featured Card -->
             <div class="card video-captioner-card border-0 shadow-lg mb-4 fade-in-view delay-1">
                 <div class="card-body p-5 text-center">
+                    <!-- Mobile Notice -->
+                    <div class="alert alert-warning d-md-none mb-4">
+                        <i class="bx bx-desktop fs-4 me-2"></i>
+                        <strong>Desktop Only:</strong> This tool requires a PC/Mac with Python installed. It cannot run on mobile devices.
+                    </div>
+
                     <div class="mb-4">
                         <div class="bg-primary bg-opacity-10 rounded-circle p-4 d-inline-flex">
                             <i class="bx bx-download display-4 text-primary"></i>
@@ -38,8 +44,8 @@
                     <h2 class="h3 mb-3">Download Desktop Tool</h2>
                     <p class="text-muted mb-4">Just double-click to launch! The app automatically installs everything it needs on first run.</p>
                     <div class="d-grid gap-3 mb-4 col-lg-8 mx-auto">
-                        <a href="/downloads/video_captioner.pyw" download class="btn btn-primary btn-lg">
-                            <i class="bx bx-download me-2"></i>Download GUI Version (Recommended)
+                        <a href="/downloads/video_captioner.pyw" download class="btn btn-primary btn-lg text-nowrap text-truncate">
+                            <i class="bx bx-download me-2"></i><span class="d-none d-sm-inline">Download GUI Version (Recommended)</span><span class="d-inline d-sm-none">Download GUI</span>
                         </a>
                     </div>
                     <small class="text-muted d-block mb-4">Windows: Use .pyw | Mac/Linux: Use .py</small>
