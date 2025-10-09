@@ -1,0 +1,25 @@
+// ============================================
+// BASE STYLES
+// ============================================
+// Global styles applied to body and html elements
+
+// Prevent horizontal scroll from full-bleed sections
+body {
+  overflow-x: hidden;
+}
+
+// Disable smooth scroll for Pac-Man game to work properly
+html {
+  scroll-behavior: auto;
+}
+
+// Stretched link improvement
+.stretched-link::after {
+  z-index: var(--z-content);
+}
+
+// Ensure card content is above stretched link
+.card-body > * {
+  position: relative;
+  z-index: 2;
+}

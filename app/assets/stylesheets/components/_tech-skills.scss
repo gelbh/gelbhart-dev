@@ -1,0 +1,102 @@
+// ============================================
+// TECHNOLOGIES & SKILLS SECTION
+// ============================================
+
+// Tech card container
+.tech-card {
+  background: var(--bs-body-bg);
+  border: 1px solid rgba(var(--color-primary), 0.15);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  transition: all 0.4s var(--ease-smooth);
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+
+  &:hover {
+    transform: translateY(-8px);
+    border-color: rgba(var(--color-primary), 0.3);
+    box-shadow: 0 1rem 2rem rgba(var(--color-primary), 0.15);
+  }
+}
+
+[data-bs-theme="dark"] .tech-card {
+  border-color: rgba(var(--color-primary), 0.2);
+  box-shadow: var(--shadow-sm);
+
+  &:hover {
+    border-color: rgba(var(--color-primary), 0.4);
+    box-shadow: 0 1rem 2rem rgba(var(--color-primary), 0.25);
+  }
+}
+
+// Tech card icon
+.tech-card-icon {
+  width: 4rem;
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  margin: 0 auto var(--spacing-lg);
+  transition: all 0.4s var(--ease-smooth);
+
+  i {
+    font-size: 2rem;
+    transition: all 0.4s var(--ease-smooth);
+  }
+
+  .tech-card:hover & {
+    transform: scale(1.1) rotate(5deg);
+
+    i {
+      transform: scale(1.1);
+    }
+  }
+}
+
+// Tech items list
+.tech-item {
+  padding: var(--spacing-sm) 0;
+  font-size: 0.95rem;
+  color: var(--bs-body-color);
+  transition: all var(--transition-normal) ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  i {
+    transition: transform var(--transition-normal) ease;
+  }
+
+  &:hover {
+    color: var(--color-primary);
+    transform: translateX(5px);
+
+    i {
+      transform: scale(1.2);
+    }
+  }
+}
+
+// Tech badges
+.tech-badge {
+  font-size: 0.85rem;
+  padding: var(--spacing-sm) 0.875rem;
+  font-weight: 500;
+  transition: all var(--transition-normal) ease;
+  cursor: default;
+
+  &:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(var(--color-primary), 0.2);
+  }
+}
+
+// Purple color class (for security icon)
+.text-purple {
+  color: var(--color-purple) !important;
+}
+
+.bg-purple {
+  background-color: var(--color-purple) !important;
+}
