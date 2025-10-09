@@ -29,8 +29,8 @@
             <div class="card hevy-tracker-card border-0 shadow-lg mb-4 fade-in-view delay-1">
                 <div class="card-body p-4 p-lg-5">
                     <div class="d-flex align-items-center mb-4">
-                        <div class="bg-primary bg-opacity-10 rounded-circle p-3 me-3">
-                            <i class="bx bx-rocket fs-3 text-primary"></i>
+                        <div class="me-3">
+                            <%= render 'shared/icon_circle', icon: 'bx-rocket', color: 'primary', size: 'md' %>
                         </div>
                         <h2 class="h3 mb-0">Getting Started</h2>
                     </div>
@@ -261,8 +261,8 @@
                 <div class="card-body p-4 p-lg-5">
                     <div class="text-center mb-4">
                         <div class="d-flex align-items-center justify-content-center mb-3">
-                            <div class="bg-primary bg-opacity-10 rounded-circle p-3 me-3">
-                                <i class="bx bx-spreadsheet fs-3 text-primary"></i>
+                            <div class="me-3">
+                                <%= render 'shared/icon_circle', icon: 'bx-spreadsheet', color: 'primary', size: 'md' %>
                             </div>
                             <h3 class="h4 mb-0">Spreadsheet Interface</h3>
                         </div>
@@ -351,48 +351,36 @@
             <!-- Features Grid -->
             <div class="row g-4 mb-4 fade-in-view delay-2">
                 <div class="col-md-6">
-                    <div class="card hevy-tracker-card border-0 shadow h-100">
-                        <div class="card-body p-4">
-                            <div class="bg-success bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
-                                <i class="bx bx-lock-alt fs-3 text-success"></i>
-                            </div>
-                            <h4 class="h5 mb-3">Secure OAuth</h4>
-                            <p class="text-muted mb-0">Industry-standard OAuth 2.0 authentication ensures your data remains private and secure.</p>
-                        </div>
-                    </div>
+                    <%= render 'shared/feature_card',
+                        icon: 'bx-lock-alt',
+                        color: 'success',
+                        title: 'Secure OAuth',
+                        description: 'Industry-standard OAuth 2.0 authentication ensures your data remains private and secure.',
+                        card_classes: 'hevy-tracker-card' %>
                 </div>
                 <div class="col-md-6">
-                    <div class="card hevy-tracker-card border-0 shadow h-100">
-                        <div class="card-body p-4">
-                            <div class="bg-info bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
-                                <i class="bx bx-sync fs-3 text-info"></i>
-                            </div>
-                            <h4 class="h5 mb-3">Auto Sync</h4>
-                            <p class="text-muted mb-0">Automatically sync your workout data from Hevy to your personal spreadsheet.</p>
-                        </div>
-                    </div>
+                    <%= render 'shared/feature_card',
+                        icon: 'bx-sync',
+                        color: 'info',
+                        title: 'Auto Sync',
+                        description: 'Automatically sync your workout data from Hevy to your personal spreadsheet.',
+                        card_classes: 'hevy-tracker-card' %>
                 </div>
                 <div class="col-md-6">
-                    <div class="card hevy-tracker-card border-0 shadow h-100">
-                        <div class="card-body p-4">
-                            <div class="bg-warning bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
-                                <i class="bx bx-spreadsheet fs-3 text-warning"></i>
-                            </div>
-                            <h4 class="h5 mb-3">Google Sheets™</h4>
-                            <p class="text-muted mb-0">Leverage the power of spreadsheets to analyze and visualize your fitness data.</p>
-                        </div>
-                    </div>
+                    <%= render 'shared/feature_card',
+                        icon: 'bx-spreadsheet',
+                        color: 'warning',
+                        title: 'Google Sheets™',
+                        description: 'Leverage the power of spreadsheets to analyze and visualize your fitness data.',
+                        card_classes: 'hevy-tracker-card' %>
                 </div>
                 <div class="col-md-6">
-                    <div class="card hevy-tracker-card border-0 shadow h-100">
-                        <div class="card-body p-4">
-                            <div class="bg-danger bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
-                                <i class="bx bx-dumbbell fs-3 text-danger"></i>
-                            </div>
-                            <h4 class="h5 mb-3">Hevy Pro</h4>
-                            <p class="text-muted mb-0">Works seamlessly with your Hevy Pro subscription and API access.</p>
-                        </div>
-                    </div>
+                    <%= render 'shared/feature_card',
+                        icon: 'bx-dumbbell',
+                        color: 'danger',
+                        title: 'Hevy Pro',
+                        description: 'Works seamlessly with your Hevy Pro subscription and API access.',
+                        card_classes: 'hevy-tracker-card' %>
                 </div>
             </div>
 
@@ -400,16 +388,16 @@
             <div class="card hevy-tracker-card border-0 shadow mb-4 fade-in-view delay-5">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-4">
-                        <div class="bg-primary bg-opacity-10 rounded-circle p-3 me-3">
-                            <i class="bx bx-shield-alt-2 fs-4 text-primary"></i>
+                        <div class="me-3">
+                            <%= render 'shared/icon_circle', icon: 'bx-shield-alt-2', color: 'primary', size: 'md' %>
                         </div>
                         <h3 class="h4 mb-0">Required Permissions</h3>
                     </div>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="d-flex align-items-start">
-                                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3 flex-shrink-0">
-                                    <i class="bx bx-spreadsheet fs-5 text-primary"></i>
+                                <div class="me-3 flex-shrink-0">
+                                    <%= render 'shared/icon_circle', icon: 'bx-spreadsheet', color: 'primary', size: 'sm' %>
                                 </div>
                                 <div>
                                     <strong class="d-block mb-1">View and manage spreadsheets</strong>
@@ -419,8 +407,8 @@
                         </div>
                         <div class="col-md-6">
                             <div class="d-flex align-items-start">
-                                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3 flex-shrink-0">
-                                    <i class="bx bx-cloud fs-5 text-primary"></i>
+                                <div class="me-3 flex-shrink-0">
+                                    <%= render 'shared/icon_circle', icon: 'bx-cloud', color: 'primary', size: 'sm' %>
                                 </div>
                                 <div>
                                     <strong class="d-block mb-1">External API access</strong>
@@ -436,8 +424,8 @@
             <div class="card hevy-tracker-card border-0 shadow mb-4 fade-in-view delay-6">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-3">
-                        <div class="bg-primary bg-opacity-10 rounded-circle p-3 me-3">
-                            <i class="bx bx-list-check fs-4 text-primary"></i>
+                        <div class="me-3">
+                            <%= render 'shared/icon_circle', icon: 'bx-list-check', color: 'primary', size: 'md' %>
                         </div>
                         <h3 class="h4 mb-0">Requirements</h3>
                     </div>
