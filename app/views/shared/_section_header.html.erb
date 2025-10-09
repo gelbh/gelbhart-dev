@@ -8,14 +8,15 @@
 # - text_align: 'start', 'center', 'end' (optional, default: 'center')
 # - animation_delay: fade-in animation delay class (optional)
 
-text_align ||= 'center'
-animation_delay ||= ''
+text_align = local_assigns.fetch(:text_align, 'center')
+animation_delay = local_assigns.fetch(:animation_delay, '')
+subtitle = local_assigns[:subtitle]
 %>
 
 <div class="text-<%= text_align %> mb-5">
   <h2 class="h1 mb-3 fade-in-view <%= animation_delay %>"><%= title %></h2>
-  <% if defined?(subtitle) && subtitle %>
-    <p class="fs-lg text-muted fade-in-view <%= animation_delay ? "#{animation_delay.split('-').first}-#{animation_delay.split('-').last.to_i + 1}" : 'delay-1' %>">
+  <% if subtitle.present? %>
+    <p class="fs-lg text-muted fade-in-view <%= animation_delay.present? ? "#{animation_delay.split('-').first}-#{animation_delay.split('-').last.to_i + 1}" : 'delay-1' %>">
       <%= subtitle %>
     </p>
   <% end %>

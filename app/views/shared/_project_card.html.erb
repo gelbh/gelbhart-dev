@@ -25,8 +25,10 @@
 # - link_rel: Link rel attribute (optional, e.g., 'noopener')
 # - animation_delay: fade-in animation delay class (optional, e.g., 'delay-1')
 
-link_icon ||= 'bx-right-arrow-alt'
-animation_delay ||= ''
+link_icon = local_assigns.fetch(:link_icon, 'bx-right-arrow-alt')
+animation_delay = local_assigns.fetch(:animation_delay, '')
+link_target = local_assigns[:link_target]
+link_rel = local_assigns[:link_rel]
 %>
 
 <article class="card project-card border-0 shadow-sm h-100 <%= animation_delay %>">
@@ -48,7 +50,7 @@ animation_delay ||= ''
         <%= render 'shared/tech_badge', text: badge[:text], color: badge[:color] %>
       <% end %>
     </div>
-    <% if defined?(link_target) && link_target %>
+    <% if link_target.present? %>
       <a href="<%= link_url %>" target="<%= link_target %>" rel="<%= link_rel %>" class="btn btn-outline-primary stretched-link project-btn">
         <%= link_text %> <i class="bx <%= link_icon %> fs-5 ms-2 arrow-icon"></i>
       </a>
