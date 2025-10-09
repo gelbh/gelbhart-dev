@@ -1,0 +1,238 @@
+// ============================================
+// HERO SECTION
+// ============================================
+
+// Hero container - Full bleed
+.hero-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-top: var(--spacing-3xl);
+}
+
+// Animated gradient background
+.hero-gradient-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--gradient-primary);
+  background-size: 200% 200%;
+  animation: gradientShift var(--duration-gradient) ease infinite;
+  opacity: var(--opacity-light);
+  z-index: var(--z-background);
+}
+
+[data-bs-theme="dark"] .hero-gradient-bg {
+  opacity: var(--opacity-medium);
+}
+
+// Tech Grid Background (like circuit board / code editor)
+.tech-grid-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
+  z-index: var(--z-grid);
+  pointer-events: none;
+  animation: gridMove var(--duration-grid) linear infinite;
+}
+
+[data-bs-theme="dark"] .tech-grid-bg {
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+}
+
+// Floating code snippets
+.floating-code {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  z-index: var(--z-content);
+  pointer-events: none;
+}
+
+.code-snippet {
+  position: absolute;
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  opacity: 0.15;
+  animation: floatCode var(--duration-float) var(--ease-in-out) infinite;
+}
+
+[data-bs-theme="dark"] .code-snippet {
+  opacity: 0.18;
+  animation: floatCodeDark var(--duration-float) var(--ease-in-out) infinite;
+}
+
+// Individual code snippet positions
+.code-1 {
+  top: 10%;
+  left: 5%;
+  animation-delay: 0s;
+  animation-duration: 30s;
+}
+
+.code-2 {
+  top: 20%;
+  right: 10%;
+  animation-delay: 3s;
+  animation-duration: 28s;
+}
+
+.code-3 {
+  top: 40%;
+  left: 8%;
+  animation-delay: 6s;
+  animation-duration: 32s;
+}
+
+.code-4 {
+  top: 60%;
+  right: 15%;
+  animation-delay: 2s;
+  animation-duration: 26s;
+}
+
+.code-5 {
+  bottom: 20%;
+  left: 12%;
+  animation-delay: 8s;
+  animation-duration: 34s;
+}
+
+.code-6 {
+  top: 30%;
+  right: 8%;
+  animation-delay: 4s;
+  animation-duration: 29s;
+}
+
+.code-7 {
+  bottom: 30%;
+  right: 20%;
+  animation-delay: 7s;
+  animation-duration: 31s;
+}
+
+.code-8 {
+  top: 70%;
+  left: 20%;
+  animation-delay: 1s;
+  animation-duration: 27s;
+}
+
+// Enhanced gradient text
+.text-gradient {
+  background: var(--gradient-primary);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientText 8s ease infinite;
+  font-weight: 800;
+}
+
+// Fade in up animation
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp var(--transition-slower) ease forwards;
+}
+
+.delay-1 {
+  animation-delay: 0.2s;
+}
+
+.delay-2 {
+  animation-delay: 0.4s;
+}
+
+.delay-3 {
+  animation-delay: 0.6s;
+}
+
+.delay-4 {
+  animation-delay: 0.8s;
+}
+
+// Button pulse effect
+.btn-pulse {
+  animation: pulse var(--duration-pulse) ease infinite;
+
+  &:hover {
+    animation: none;
+  }
+}
+
+// Badge hover effect
+.badge-hover {
+  transition: all var(--transition-normal) ease;
+  cursor: default;
+
+  &:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(var(--color-primary), 0.2);
+  }
+}
+
+// Scroll indicator - Fixed positioning and centering
+.scroll-indicator {
+  position: absolute;
+  bottom: var(--spacing-xl);
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: fit-content;
+  text-align: center;
+  z-index: var(--z-floating);
+  color: inherit;
+
+  &:hover .scroll-indicator-arrow {
+    transform: translateY(5px);
+  }
+}
+
+.scroll-indicator-arrow {
+  font-size: 2rem;
+  animation: bounce var(--duration-pulse) ease infinite;
+  transition: transform var(--transition-normal) ease;
+  color: var(--color-primary);
+}
+
+// Hero heading enhancement
+.hero-heading {
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+// Responsive adjustments
+@media (max-width: $mobile-breakpoint) {
+  .hero-section {
+    min-height: auto;
+    padding: 3rem 0;
+  }
+
+  .shape {
+    opacity: 0.05;
+  }
+
+  .scroll-indicator {
+    bottom: var(--spacing-md);
+  }
+}
