@@ -149,97 +149,64 @@
 
 <!-- Projects Section -->
 <section id="projects" class="container py-5" data-controller="scroll-animation">
-    <h2 class="h1 text-center mb-5 fade-in-view">Featured Projects</h2>
+    <%= render 'shared/section_header', title: 'Featured Projects' %>
 
     <!-- Project cards -->
     <div class="row g-4 justify-content-center">
 
         <!-- Hevy Tracker Card -->
-        <div class="col-lg-4 col-md-6 fade-in-view delay-1">
-            <article class="card project-card border-0 shadow-sm h-100">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="flex-shrink-0">
-                            <div class="project-icon bg-primary bg-opacity-10 rounded-3 p-3">
-                                <i class="bx bx-dumbbell fs-1 text-primary"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h3 class="h5 mb-0">Hevy Tracker</h3>
-                            <span class="fs-sm text-muted">Google Apps Script</span>
-                        </div>
-                    </div>
-                    <p class="card-text mb-4">
-                        Connect your Hevy workout data to Google Sheets™ with secure OAuth integration. Automatically sync your fitness progress.
-                    </p>
-                    <div class="d-flex gap-2 mb-3 flex-wrap">
-                        <span class="badge project-badge bg-success bg-opacity-10 text-success">OAuth 2.0</span>
-                        <span class="badge project-badge bg-info bg-opacity-10 text-info">Google Apps</span>
-                    </div>
-                    <%= link_to hevy_tracker_path, class: "btn btn-outline-primary stretched-link project-btn" do %>
-                    Learn More <i class="bx bx-right-arrow-alt fs-5 ms-2 arrow-icon"></i>
-                    <% end %>
-                </div>
-            </article>
+        <div class="col-lg-4 col-md-6">
+            <%= render 'shared/project_card',
+                icon: 'bx-dumbbell',
+                color: 'primary',
+                title: 'Hevy Tracker',
+                subtitle: 'Google Apps Script',
+                description: 'Connect your Hevy workout data to Google Sheets™ with secure OAuth integration. Automatically sync your fitness progress.',
+                badges: [
+                    {text: 'OAuth 2.0', color: 'success'},
+                    {text: 'Google Apps', color: 'info'}
+                ],
+                link_text: 'Learn More',
+                link_url: hevy_tracker_path,
+                animation_delay: 'fade-in-view delay-1' %>
         </div>
 
         <!-- Video Captioner Card -->
-        <div class="col-lg-4 col-md-6 fade-in-view delay-2">
-            <article class="card project-card border-0 shadow-sm h-100">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="flex-shrink-0">
-                            <div class="project-icon bg-success bg-opacity-10 rounded-3 p-3">
-                                <i class="bx bx-video fs-1 text-success"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h3 class="h5 mb-0">Video Captioner</h3>
-                            <span class="fs-sm text-muted">AI-Powered Tool</span>
-                        </div>
-                    </div>
-                    <p class="card-text mb-4">
-                        Generate and translate video captions from YouTube videos or local files. Powered by AI transcription with 15+ languages.
-                    </p>
-                    <div class="d-flex gap-2 mb-3 flex-wrap">
-                        <span class="badge project-badge bg-primary bg-opacity-10 text-primary">Whisper AI</span>
-                        <span class="badge project-badge bg-warning bg-opacity-10 text-warning">Python</span>
-                    </div>
-                    <%= link_to video_captioner_path, class: "btn btn-outline-primary stretched-link project-btn" do %>
-                    Learn More <i class="bx bx-right-arrow-alt fs-5 ms-2 arrow-icon"></i>
-                    <% end %>
-                </div>
-            </article>
+        <div class="col-lg-4 col-md-6">
+            <%= render 'shared/project_card',
+                icon: 'bx-video',
+                color: 'success',
+                title: 'Video Captioner',
+                subtitle: 'AI-Powered Tool',
+                description: 'Generate and translate video captions from YouTube videos or local files. Powered by AI transcription with 15+ languages.',
+                badges: [
+                    {text: 'Whisper AI', color: 'primary'},
+                    {text: 'Python', color: 'warning'}
+                ],
+                link_text: 'Learn More',
+                link_url: video_captioner_path,
+                animation_delay: 'fade-in-view delay-2' %>
         </div>
 
         <!-- Robot Motion Planning Card -->
-        <div class="col-lg-4 col-md-6 fade-in-view delay-3">
-            <article class="card project-card border-0 shadow-sm h-100">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="flex-shrink-0">
-                            <div class="project-icon bg-warning bg-opacity-10 rounded-3 p-3">
-                                <i class="bx bx-brain fs-1 text-warning"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h3 class="h5 mb-0">Robot Motion Planning</h3>
-                            <span class="fs-sm text-muted">MATLAB Application</span>
-                        </div>
-                    </div>
-                    <p class="card-text mb-4">
-                        Genetic algorithm implementation for robot path optimization with interactive UI, dynamic parameter adjustment, and real-time visualization.
-                    </p>
-                    <div class="d-flex gap-2 mb-3 flex-wrap">
-                        <span class="badge project-badge bg-danger bg-opacity-10 text-danger">MATLAB</span>
-                        <span class="badge project-badge bg-info bg-opacity-10 text-info">Genetic Algorithm</span>
-                        <span class="badge project-badge bg-success bg-opacity-10 text-success">Path Planning</span>
-                    </div>
-                    <a href="https://github.com/gelbh/robot-motion-planning" target="_blank" rel="noopener" class="btn btn-outline-primary stretched-link project-btn">
-                        View on GitHub <i class="bx bxl-github fs-5 ms-2 arrow-icon"></i>
-                    </a>
-                </div>
-            </article>
+        <div class="col-lg-4 col-md-6">
+            <%= render 'shared/project_card',
+                icon: 'bx-brain',
+                color: 'warning',
+                title: 'Robot Motion Planning',
+                subtitle: 'MATLAB Application',
+                description: 'Genetic algorithm implementation for robot path optimization with interactive UI, dynamic parameter adjustment, and real-time visualization.',
+                badges: [
+                    {text: 'MATLAB', color: 'danger'},
+                    {text: 'Genetic Algorithm', color: 'info'},
+                    {text: 'Path Planning', color: 'success'}
+                ],
+                link_text: 'View on GitHub',
+                link_url: 'https://github.com/gelbh/robot-motion-planning',
+                link_icon: 'bxl-github',
+                link_target: '_blank',
+                link_rel: 'noopener',
+                animation_delay: 'fade-in-view delay-3' %>
         </div>
 
     </div>
@@ -247,10 +214,9 @@
 
 <!-- Technologies & Skills Section -->
 <section id="technologies" class="container py-5 my-5" data-controller="scroll-animation">
-    <div class="text-center mb-5">
-        <h2 class="h1 mb-3 fade-in-view">Technologies & Skills</h2>
-        <p class="fs-lg text-muted fade-in-view delay-1">Programming languages, frameworks, and tools I work with</p>
-    </div>
+    <%= render 'shared/section_header',
+        title: 'Technologies & Skills',
+        subtitle: 'Programming languages, frameworks, and tools I work with' %>
 
     <!-- Programming Languages -->
     <div class="row g-4 mb-4">
