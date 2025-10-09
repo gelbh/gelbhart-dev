@@ -7,8 +7,8 @@
 # - color: Bootstrap color (default: 'primary')
 # - size: 'sm', 'md', 'lg', 'xl' (default: 'md')
 
-color ||= 'primary'
-size ||= 'md'
+color = local_assigns.fetch(:color, 'primary')
+size = local_assigns.fetch(:size, 'md')
 
 # Size classes
 size_classes = {

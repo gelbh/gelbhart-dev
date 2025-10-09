@@ -10,8 +10,8 @@
 # - card_classes: Additional CSS classes for the card (optional)
 # - animation_delay: fade-in animation delay class (optional, e.g., 'delay-1')
 
-card_classes ||= ''
-animation_delay ||= ''
+card_classes = local_assigns.fetch(:card_classes, '')
+animation_delay = local_assigns.fetch(:animation_delay, '')
 %>
 
 <div class="card <%= card_classes %> border-0 shadow h-100 <%= animation_delay %>">

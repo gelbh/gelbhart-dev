@@ -9,8 +9,9 @@
 # - size: 'sm', 'md', 'lg' (optional, default: 'md')
 # - badge_class: 'tech-badge' or 'project-badge' (optional, default: 'project-badge')
 
-size ||= 'md'
-badge_class ||= 'project-badge'
+size = local_assigns.fetch(:size, 'md')
+badge_class = local_assigns.fetch(:badge_class, 'project-badge')
+icon = local_assigns[:icon]
 
 size_classes = {
   'sm' => 'fs-xs',
@@ -22,7 +23,7 @@ size_class = size_classes[size] || ''
 %>
 
 <span class="badge <%= badge_class %> bg-<%= color %> bg-opacity-10 text-<%= color %> <%= size_class %>">
-  <% if defined?(icon) && icon %>
+  <% if icon.present? %>
     <i class="bx <%= icon %> me-1"></i>
   <% end %>
   <%= text %>
