@@ -105,6 +105,11 @@ export class UIManager {
    * Show pause overlay with controls
    */
   showPauseOverlay() {
+    // Prevent duplicate pause overlays
+    if (document.querySelector('.pacman-pause-overlay')) {
+      return
+    }
+
     // Create pause overlay
     const pauseOverlay = document.createElement('div')
     pauseOverlay.className = 'pacman-pause-overlay'
@@ -451,6 +456,11 @@ export class UIManager {
    * @param {Function} onClose - Callback when modal is closed
    */
   async showLeaderboardModal(leaderboardData, onClose) {
+    // Prevent duplicate leaderboard modals
+    if (document.querySelector('.leaderboard-modal')) {
+      return
+    }
+
     const modal = document.createElement('div')
     modal.className = 'pacman-game-over-modal leaderboard-modal'
 
@@ -482,7 +492,7 @@ export class UIManager {
         <h2 class="modal-title">Leaderboard</h2>
 
         <div class="leaderboard-tabs">
-          <button class="leaderboard-tab active" data-tab="global">Global Top 100</button>
+          <button class="leaderboard-tab active" data-tab="global">Top Players</button>
           ${player ? `<button class="leaderboard-tab" data-tab="player">My Scores</button>` : ''}
         </div>
 
@@ -547,10 +557,24 @@ export class UIManager {
     })
 
     // Close button
-    modal.querySelector('[data-action="close"]').addEventListener('click', () => {
+    const closeHandler = () => {
       modal.remove()
       if (onClose) onClose()
-    })
+      // Remove keyboard listener
+      document.removeEventListener('keydown', keydownHandler)
+    }
+
+    modal.querySelector('[data-action="close"]').addEventListener('click', closeHandler)
+
+    // Allow L key to close leaderboard
+    const keydownHandler = (e) => {
+      if (e.key === 'l' || e.key === 'L') {
+        e.preventDefault()
+        e.stopImmediatePropagation() // Prevent other listeners from firing
+        closeHandler()
+      }
+    }
+    document.addEventListener('keydown', keydownHandler)
   }
 
   /**
@@ -590,6 +614,11 @@ export class UIManager {
    * @param {Function} onCancel - Callback when user cancels
    */
   showConfirmationModal(title, message, onConfirm, onCancel) {
+    // Prevent duplicate confirmation modals
+    if (document.querySelector('.confirmation-modal')) {
+      return
+    }
+
     const modal = document.createElement('div')
     modal.className = 'pacman-game-over-modal confirmation-modal'
 
