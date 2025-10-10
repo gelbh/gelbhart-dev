@@ -27,7 +27,13 @@ class GoogleAnalyticsService
         # Set universe domain to fix compatibility
         auth_client.instance_variable_set(:@universe_domain, 'googleapis.com')
 
-        auth_client.fetch_access_token!
+        # Fetch access token with error handling
+        begin
+          auth_client.fetch_access_token!
+        rescue Signet::AuthorizationError => e
+          Rails.logger.error "Authorization failed. #{e.message}"
+          raise StandardError.new("Authorization failed. Please run: rails analytics:authorize")
+        end
 
         config.credentials = auth_client
       end
