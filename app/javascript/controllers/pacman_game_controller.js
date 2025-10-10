@@ -1,12 +1,12 @@
 import { Controller } from "@hotwired/stimulus"
-import { AudioManager } from "./audio_manager"
-import { SpriteManager } from "./sprite_manager"
-import { CollisionManager } from "./collision_manager"
-import { GhostAI } from "./ghost_ai"
-import { ItemManager } from "./item_manager"
-import { SectionManager } from "./section_manager"
-import { UIManager } from "./ui_manager"
-import { AnimationManager } from "./animation_manager"
+import { AudioManager } from "../lib/pacman/audio_manager"
+import { SpriteManager } from "../lib/pacman/sprite_manager"
+import { CollisionManager } from "../lib/pacman/collision_manager"
+import { GhostAI } from "../lib/pacman/ghost_ai"
+import { ItemManager } from "../lib/pacman/item_manager"
+import { SectionManager } from "../lib/pacman/section_manager"
+import { UIManager } from "../lib/pacman/ui_manager"
+import { AnimationManager } from "../lib/pacman/animation_manager"
 
 /**
  * Pac-Man Game Controller
@@ -192,10 +192,13 @@ export default class extends Controller {
       return
     }
 
-    // Handle leaderboard (L key)
-    if ((event.key === 'l' || event.key === 'L') && this.isGameActive && !this.isStarting && !this.isDying) {
-      this.showLeaderboardDuringGame()
-      event.preventDefault()
+    // Handle leaderboard (L key) - only when paused and no modal open
+    if ((event.key === 'l' || event.key === 'L') && this.isGameActive && !this.isStarting && !this.isDying && this.isPaused) {
+      // Don't open if leaderboard is already open
+      if (!document.querySelector('.leaderboard-modal')) {
+        this.showLeaderboardDuringGame()
+        event.preventDefault()
+      }
       return
     }
 
@@ -686,7 +689,8 @@ export default class extends Controller {
    */
   onGhostEaten(ghost) {
     // Award points for eating ghost (200, 400, 800, 1600)
-    const ghostPoints = 200 * Math.pow(2, this.ghostsEatenThisPowerMode || 0)
+    const baseGhostPoints = 200 * Math.pow(2, this.ghostsEatenThisPowerMode || 0)
+    const ghostPoints = baseGhostPoints * (this.activeEffects.doublePoints ? 2 : 1)
     this.score += ghostPoints
     this.ghostsEatenThisPowerMode = (this.ghostsEatenThisPowerMode || 0) + 1
     this.updateHUD()
@@ -1035,15 +1039,9 @@ export default class extends Controller {
     console.log('📊 Loading leaderboard...')
     const data = await this.fetchLeaderboardData()
     this.uiManager.showLeaderboardModal(data, () => {
-      console.log('Leaderboard closed, resuming game')
-      // Resume game when leaderboard is closed
-      if (this.isPaused) {
-        this.uiManager.hidePauseOverlay().then(() => {
-          this.isPaused = false
-          this.lastFrameTime = null // Reset frame time to prevent huge delta
-          this.gameLoop()
-        })
-      }
+      console.log('Leaderboard closed, returning to pause menu')
+      // Don't resume game - just return to pause menu
+      // User must press P to resume
     })
   }
 

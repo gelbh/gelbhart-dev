@@ -340,8 +340,11 @@ export class ItemManager {
       if (distance < collisionRadius) {
         dot.collected = true
         dot.element.classList.add('collected')
-        this.controller.score += dot.points
-        this.controller.dotsScore += dot.points // Track dots score separately for section unlocking
+
+        // Apply double points if active
+        const pointsEarned = dot.points * (this.controller.activeEffects.doublePoints ? 2 : 1)
+        this.controller.score += pointsEarned
+        this.controller.dotsScore += dot.points // Track dots score separately for section unlocking (no double points for unlocking)
         this.controller.updateHUD()
 
         // Track this dot position as collected (to prevent regeneration)

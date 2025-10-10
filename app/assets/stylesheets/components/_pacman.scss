@@ -240,6 +240,19 @@
     animation: titleSlide var(--transition-slow) ease 0.3s both;
   }
 
+  // Leaderboard modal specific sizing (smaller header)
+  &.leaderboard-modal {
+    .modal-emoji {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    .modal-title {
+      font-size: 1.8rem;
+      margin-bottom: 5px;
+    }
+  }
+
   .modal-message {
     font-size: 1.1rem;
     color: rgba(255, 255, 255, 0.8);
@@ -1172,7 +1185,6 @@
 // Leaderboard container
 .leaderboard-container {
   position: relative;
-  min-height: 400px;
   margin-bottom: 20px;
 }
 
