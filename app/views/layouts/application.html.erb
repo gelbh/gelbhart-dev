@@ -32,14 +32,14 @@
     <meta property="og:url" content="<%= request.original_url %>">
     <meta property="og:title" content="<%= content_for?(:title) ? yield(:title) : page_title("") %>">
     <meta property="og:description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : 'Personal portfolio and development projects by Tomer Gelbhart. Full-stack developer specializing in Ruby on Rails and modern web applications.' %>">
-    <meta property="og:image" content="<%= asset_url('logos/logo_social.svg') %>">
+    <meta property="og:image" content="<%= asset_url('logos/source/logo_social.svg') %>">
 
     <%# Twitter Card Meta Tags %>
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="<%= request.original_url %>">
     <meta name="twitter:title" content="<%= content_for?(:title) ? yield(:title) : page_title("") %>">
     <meta name="twitter:description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : 'Personal portfolio and development projects by Tomer Gelbhart. Full-stack developer specializing in Ruby on Rails and modern web applications.' %>">
-    <meta name="twitter:image" content="<%= asset_url('logos/logo_social.svg') %>">
+    <meta name="twitter:image" content="<%= asset_url('logos/source/logo_social.svg') %>">
 
     <%# Security Tags %>
     <%= csrf_meta_tags %>
@@ -67,7 +67,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css">
 
     <%# Logo - using asset_path for preloading %>
-    <link rel="preload" href="<%= asset_path('logos/logo.svg') %>" as="image">
+    <link rel="preload" href="<%= asset_path('logos/source/logo.svg') %>" as="image">
 
     <%# Application CSS %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>

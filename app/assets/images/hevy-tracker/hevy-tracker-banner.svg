@@ -1,0 +1,205 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <!-- Background gradient - lighter, cleaner -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8fafc;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e2e8f0;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Logo background -->
+    <linearGradient id="logoBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4A90E2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#357ABD;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Google Sheets green accent -->
+    <linearGradient id="sheetsGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f9d58;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0b8043;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Card shadow -->
+    <filter id="cardShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+      <feOffset dx="0" dy="4" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.15"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Glow -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="0" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.4"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Clean background -->
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+
+  <!-- Decorative dots pattern -->
+  <g opacity="0.08">
+    <circle cx="100" cy="100" r="3" fill="#4A90E2"/>
+    <circle cx="140" cy="100" r="3" fill="#4A90E2"/>
+    <circle cx="180" cy="100" r="3" fill="#4A90E2"/>
+    <circle cx="100" cy="140" r="3" fill="#4A90E2"/>
+    <circle cx="140" cy="140" r="3" fill="#4A90E2"/>
+    <circle cx="180" cy="140" r="3" fill="#4A90E2"/>
+
+    <circle cx="1020" cy="490" r="3" fill="#0f9d58"/>
+    <circle cx="1060" cy="490" r="3" fill="#0f9d58"/>
+    <circle cx="1100" cy="490" r="3" fill="#0f9d58"/>
+    <circle cx="1020" cy="530" r="3" fill="#0f9d58"/>
+    <circle cx="1060" cy="530" r="3" fill="#0f9d58"/>
+    <circle cx="1100" cy="530" r="3" fill="#0f9d58"/>
+  </g>
+
+  <!-- Main content card -->
+  <rect x="80" y="80" width="1040" height="470" rx="20" fill="#ffffff" filter="url(#cardShadow)"/>
+
+  <!-- Left section - Logo and branding -->
+  <g transform="translate(220, 315)">
+    <!-- Logo circle -->
+    <circle cx="0" cy="0" r="100" fill="url(#logoBg)" filter="url(#glow)"/>
+    <circle cx="0" cy="0" r="95" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+
+    <!-- Dumbbell with glasses -->
+    <g filter="url(#glow)">
+      <!-- Left outer small weight plate -->
+      <rect x="-66" y="-16" width="11" height="33" rx="1.5" fill="#ffffff" opacity="0.9"/>
+
+      <!-- Left inner large weight -->
+      <rect x="-55" y="-22" width="16" height="44" rx="2" fill="#ffffff"/>
+      <rect x="-53" y="-20" width="12" height="40" rx="1" fill="none" stroke="rgba(74,144,226,0.3)" stroke-width="1"/>
+
+      <!-- Left connector -->
+      <rect x="-39" y="-6" width="16" height="13" rx="1" fill="#ffffff"/>
+
+      <!-- Center handle -->
+      <rect x="-22" y="-9" width="44" height="18" rx="3" fill="#ffffff"/>
+      <line x1="-13" y1="-5" x2="-13" y2="5" stroke="rgba(74,144,226,0.3)" stroke-width="1.5"/>
+      <line x1="-4" y1="-5" x2="-4" y2="5" stroke="rgba(74,144,226,0.3)" stroke-width="1.5"/>
+      <line x1="4" y1="-5" x2="4" y2="5" stroke="rgba(74,144,226,0.3)" stroke-width="1.5"/>
+      <line x1="13" y1="-5" x2="13" y2="5" stroke="rgba(74,144,226,0.3)" stroke-width="1.5"/>
+
+      <!-- Right connector -->
+      <rect x="23" y="-6" width="16" height="13" rx="1" fill="#ffffff"/>
+
+      <!-- Right inner large weight -->
+      <rect x="39" y="-22" width="16" height="44" rx="2" fill="#ffffff"/>
+      <rect x="41" y="-20" width="12" height="40" rx="1" fill="none" stroke="rgba(74,144,226,0.3)" stroke-width="1"/>
+
+      <!-- Right outer small weight plate -->
+      <rect x="55" y="-16" width="11" height="33" rx="1.5" fill="#ffffff" opacity="0.9"/>
+
+      <!-- Nerdy glasses -->
+      <g transform="translate(0, -2)">
+        <!-- Left lens -->
+        <rect x="-20" y="-20" width="15" height="13" rx="2" fill="none" stroke="#ffffff" stroke-width="2.5" opacity="0.95"/>
+        <rect x="-19" y="-19" width="13" height="11" rx="1.5" fill="rgba(255,255,255,0.15)"/>
+
+        <!-- Bridge -->
+        <line x1="-5" y1="-13" x2="5" y2="-13" stroke="#ffffff" stroke-width="2" opacity="0.95"/>
+
+        <!-- Right lens -->
+        <rect x="5" y="-20" width="15" height="13" rx="2" fill="none" stroke="#ffffff" stroke-width="2.5" opacity="0.95"/>
+        <rect x="6" y="-19" width="13" height="11" rx="1.5" fill="rgba(255,255,255,0.15)"/>
+
+        <!-- Temples -->
+        <line x1="-20" y1="-13" x2="-26" y2="-11" stroke="#ffffff" stroke-width="2" opacity="0.95" stroke-linecap="round"/>
+        <line x1="20" y1="-13" x2="26" y2="-11" stroke="#ffffff" stroke-width="2" opacity="0.95" stroke-linecap="round"/>
+
+        <!-- Glare -->
+        <circle cx="-14" cy="-15" r="2" fill="#ffffff" opacity="0.6"/>
+        <circle cx="11" cy="-15" r="2" fill="#ffffff" opacity="0.6"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Right section - Content -->
+  <g transform="translate(450, 200)">
+    <!-- Title -->
+    <text
+      fill="#1e293b"
+      font-family="'Inter', 'Helvetica Neue', Arial, sans-serif"
+      font-size="64"
+      font-weight="800"
+      x="0"
+      y="0">HEVY TRACKER</text>
+
+    <!-- Subtitle with icon -->
+    <g transform="translate(0, 50)">
+      <text
+        fill="#64748b"
+        font-family="'Inter', 'Helvetica Neue', Arial, sans-serif"
+        font-size="28"
+        font-weight="500"
+        x="0"
+        y="0">Sync Your Workouts to</text>
+    </g>
+
+    <!-- Google Sheets logo mock + text -->
+    <g transform="translate(0, 100)">
+      <!-- Green sheets icon -->
+      <rect x="0" y="-22" width="32" height="32" rx="4" fill="url(#sheetsGradient)"/>
+      <g fill="#ffffff" opacity="0.9">
+        <rect x="6" y="-16" width="20" height="2" rx="1"/>
+        <rect x="6" y="-10" width="20" height="2" rx="1"/>
+        <rect x="6" y="-4" width="14" height="2" rx="1"/>
+      </g>
+
+      <text
+        fill="#0f9d58"
+        font-family="'Inter', 'Helvetica Neue', Arial, sans-serif"
+        font-size="32"
+        font-weight="700"
+        x="40"
+        y="0">Google Sheets</text>
+    </g>
+
+    <!-- Features list -->
+    <g transform="translate(0, 165)">
+      <!-- Feature 1 -->
+      <g>
+        <circle cx="6" cy="-6" r="6" fill="#4A90E2"/>
+        <text fill="#475569" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="500" x="20" y="0">Automatic workout sync</text>
+      </g>
+
+      <!-- Feature 2 -->
+      <g transform="translate(0, 35)">
+        <circle cx="6" cy="-6" r="6" fill="#0f9d58"/>
+        <text fill="#475569" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="500" x="20" y="0">Custom analytics &amp; charts</text>
+      </g>
+
+      <!-- Feature 3 -->
+      <g transform="translate(0, 70)">
+        <circle cx="6" cy="-6" r="6" fill="#f59e0b"/>
+        <text fill="#475569" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="500" x="20" y="0">Track your progress</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Footer badge -->
+  <g transform="translate(600, 560)">
+    <rect x="-120" y="-18" width="240" height="36" rx="18" fill="#f1f5f9"/>
+    <text
+      fill="#64748b"
+      font-family="'Inter', 'Helvetica Neue', Arial, sans-serif"
+      font-size="16"
+      font-weight="600"
+      text-anchor="middle"
+      x="0"
+      y="6">gelbhart.dev/hevy-tracker</text>
+  </g>
+</svg>
