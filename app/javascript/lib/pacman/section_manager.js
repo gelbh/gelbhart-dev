@@ -23,6 +23,7 @@ export class SectionManager {
     this.keySpawned = false
     this.keyCollected = false
     this.key = null
+    this.activeTimers = [] // Track all active timers for cleanup
   }
 
   /**
@@ -81,7 +82,7 @@ export class SectionManager {
 
       if (lockOverlay) {
         lockOverlay.classList.add('unlocking')
-        setTimeout(() => {
+        const timer = setTimeout(() => {
           lockOverlay.remove()
 
           // Unwrap the content
@@ -91,7 +92,11 @@ export class SectionManager {
             }
             contentWrapper.remove()
           }
+          // Remove timer from tracking
+          const index = this.activeTimers.indexOf(timer)
+          if (index > -1) this.activeTimers.splice(index, 1)
         }, 600)
+        this.activeTimers.push(timer)
       }
     }
   }
@@ -127,6 +132,15 @@ export class SectionManager {
   }
 
   /**
+   * Clean up all active timers
+   */
+  cleanup() {
+    // Clear all pending timers
+    this.activeTimers.forEach(timer => clearTimeout(timer))
+    this.activeTimers = []
+  }
+
+  /**
    * Check if score reached a section threshold and spawn key
    */
   checkSectionThreshold() {
@@ -147,7 +161,7 @@ export class SectionManager {
       })
 
       // Remove dots after fade animation completes
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         this.controller.dots.forEach(dot => {
           if (dot.element && dot.element.parentNode) {
             dot.element.remove()
@@ -159,7 +173,12 @@ export class SectionManager {
 
         // Spawn the key
         this.spawnKey()
+
+        // Remove timer from tracking
+        const index = this.activeTimers.indexOf(timer)
+        if (index > -1) this.activeTimers.splice(index, 1)
       }, 200) // Match CSS fade-out animation duration
+      this.activeTimers.push(timer)
     }
   }
 
@@ -218,11 +237,15 @@ export class SectionManager {
 
       // Remove key with animation
       this.key.element.classList.add('collected')
-      setTimeout(() => {
+      const keyTimer = setTimeout(() => {
         if (this.key.element && this.key.element.parentNode) {
           this.key.element.remove()
         }
+        // Remove timer from tracking
+        const index = this.activeTimers.indexOf(keyTimer)
+        if (index > -1) this.activeTimers.splice(index, 1)
       }, 300)
+      this.activeTimers.push(keyTimer)
 
       // Unlock the section
       this.unlockSection(this.currentSection)
@@ -238,17 +261,25 @@ export class SectionManager {
       // Regenerate dots for next section
       if (this.currentSection < this.sections.length) {
         this.controller.regeneratingDots = true // Flag to prevent win condition during regeneration
-        setTimeout(() => {
+        const regenTimer = setTimeout(() => {
           this.controller.generateDots()
           this.controller.regeneratingDots = false
+          // Remove timer from tracking
+          const index = this.activeTimers.indexOf(regenTimer)
+          if (index > -1) this.activeTimers.splice(index, 1)
         }, 800)
+        this.activeTimers.push(regenTimer)
       } else {
         // All sections unlocked, regenerate dots one final time
         this.controller.regeneratingDots = true
-        setTimeout(() => {
+        const regenTimer = setTimeout(() => {
           this.controller.generateDots()
           this.controller.regeneratingDots = false
+          // Remove timer from tracking
+          const index = this.activeTimers.indexOf(regenTimer)
+          if (index > -1) this.activeTimers.splice(index, 1)
         }, 800)
+        this.activeTimers.push(regenTimer)
       }
     }
   }
