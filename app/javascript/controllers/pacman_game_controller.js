@@ -38,6 +38,7 @@ export default class extends Controller {
     // Game state
     this.isGameActive = false
     this.isStarting = false // Flag to track if game is in starting phase (waiting for intro music)
+    this.wasActiveBeforePause = false // Track game state before menu was opened
     this.score = 0
     this.dotsScore = 0 // Score from dots only (for section unlocking)
     this.lives = 3
@@ -382,6 +383,7 @@ export default class extends Controller {
   stopGame() {
     this.isGameActive = false
     this.isStarting = false
+    this.wasActiveBeforePause = false // Reset pause state
 
     // Clean up intro music listener and timeout if they exist
     if (this.introMusicListener) {
@@ -1035,9 +1037,12 @@ export default class extends Controller {
    * Show main menu
    */
   showMenu() {
-    // Pause the game while menu is open
-    const wasActive = this.isGameActive
-    this.isGameActive = false
+    // Capture original game state only if not already paused for menu
+    // This preserves the state across Settings -> Back to Menu transitions
+    if (this.isGameActive) {
+      this.wasActiveBeforePause = true
+      this.isGameActive = false
+    }
 
     // Show menu modal
     this.uiManager.showMenuModal({
@@ -1045,9 +1050,10 @@ export default class extends Controller {
       onControls: () => this.showControls(),
       onLeaderboard: () => this.showLeaderboardFromMenu(),
       onResume: () => {
-        // Resume game if it was active
-        if (wasActive) {
+        // Resume game if it was active before pause
+        if (this.wasActiveBeforePause) {
           this.isGameActive = true
+          this.wasActiveBeforePause = false
           this.lastFrameTime = null // Reset to prevent huge delta
           this.gameLoop()
         }
@@ -1059,6 +1065,7 @@ export default class extends Controller {
           'Are you sure you want to quit? Your progress will be lost.',
           () => {
             // Confirmed quit
+            this.wasActiveBeforePause = false
             this.stopGame()
           },
           () => {
@@ -1074,8 +1081,8 @@ export default class extends Controller {
    * Show settings modal from menu
    */
   showSettings() {
-    const wasActive = this.isGameActive
-    this.isGameActive = false
+    // Game state is already captured in wasActiveBeforePause by showMenu()
+    // No need to capture it again here
 
     this.uiManager.showSettingsModal(
       this.audioManager.musicVolume,
