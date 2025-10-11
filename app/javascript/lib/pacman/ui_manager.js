@@ -206,8 +206,22 @@ export class UIManager {
       document.body.appendChild(countdown)
 
       let count = 3
+      let countdownTimer1 = null
+      let countdownTimer2 = null
+      let cancelled = false
+
+      // Store timers on element for external cancellation
+      countdown._cancel = () => {
+        cancelled = true
+        if (countdownTimer1) clearTimeout(countdownTimer1)
+        if (countdownTimer2) clearTimeout(countdownTimer2)
+        countdown.remove()
+        resolve()
+      }
 
       const updateCountdown = () => {
+        if (cancelled) return
+
         if (count > 0) {
           countdown.textContent = count
           countdown.style.animation = 'none'
@@ -215,13 +229,15 @@ export class UIManager {
           countdown.offsetHeight
           countdown.style.animation = 'countdownPulse 1s ease-in-out'
           count--
-          setTimeout(updateCountdown, 1000)
+          countdownTimer1 = setTimeout(updateCountdown, 1000)
         } else {
           countdown.textContent = 'GO!'
           countdown.style.animation = 'countdownGo 0.8s ease-out'
-          setTimeout(() => {
-            countdown.remove()
-            resolve()
+          countdownTimer2 = setTimeout(() => {
+            if (!cancelled) {
+              countdown.remove()
+              resolve()
+            }
           }, 800)
         }
       }

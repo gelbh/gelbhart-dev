@@ -24,6 +24,7 @@ export class GhostAI {
     // Ghost state
     this.ghosts = []
     this.animationFrame = 0
+    this.ghostRespawnTimers = [] // Track ghost respawn timers for cleanup
 
     // References to game state (will be updated from controller)
     this.pacmanPosition = { x: 0, y: 0 }
@@ -216,6 +217,13 @@ export class GhostAI {
 
           case 'patrol': // Inky - Coordinated flanking with Blinky
             const blinky = this.ghosts[0]
+
+            // Defensive check: If Blinky doesn't exist, fall back to direct chase
+            if (!blinky) {
+              targetX = this.pacmanPosition.x
+              targetY = this.pacmanPosition.y
+              break
+            }
 
             // Calculate where Pac-Man is trying to escape
             const escapeAngle = Math.atan2(
@@ -562,10 +570,16 @@ export class GhostAI {
             onEatGhost(ghost)
           }
 
-          // Respawn after reaching home
-          setTimeout(() => {
+          // Respawn after reaching home - store timer for cleanup
+          const respawnTimer = setTimeout(() => {
             this.respawnGhost(ghost)
+            // Remove this timer from tracking array
+            const index = this.ghostRespawnTimers.indexOf(respawnTimer)
+            if (index > -1) {
+              this.ghostRespawnTimers.splice(index, 1)
+            }
           }, 3000)
+          this.ghostRespawnTimers.push(respawnTimer)
         } else if (!this.activeEffects.shield) {
           // Lose a life (unless shielded)
           lifeLost = true
@@ -665,6 +679,10 @@ export class GhostAI {
    * Clean up all ghosts and indicators
    */
   cleanup() {
+    // Clear all ghost respawn timers
+    this.ghostRespawnTimers.forEach(timer => clearTimeout(timer))
+    this.ghostRespawnTimers = []
+
     this.ghosts.forEach(ghost => {
       if (ghost.element && ghost.element.parentNode) {
         ghost.element.parentNode.removeChild(ghost.element)

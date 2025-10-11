@@ -395,10 +395,14 @@ export default class extends Controller {
       this.introMusicTimeout = null
     }
 
-    // Remove countdown overlay if it exists
+    // Remove countdown overlay if it exists and cancel its timers
     const countdownOverlay = document.querySelector('.pacman-countdown')
     if (countdownOverlay) {
-      countdownOverlay.remove()
+      if (countdownOverlay._cancel) {
+        countdownOverlay._cancel()
+      } else {
+        countdownOverlay.remove()
+      }
     }
 
     this.gameContainerTarget.classList.remove('active')
@@ -438,6 +442,9 @@ export default class extends Controller {
 
     // Remove all section locks
     this.sectionManager.removeAllSectionLocks()
+
+    // Clean up section manager timers
+    this.sectionManager.cleanup()
 
     // Clear hover effects
     this.collisionManager.clearHoverEffects()
@@ -702,11 +709,21 @@ export default class extends Controller {
     this.audioManager.stopAll()
     this.audioManager.play('death', true)
 
-    // Reset power mode
+    // Reset power mode and clear timers
     this.powerMode = false
     this.powerModeEnding = false
     this.pacmanTarget.classList.remove('powered')
     this.ghostsEatenThisPowerMode = 0
+
+    // Clear power mode timers to prevent them firing after death
+    if (this.powerModeTimer) {
+      clearTimeout(this.powerModeTimer)
+      this.powerModeTimer = null
+    }
+    if (this.powerModeEndingTimer) {
+      clearTimeout(this.powerModeEndingTimer)
+      this.powerModeEndingTimer = null
+    }
 
     // Play death animation
     await this.animationManager.playDeathAnimation()
