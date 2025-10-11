@@ -10,6 +10,7 @@ export class CollisionManager {
   constructor() {
     this.hoveredElement = null
     this.lastBoundaryFlash = null
+    this.hoverCheckFrameCounter = 0 // Throttle hover checks for performance
   }
 
   /**
@@ -85,8 +86,16 @@ export class CollisionManager {
 
   /**
    * Check if Pac-Man is hovering over any interactive elements
+   * Throttled to every 3 frames for better performance
    */
   checkHoverEffects(pacmanPosition) {
+    // Throttle to every 3 frames for performance (document.elementsFromPoint is expensive)
+    this.hoverCheckFrameCounter++
+    if (this.hoverCheckFrameCounter < 3) {
+      return this.hoveredElement
+    }
+    this.hoverCheckFrameCounter = 0
+
     const viewportX = pacmanPosition.x
     const viewportY = pacmanPosition.y - window.scrollY
 
@@ -163,6 +172,9 @@ export class CollisionManager {
       this.hoveredElement.dispatchEvent(leaveEvent)
       this.hoveredElement = null
     }
+
+    // Reset frame counter
+    this.hoverCheckFrameCounter = 0
 
     // Remove all pacman-hover classes from any elements
     document.querySelectorAll('.pacman-hover').forEach(el => {

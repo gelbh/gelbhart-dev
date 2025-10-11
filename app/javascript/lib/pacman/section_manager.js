@@ -136,18 +136,30 @@ export class SectionManager {
     const section = this.sections[this.currentSection]
 
     if (this.controller.dotsScore >= section.threshold) {
-      // Clear ALL dots (collected and uncollected) to prepare for key
+      // Set flag immediately to prevent multiple triggers during animation
+      this.keySpawned = true
+
+      // Fade out ALL dots (collected and uncollected) before removing
       this.controller.dots.forEach(dot => {
         if (dot.element && dot.element.parentNode) {
-          dot.element.remove()
+          dot.element.classList.add('fade-out')
         }
       })
 
-      // Clear the dots array completely - we'll regenerate after key is collected
-      this.controller.dots = []
+      // Remove dots after fade animation completes
+      setTimeout(() => {
+        this.controller.dots.forEach(dot => {
+          if (dot.element && dot.element.parentNode) {
+            dot.element.remove()
+          }
+        })
 
-      // Spawn the key
-      this.spawnKey()
+        // Clear the dots array completely - we'll regenerate after key is collected
+        this.controller.dots = []
+
+        // Spawn the key
+        this.spawnKey()
+      }, 200) // Match CSS fade-out animation duration
     }
   }
 
