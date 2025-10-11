@@ -446,6 +446,9 @@ export default class extends Controller {
     Object.values(this.effectTimers).forEach(timer => clearTimeout(timer))
     this.effectTimers = {}
 
+    // Reset speed modification tracking
+    this.baseSpeedBeforeEffect = null
+
     // Stop all sounds
     this.audioManager.stopAll()
 
