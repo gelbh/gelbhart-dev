@@ -446,8 +446,13 @@ export class ItemManager {
    * Activate speed boost effect
    */
   activateSpeedBoost(duration) {
+    // Store current base speed before modification (only if no other speed effect is active)
+    if (!this.controller.baseSpeedBeforeEffect) {
+      this.controller.baseSpeedBeforeEffect = this.controller.pacmanSpeed
+    }
+
     this.controller.activeEffects.speedBoost = true
-    this.controller.pacmanSpeed = 180 * 1.5 // 50% faster (270 pixels/second)
+    this.controller.pacmanSpeed = this.controller.baseSpeedBeforeEffect * 1.5 // 50% faster
     this.controller.pacmanTarget.classList.add('speed-boost')
 
     // Create cooldown bar under Pac-Man
@@ -456,9 +461,14 @@ export class ItemManager {
     this.clearEffectTimer('speedBoost')
     this.controller.effectTimers.speedBoost = setTimeout(() => {
       this.controller.activeEffects.speedBoost = false
-      this.controller.pacmanSpeed = 180 // Reset to normal speed
       this.controller.pacmanTarget.classList.remove('speed-boost')
       this.removeEffectCooldown('speedBoost')
+
+      // Only restore base speed if no other speed effects are active
+      if (!this.controller.activeEffects.slowDown) {
+        this.controller.pacmanSpeed = this.controller.baseSpeedBeforeEffect
+        this.controller.baseSpeedBeforeEffect = null
+      }
     }, duration)
   }
 
@@ -466,8 +476,13 @@ export class ItemManager {
    * Activate slow down effect
    */
   activateSlowDown(duration) {
+    // Store current base speed before modification (only if no other speed effect is active)
+    if (!this.controller.baseSpeedBeforeEffect) {
+      this.controller.baseSpeedBeforeEffect = this.controller.pacmanSpeed
+    }
+
     this.controller.activeEffects.slowDown = true
-    this.controller.pacmanSpeed = 180 * 0.6 // 40% slower (108 pixels/second)
+    this.controller.pacmanSpeed = this.controller.baseSpeedBeforeEffect * 0.6 // 40% slower
     this.controller.pacmanTarget.classList.add('slow-down')
 
     // Create cooldown bar under Pac-Man
@@ -476,9 +491,14 @@ export class ItemManager {
     this.clearEffectTimer('slowDown')
     this.controller.effectTimers.slowDown = setTimeout(() => {
       this.controller.activeEffects.slowDown = false
-      this.controller.pacmanSpeed = 180 // Reset to normal speed
       this.controller.pacmanTarget.classList.remove('slow-down')
       this.removeEffectCooldown('slowDown')
+
+      // Only restore base speed if no other speed effects are active
+      if (!this.controller.activeEffects.speedBoost) {
+        this.controller.pacmanSpeed = this.controller.baseSpeedBeforeEffect
+        this.controller.baseSpeedBeforeEffect = null
+      }
     }, duration)
   }
 
