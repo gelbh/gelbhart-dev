@@ -133,8 +133,6 @@ export class ItemManager {
       })
     }
 
-    console.log(`Generated ${this.controller.dots.length} dots in playable area (${sections} sections, excluding locked zones) - optimized for performance`)
-
     // Spawn initial items after dots are generated
     this.spawnRandomItems()
   }
@@ -269,8 +267,6 @@ export class ItemManager {
       this.createItem(x, y, selectedType)
       spawned++
     }
-
-    console.log(`🎁 Spawned ${spawned} powerup items (avoided locked sections)`)
   }
 
   /**
@@ -442,7 +438,6 @@ export class ItemManager {
         this.controller.lives++
         this.controller.updateHUD()
         this.controller.playSound('extraPac', true)
-        console.log("❤️ Extra life gained!")
         break
     }
   }
@@ -465,8 +460,6 @@ export class ItemManager {
       this.controller.pacmanTarget.classList.remove('speed-boost')
       this.removeEffectCooldown('speedBoost')
     }, duration)
-
-    console.log(`⚡ Speed boost activated for ${duration / 1000}s!`)
   }
 
   /**
@@ -487,8 +480,6 @@ export class ItemManager {
       this.controller.pacmanTarget.classList.remove('slow-down')
       this.removeEffectCooldown('slowDown')
     }, duration)
-
-    console.log(`🐌 Slowed down for ${duration / 1000}s!`)
   }
 
   /**
@@ -507,8 +498,6 @@ export class ItemManager {
       this.controller.pacmanTarget.classList.remove('shielded')
       this.removeEffectCooldown('shield')
     }, duration)
-
-    console.log(`🛡️ Shield activated for ${duration / 1000}s!`)
   }
 
   /**
@@ -537,8 +526,6 @@ export class ItemManager {
         ghost.element.classList.remove('frozen')
       })
     }, duration)
-
-    console.log(`❄️ Ghosts frozen for ${duration / 1000}s!`)
   }
 
   /**
@@ -557,8 +544,6 @@ export class ItemManager {
       this.controller.pacmanTarget.classList.remove('double-points')
       this.removeEffectCooldown('doublePoints')
     }, duration)
-
-    console.log(`⭐ Double points activated for ${duration / 1000}s!`)
   }
 
   /**

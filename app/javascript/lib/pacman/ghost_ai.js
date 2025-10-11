@@ -574,7 +574,6 @@ export class GhostAI {
           }
         } else {
           // Shield deflects ghost
-          console.log("🛡️ Shield deflected ghost!")
         }
       }
     })

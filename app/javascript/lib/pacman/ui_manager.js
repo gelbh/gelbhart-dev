@@ -101,69 +101,6 @@ export class UIManager {
     }
   }
 
-  /**
-   * Show pause overlay with controls
-   */
-  showPauseOverlay() {
-    // Prevent duplicate pause overlays
-    if (document.querySelector('.pacman-pause-overlay')) {
-      return
-    }
-
-    // Create pause overlay
-    const pauseOverlay = document.createElement('div')
-    pauseOverlay.className = 'pacman-pause-overlay'
-    pauseOverlay.innerHTML = `
-      <div class="pause-content">
-        <div class="pause-title">⏸️ PAUSED</div>
-        <div class="pause-message">Press P to resume</div>
-        <div class="pause-controls">
-          <div class="control-row">
-            <span class="control-key">WASD / Arrows</span>
-            <span class="control-desc">Move</span>
-          </div>
-          <div class="control-row">
-            <span class="control-key">P</span>
-            <span class="control-desc">Pause/Resume</span>
-          </div>
-          <div class="control-row">
-            <span class="control-key">L</span>
-            <span class="control-desc">Leaderboard</span>
-          </div>
-          <div class="control-row">
-            <span class="control-key">Esc</span>
-            <span class="control-desc">Quit Game</span>
-          </div>
-        </div>
-      </div>
-    `
-
-    document.body.appendChild(pauseOverlay)
-
-    // Animate in
-    requestAnimationFrame(() => {
-      pauseOverlay.classList.add('show')
-    })
-  }
-
-  /**
-   * Hide pause overlay
-   * @returns {Promise} Resolves when animation completes
-   */
-  hidePauseOverlay() {
-    return new Promise((resolve) => {
-      const pauseOverlay = document.querySelector('.pacman-pause-overlay')
-      if (pauseOverlay) {
-        pauseOverlay.classList.remove('show')
-        setTimeout(() => {
-          pauseOverlay.remove()
-          resolve()
-        }, 300)
-      } else {
-        resolve()
-      }
-    })
-  }
 
   /**
    * Show game over modal
@@ -667,5 +604,332 @@ export class UIManager {
       }
     }
     document.addEventListener('keydown', escapeHandler)
+  }
+
+  /**
+   * Show menu modal with navigation buttons
+   * @param {Object} callbacks - { onSettings, onControls, onLeaderboard, onResume, onQuit }
+   */
+  showMenuModal(callbacks = {}) {
+    // Prevent duplicate menu modals
+    if (document.querySelector('.pacman-menu-modal')) {
+      return
+    }
+
+    const { onSettings, onControls, onLeaderboard, onResume, onQuit } = callbacks
+
+    const modal = document.createElement('div')
+    modal.className = 'pacman-game-over-modal pacman-menu-modal'
+
+    modal.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-emoji">🎮</div>
+        <h2 class="modal-title">Menu</h2>
+
+        <div class="menu-buttons">
+          <button class="menu-item-btn" data-action="settings">
+            <i class="bx bx-slider"></i>
+            <span>Audio Settings</span>
+          </button>
+          <button class="menu-item-btn" data-action="controls">
+            <i class="bx bx-joystick"></i>
+            <span>Controls</span>
+          </button>
+          <button class="menu-item-btn" data-action="leaderboard">
+            <i class="bx bx-trophy"></i>
+            <span>Leaderboard</span>
+          </button>
+        </div>
+
+        <div class="modal-buttons">
+          <button class="modal-btn modal-btn-primary" data-action="resume">
+            <i class="bx bx-play"></i>
+            Resume Game
+          </button>
+          <button class="modal-btn modal-btn-secondary" data-action="quit">
+            <i class="bx bx-exit"></i>
+            Quit Game
+          </button>
+        </div>
+      </div>
+    `
+
+    document.body.appendChild(modal)
+
+    // Animate in
+    requestAnimationFrame(() => {
+      modal.classList.add('show')
+    })
+
+    // Close handler
+    const closeHandler = () => {
+      modal.remove()
+      document.removeEventListener('keydown', keydownHandler)
+    }
+
+    // Button handlers
+    if (onSettings) {
+      modal.querySelector('[data-action="settings"]').addEventListener('click', () => {
+        closeHandler()
+        onSettings()
+      })
+    }
+
+    if (onControls) {
+      modal.querySelector('[data-action="controls"]').addEventListener('click', () => {
+        closeHandler()
+        onControls()
+      })
+    }
+
+    if (onLeaderboard) {
+      modal.querySelector('[data-action="leaderboard"]').addEventListener('click', () => {
+        closeHandler()
+        onLeaderboard()
+      })
+    }
+
+    if (onResume) {
+      modal.querySelector('[data-action="resume"]').addEventListener('click', () => {
+        closeHandler()
+        onResume()
+      })
+    }
+
+    if (onQuit) {
+      modal.querySelector('[data-action="quit"]').addEventListener('click', () => {
+        closeHandler()
+        onQuit()
+      })
+    }
+
+    // Keyboard shortcuts
+    const keydownHandler = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        if (onResume) {
+          closeHandler()
+          onResume()
+        }
+      }
+    }
+    document.addEventListener('keydown', keydownHandler)
+  }
+
+  /**
+   * Show settings modal (audio controls only)
+   * @param {number} musicVolume - Current music volume (0.0 to 1.0)
+   * @param {number} sfxVolume - Current SFX volume (0.0 to 1.0)
+   * @param {boolean} isMuted - Whether audio is currently muted
+   * @param {Object} callbacks - { onMusicVolumeChange, onSFXVolumeChange, onMuteToggle, onClose }
+   */
+  showSettingsModal(musicVolume, sfxVolume, isMuted, callbacks = {}) {
+    // Prevent duplicate settings modals
+    if (document.querySelector('.pacman-settings-modal')) {
+      return
+    }
+
+    const { onMusicVolumeChange, onSFXVolumeChange, onMuteToggle, onClose } = callbacks
+
+    const modal = document.createElement('div')
+    modal.className = 'pacman-game-over-modal pacman-settings-modal'
+
+    modal.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-emoji">🔊</div>
+        <h2 class="modal-title">Audio Settings</h2>
+
+        <div class="settings-section">
+          <div class="settings-control">
+            <div class="settings-control-header">
+              <label class="settings-label">
+                <i class="bx bx-music"></i>
+                <span>Music Volume</span>
+              </label>
+              <button class="settings-mute-btn ${isMuted ? 'muted' : ''}" data-action="mute" title="Toggle Mute (M)">
+                <i class="bx ${isMuted ? 'bx-volume-mute' : 'bx-volume-full'}"></i>
+              </button>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value="${Math.round(musicVolume * 100)}"
+              class="settings-volume-slider"
+              data-action="music-volume"
+            >
+          </div>
+
+          <div class="settings-control">
+            <label class="settings-label">
+              <i class="bx bxs-volume"></i>
+              <span>SFX Volume</span>
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value="${Math.round(sfxVolume * 100)}"
+              class="settings-volume-slider"
+              data-action="sfx-volume"
+            >
+          </div>
+        </div>
+
+        <div class="modal-buttons">
+          <button class="modal-btn modal-btn-primary" data-action="back">
+            <i class="bx bx-arrow-back"></i>
+            Back to Menu
+          </button>
+        </div>
+      </div>
+    `
+
+    document.body.appendChild(modal)
+
+    // Animate in
+    requestAnimationFrame(() => {
+      modal.classList.add('show')
+    })
+
+    // Get elements
+    const musicSlider = modal.querySelector('[data-action="music-volume"]')
+    const sfxSlider = modal.querySelector('[data-action="sfx-volume"]')
+    const muteBtn = modal.querySelector('[data-action="mute"]')
+    const backBtn = modal.querySelector('[data-action="back"]')
+
+    // Music volume change
+    if (onMusicVolumeChange) {
+      musicSlider.addEventListener('input', (e) => {
+        onMusicVolumeChange(parseInt(e.target.value) / 100)
+      })
+    }
+
+    // SFX volume change
+    if (onSFXVolumeChange) {
+      sfxSlider.addEventListener('input', (e) => {
+        onSFXVolumeChange(parseInt(e.target.value) / 100)
+      })
+    }
+
+    // Mute toggle
+    if (onMuteToggle) {
+      muteBtn.addEventListener('click', () => {
+        onMuteToggle()
+        // Update button state
+        const isNowMuted = muteBtn.classList.toggle('muted')
+        muteBtn.querySelector('i').className = `bx ${isNowMuted ? 'bx-volume-mute' : 'bx-volume-full'}`
+      })
+    }
+
+    // Close handler
+    const closeHandler = () => {
+      modal.remove()
+      if (onClose) onClose()
+      document.removeEventListener('keydown', keydownHandler)
+    }
+
+    // Back button
+    backBtn.addEventListener('click', closeHandler)
+
+    // Keyboard shortcuts
+    const keydownHandler = (e) => {
+      // M for mute
+      if ((e.key === 'm' || e.key === 'M') && onMuteToggle) {
+        e.preventDefault()
+        muteBtn.click()
+      }
+      // Escape to go back
+      else if (e.key === 'Escape') {
+        e.preventDefault()
+        closeHandler()
+      }
+    }
+    document.addEventListener('keydown', keydownHandler)
+  }
+
+  /**
+   * Show controls modal (keyboard reference)
+   * @param {Function} onClose - Callback when modal is closed
+   */
+  showControlsModal(onClose) {
+    // Prevent duplicate controls modals
+    if (document.querySelector('.pacman-controls-modal')) {
+      return
+    }
+
+    const modal = document.createElement('div')
+    modal.className = 'pacman-game-over-modal pacman-controls-modal'
+
+    modal.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-emoji">🎮</div>
+        <h2 class="modal-title">Controls</h2>
+
+        <div class="controls-section">
+          <div class="controls-grid">
+            <div class="control-item">
+              <div class="control-keys">
+                <kbd class="control-key">W</kbd>
+                <kbd class="control-key">A</kbd>
+                <kbd class="control-key">S</kbd>
+                <kbd class="control-key">D</kbd>
+              </div>
+              <span class="control-desc">Move</span>
+            </div>
+            <div class="control-item">
+              <div class="control-keys">
+                <kbd class="control-key">←</kbd>
+                <kbd class="control-key">↑</kbd>
+                <kbd class="control-key">↓</kbd>
+                <kbd class="control-key">→</kbd>
+              </div>
+              <span class="control-desc">Move</span>
+            </div>
+            <div class="control-item">
+              <kbd class="control-key">M</kbd>
+              <span class="control-desc">Mute/Unmute</span>
+            </div>
+            <div class="control-item">
+              <kbd class="control-key">Esc</kbd>
+              <span class="control-desc">Menu</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-buttons">
+          <button class="modal-btn modal-btn-primary" data-action="back">
+            <i class="bx bx-arrow-back"></i>
+            Back to Menu
+          </button>
+        </div>
+      </div>
+    `
+
+    document.body.appendChild(modal)
+
+    // Animate in
+    requestAnimationFrame(() => {
+      modal.classList.add('show')
+    })
+
+    // Close handler
+    const closeHandler = () => {
+      modal.remove()
+      if (onClose) onClose()
+      document.removeEventListener('keydown', keydownHandler)
+    }
+
+    // Back button
+    modal.querySelector('[data-action="back"]').addEventListener('click', closeHandler)
+
+    // Keyboard shortcuts
+    const keydownHandler = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        closeHandler()
+      }
+    }
+    document.addEventListener('keydown', keydownHandler)
   }
 }

@@ -14,6 +14,112 @@ export class AudioManager {
     this.audioFiles = {}
     this.soundsEnabled = false
     this.chompPlaying = false
+
+    // Audio categories for volume control
+    this.musicTracks = ['beginning', 'intermission']
+    this.sfxTracks = ['chomp', 'death', 'eatFruit', 'eatGhost', 'extraPac']
+
+    // Load preferences from localStorage
+    this.preferences = this.loadPreferences()
+    this.musicVolume = this.preferences.musicVolume
+    this.sfxVolume = this.preferences.sfxVolume
+    this.isMuted = this.preferences.isMuted
+  }
+
+  /**
+   * Load audio preferences from localStorage
+   */
+  loadPreferences() {
+    try {
+      const saved = localStorage.getItem('pacman_audio_preferences')
+      if (saved) {
+        const prefs = JSON.parse(saved)
+        return {
+          musicVolume: prefs.musicVolume ?? 0.4,
+          sfxVolume: prefs.sfxVolume ?? 0.4,
+          isMuted: prefs.isMuted ?? false
+        }
+      }
+    } catch (error) {
+      console.warn("Could not load audio preferences:", error)
+    }
+
+    // Default preferences - muted by default
+    return {
+      musicVolume: 0.4,
+      sfxVolume: 0.4,
+      isMuted: true
+    }
+  }
+
+  /**
+   * Save audio preferences to localStorage
+   */
+  savePreferences() {
+    try {
+      const prefs = {
+        musicVolume: this.musicVolume,
+        sfxVolume: this.sfxVolume,
+        isMuted: this.isMuted
+      }
+      localStorage.setItem('pacman_audio_preferences', JSON.stringify(prefs))
+    } catch (error) {
+      console.warn("Could not save audio preferences:", error)
+    }
+  }
+
+  /**
+   * Set music volume (0.0 to 1.0)
+   */
+  setMusicVolume(volume) {
+    this.musicVolume = Math.max(0, Math.min(1, volume))
+    this.updateVolumes()
+    this.savePreferences()
+  }
+
+  /**
+   * Set SFX volume (0.0 to 1.0)
+   */
+  setSFXVolume(volume) {
+    this.sfxVolume = Math.max(0, Math.min(1, volume))
+    this.updateVolumes()
+    this.savePreferences()
+  }
+
+  /**
+   * Toggle mute on/off
+   */
+  toggleMute() {
+    this.isMuted = !this.isMuted
+    this.updateVolumes()
+    this.savePreferences()
+    return this.isMuted
+  }
+
+  /**
+   * Set mute state
+   */
+  setMute(muted) {
+    this.isMuted = muted
+    this.updateVolumes()
+    this.savePreferences()
+  }
+
+  /**
+   * Update all audio file volumes based on current settings
+   */
+  updateVolumes() {
+    if (!this.soundsEnabled) return
+
+    Object.entries(this.audioFiles).forEach(([name, audio]) => {
+      if (this.isMuted) {
+        audio.volume = 0
+      } else if (this.musicTracks.includes(name)) {
+        audio.volume = this.musicVolume
+      } else if (this.sfxTracks.includes(name)) {
+        audio.volume = this.sfxVolume
+      }
+    })
   }
 
   /**
@@ -34,12 +140,14 @@ export class AudioManager {
 
       // Configure audio properties
       Object.values(this.audioFiles).forEach(audio => {
-        audio.volume = 0.4 // Set volume to 40% (not too loud)
         audio.preload = 'auto' // Preload for instant playback
       })
 
       this.soundsEnabled = true
-      console.log("🔊 Sound system initialized with authentic Pac-Man sounds!")
+
+      // Apply saved volume preferences
+      this.updateVolumes()
+
       return true
     } catch (error) {
       console.warn("⚠️ Could not initialize audio system:", error)

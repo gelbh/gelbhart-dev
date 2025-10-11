@@ -59,8 +59,6 @@ export class SpriteManager {
       img.src = this.getAssetPath(sprite)
       this.spriteCache[sprite] = img.src
     })
-
-    console.log("🎨 Preloaded", Object.keys(this.spriteCache).length, "sprite images")
   }
 
   /**
