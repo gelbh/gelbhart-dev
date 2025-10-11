@@ -16,7 +16,7 @@ export class CollisionManager {
    * Build collision map (not used for movement in free mode)
    */
   buildCollisionMap() {
-    console.log(`🎮 Free movement enabled`)
+    // Free movement enabled
   }
 
   /**

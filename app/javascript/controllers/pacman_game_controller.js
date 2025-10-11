@@ -25,7 +25,7 @@ import { AnimationManager } from "../lib/pacman/animation_manager"
  * @extends Controller
  */
 export default class extends Controller {
-  static targets = ["gameContainer", "pacman", "hud", "score", "lives", "startHint", "progressItem", "progressLabel", "progressValue", "pageTint"]
+  static targets = ["gameContainer", "pacman", "hud", "score", "lives", "startHint", "progressItem", "progressLabel", "progressValue", "pageTint", "mutedIndicator"]
   static values = { assetManifest: Object }
 
   /**
@@ -35,12 +35,9 @@ export default class extends Controller {
     // Store asset manifest for production asset paths
     this.assetPaths = this.hasAssetManifestValue ? this.assetManifestValue : {}
 
-    console.log("🎮 Pac-Man game controller connected!")
-
     // Game state
     this.isGameActive = false
     this.isStarting = false // Flag to track if game is in starting phase (waiting for intro music)
-    this.isPaused = false // Flag to track if game is paused
     this.score = 0
     this.dotsScore = 0 // Score from dots only (for section unlocking)
     this.lives = 3
@@ -102,6 +99,9 @@ export default class extends Controller {
     // Initialize managers
     this.audioManager = new AudioManager(this.assetPaths)
     this.audioManager.initialize()
+
+    // Initialize audio controls UI with saved preferences
+    this.initializeAudioControls()
 
     this.spriteManager = new SpriteManager(this.assetPaths)
     this.spriteManager.preload()
@@ -172,8 +172,6 @@ export default class extends Controller {
 
       // Set initial Pac-Man position
       this.animationManager.updatePacmanPosition()
-
-      console.log(`📍 Pac-Man initialized at (${Math.round(this.pacmanPosition.x)}, ${Math.round(this.pacmanPosition.y)})`)
     }
   }
 
@@ -185,29 +183,21 @@ export default class extends Controller {
    * Handle keyboard input for movement and controls
    */
   handleKeydown(event) {
-    // Handle pause toggle (P key)
-    if ((event.key === 'p' || event.key === 'P') && this.isGameActive && !this.isStarting && !this.isDying) {
-      this.togglePause()
+    // Handle mute toggle (M key)
+    if ((event.key === 'm' || event.key === 'M') && (this.isGameActive || this.isStarting)) {
+      this.toggleMute()
       event.preventDefault()
       return
     }
 
-    // Handle leaderboard (L key) - only when paused and no modal open
-    if ((event.key === 'l' || event.key === 'L') && this.isGameActive && !this.isStarting && !this.isDying && this.isPaused) {
-      // Don't open if leaderboard is already open
-      if (!document.querySelector('.leaderboard-modal')) {
-        this.showLeaderboardDuringGame()
-        event.preventDefault()
-      }
-      return
-    }
-
-    // Handle quit (Escape key)
+    // Handle menu (Escape key)
     if (event.key === 'Escape') {
       if (this.isGameActive || this.isStarting) {
-        // Show confirmation modal
-        this.showQuitConfirmation()
-        event.preventDefault()
+        // Check if menu modal is already open
+        if (!document.querySelector('.pacman-menu-modal')) {
+          this.showMenu()
+          event.preventDefault()
+        }
         return
       }
     }
@@ -222,8 +212,8 @@ export default class extends Controller {
       return
     }
 
-    // Prevent movement during intro music, pause, or death
-    if (this.isStarting || !this.isGameActive || this.isDying || this.isPaused) {
+    // Prevent movement during intro music or death
+    if (this.isStarting || !this.isGameActive || this.isDying) {
       if (movementKeys.includes(event.key)) {
         event.preventDefault()
       }
@@ -263,23 +253,6 @@ export default class extends Controller {
     }
   }
 
-  /**
-   * Toggle pause state
-   */
-  togglePause() {
-    if (this.isPaused) {
-      // Unpause
-      this.uiManager.hidePauseOverlay().then(() => {
-        this.isPaused = false
-        this.lastFrameTime = null // Reset frame time to prevent huge delta
-        this.gameLoop()
-      })
-    } else {
-      // Pause
-      this.isPaused = true
-      this.uiManager.showPauseOverlay()
-    }
-  }
 
   // ============================================
   // GAME LIFECYCLE (Start/Stop)
@@ -292,7 +265,6 @@ export default class extends Controller {
   async startGame() {
     if (this.isGameActive || this.isStarting) return
 
-    console.log("🎮 Starting Pac-Man game!")
     this.isStarting = true // Flag to prevent multiple start attempts
     this.isGameActive = false // Game is not yet active (waiting for intro music)
 
@@ -361,12 +333,10 @@ export default class extends Controller {
 
     // Only scroll if we're not already near the starting position
     if (Math.abs(window.scrollY - clampedTargetY) > 100) {
-      console.log("📜 Scrolling to starting position...")
       await this.animationManager.smoothScrollTo(clampedTargetY, 800)
     }
 
     // Play beginning sound
-    console.log("🎵 Playing intro music...")
     this.audioManager.play('beginning', true)
 
     // Show countdown while intro music plays
@@ -376,7 +346,6 @@ export default class extends Controller {
     const beginningAudio = this.audioManager.getAudio('beginning')
 
     const onBeginningEnded = () => {
-      console.log("🎵 Intro music finished, starting gameplay!")
       this.isGameActive = true
       this.isStarting = false
 
@@ -396,7 +365,6 @@ export default class extends Controller {
     // Fallback: Start anyway after 5 seconds if sound doesn't fire ended event
     this.introMusicTimeout = setTimeout(() => {
       if (!this.isGameActive && this.isStarting) {
-        console.log("⚠️ Intro music timeout, starting gameplay anyway")
         beginningAudio.removeEventListener('ended', onBeginningEnded)
         this.isGameActive = true
         this.isStarting = false
@@ -412,10 +380,8 @@ export default class extends Controller {
    * Stop the game and cleanup
    */
   stopGame() {
-    console.log("🛑 Stopping Pac-Man game!")
     this.isGameActive = false
     this.isStarting = false
-    this.isPaused = false
 
     // Clean up intro music listener and timeout if they exist
     if (this.introMusicListener) {
@@ -437,12 +403,6 @@ export default class extends Controller {
     this.hudTarget.classList.remove('active')
     if (this.hasPageTintTarget) {
       this.pageTintTarget.classList.remove('active')
-    }
-
-    // Remove pause overlay if it exists
-    const pauseOverlay = document.querySelector('.pacman-pause-overlay')
-    if (pauseOverlay) {
-      pauseOverlay.remove()
     }
 
     // Re-enable page scrolling
@@ -506,9 +466,9 @@ export default class extends Controller {
    * Handles all game updates and rendering
    */
   gameLoop(timestamp = performance.now()) {
-    // Exit if game is no longer active or paused
+    // Exit if game is no longer active
     // Important: Check BEFORE scheduling next frame to prevent multiple loops
-    if (!this.isGameActive || this.isPaused) return
+    if (!this.isGameActive) return
 
     // Calculate delta time in seconds (for frame-rate independent movement)
     const deltaTime = this.lastFrameTime ? (timestamp - this.lastFrameTime) / 1000 : 1/60
@@ -578,9 +538,8 @@ export default class extends Controller {
     // Check win condition
     this.checkWinCondition()
 
-    // Continue game loop - only if still active and not paused
-    // This prevents duplicate loops when resuming from pause
-    if (this.isGameActive && !this.isPaused) {
+    // Continue game loop - only if still active
+    if (this.isGameActive) {
       requestAnimationFrame((ts) => this.gameLoop(ts))
     }
   }
@@ -694,8 +653,6 @@ export default class extends Controller {
     this.score += ghostPoints
     this.ghostsEatenThisPowerMode = (this.ghostsEatenThisPowerMode || 0) + 1
     this.updateHUD()
-
-    console.log(`👻 Ate ${ghost.name} for ${ghostPoints} points!`)
   }
 
   /**
@@ -757,7 +714,6 @@ export default class extends Controller {
       this.gameOver()
     } else {
       // Respawn
-      console.log(`💀 Lost a life! ${this.lives} lives remaining`)
 
       // Show countdown
       await this.uiManager.showCountdown()
@@ -783,7 +739,6 @@ export default class extends Controller {
    * Game over - player lost
    */
   async gameOver() {
-    console.log("💀 Game Over!")
     this.isGameActive = false
     this.isDying = false
 
@@ -795,7 +750,6 @@ export default class extends Controller {
    * Win game - player cleared all dots
    */
   async winGame() {
-    console.log("🎉 You win!")
     this.isGameActive = false
 
     // Handle score submission (celebration sound played in handleGameEnd)
@@ -845,10 +799,8 @@ export default class extends Controller {
    * Show leaderboard after game ends (calls stopGame when closed)
    */
   async showLeaderboardFromGameEnd() {
-    console.log('📊 Loading leaderboard...')
     const data = await this.fetchLeaderboardData()
     this.uiManager.showLeaderboardModal(data, () => {
-      console.log('Leaderboard closed')
       this.stopGame()
     })
   }
@@ -857,7 +809,6 @@ export default class extends Controller {
    * Restart the game
    */
   restartGame() {
-    console.log("🔄 Restarting game...")
     this.stopGame()
     setTimeout(() => {
       this.startGame()
@@ -884,7 +835,6 @@ export default class extends Controller {
         this.lives++
         this.extraLifeAwarded = true
         this.audioManager.play('extraPac', true)
-        console.log("🎉 Extra life earned at 10,000 points!")
         this.updateHUD()
       }
     })
@@ -937,7 +887,6 @@ export default class extends Controller {
   savePlayerName(name) {
     try {
       localStorage.setItem('pacman_player_name', name)
-      console.log(`💾 Saved player name: ${name}`)
     } catch (e) {
       console.error('Error saving player name to localStorage:', e)
     }
@@ -964,12 +913,7 @@ export default class extends Controller {
 
       const data = await response.json()
 
-      if (data.success) {
-        console.log('✅ Score submitted successfully!')
-        if (data.is_high_score) {
-          console.log('🎉 New high score on global leaderboard!')
-        }
-      } else {
+      if (!data.success) {
         console.error('❌ Error submitting score:', data.errors)
       }
 
@@ -1019,88 +963,154 @@ export default class extends Controller {
    * Show leaderboard modal
    */
   async showLeaderboard() {
-    console.log('📊 Loading leaderboard...')
     const data = await this.fetchLeaderboardData()
     this.uiManager.showLeaderboardModal(data, () => {
-      console.log('Leaderboard closed')
+      // Leaderboard closed
     })
   }
 
-  /**
-   * Show leaderboard during game (pauses game)
-   */
-  async showLeaderboardDuringGame() {
-    // Pause the game first
-    if (!this.isPaused) {
-      this.isPaused = true
-      this.uiManager.showPauseOverlay()
-    }
 
-    console.log('📊 Loading leaderboard...')
-    const data = await this.fetchLeaderboardData()
-    this.uiManager.showLeaderboardModal(data, () => {
-      console.log('Leaderboard closed, returning to pause menu')
-      // Don't resume game - just return to pause menu
-      // User must press P to resume
-    })
+  // ============================================
+  // AUDIO CONTROLS
+  // ============================================
+
+  /**
+   * Initialize audio controls with saved preferences
+   */
+  initializeAudioControls() {
+    // Update muted indicator visibility
+    this.updateMutedIndicator()
   }
 
   /**
-   * Show quit confirmation modal
+   * Toggle mute on/off
    */
-  showQuitConfirmation() {
-    // Store state for proper restoration if cancelled
-    const wasPaused = this.isPaused
-    const wasStarting = this.isStarting
+  toggleMute(event) {
+    if (event) event.preventDefault()
 
-    // IMMEDIATELY pause the game - set flag FIRST before any async operations
-    // This ensures the game loop will stop on the next frame check
-    this.isPaused = true
+    this.audioManager.toggleMute()
+    this.updateMutedIndicator()
+  }
 
-    // Pause all audio immediately (including intro music)
-    this.audioManager.pauseAll()
+  /**
+   * Update muted indicator visibility in HUD
+   */
+  updateMutedIndicator() {
+    if (!this.hasMutedIndicatorTarget) return
 
-    // Then show visual pause overlay if in active gameplay
-    if (this.isGameActive && !wasStarting && !wasPaused) {
-      this.uiManager.showPauseOverlay()
+    if (this.audioManager.isMuted) {
+      this.mutedIndicatorTarget.style.display = 'flex'
+    } else {
+      this.mutedIndicatorTarget.style.display = 'none'
     }
+  }
 
-    this.uiManager.showConfirmationModal(
-      'Quit Game',
-      'Are you sure you want to quit? Your progress will be lost.',
-      () => {
-        // User confirmed quit
-        this.isPaused = false
-        const pauseOverlay = document.querySelector('.pacman-pause-overlay')
-        if (pauseOverlay) {
-          pauseOverlay.remove()
+  /**
+   * Update music volume
+   */
+  updateMusicVolume(volume) {
+    this.audioManager.setMusicVolume(volume)
+
+    // If adjusting volume, unmute automatically
+    if (this.audioManager.isMuted && volume > 0) {
+      this.audioManager.setMute(false)
+      this.updateMutedIndicator()
+    }
+  }
+
+  /**
+   * Update SFX volume
+   */
+  updateSFXVolume(volume) {
+    this.audioManager.setSFXVolume(volume)
+
+    // If adjusting volume, unmute automatically
+    if (this.audioManager.isMuted && volume > 0) {
+      this.audioManager.setMute(false)
+      this.updateMutedIndicator()
+    }
+  }
+
+  /**
+   * Show main menu
+   */
+  showMenu() {
+    // Pause the game while menu is open
+    const wasActive = this.isGameActive
+    this.isGameActive = false
+
+    // Show menu modal
+    this.uiManager.showMenuModal({
+      onSettings: () => this.showSettings(),
+      onControls: () => this.showControls(),
+      onLeaderboard: () => this.showLeaderboardFromMenu(),
+      onResume: () => {
+        // Resume game if it was active
+        if (wasActive) {
+          this.isGameActive = true
+          this.lastFrameTime = null // Reset to prevent huge delta
+          this.gameLoop()
         }
-        this.stopGame()
       },
-      () => {
-        // User cancelled - resume game
-        if (!wasPaused) {
-          // Resume audio
-          this.audioManager.resumeAll()
-
-          // If was in active gameplay, hide pause overlay and resume
-          if (!wasStarting) {
-            this.uiManager.hidePauseOverlay().then(() => {
-              this.isPaused = false
-              this.lastFrameTime = null // Reset frame time to prevent huge delta
-              this.gameLoop()
-            })
-          } else {
-            // If was starting, just unpause (countdown/intro continues)
-            this.isPaused = false
+      onQuit: () => {
+        // Show confirmation modal
+        this.uiManager.showConfirmationModal(
+          'Quit Game',
+          'Are you sure you want to quit? Your progress will be lost.',
+          () => {
+            // Confirmed quit
+            this.stopGame()
+          },
+          () => {
+            // Cancelled - reopen menu
+            this.showMenu()
           }
-        } else if (wasStarting) {
-          // Was starting, unpause to let intro continue
-          this.isPaused = false
-          this.audioManager.resumeAll()
+        )
+      }
+    })
+  }
+
+  /**
+   * Show settings modal from menu
+   */
+  showSettings() {
+    const wasActive = this.isGameActive
+    this.isGameActive = false
+
+    this.uiManager.showSettingsModal(
+      this.audioManager.musicVolume,
+      this.audioManager.sfxVolume,
+      this.audioManager.isMuted,
+      {
+        onMusicVolumeChange: (volume) => this.updateMusicVolume(volume),
+        onSFXVolumeChange: (volume) => this.updateSFXVolume(volume),
+        onMuteToggle: () => this.toggleMute(),
+        onClose: () => {
+          // Return to menu
+          this.showMenu()
         }
-        // If wasPaused and not wasStarting, keep pause state and keep pause overlay
       }
     )
+  }
+
+  /**
+   * Show controls modal from menu
+   */
+  showControls() {
+    this.uiManager.showControlsModal(() => {
+      // Return to menu
+      this.showMenu()
+    })
+  }
+
+  /**
+   * Show leaderboard from menu
+   */
+  async showLeaderboardFromMenu() {
+    const data = await this.fetchLeaderboardData()
+    this.uiManager.showLeaderboardModal(data, () => {
+      // Return to menu
+      this.showMenu()
+    })
   }
 }

@@ -61,8 +61,6 @@ export class SectionManager {
 
         // Append lock overlay (as sibling to blurred content, not child)
         sectionElement.appendChild(lockOverlay)
-
-        console.log(`🔒 Section "${section.name}" locked (requires ${section.threshold} points)`)
       }
     })
   }
@@ -95,8 +93,6 @@ export class SectionManager {
           }
         }, 600)
       }
-
-      console.log(`🔓 Section "${section.name}" unlocked!`)
     }
   }
 
@@ -186,8 +182,6 @@ export class SectionManager {
       y: keyY,
       collected: false
     }
-
-    console.log(`🔑 Key spawned! Collect it to unlock "${this.sections[this.currentSection].name}"`)
   }
 
   /**
@@ -244,8 +238,6 @@ export class SectionManager {
           this.controller.regeneratingDots = false
         }, 800)
       }
-
-      console.log(`🎉 Key collected! Section unlocked!`)
     }
   }
 
@@ -274,7 +266,5 @@ export class SectionManager {
     // Reduce power mode duration (7s base, -1s per section, minimum 3s)
     this.controller.powerModeDuration = Math.max(3000, 7000 - (this.currentSection * 1000))
     this.controller.powerModeWarningDuration = Math.max(1500, 2000 - (this.currentSection * 300))
-
-    console.log(`⚡ Difficulty increased! Pac-Man: ${this.controller.pacmanSpeed.toFixed(0)} px/s, Ghosts: ${this.controller.ghostSpeed.toFixed(0)} px/s, Power mode: ${this.controller.powerModeDuration/1000}s`)
   }
 }
