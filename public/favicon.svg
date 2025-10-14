@@ -15,5 +15,5 @@
   </defs>
 
   <!-- Logo -->
-  <text fill="#2e1065" font-family="'Courier New', Courier, monospace" font-size="76" font-weight="700" filter="url(#glow-icon)" x="96" y="125" text-anchor="middle">&lt;G/&gt;</text>
+  <text fill="#2e1065" stroke="#000000" stroke-width="2" font-family="'Courier New', Courier, monospace" font-size="76" font-weight="700" filter="url(#glow-icon)" x="96" y="125" text-anchor="middle">&lt;G/&gt;</text>
 </svg>
