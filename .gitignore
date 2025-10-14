@@ -69,9 +69,6 @@ yarn-debug.log*
 
 # Ignore documentation files
 .claude/
-.github/copilot-instructions.md
-CLAUDE.md
-CLAUDE.MD
 
 # Ignore generated captions and sitemaps
 /public/captions/
