@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <defs>
+    <!-- Glow effect -->
+    <filter id="glow-icon" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+      <feOffset dx="0" dy="0" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.5"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Logo -->
+  <text fill="#5b21b6" font-family="'Courier New', Courier, monospace" font-size="76" font-weight="700" filter="url(#glow-icon)" x="96" y="125" text-anchor="middle">&lt;G/&gt;</text>
+</svg>
