@@ -39,6 +39,7 @@ export default class extends Controller {
     this.isGameActive = false
     this.isStarting = false // Flag to track if game is in starting phase (waiting for intro music)
     this.wasActiveBeforePause = false // Track game state before menu was opened
+    this.wasStartingBeforePause = false // Track if game was starting before menu was opened
     this.score = 0
     this.dotsScore = 0 // Score from dots only (for section unlocking)
     this.lives = 3
@@ -384,6 +385,7 @@ export default class extends Controller {
     this.isGameActive = false
     this.isStarting = false
     this.wasActiveBeforePause = false // Reset pause state
+    this.wasStartingBeforePause = false // Reset starting pause state
 
     // Clean up intro music listener and timeout if they exist
     if (this.introMusicListener) {
@@ -1062,6 +1064,29 @@ export default class extends Controller {
     if (this.isGameActive) {
       this.wasActiveBeforePause = true
       this.isGameActive = false
+    } else if (this.isStarting) {
+      // If game is starting (during countdown), pause the starting sequence
+      this.wasStartingBeforePause = true
+      this.isStarting = false
+
+      // Cancel the countdown
+      const countdownOverlay = document.querySelector('.pacman-countdown')
+      if (countdownOverlay && countdownOverlay._cancel) {
+        countdownOverlay._cancel()
+      }
+
+      // Stop intro music
+      this.audioManager.stopAll()
+
+      // Clean up intro music listener
+      if (this.introMusicListener) {
+        this.introMusicListener.audio.removeEventListener('ended', this.introMusicListener.handler)
+        this.introMusicListener = null
+      }
+      if (this.introMusicTimeout) {
+        clearTimeout(this.introMusicTimeout)
+        this.introMusicTimeout = null
+      }
     }
 
     // Show menu modal
@@ -1076,6 +1101,10 @@ export default class extends Controller {
           this.wasActiveBeforePause = false
           this.lastFrameTime = null // Reset to prevent huge delta
           this.gameLoop()
+        } else if (this.wasStartingBeforePause) {
+          // Resume starting sequence
+          this.wasStartingBeforePause = false
+          this.resumeStartingSequence()
         }
       },
       onQuit: () => {
@@ -1086,6 +1115,7 @@ export default class extends Controller {
           () => {
             // Confirmed quit
             this.wasActiveBeforePause = false
+            this.wasStartingBeforePause = false
             this.stopGame()
           },
           () => {
@@ -1095,6 +1125,52 @@ export default class extends Controller {
         )
       }
     })
+  }
+
+  /**
+   * Resume the starting sequence after pausing during countdown
+   */
+  async resumeStartingSequence() {
+    this.isStarting = true
+
+    // Restart intro music
+    this.audioManager.play('beginning', true)
+
+    // Show countdown again
+    await this.uiManager.showCountdown()
+
+    // Wait for the beginning sound to finish before starting gameplay
+    const beginningAudio = this.audioManager.getAudio('beginning')
+
+    const onBeginningEnded = () => {
+      this.isGameActive = true
+      this.isStarting = false
+
+      // Start game loop
+      this.gameLoop()
+
+      // Remove event listener
+      beginningAudio.removeEventListener('ended', onBeginningEnded)
+      this.introMusicListener = null
+      this.introMusicTimeout = null
+    }
+
+    // Store listener for cleanup
+    this.introMusicListener = { audio: beginningAudio, handler: onBeginningEnded }
+    beginningAudio.addEventListener('ended', onBeginningEnded)
+
+    // Fallback: Start anyway after 5 seconds if sound doesn't fire ended event
+    this.introMusicTimeout = setTimeout(() => {
+      if (!this.isGameActive && this.isStarting) {
+        beginningAudio.removeEventListener('ended', onBeginningEnded)
+        this.isGameActive = true
+        this.isStarting = false
+
+        this.gameLoop()
+        this.introMusicListener = null
+        this.introMusicTimeout = null
+      }
+    }, 5000)
   }
 
   /**
