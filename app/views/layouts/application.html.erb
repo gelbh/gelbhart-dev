@@ -47,9 +47,12 @@
 
     <%# Favicon Links %>
     <%= favicon_link_tag '/favicon.ico' %>
-    <%= favicon_link_tag '/apple-touch-icon.png', rel: 'apple-touch-icon', sizes: '180x180', type: 'image/png' %>
+    <%= favicon_link_tag '/favicon.svg', rel: 'icon', type: 'image/svg+xml' %>
+    <%= favicon_link_tag '/favicon-96x96.png', rel: 'icon', sizes: '96x96', type: 'image/png' %>
     <%= favicon_link_tag '/favicon-32x32.png', rel: 'icon', sizes: '32x32', type: 'image/png' %>
     <%= favicon_link_tag '/favicon-16x16.png', rel: 'icon', sizes: '16x16', type: 'image/png' %>
+    <%= favicon_link_tag '/apple-touch-icon.png', rel: 'apple-touch-icon', sizes: '180x180', type: 'image/png' %>
+    <meta name="apple-mobile-web-app-title" content="T. Gelbhart">
     <%= tag :link, rel: 'manifest', href: asset_path('/site.webmanifest') %>
 
     <%# Preconnect to external domains %>
@@ -67,7 +70,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css">
 
     <%# Application CSS %>
-    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", media: "all" %>
 
     <%# JavaScript %>
     <%= javascript_importmap_tags %>
