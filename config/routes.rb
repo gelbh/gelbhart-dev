@@ -3,12 +3,12 @@ Rails.application.routes.draw do
 
   # API endpoints
   namespace :api do
-    get 'analytics/hevy-tracker', to: 'analytics#hevy_tracker_stats'
+    get "analytics/hevy-tracker", to: "analytics#hevy_tracker_stats"
 
     # Pac-Man leaderboard
-    resources :pacman_scores, only: [:create]
-    get 'pacman_scores/global', to: 'pacman_scores#global'
-    get 'pacman_scores/player/:player_name', to: 'pacman_scores#player'
+    resources :pacman_scores, only: [ :create ]
+    get "pacman_scores/global", to: "pacman_scores#global"
+    get "pacman_scores/player/:player_name", to: "pacman_scores#player"
   end
 
   # Hevy Tracker pages
@@ -28,7 +28,7 @@ Rails.application.routes.draw do
   get "/robots.txt", to: "pages#robots"
 
   # Ignore Chrome DevTools requests
-  get "/.well-known/appspecific/*path", to: proc { [204, {}, []] }
+  get "/.well-known/appspecific/*path", to: proc { [ 204, {}, [] ] }
 
   get "up" => "rails/health#show", as: :rails_health_check
   get "/_up" => "health#show"
