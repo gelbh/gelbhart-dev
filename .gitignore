@@ -67,9 +67,6 @@ yarn-debug.log*
 # Ignore coverage files
 /coverage/
 
-# Ignore documentation files
-.claude/
-
 # Ignore generated captions and sitemaps
 /public/captions/
 /public/sitemaps/
