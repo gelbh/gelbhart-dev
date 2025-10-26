@@ -5,18 +5,16 @@ class PacmanScore < ApplicationRecord
   validates :played_at, presence: true
 
   scope :global_leaderboard, -> {
-    # Get each player's highest score only
-    # Uses a subquery to find the ID of the highest score for each player
-    select('pacman_scores.*')
-      .from("pacman_scores INNER JOIN (
-        SELECT player_name, MAX(score) as max_score
-        FROM pacman_scores
-        GROUP BY player_name
-      ) best_scores ON pacman_scores.player_name = best_scores.player_name
-        AND pacman_scores.score = best_scores.max_score")
-      .order(score: :desc)
-      .limit(100)
-      .distinct
+    # Get each player's highest score only (most recent if tied)
+    # Uses DISTINCT ON to eliminate duplicate players
+    from(<<-SQL.squish
+      (SELECT DISTINCT ON (player_name) *
+       FROM pacman_scores
+       ORDER BY player_name, score DESC, played_at DESC) unique_players
+    SQL
+    )
+    .order('score DESC, played_at DESC')
+    .limit(100)
   }
   scope :player_scores, ->(player_name) { where(player_name: player_name).order(score: :desc) }
   scope :player_high_score, ->(player_name) { where(player_name: player_name).order(score: :desc).first }
