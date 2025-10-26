@@ -11,7 +11,7 @@ Rails.application.config.after_initialize do
   )
   
   # Accessor method for rate limit cache
-  def Rails.cache.rate_limit
+  Rails.cache.define_singleton_method(:rate_limit) do
     @rate_limit_cache
   end
 end
