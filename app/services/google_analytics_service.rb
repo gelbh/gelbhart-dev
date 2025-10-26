@@ -135,27 +135,38 @@ class GoogleAnalyticsService
   end
 
   def fetch_active_users
+    return 0 unless @client
+
     response = @client.run_report(
       property: "properties/#{PROPERTY_ID}",
       date_ranges: [{ start_date: '2024-11-19', end_date: 'today' }],
       metrics: [{ name: 'totalUsers' }]
     )
 
-    total_users = response.rows.first&.metric_values&.first&.value.to_i || 0
-    total_users
+    response.rows&.first&.metric_values&.first&.value.to_i || 0
+  rescue StandardError => e
+    Rails.logger.error "Failed to fetch active users: #{e.message}"
+    0
   end
 
   def fetch_page_views
+    return 0 unless @client
+
     response = @client.run_report(
       property: "properties/#{PROPERTY_ID}",
       date_ranges: [{ start_date: '2024-11-19', end_date: 'today' }],
       metrics: [{ name: 'screenPageViews' }]
     )
 
-    response.rows.first&.metric_values&.first&.value.to_i || 0
+    response.rows&.first&.metric_values&.first&.value.to_i || 0
+  rescue StandardError => e
+    Rails.logger.error "Failed to fetch page views: #{e.message}"
+    0
   end
 
   def fetch_top_countries
+    return { list: [], total: 0 } unless @client
+
     response = @client.run_report(
       property: "properties/#{PROPERTY_ID}",
       date_ranges: [{ start_date: '2024-11-19', end_date: 'today' }],
@@ -165,10 +176,10 @@ class GoogleAnalyticsService
       limit: 100
     )
 
-    countries = response.rows.map do |row|
+    countries = (response.rows || []).map do |row|
       {
-        name: row.dimension_values.first.value,
-        users: row.metric_values.first.value.to_i
+        name: row.dimension_values&.first&.value || 'Unknown',
+        users: row.metric_values&.first&.value.to_i || 0
       }
     end
 
@@ -179,20 +190,30 @@ class GoogleAnalyticsService
       list: countries,
       total: total_countries
     }
+  rescue StandardError => e
+    Rails.logger.error "Failed to fetch top countries: #{e.message}"
+    { list: [], total: 0 }
   end
 
   def fetch_engagement_rate
+    return 0 unless @client
+
     response = @client.run_report(
       property: "properties/#{PROPERTY_ID}",
       date_ranges: [{ start_date: '2024-11-19', end_date: 'today' }],
       metrics: [{ name: 'engagementRate' }]
     )
 
-    rate = response.rows.first&.metric_values&.first&.value.to_f || 0
+    rate = response.rows&.first&.metric_values&.first&.value.to_f || 0
     (rate * 100).round
+  rescue StandardError => e
+    Rails.logger.error "Failed to fetch engagement rate: #{e.message}"
+    0
   end
 
   def fetch_install_count
+    return 0 unless @client
+
     response = @client.run_report(
       property: "properties/#{PROPERTY_ID}",
       date_ranges: [{ start_date: '2024-11-19', end_date: 'today' }],
@@ -209,7 +230,10 @@ class GoogleAnalyticsService
       }
     )
 
-    response.rows.first&.metric_values&.first&.value.to_i || 0
+    response.rows&.first&.metric_values&.first&.value.to_i || 0
+  rescue StandardError => e
+    Rails.logger.error "Failed to fetch install count: #{e.message}"
+    0
   end
 
   # Mock data for development when credentials are not set
