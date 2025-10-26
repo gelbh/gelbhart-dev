@@ -6,6 +6,30 @@ export class ApiManager {
   constructor(apiEndpoint) {
     this.apiEndpoint = apiEndpoint;
     this.exoplanets = [];
+    this.isProcessing = false;
+    this.pendingCallbacks = []; // Track pending idle/animation frame callbacks
+  }
+
+  /**
+   * Cancel any ongoing batch processing
+   */
+  cancelProcessing() {
+    if (!this.isProcessing) return;
+
+    // Cancel all pending callbacks
+    this.pendingCallbacks.forEach((callback) => {
+      if (callback.type === 'idle') {
+        cancelIdleCallback(callback.id);
+      } else if (callback.type === 'raf') {
+        cancelAnimationFrame(callback.id);
+      } else if (callback.type === 'timeout') {
+        clearTimeout(callback.id);
+      }
+    });
+
+    // Clear tracking arrays
+    this.pendingCallbacks = [];
+    this.isProcessing = false;
   }
 
   /**
@@ -13,6 +37,12 @@ export class ApiManager {
    * Processes data in batches for smoother UI experience
    */
   async fetchExoplanets(onBatchProcessed, onComplete, onError) {
+    // Cancel any existing processing before starting new fetch
+    this.cancelProcessing();
+
+    // Mark as processing
+    this.isProcessing = true;
+
     try {
       const response = await fetch(this.apiEndpoint);
 
@@ -30,6 +60,9 @@ export class ApiManager {
       let currentBatch = 0;
 
       const processBatch = () => {
+        // Exit if processing was cancelled
+        if (!this.isProcessing) return;
+
         const start = currentBatch * batchSize;
         const end = Math.min(start + batchSize, data.length);
 
@@ -52,15 +85,22 @@ export class ApiManager {
         // Continue processing if there are more planets
         if (end < data.length) {
           if ("requestIdleCallback" in window) {
-            requestIdleCallback(processBatch);
+            const callbackId = requestIdleCallback(processBatch);
+            this.pendingCallbacks.push({ type: 'idle', id: callbackId });
           } else {
             // Fallback for browsers without requestIdleCallback (Safari)
             // Use requestAnimationFrame + setTimeout to better mimic idle behavior
-            requestAnimationFrame(() => {
-              setTimeout(processBatch, 1);
+            const rafId = requestAnimationFrame(() => {
+              const timeoutId = setTimeout(processBatch, 1);
+              this.pendingCallbacks.push({ type: 'timeout', id: timeoutId });
             });
+            this.pendingCallbacks.push({ type: 'raf', id: rafId });
           }
         } else {
+          // Processing complete
+          this.isProcessing = false;
+          this.pendingCallbacks = [];
+          
           if (onComplete) {
             onComplete(this.exoplanets);
           }
@@ -70,6 +110,10 @@ export class ApiManager {
       // Start processing batches
       processBatch();
     } catch (error) {
+      // Clean up processing state on error
+      this.isProcessing = false;
+      this.pendingCallbacks = [];
+      
       console.error("Error fetching exoplanets:", error);
       if (onError) {
         onError(error);
