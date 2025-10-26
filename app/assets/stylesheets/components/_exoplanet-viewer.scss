@@ -1,0 +1,700 @@
+// ============================================
+// EXOPLANET VIEWER PAGE STYLES
+// ============================================
+// Custom styling for the exoplanet 3D visualization tool
+// Includes viewer panels, controls, and responsive layouts
+
+.exoplanet-viewer-hero {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-top: 8rem;
+  padding-bottom: var(--spacing-2xl);
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  padding-left: calc(50vw - 50%);
+  padding-right: calc(50vw - 50%);
+}
+
+.exoplanet-viewer-gradient-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  background-size: 200% 200%;
+  animation: gradientShift var(--duration-gradient) ease infinite;
+  opacity: 0.12;
+  z-index: var(--z-grid);
+}
+
+.exoplanet-viewer-page {
+  // Ensure full-height layout
+  min-height: 100vh;
+
+  // Left and right panel scrolling
+  .bg-light {
+    &[style*="height"] {
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    // Ensure proper text colors in light panels
+    h5,
+    h6 {
+      color: var(--bs-body-color);
+    }
+
+    .text-muted {
+      color: var(--bs-secondary-color) !important;
+    }
+  }
+
+  // Results list styling
+  .list-group-item {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    background-color: var(--bs-list-group-bg);
+    color: var(--bs-body-color);
+
+    &:hover {
+      background-color: var(--bs-list-group-action-hover-bg);
+      border-left-color: var(--bs-primary);
+      transform: translateX(2px);
+      color: var(--bs-body-color);
+    }
+
+    &:active {
+      background-color: var(--bs-list-group-action-active-bg);
+      color: var(--bs-body-color);
+    }
+
+    &.active {
+      background-color: var(--bs-primary);
+      color: white;
+      border-left-color: var(--bs-primary);
+
+      .text-muted {
+        color: rgba(255, 255, 255, 0.8) !important;
+      }
+
+      .badge {
+        background-color: rgba(255, 255, 255, 0.2) !important;
+        color: white !important;
+        border-color: rgba(255, 255, 255, 0.3) !important;
+      }
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .fw-semibold {
+      font-weight: 600;
+    }
+
+    .fs-sm {
+      font-size: 0.875rem;
+    }
+  }
+
+  // 3D Canvas container
+  .bg-dark {
+    canvas {
+      display: block;
+      outline: none;
+    }
+  }
+
+  // Control buttons overlay
+  .btn-outline-light {
+    backdrop-filter: blur(10px);
+    border-color: rgba(255, 255, 255, 0.3);
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    &.active {
+      background-color: var(--bs-primary);
+      border-color: var(--bs-primary);
+      color: white;
+    }
+  }
+
+  // Instructions overlay
+  .bg-dark.bg-opacity-75 {
+    backdrop-filter: blur(10px);
+    background-color: rgba(0, 0, 0, 0.6) !important;
+  }
+
+  // Info panel tables
+  .table {
+    td {
+      padding: 0.5rem 0.25rem;
+      border-bottom: 1px solid var(--bs-gray-200);
+
+      &:first-child {
+        width: 40%;
+      }
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+  }
+
+  // Planet type badges
+  .badge {
+    &.bg-success {
+      background-color: rgba(var(--bs-success-rgb), 0.15) !important;
+      color: var(--bs-success);
+      border: 1px solid rgba(var(--bs-success-rgb), 0.3);
+    }
+
+    &.bg-info {
+      background-color: rgba(var(--bs-info-rgb), 0.15) !important;
+      color: var(--bs-info);
+      border: 1px solid rgba(var(--bs-info-rgb), 0.3);
+    }
+
+    &.bg-primary {
+      background-color: rgba(var(--bs-primary-rgb), 0.15) !important;
+      color: var(--bs-primary);
+      border: 1px solid rgba(var(--bs-primary-rgb), 0.3);
+    }
+
+    &.bg-warning {
+      background-color: rgba(var(--bs-warning-rgb), 0.15) !important;
+      color: var(--bs-warning);
+      border: 1px solid rgba(var(--bs-warning-rgb), 0.3);
+    }
+  }
+
+  // Filter section styling
+  .form-label {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    color: var(--bs-body-color);
+
+    &.fw-semibold {
+      font-weight: 600;
+    }
+  }
+
+  .form-select,
+  .form-control {
+    font-size: 0.9rem;
+    background-color: #ffffff;
+    border-color: var(--bs-border-color);
+    color: #212529;
+
+    &:focus {
+      border-color: var(--bs-primary);
+      box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+      background-color: #ffffff;
+      color: #212529;
+    }
+
+    &::placeholder {
+      color: #6c757d;
+    }
+  }
+
+  .form-select {
+    option {
+      background-color: #ffffff;
+      color: #212529;
+      padding: 0.5rem;
+    }
+  }
+
+  // Force dark text in inputs on light background
+  input.form-control,
+  select.form-select {
+    color: #212529 !important;
+  }
+
+  // Loading spinner
+  .spinner-border {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.3rem;
+  }
+
+  // Empty state
+  .text-center.py-5 {
+    .bx {
+      font-size: 4rem;
+    }
+  }
+
+  // Alert styling
+  .alert {
+    border: none;
+    border-radius: 0.5rem;
+
+    &.alert-info {
+      background-color: rgba(var(--bs-info-rgb), 0.1);
+      color: var(--bs-info-text-emphasis);
+    }
+
+    &.alert-warning {
+      background-color: rgba(var(--bs-warning-rgb), 0.1);
+      color: var(--bs-warning-text-emphasis);
+    }
+  }
+
+  // Responsive adjustments
+  @media (max-width: 991.98px) {
+    // Stack panels vertically on mobile
+    .col-lg-3,
+    .col-lg-6 {
+      height: auto !important;
+      min-height: 300px;
+    }
+
+    .col-lg-6 {
+      min-height: 400px;
+    }
+  }
+
+  // Form check (switch) styling
+  .form-check-input {
+    &:checked {
+      background-color: var(--bs-primary);
+      border-color: var(--bs-primary);
+    }
+  }
+
+  // Smooth transitions
+  * {
+    transition-property: background-color, border-color, color, transform;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-in-out;
+  }
+}
+
+// About section styling
+.exoplanet-viewer-page + section,
+.exoplanet-viewer-page section:last-child {
+  .rounded-circle {
+    transition: transform 0.3s ease;
+  }
+
+  .col-md-4:hover .rounded-circle {
+    transform: scale(1.1);
+  }
+}
+
+// Search input focus effect
+.input-group {
+  .form-control:focus {
+    z-index: 3;
+    box-shadow: none;
+  }
+
+  .btn-primary {
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}
+
+// Result count badge
+.badge.bg-secondary {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  vertical-align: middle;
+}
+
+// Scrollbar styling for panels
+.exoplanet-viewer-page {
+  [style*="overflow-y: auto"] {
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: var(--bs-gray-100);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--bs-gray-400);
+      border-radius: 4px;
+
+      &:hover {
+        background: var(--bs-gray-500);
+      }
+    }
+  }
+}
+
+// Hide loading indicators
+.exoplanet-loading-hidden {
+  display: none !important;
+}
+
+// ============================================
+// SYSTEM VIEW SPECIFIC STYLES
+// ============================================
+
+// View mode toggle buttons
+.btn-group {
+  .btn-check:checked + .btn-outline-primary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: white;
+    font-weight: 600;
+  }
+
+  .btn-outline-primary {
+    transition: all 0.3s ease;
+
+    i {
+      transition: transform 0.3s ease;
+    }
+
+    &:hover i {
+      transform: scale(1.1);
+    }
+  }
+}
+
+// System list item styling
+.list-group-item {
+  .bx-planet {
+    color: var(--bs-primary);
+    font-size: 1.2rem;
+    vertical-align: middle;
+  }
+
+  &.active .bx-planet {
+    color: white;
+  }
+}
+
+// System comparison table styling
+.table-responsive {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.5rem;
+
+  .table {
+    margin-bottom: 0;
+
+    thead {
+      position: sticky;
+      top: 0;
+      background-color: var(--bs-light);
+      z-index: 1;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+      th {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        padding: 0.75rem 0.5rem;
+        border-bottom: 2px solid var(--bs-border-color);
+        white-space: nowrap;
+      }
+    }
+
+    tbody {
+      tr {
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          background-color: rgba(var(--bs-primary-rgb), 0.05);
+        }
+
+        td {
+          font-size: 0.85rem;
+          padding: 0.6rem 0.5rem;
+          vertical-align: middle;
+        }
+      }
+    }
+  }
+}
+
+// System details panel
+[data-exoplanet-viewer-target="systemDetails"] {
+  animation: fadeIn 0.3s ease;
+
+  h5 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .bx-sun {
+      color: var(--bs-warning);
+      font-size: 1.5rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Badge styling for planet count
+.badge.bg-info {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+// Random system button
+#randomSystemBtn {
+  animation: fadeIn 0.3s ease;
+}
+
+// Fullscreen button icon animation
+.btn-outline-light {
+  .bx-fullscreen {
+    transition: transform 0.3s ease;
+  }
+
+  &:hover .bx-fullscreen {
+    transform: scale(1.1);
+  }
+}
+
+// ============================================
+// SPACE-THEMED CURSORS
+// ============================================
+
+// Custom cursor definitions using SVG data URIs
+$cursor-default: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="%236366f1" opacity="0.8"/><circle cx="12" cy="12" r="6" fill="none" stroke="%236366f1" stroke-width="1" opacity="0.5"/><circle cx="12" cy="12" r="1.5" fill="%23ffffff"/></svg>')
+    12 12,
+  auto;
+
+$cursor-grab: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 2L15 8L21 9L16 14L17 20L12 17L7 20L8 14L3 9L9 8Z" fill="%236366f1" stroke="%23ffffff" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="%23ffffff" opacity="0.3"/></svg>')
+    12 12,
+  grab;
+
+$cursor-grabbing: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 2L15 8L21 9L16 14L17 20L12 17L7 20L8 14L3 9L9 8Z" fill="%23f59e0b" stroke="%23ffffff" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="%23ffffff" opacity="0.5"/></svg>')
+    12 12,
+  grabbing;
+
+$cursor-pointer: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="5" fill="%2322c55e" opacity="0.3"/><circle cx="14" cy="14" r="3" fill="%2322c55e" stroke="%23ffffff" stroke-width="2"/><path d="M14 2 L14 8 M14 20 L14 26 M2 14 L8 14 M20 14 L26 14" stroke="%2322c55e" stroke-width="2" opacity="0.6"/></svg>')
+    14 14,
+  pointer;
+
+$cursor-zoom-in: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6" fill="none" stroke="%236366f1" stroke-width="2"/><path d="M15 15L20 20" stroke="%236366f1" stroke-width="2" stroke-linecap="round"/><path d="M10 7v6M7 10h6" stroke="%2322c55e" stroke-width="2"/></svg>')
+    12 12,
+  zoom-in;
+
+$cursor-zoom-out: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6" fill="none" stroke="%236366f1" stroke-width="2"/><path d="M15 15L20 20" stroke="%236366f1" stroke-width="2" stroke-linecap="round"/><path d="M7 10h6" stroke="%23ef4444" stroke-width="2"/></svg>')
+    12 12,
+  zoom-out;
+
+$cursor-move: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2" fill="%236366f1"/><path d="M12 4 L12 8 M12 16 L12 20 M4 12 L8 12 M16 12 L20 12" stroke="%236366f1" stroke-width="2"/><path d="M12 4 L10 6 L14 6 Z M12 20 L10 18 L14 18 Z M4 12 L6 10 L6 14 Z M20 12 L18 10 L18 14 Z" fill="%236366f1"/></svg>')
+    12 12,
+  move;
+
+// Apply space-themed cursors ONLY to canvas
+.exoplanet-viewer-page {
+  // Default cursor for canvas only
+  canvas {
+    cursor: $cursor-default;
+    transition: cursor 0.1s ease;
+
+    // Grabbing state (when actively dragging to rotate)
+    &.grabbing {
+      cursor: $cursor-grabbing !important;
+    }
+
+    // Grab state (when hovering, ready to rotate)
+    &.grab {
+      cursor: $cursor-grab;
+    }
+
+    // Pointer state (when hovering over clickable planet)
+    &.pointer {
+      cursor: $cursor-pointer;
+    }
+
+    // Move state (when right-click panning)
+    &.moving {
+      cursor: $cursor-move !important;
+    }
+  }
+
+  // Keep default cursors for UI elements outside canvas
+  .btn,
+  button,
+  .list-group-item,
+  input[type="range"] {
+    cursor: pointer;
+  }
+
+  input[type="range"]:active {
+    cursor: grabbing;
+  }
+}
+
+// Enhanced table striping
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(var(--bs-light-rgb), 0.5);
+}
+
+// Smooth view mode transition
+.exoplanet-viewer-page {
+  [data-exoplanet-viewer-target="planetDetails"],
+  [data-exoplanet-viewer-target="systemDetails"],
+  [data-exoplanet-viewer-target="planetInfo"] {
+    transition: opacity 0.3s ease, display 0s 0.3s;
+
+    &[style*="display: none"] {
+      opacity: 0;
+    }
+
+    &[style*="display: block"] {
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+  }
+}
+
+// System info alert
+[data-exoplanet-viewer-target="systemDetails"] .alert-info {
+  border-left: 4px solid var(--bs-info);
+}
+
+// Highlight current view mode in toggle
+input[name="viewMode"]:checked + label {
+  box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+// ============================================
+// ORBIT SPEED SLIDER STYLES (INLINE)
+// ============================================
+
+.orbit-speed-inline {
+  animation: fadeIn 0.3s ease;
+
+  .form-label {
+    color: white;
+    font-weight: 500;
+    font-size: 0.875rem;
+  }
+
+  .orbit-speed-slider {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+
+    &::-webkit-slider-thumb {
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      background: var(--bs-primary);
+      cursor: pointer;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      transition: all 0.2s ease;
+
+      &:hover {
+        transform: scale(1.2);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+      }
+
+      &:active {
+        transform: scale(1.1);
+      }
+    }
+
+    &::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      background: var(--bs-primary);
+      cursor: pointer;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      transition: all 0.2s ease;
+
+      &:hover {
+        transform: scale(1.2);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+      }
+
+      &:active {
+        transform: scale(1.1);
+      }
+    }
+
+    &::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 6px;
+      background: linear-gradient(
+        to right,
+        rgba(var(--bs-info-rgb), 0.4) 0%,
+        rgba(var(--bs-success-rgb), 0.6) 50%,
+        rgba(var(--bs-warning-rgb), 0.4) 100%
+      );
+      border-radius: 3px;
+    }
+
+    &::-moz-range-track {
+      width: 100%;
+      height: 6px;
+      background: linear-gradient(
+        to right,
+        rgba(var(--bs-info-rgb), 0.4) 0%,
+        rgba(var(--bs-success-rgb), 0.6) 50%,
+        rgba(var(--bs-warning-rgb), 0.4) 100%
+      );
+      border-radius: 3px;
+    }
+  }
+
+  .badge {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.6rem;
+    min-width: 50px;
+    text-align: center;
+    font-weight: 600;
+  }
+}
+
+// Responsive orbit speed control
+@media (max-width: 991.98px) {
+  .orbit-speed-inline {
+    width: 100%;
+    margin-top: 0.5rem;
+
+    .orbit-speed-slider {
+      flex: 1;
+      min-width: 100px;
+    }
+  }
+}

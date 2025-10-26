@@ -11,26 +11,26 @@
 
 // ---- Foundation ----
 // CSS variables, colors, spacing, transitions, z-index layers
-@import 'components/variables';
+@import "components/variables";
 
 // All @keyframes animations used throughout the site
-@import 'components/animations';
+@import "components/animations";
 
 // Global base styles (body, html, card utilities)
-@import 'components/base';
+@import "components/base";
 
 // ---- Page Sections ----
 // Hero section with animated backgrounds and gradient text
-@import 'components/hero';
+@import "components/hero";
 
 // Technologies & skills section with tech cards
-@import 'components/tech-skills';
+@import "components/tech-skills";
 
 // Contact page with glassmorphic cards and typing code background
-@import 'components/contact';
+@import "components/contact";
 
 // Project cards with hover effects and animations
-@import 'components/projects';
+@import "components/projects";
 
 // ---- Interactive Features ----
 // Comprehensive Pac-Man game styles including:
@@ -42,11 +42,14 @@
 // - Modals (game over, pause, leaderboard)
 // - Section locking system
 // - Hover effects for interactive elements
-@import 'components/pacman';
+@import "components/pacman";
 
 // ---- Project Pages ----
 // Video Captioner page with hero and card styles
-@import 'components/video-captioner';
+@import "components/video-captioner";
 
 // Hevy Tracker page with hero, cards, gallery, and steps
-@import 'components/hevy-tracker';
+@import "components/hevy-tracker";
+
+// Exoplanet Viewer page with 3D visualization and panels
+@import "components/exoplanet-viewer";
