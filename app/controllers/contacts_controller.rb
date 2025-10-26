@@ -93,6 +93,7 @@ class ContactsController < ApplicationController
         format.html { redirect_to contact_path, alert: "Too many submissions. Please try again later." }
         format.json { render json: { success: false, message: "Rate limit exceeded" }, status: :too_many_requests }
       end
+      return false  # Halt the before_action chain
     else
       Rails.cache.write(cache_key, submission_count + 1, expires_in: 1.hour)
     end
