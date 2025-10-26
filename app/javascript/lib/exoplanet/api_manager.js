@@ -54,7 +54,11 @@ export class ApiManager {
           if ("requestIdleCallback" in window) {
             requestIdleCallback(processBatch);
           } else {
-            setTimeout(processBatch, 0);
+            // Fallback for browsers without requestIdleCallback (Safari)
+            // Use requestAnimationFrame + setTimeout to better mimic idle behavior
+            requestAnimationFrame(() => {
+              setTimeout(processBatch, 1);
+            });
           }
         } else {
           if (onComplete) {
