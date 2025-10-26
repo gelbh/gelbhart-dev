@@ -10,7 +10,7 @@ class PacmanScore < ApplicationRecord
     from(<<-SQL.squish
       (SELECT DISTINCT ON (player_name) *
        FROM pacman_scores
-       ORDER BY player_name, score DESC, played_at DESC) unique_players
+       ORDER BY player_name, score DESC, played_at DESC) AS pacman_scores
     SQL
     )
     .order('score DESC, played_at DESC')
