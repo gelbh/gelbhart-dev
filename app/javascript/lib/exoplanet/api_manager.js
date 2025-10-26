@@ -18,11 +18,11 @@ export class ApiManager {
 
     // Cancel all pending callbacks
     this.pendingCallbacks.forEach((callback) => {
-      if (callback.type === 'idle') {
+      if (callback.type === "idle") {
         cancelIdleCallback(callback.id);
-      } else if (callback.type === 'raf') {
+      } else if (callback.type === "raf") {
         cancelAnimationFrame(callback.id);
-      } else if (callback.type === 'timeout') {
+      } else if (callback.type === "timeout") {
         clearTimeout(callback.id);
       }
     });
@@ -86,21 +86,21 @@ export class ApiManager {
         if (end < data.length) {
           if ("requestIdleCallback" in window) {
             const callbackId = requestIdleCallback(processBatch);
-            this.pendingCallbacks.push({ type: 'idle', id: callbackId });
+            this.pendingCallbacks.push({ type: "idle", id: callbackId });
           } else {
             // Fallback for browsers without requestIdleCallback (Safari)
             // Use requestAnimationFrame + setTimeout to better mimic idle behavior
             const rafId = requestAnimationFrame(() => {
               const timeoutId = setTimeout(processBatch, 1);
-              this.pendingCallbacks.push({ type: 'timeout', id: timeoutId });
+              this.pendingCallbacks.push({ type: "timeout", id: timeoutId });
             });
-            this.pendingCallbacks.push({ type: 'raf', id: rafId });
+            this.pendingCallbacks.push({ type: "raf", id: rafId });
           }
         } else {
           // Processing complete
           this.isProcessing = false;
           this.pendingCallbacks = [];
-          
+
           if (onComplete) {
             onComplete(this.exoplanets);
           }
@@ -113,7 +113,7 @@ export class ApiManager {
       // Clean up processing state on error
       this.isProcessing = false;
       this.pendingCallbacks = [];
-      
+
       console.error("Error fetching exoplanets:", error);
       if (onError) {
         onError(error);
@@ -125,24 +125,33 @@ export class ApiManager {
    * Process and classify planet data
    */
   processPlanetData(raw) {
-    const radius = raw.pl_rade || 1.0; // Earth radii
-    const mass = raw.pl_bmasse || 1.0; // Earth masses
-    const temp = raw.pl_eqt || 288; // Kelvin
-    const distance = raw.sy_dist || 0; // parsecs
-    const density = raw.pl_dens || null; // g/cm³
-    const orbitalEccentricity = raw.pl_orbeccen || 0; // 0-1
-    const semiMajorAxis = raw.pl_orbsmax || null; // AU
-    const insolationFlux = raw.pl_insol || null; // Earth flux
-    const stellarTemp = raw.st_teff || 5778; // Kelvin (default to Sun)
-    const stellarRadius = raw.st_rad || 1.0; // Solar radii
-    const stellarMass = raw.st_mass || 1.0; // Solar masses
+    // Extract and validate with realistic physical bounds
+    const radius = Math.max(0.1, Math.min(raw.pl_rade || 1.0, 100)); // 0.1-100 Earth radii
+    const mass = Math.max(0.01, Math.min(raw.pl_bmasse || 1.0, 10000)); // 0.01-10000 Earth masses
+    const temp = Math.max(0, Math.min(raw.pl_eqt || 288, 10000)); // 0-10000 Kelvin
+    const distance = Math.max(0, raw.sy_dist || 0); // parsecs (non-negative)
+    const density = raw.pl_dens
+      ? Math.max(0.01, Math.min(raw.pl_dens, 50)) // 0.01-50 g/cm³
+      : null; // Null if not provided
+    const orbitalEccentricity = Math.max(0, Math.min(raw.pl_orbeccen || 0, 1)); // 0-1 (valid range)
+    const semiMajorAxis =
+      raw.pl_orbsmax && raw.pl_orbsmax > 0 ? raw.pl_orbsmax : null; // AU (positive)
+    const insolationFlux =
+      raw.pl_insol && raw.pl_insol > 0 ? raw.pl_insol : null; // Earth flux (positive)
+    const stellarTemp = Math.max(0, Math.min(raw.st_teff || 5778, 100000)); // 0-100000 Kelvin
+    const stellarRadius = Math.max(0.01, Math.min(raw.st_rad || 1.0, 2000)); // 0.01-2000 Solar radii
+    const stellarMass = Math.max(0.01, Math.min(raw.st_mass || 1.0, 300)); // 0.01-300 Solar masses
     const stellarLuminosity = raw.st_lum || null; // Log solar luminosity
     const ra = raw.ra || null; // Right Ascension (degrees)
     const dec = raw.dec || null; // Declination (degrees)
 
-    // NEW: Orbital mechanics
-    const orbitalInclination = raw.pl_orbincl || null; // Degrees (0-90)
-    const longitudeOfPeriastron = raw.pl_orblper || null; // Degrees
+    // NEW: Orbital mechanics (validated)
+    const orbitalInclination = raw.pl_orbincl
+      ? Math.max(0, Math.min(raw.pl_orbincl, 180)) // 0-180 degrees
+      : null;
+    const longitudeOfPeriastron = raw.pl_orblper
+      ? Math.max(0, Math.min(raw.pl_orblper, 360)) // 0-360 degrees
+      : null;
 
     // NEW: Discovery context
     const discoveryMethod = raw.discoverymethod || null; // e.g., "Transit", "Radial Velocity"
@@ -156,9 +165,15 @@ export class ApiManager {
     const spectralType = raw.st_spectype || null; // e.g., "G2V", "M3V"
     const stellarAge = raw.st_age || null; // Gyr (billion years)
 
-    // NEW: Gas giant measurements
-    const massJupiter = raw.pl_massj || null; // Jupiter masses
-    const radiusJupiter = raw.pl_radj || null; // Jupiter radii
+    // NEW: Gas giant measurements (validated)
+    const massJupiter =
+      raw.pl_massj && raw.pl_massj > 0
+        ? Math.min(raw.pl_massj, 80) // 0-80 Jupiter masses (brown dwarf limit)
+        : null;
+    const radiusJupiter =
+      raw.pl_radj && raw.pl_radj > 0
+        ? Math.min(raw.pl_radj, 10) // 0-10 Jupiter radii
+        : null;
 
     return {
       name: raw.pl_name || "Unknown",
