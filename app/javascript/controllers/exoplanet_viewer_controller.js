@@ -1463,8 +1463,7 @@ export default class extends Controller {
           this.hideTooltip();
 
           // Get the system's galactic position
-          const systemPosition =
-            this.galaxyRenderer.getSystemPosition(system);
+          const systemPosition = this.galaxyRenderer.getSystemPosition(system);
 
           if (systemPosition) {
             // Set transitioning flag
