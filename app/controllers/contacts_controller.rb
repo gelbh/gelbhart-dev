@@ -51,7 +51,7 @@ class ContactsController < ApplicationController
   end
 
   def valid_email?(email)
-    email.match?(/\A[^@\s]+@[^@\s]+\z/)
+    email.match?(/\A[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\z/)
   end
 
   def spam_detected?
