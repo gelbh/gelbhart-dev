@@ -49,7 +49,8 @@ export class SceneManager {
     this.scene.background = new THREE.Color(0x000000);
 
     // Camera (60° FOV for better viewing area, standard for 3D applications)
-    this.camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+    // Near plane of 0.5 (instead of 0.1) to reduce z-fighting on lower-end GPUs
+    this.camera = new THREE.PerspectiveCamera(60, width / height, 0.5, 1000);
     this.camera.position.set(0, 0, 5);
 
     // Renderer
@@ -57,6 +58,9 @@ export class SceneManager {
     this.renderer.setSize(width, height);
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.container.appendChild(this.renderer.domElement);
+
+    // Handle WebGL context loss/restoration
+    this.handleContextLoss();
 
     // Post-processing
     this.setupPostProcessing(width, height);
@@ -76,6 +80,39 @@ export class SceneManager {
 
     // Handle window resize
     window.addEventListener("resize", () => this.onWindowResize());
+  }
+
+  /**
+   * Handle WebGL context loss and restoration
+   */
+  handleContextLoss() {
+    const canvas = this.renderer.domElement;
+
+    canvas.addEventListener(
+      "webglcontextlost",
+      (event) => {
+        event.preventDefault();
+        console.warn("WebGL context lost. Attempting to restore...");
+
+        // Cancel any ongoing animations
+        if (this.animationId) {
+          cancelAnimationFrame(this.animationId);
+          this.animationId = null;
+        }
+      },
+      false
+    );
+
+    canvas.addEventListener(
+      "webglcontextrestored",
+      () => {
+        console.log("WebGL context restored. Reinitializing scene...");
+
+        // Reinitialize the scene
+        this.initialize();
+      },
+      false
+    );
   }
 
   /**
