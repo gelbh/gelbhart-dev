@@ -71,12 +71,12 @@ class Api::PacmanScoresController < ApplicationController
 
   # Check if the score would be in the top 100 global leaderboard
   def is_global_high_score?(score)
-    leaderboard_count = PacmanScore.count
-    if leaderboard_count < 100
-      true
-    else
-      lowest_high_score = PacmanScore.order(score: :desc).limit(100).last.score
-      score.score >= lowest_high_score
+    PacmanScore.transaction do
+      # Get the 100th highest score (if it exists)
+      hundredth_score = PacmanScore.order(score: :desc).offset(99).limit(1).first
+      
+      # If there aren't 100 scores yet, or this score is >= the 100th score
+      hundredth_score.nil? || score.score >= hundredth_score.score
     end
   end
 end
