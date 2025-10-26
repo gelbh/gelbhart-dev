@@ -21,6 +21,16 @@ class Api::PacmanScoresController < ApplicationController
   # Returns all scores for a specific player
   def player
     player_name = params[:player_name]
+    
+    # Validate player_name is present and not blank
+    if player_name.blank?
+      render json: {
+        success: false,
+        error: 'Player name is required'
+      }, status: :bad_request
+      return
+    end
+    
     scores = PacmanScore.player_scores(player_name)
 
     render json: {
