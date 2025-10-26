@@ -365,9 +365,6 @@ export default class extends Controller {
     this.generateDots();
     this.createGhosts();
 
-    // Initialize ghost AI dot counts cache for performance
-    this.ghostAI.initializeDotCounts();
-
     // Smoothly scroll to starting position before beginning
     const targetScrollY = this.initialPacmanPosition.y - window.innerHeight / 2;
     const clampedTargetY = Math.max(
@@ -699,6 +696,8 @@ export default class extends Controller {
    */
   generateDots() {
     this.itemManager.generateDots();
+    // Reinitialize ghost AI dot counts cache after regeneration
+    this.ghostAI.initializeDotCounts();
   }
 
   /**
@@ -743,7 +742,8 @@ export default class extends Controller {
     if (this.regeneratingDots) return;
 
     const allSectionsUnlocked = this.sections.every((s) => s.unlocked);
-    const allDotsCollected = this.dots.every((d) => d.collected);
+    const allDotsCollected =
+      this.dots.length > 0 && this.dots.every((d) => d.collected);
 
     if (allSectionsUnlocked && allDotsCollected) {
       this.winGame();
