@@ -37,7 +37,8 @@ export class UIManager {
       itemsToRender = filteredExoplanets.slice(0, displayLimit);
     }
 
-    // Render items
+    // Render items using DocumentFragment to batch DOM insertions
+    const fragment = document.createDocumentFragment();
     itemsToRender.forEach((planet) => {
       const item = document.createElement("button");
       item.className = "list-group-item list-group-item-action";
@@ -57,8 +58,9 @@ export class UIManager {
           this.onPlanetSelect(planet);
         }
       });
-      list.appendChild(item);
+      fragment.appendChild(item);
     });
+    list.appendChild(fragment);
 
     // Show "more results" indicator if needed
     const existingMore = list.querySelector(".more-results-indicator");
@@ -145,7 +147,8 @@ export class UIManager {
     planetList.style.borderLeft = "2px solid #dee2e6";
     planetList.style.marginLeft = "10px";
 
-    // Add planets to the list
+    // Add planets to the list using DocumentFragment to batch DOM insertions
+    const planetFragment = document.createDocumentFragment();
     systemData.planets.forEach((planet) => {
       const planetItem = document.createElement("button");
       planetItem.className = "list-group-item list-group-item-action border-0";
@@ -171,8 +174,9 @@ export class UIManager {
         }
       });
 
-      planetList.appendChild(planetItem);
+      planetFragment.appendChild(planetItem);
     });
+    planetList.appendChild(planetFragment);
 
     // Toggle expansion
     systemHeader.addEventListener("click", () => {
@@ -433,6 +437,8 @@ export class UIManager {
 
     this.targets.resultCount.textContent = systems.length;
 
+    // Use DocumentFragment to batch DOM insertions
+    const fragment = document.createDocumentFragment();
     systems.forEach((system) => {
       const item = document.createElement("button");
       item.className = "list-group-item list-group-item-action";
@@ -455,8 +461,9 @@ export class UIManager {
           this.onSystemSelect(system);
         }
       });
-      list.appendChild(item);
+      fragment.appendChild(item);
     });
+    list.appendChild(fragment);
   }
 
   /**
@@ -490,6 +497,8 @@ export class UIManager {
 
     tbody.innerHTML = "";
 
+    // Use DocumentFragment to batch DOM insertions
+    const fragment = document.createDocumentFragment();
     planets.forEach((planet) => {
       const row = document.createElement("tr");
       row.innerHTML = `
@@ -511,8 +520,9 @@ export class UIManager {
             : "N/A"
         }</td>
       `;
-      tbody.appendChild(row);
+      fragment.appendChild(row);
     });
+    tbody.appendChild(fragment);
   }
 
   /**
