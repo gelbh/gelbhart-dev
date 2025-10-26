@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_07_183416) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_26_164854) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -21,7 +21,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_07_183416) do
     t.datetime "played_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["player_name"], name: "index_pacman_scores_on_player_name"
-    t.index ["score"], name: "index_pacman_scores_on_score"
+    t.index ["player_name", "score"], name: "index_pacman_scores_on_player_and_score", order: { score: :desc }
   end
 end
