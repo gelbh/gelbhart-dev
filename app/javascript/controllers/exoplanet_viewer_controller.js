@@ -289,7 +289,7 @@ export default class extends Controller {
         <div class="fw-bold mb-2"><i class="bx bx-sun text-warning me-1"></i> ${
           objectData.starName
         }</div>
-        <div class="small mb-2">
+        <div class="small">
           <div><i class="bx bx-planet me-1"></i> ${
             objectData.planetCount
           } planets</div>
@@ -297,14 +297,13 @@ export default class extends Controller {
             1
           )} light-years</div>
         </div>
-        <div class="text-info small"><i class="bx bx-mouse me-1"></i> Click again to zoom in</div>
       `;
     } else if (objectData.type === "planet") {
       content = `
         <div class="fw-bold mb-2"><i class="bx bx-planet text-primary me-1"></i> ${
           objectData.name
         }</div>
-        <div class="small mb-2">
+        <div class="small">
           <div><i class="bx bx-sun me-1"></i> ${objectData.hostStar}</div>
           <div><i class="bx bx-thermometer me-1"></i> ${
             objectData.temperature
@@ -312,7 +311,6 @@ export default class extends Controller {
               : "Unknown"
           }</div>
         </div>
-        <div class="text-info small"><i class="bx bx-mouse me-1"></i> Click again to zoom in</div>
       `;
     }
 
@@ -1423,9 +1421,9 @@ export default class extends Controller {
     // Don't trigger click if we were dragging
     if (this.isDragging) return;
 
-    // Only ignore extremely fast clicks (< 50ms, likely double-clicks or accidents)
+    // Ignore very fast clicks (< 100ms, likely accidental double-clicks)
     const clickDuration = Date.now() - this.clickStartTime;
-    if (clickDuration < 50) {
+    if (clickDuration < 100) {
       return;
     }
 
@@ -1456,69 +1454,49 @@ export default class extends Controller {
           clickedMesh.userData.system || clickedMesh.userData.systemData;
 
         if (system) {
-          // Two-click system: First click shows tooltip, second click zooms in
-          if (
-            this.selectedObjectForTooltip &&
-            this.selectedObjectForTooltip.starName === system.starName &&
-            this.selectedObjectForTooltip.type === "system"
-          ) {
-            // Second click - zoom in
-            console.log(
-              `Zooming into star system: ${system.starName} (${system.planets.length} planets)`
-            );
+          // Single-click to zoom into system
+          console.log(
+            `Zooming into star system: ${system.starName} (${system.planets.length} planets)`
+          );
 
-            this.hideTooltip();
+          // Hide any existing tooltip
+          this.hideTooltip();
 
-            // Get the system's galactic position
-            const systemPosition =
-              this.galaxyRenderer.getSystemPosition(system);
+          // Get the system's galactic position
+          const systemPosition =
+            this.galaxyRenderer.getSystemPosition(system);
 
-            if (systemPosition) {
-              // Set transitioning flag
-              this.isTransitioning = true;
+          if (systemPosition) {
+            // Set transitioning flag
+            this.isTransitioning = true;
 
-              // Calculate zoom-in camera position (closer to the system)
-              const zoomDistance = 8; // Much closer than galaxy view
-              const direction = this.sceneManager.camera.position
-                .clone()
-                .sub(systemPosition)
-                .normalize();
-              const targetCameraPos = systemPosition
-                .clone()
-                .add(direction.multiplyScalar(zoomDistance));
+            // Calculate zoom-in camera position (closer to the system)
+            const zoomDistance = 8; // Much closer than galaxy view
+            const direction = this.sceneManager.camera.position
+              .clone()
+              .sub(systemPosition)
+              .normalize();
+            const targetCameraPos = systemPosition
+              .clone()
+              .add(direction.multiplyScalar(zoomDistance));
 
-              // Smooth zoom transition to the system
-              this.sceneManager.smoothCameraTransitionWithTarget(
-                targetCameraPos,
-                systemPosition,
-                1000,
-                () => {
-                  // After zoom animation completes, switch to system view
-                  this.viewMode = "system";
-                  this.currentSystem = system;
-                  this.galaxyRenderer.cleanup();
-                  this.selectSystem(system);
+            // Smooth zoom transition to the system
+            this.sceneManager.smoothCameraTransitionWithTarget(
+              targetCameraPos,
+              systemPosition,
+              1000,
+              () => {
+                // After zoom animation completes, switch to system view
+                this.viewMode = "system";
+                this.currentSystem = system;
+                this.galaxyRenderer.cleanup();
+                this.selectSystem(system);
 
-                  // Clear transition flag
-                  setTimeout(() => {
-                    this.isTransitioning = false;
-                  }, 300);
-                }
-              );
-            }
-          } else {
-            // First click - show tooltip
-            console.log(`Selected star system: ${system.starName}`);
-            this.selectedObjectForTooltip = {
-              type: "system",
-              starName: system.starName,
-              planetCount: system.planets.length,
-              distance: system.distance || 0,
-            };
-            this.showTooltip(
-              this.selectedObjectForTooltip,
-              event.clientX - rect.left,
-              event.clientY - rect.top
+                // Clear transition flag
+                setTimeout(() => {
+                  this.isTransitioning = false;
+                }, 300);
+              }
             );
           }
         }
@@ -1543,43 +1521,22 @@ export default class extends Controller {
         if (clickedMesh.userData.planet) {
           const planet = clickedMesh.userData.planet;
 
-          // Two-click system: First click shows tooltip, second click zooms in
-          if (
-            this.selectedObjectForTooltip &&
-            this.selectedObjectForTooltip.name === planet.name &&
-            this.selectedObjectForTooltip.type === "planet"
-          ) {
-            // Second click - zoom in
-            console.log(`Zooming into planet: ${planet.name}`);
+          // Single-click to zoom into planet
+          console.log(`Zooming into planet: ${planet.name}`);
 
-            this.hideTooltip();
+          // Hide any existing tooltip
+          this.hideTooltip();
 
-            // Get the planet's current world position in the system
-            const planetWorldPosition = new THREE.Vector3();
-            clickedMesh.getWorldPosition(planetWorldPosition);
+          // Get the planet's current world position in the system
+          const planetWorldPosition = new THREE.Vector3();
+          clickedMesh.getWorldPosition(planetWorldPosition);
 
-            // Perform cinematic transition to the planet
-            this.transitionToPlanetFromSystem(
-              planet,
-              planetWorldPosition,
-              clickedMesh
-            );
-          } else {
-            // First click - show tooltip
-            console.log(`Selected planet: ${planet.name}`);
-            this.selectedObjectForTooltip = {
-              type: "planet",
-              name: planet.name,
-              hostStar: planet.hostStar,
-              temperature: planet.temperature,
-            };
-            const rect = this.canvasTarget.getBoundingClientRect();
-            this.showTooltip(
-              this.selectedObjectForTooltip,
-              event.clientX - rect.left,
-              event.clientY - rect.top
-            );
-          }
+          // Perform cinematic transition to the planet
+          this.transitionToPlanetFromSystem(
+            planet,
+            planetWorldPosition,
+            clickedMesh
+          );
         }
       } else {
         // Clicked empty space - hide tooltip
@@ -1679,13 +1636,15 @@ export default class extends Controller {
     };
 
     if (event.button === 0) {
-      // Left click - rotation (don't disable following, just update cursor)
+      // Left click - rotation
+      // Immediately provide visual feedback
       this.canvasTarget.classList.add("grabbing");
       this.canvasTarget.classList.remove("grab", "pointer");
     } else if (event.button === 2) {
       // Right click - panning (disable camera following)
       this.isPanning = true;
       this.canvasTarget.classList.add("moving");
+      this.canvasTarget.classList.remove("grab", "pointer");
 
       // Disable following when panning
       if (this.followPlanet) {
@@ -1720,7 +1679,15 @@ export default class extends Controller {
 
       // Only consider it dragging if moved beyond threshold
       if (distanceMoved > this.dragThreshold) {
-        this.isDragging = true;
+        if (!this.isDragging) {
+          // Just started dragging - ensure cursor is updated
+          this.isDragging = true;
+          if (event.buttons === 1) {
+            // Left button drag - ensure grabbing cursor
+            this.canvasTarget.classList.add("grabbing");
+            this.canvasTarget.classList.remove("grab", "pointer");
+          }
+        }
 
         // Hide tooltip when user starts dragging
         if (this.selectedObjectForTooltip) {
@@ -1729,9 +1696,14 @@ export default class extends Controller {
       }
     }
 
-    // Update cursor based on hover state (only in system view)
-    if (this.viewMode === "system" && !this.isPanning && !event.buttons) {
-      this.updateCanvasCursor(event);
+    // Update cursor based on hover state (only when not actively interacting)
+    if (!event.buttons && !this.isPanning) {
+      if (this.viewMode === "system") {
+        this.updateCanvasCursor(event);
+      } else if (this.viewMode === "galaxy") {
+        // In galaxy view, show pointer cursor when hovering over systems
+        this.updateGalaxyCursor(event);
+      }
     }
   }
 
@@ -1751,7 +1723,7 @@ export default class extends Controller {
   }
 
   /**
-   * Update canvas cursor based on hover state
+   * Update canvas cursor based on hover state in system view
    */
   updateCanvasCursor(event = null) {
     if (!this.currentSystem || this.viewMode !== "system") {
@@ -1769,6 +1741,39 @@ export default class extends Controller {
       this.raycaster.setFromCamera(this.mouse, this.sceneManager.camera);
       const planetMeshes = this.systemRenderer.getAllPlanetMeshes();
       const intersects = this.raycaster.intersectObjects(planetMeshes, true);
+
+      if (intersects.length > 0) {
+        this.canvasTarget.classList.add("pointer");
+        this.canvasTarget.classList.remove("grab");
+      } else {
+        this.canvasTarget.classList.remove("pointer");
+        this.canvasTarget.classList.add("grab");
+      }
+    } else {
+      this.canvasTarget.classList.remove("pointer");
+      this.canvasTarget.classList.add("grab");
+    }
+  }
+
+  /**
+   * Update canvas cursor based on hover state in galaxy view
+   */
+  updateGalaxyCursor(event = null) {
+    if (this.viewMode !== "galaxy") {
+      this.canvasTarget.classList.remove("pointer");
+      this.canvasTarget.classList.add("grab");
+      return;
+    }
+
+    if (event) {
+      // Check if hovering over a star system
+      const rect = this.canvasTarget.getBoundingClientRect();
+      this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+      this.raycaster.setFromCamera(this.mouse, this.sceneManager.camera);
+      const systemMeshes = this.galaxyRenderer.getAllSystemMeshes();
+      const intersects = this.raycaster.intersectObjects(systemMeshes, true);
 
       if (intersects.length > 0) {
         this.canvasTarget.classList.add("pointer");
