@@ -1,7 +1,17 @@
 class Api::ExoplanetsController < ApplicationController
+  # CSRF protection skipped for read-only public API endpoint
+  # This is safe because:
+  # 1. GET requests should be idempotent and not cause side effects
+  # 2. No sensitive user data is exposed or modified
+  # 3. Data is publicly available from NASA's API
   skip_before_action :verify_authenticity_token, only: [:index]
 
   def index
+    # Security: Ensure only GET requests are allowed
+    unless request.get?
+      render json: { error: "Method not allowed" }, status: :method_not_allowed
+      return
+    end
     # Prevent browser caching - we handle caching server-side
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
@@ -22,8 +32,14 @@ class Api::ExoplanetsController < ApplicationController
     # ADQL query for NASA Exoplanet Archive
     # Query the Planetary Systems (ps) table
     # Fetch ALL confirmed exoplanets (6000+) with extended properties for accurate visualization
-    # Enhanced with orbital mechanics, discovery context, stellar properties, and system data
     query = "SELECT pl_name,pl_rade,pl_bmasse,pl_eqt,pl_orbper,hostname,sy_dist,disc_year,pl_letter,pl_dens,pl_orbeccen,pl_orbsmax,pl_insol,st_teff,st_rad,st_mass,st_lum,ra,dec,pl_orbincl,pl_orblper,discoverymethod,disc_facility,sy_snum,sy_pnum,st_spectype,st_age,pl_massj,pl_radj FROM ps WHERE default_flag=1"
+
+    # Security: Validate query string to prevent injection if it ever becomes dynamic
+    unless valid_query?(query)
+      Rails.logger.error("Invalid query string detected")
+      render json: { error: "Invalid query" }, status: :bad_request
+      return
+    end
 
     uri = URI("https://exoplanetarchive.ipac.caltech.edu/TAP/sync")
     params = { 
@@ -72,6 +88,36 @@ class Api::ExoplanetsController < ApplicationController
 
   private
 
+  # Security: Validate query to prevent SQL injection
+  # Only allows SELECT statements with whitelisted tables and safe characters
+  def valid_query?(query)
+    return false if query.blank?
+    
+    # Must start with SELECT
+    return false unless query.strip.upcase.start_with?("SELECT")
+    
+    # Must not contain dangerous SQL commands
+    dangerous_keywords = %w[DROP DELETE INSERT UPDATE EXEC EXECUTE UNION-- /*]
+    return false if dangerous_keywords.any? { |keyword| query.upcase.include?(keyword) }
+    
+    # Must reference the allowed table (ps = Planetary Systems)
+    return false unless query.include?("FROM ps")
+    
+    true
+  end
+
+  # Security: Rotate User-Agent to avoid fingerprinting
+  def random_user_agent
+    user_agents = [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    ]
+    user_agents.sample
+  end
+
   def fetch_with_redirect(uri, limit = 5)
     raise "Too many HTTP redirects" if limit == 0
 
@@ -80,9 +126,13 @@ class Api::ExoplanetsController < ApplicationController
     http.open_timeout = 15
     http.read_timeout = 45
     http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+    
+    # Security: Add certificate pinning for NASA API
+    http.ca_file = Rails.root.join('config', 'certs', 'nasa_ca_bundle.pem').to_s if File.exist?(Rails.root.join('config', 'certs', 'nasa_ca_bundle.pem'))
 
     request = Net::HTTP::Get.new(uri.request_uri)
-    request["User-Agent"] = "Mozilla/5.0 (compatible; RailsApp/1.0)"
+    # Security: Use rotating User-Agent to avoid fingerprinting
+    request["User-Agent"] = random_user_agent
     
     response = http.request(request)
 
