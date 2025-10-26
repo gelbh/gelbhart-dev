@@ -365,6 +365,9 @@ export default class extends Controller {
     this.generateDots();
     this.createGhosts();
 
+    // Initialize ghost AI dot counts cache for performance
+    this.ghostAI.initializeDotCounts();
+
     // Smoothly scroll to starting position before beginning
     const targetScrollY = this.initialPacmanPosition.y - window.innerHeight / 2;
     const clampedTargetY = Math.max(

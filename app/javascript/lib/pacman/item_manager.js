@@ -398,6 +398,9 @@ export class ItemManager {
         dot.collected = true;
         dot.element.classList.add("collected");
 
+        // Update ghost AI cache for performance (avoid filtering every frame)
+        this.controller.ghostAI.decrementDotsRemaining();
+
         // Apply double points if active
         const pointsEarned =
           dot.points * (this.controller.activeEffects.doublePoints ? 2 : 1);
