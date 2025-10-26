@@ -108,7 +108,7 @@ export class ItemManager {
     });
 
     // REDUCE dot density for better performance
-    const dotSpacing = 100; // Increased from 60 for fewer dots
+    const dotSpacing = 150; // Increased from 100 to reduce DOM elements
     const margin = 80;
 
     for (let x = margin; x < viewportWidth - margin; x += dotSpacing) {
