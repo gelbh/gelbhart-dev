@@ -267,6 +267,14 @@ export class ItemManager {
       this.createItem(x, y, selectedType)
       spawned++
     }
+
+    // Log warning if we couldn't spawn all items
+    if (spawned < itemCount) {
+      console.warn(
+        `Item spawning incomplete: Only spawned ${spawned}/${itemCount} items after ${maxAttempts} attempts. ` +
+        `This may indicate too many locked sections or insufficient valid spawn space.`
+      )
+    }
   }
 
   /**
