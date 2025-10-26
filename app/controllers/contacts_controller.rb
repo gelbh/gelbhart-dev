@@ -60,8 +60,18 @@ class ContactsController < ApplicationController
 
     # 2. Time-based check - form must be filled for at least 3 seconds
     if params[:form_timestamp].present?
-      form_time = Time.at(params[:form_timestamp].to_i)
-      return true if (Time.now - form_time) < 3.seconds
+      timestamp = params[:form_timestamp].to_i
+      form_time = Time.at(timestamp)
+      elapsed_time = Time.now - form_time
+      
+      # Validate timestamp is within reasonable range (0-3600 seconds ago)
+      # Reject if: future timestamp, too old (>1 hour), or too fast (<3s)
+      return true if elapsed_time < 3.seconds      # Too fast (bot)
+      return true if elapsed_time > 3600.seconds   # Too old (suspicious)
+      return true if elapsed_time < 0              # Future timestamp (manipulated)
+    else
+      # No timestamp provided - assume bot (fail closed)
+      return true
     end
 
     # 3. Spam keyword detection
