@@ -127,8 +127,9 @@ class Api::ExoplanetsController < ApplicationController
     http.read_timeout = 45
     http.verify_mode = OpenSSL::SSL::VERIFY_PEER
     
-    # Security: Add certificate pinning for NASA API
-    http.ca_file = Rails.root.join('config', 'certs', 'nasa_ca_bundle.pem').to_s if File.exist?(Rails.root.join('config', 'certs', 'nasa_ca_bundle.pem'))
+    # Use system CA certificates for SSL verification
+    http.cert_store = OpenSSL::X509::Store.new
+    http.cert_store.set_default_paths
 
     request = Net::HTTP::Get.new(uri.request_uri)
     # Security: Use rotating User-Agent to avoid fingerprinting
