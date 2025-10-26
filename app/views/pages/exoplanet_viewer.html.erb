@@ -1,0 +1,528 @@
+<% content_for :title, page_title("Exoplanet 3D Viewer") %>
+<% meta_description "Explore and visualize exoplanets in 3D using NASA data. Interactive tool for discovering alien worlds with realistic procedural generation." %>
+
+<!-- Exoplanet Viewer Page -->
+<div class="exoplanet-viewer-page" data-controller="exoplanet-viewer">
+  <!-- Hero Section with Gradient Background -->
+  <section class="position-relative exoplanet-viewer-hero">
+    <!-- Animated Gradient Background -->
+    <div class="exoplanet-viewer-gradient-bg"></div>
+
+    <div class="container py-4 position-relative zindex-5">
+      <div class="row justify-content-center text-center">
+        <div class="col-lg-8">
+          <%= render 'shared/icon_circle', icon: 'bx-planet', color: 'primary', size: 'lg' %>
+          <h1 class="display-5 mb-2 mt-3">Exoplanet 3D Viewer</h1>
+          <p class="lead text-light mb-2">Interactive Space Exploration</p>
+          <p class="text-light opacity-75 mb-0">
+            Explore discovered exoplanets in stunning 3D visualization powered by NASA data. Experience procedurally generated worlds based on real scientific measurements.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Viewer Section -->
+  <section class="py-4">
+    <div class="container-fluid">
+      <div class="row g-0">
+        
+        <!-- Left Panel: Search & Filter -->
+        <div class="col-lg-3 bg-light border-end position-relative" style="height: calc(100vh - 200px); overflow-y: auto;" data-exoplanet-viewer-target="leftPanel">
+          <div class="p-4">
+            <h5 class="mb-3">
+              <i class="bx bx-search me-2"></i>
+              <span id="searchTitle">Search</span>
+            </h5>
+
+            <!-- Search Input -->
+            <div class="mb-3">
+              <div class="input-group">
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  placeholder="Search by name..."
+                  data-exoplanet-viewer-target="searchInput"
+                  data-action="input->exoplanet-viewer#search">
+                <button class="btn btn-primary" type="button" data-action="click->exoplanet-viewer#search">
+                  <i class="bx bx-search"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="mb-4">
+              <h6 class="text-muted mb-3">Filters</h6>
+              
+              <!-- Filter Mode Toggle -->
+              <div class="mb-3">
+                <label for="filterModeSelect" class="form-label fs-sm fw-semibold">Filter By</label>
+                <select id="filterModeSelect" class="form-select" data-exoplanet-viewer-target="filterMode" data-action="change->exoplanet-viewer#changeFilterMode">
+                  <option value="planets">Planets</option>
+                  <option value="systems">Systems</option>
+                </select>
+              </div>
+
+              <!-- Planet Filters (visible when filtering planets) -->
+              <div data-exoplanet-viewer-target="planetFilters">
+              
+              <!-- Planet Type Filter -->
+              <div class="mb-3">
+                <label for="planetTypeFilter" class="form-label fs-sm fw-semibold">Planet Type</label>
+                <select id="planetTypeFilter" class="form-select" data-exoplanet-viewer-target="typeFilter" data-action="change->exoplanet-viewer#applyFilters">
+                  <option value="">All Types</option>
+                  <option value="terrestrial">Terrestrial</option>
+                  <option value="super-earth">Super-Earth</option>
+                  <option value="neptune">Neptune-like</option>
+                  <option value="jupiter">Jupiter-like</option>
+                </select>
+              </div>
+
+              <!-- Temperature Range -->
+              <div class="mb-3">
+                <label for="tempMinFilter" class="form-label fs-sm fw-semibold">Temperature Range (K)</label>
+                <div class="row g-2">
+                  <div class="col-6">
+                    <input id="tempMinFilter" type="number" class="form-control" placeholder="Min" data-exoplanet-viewer-target="tempMin">
+                  </div>
+                  <div class="col-6">
+                    <input id="tempMaxFilter" type="number" class="form-control" placeholder="Max" data-exoplanet-viewer-target="tempMax">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Distance Filter -->
+              <div class="mb-3">
+                <label for="distanceFilter" class="form-label fs-sm fw-semibold">Distance (light-years)</label>
+                <input id="distanceFilter" type="number" class="form-control" placeholder="Max distance" data-exoplanet-viewer-target="distanceMax">
+              </div>
+
+              <!-- Discovery Method Filter -->
+              <div class="mb-3">
+                <label for="discoveryMethodFilter" class="form-label fs-sm fw-semibold">Discovery Method</label>
+                <select id="discoveryMethodFilter" class="form-select" data-exoplanet-viewer-target="discoveryMethodFilter" data-action="change->exoplanet-viewer#applyFilters">
+                  <option value="">All Methods</option>
+                  <option value="Transit">Transit</option>
+                  <option value="Radial Velocity">Radial Velocity</option>
+                  <option value="Microlensing">Microlensing</option>
+                  <option value="Imaging">Direct Imaging</option>
+                  <option value="Astrometry">Astrometry</option>
+                  <option value="Timing">Timing Variations</option>
+                </select>
+              </div>
+
+              <!-- Discovery Facility Filter -->
+              <div class="mb-3">
+                <label for="discoveryFacilityFilter" class="form-label fs-sm fw-semibold">Telescope/Mission</label>
+                <select id="discoveryFacilityFilter" class="form-select" data-exoplanet-viewer-target="discoveryFacilityFilter" data-action="change->exoplanet-viewer#applyFilters">
+                  <option value="">All Telescopes</option>
+                  <option value="Kepler">Kepler</option>
+                  <option value="TESS">TESS</option>
+                  <option value="Hubble">Hubble Space Telescope</option>
+                  <option value="James Webb">James Webb Space Telescope</option>
+                  <option value="La Silla">La Silla Observatory</option>
+                  <option value="Keck">Keck Observatory</option>
+                  <option value="Spitzer">Spitzer Space Telescope</option>
+                </select>
+              </div>
+              
+              </div>
+              <!-- End Planet Filters -->
+              
+              <!-- System Filters (visible when filtering systems) -->
+              <div data-exoplanet-viewer-target="systemFilters" style="display: none;">
+              
+              <!-- Minimum Number of Planets -->
+              <div class="mb-3">
+                <label for="minPlanetsFilter" class="form-label fs-sm fw-semibold">Minimum Planets</label>
+                <input id="minPlanetsFilter" type="number" class="form-control" placeholder="Min planets" min="2" data-exoplanet-viewer-target="minPlanets">
+              </div>
+              
+              <!-- Distance Filter (Systems) -->
+              <div class="mb-3">
+                <label for="systemDistanceFilter" class="form-label fs-sm fw-semibold">Distance (light-years)</label>
+                <input id="systemDistanceFilter" type="number" class="form-control" placeholder="Max distance" data-exoplanet-viewer-target="systemDistanceMax">
+              </div>
+              
+              <!-- Star Spectral Type -->
+              <div class="mb-3">
+                <label for="spectralTypeFilter" class="form-label fs-sm fw-semibold">Star Spectral Type</label>
+                <select id="spectralTypeFilter" class="form-select" data-exoplanet-viewer-target="spectralTypeFilter">
+                  <option value="">All Types</option>
+                  <option value="O">O - Blue (Hot)</option>
+                  <option value="B">B - Blue-White</option>
+                  <option value="A">A - White</option>
+                  <option value="F">F - Yellow-White</option>
+                  <option value="G">G - Yellow (Sun-like)</option>
+                  <option value="K">K - Orange</option>
+                  <option value="M">M - Red (Cool)</option>
+                </select>
+              </div>
+              
+              </div>
+              <!-- End System Filters -->
+
+              <button class="btn btn-outline-primary w-100 mb-2" data-action="click->exoplanet-viewer#applyFilters">
+                Apply Filters
+              </button>
+              <button class="btn btn-outline-secondary w-100" data-action="click->exoplanet-viewer#clearFilters">
+                Clear All
+              </button>
+            </div>
+
+            <!-- Results List -->
+            <div class="results-section">
+              <h6 class="text-muted mb-3">
+                Results 
+                <output class="badge bg-secondary" data-exoplanet-viewer-target="resultCount">0</output>
+              </h6>
+              
+              <div class="d-flex align-items-center justify-content-center py-5" data-exoplanet-viewer-target="loadingIndicator">
+                <output class="spinner-border text-primary">
+                  <span class="visually-hidden">Loading...</span>
+                </output>
+              </div>
+
+              <div data-exoplanet-viewer-target="resultsList" class="list-group">
+                <!-- Planet results will be inserted here -->
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Center Panel: 3D Viewer -->
+        <div class="col-lg-6 bg-dark position-relative">
+          <div class="w-100" style="height: calc(100vh - 200px);">
+            <!-- Three.js Canvas -->
+            <div
+              data-exoplanet-viewer-target="canvas"
+              class="w-100 h-100 position-relative"
+              style="background: #000000;">
+            </div>
+
+            <!-- Loading Overlay -->
+            <output 
+              class="position-absolute top-50 start-50 translate-middle text-white text-center"
+              data-exoplanet-viewer-target="canvasLoading">
+              <div class="spinner-border mb-3">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p>Initializing 3D Viewer...</p>
+            </output>
+
+            <!-- Controls Overlay -->
+            <div class="position-absolute bottom-0 start-0 p-3 text-white bg-dark bg-opacity-75 rounded m-3" style="max-width: calc(100% - 2rem);">
+              <div class="d-flex gap-3 align-items-center flex-wrap">
+                <button class="btn btn-sm btn-outline-light" data-action="click->exoplanet-viewer#resetCamera">
+                  <i class="bx bx-reset"></i> Reset View
+                </button>
+                <button class="btn btn-sm btn-outline-light" data-action="click->exoplanet-viewer#toggleFullscreen">
+                  <i class="bx bx-fullscreen"></i> Fullscreen
+                </button>
+                
+                <!-- Atmosphere Toggle -->
+                <div class="form-check">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    id="atmosphereToggle"
+                    data-exoplanet-viewer-target="atmosphereToggle"
+                    data-action="change->exoplanet-viewer#toggleAtmospheres">
+                  <label class="form-check-label fs-sm text-nowrap" for="atmosphereToggle">
+                    <i class="bx bx-cloud"></i> Atmospheres
+                  </label>
+                </div>
+                
+                <!-- Orbital Inclination Toggle (System View Only) -->
+                <div class="form-check" id="orbitalInclinationControl" style="display: none;">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    id="orbitalInclinationToggle"
+                    data-exoplanet-viewer-target="orbitalInclinationToggle"
+                    data-action="change->exoplanet-viewer#toggleOrbitalInclination">
+                  <label class="form-check-label fs-sm text-nowrap" for="orbitalInclinationToggle">
+                    3D Orbits
+                  </label>
+                </div>
+                
+                <!-- Orbit Speed Control (System View Only) -->
+                <div class="orbit-speed-inline d-flex align-items-center gap-2" id="orbitSpeedControl" style="display: none !important;">
+                  <label for="orbitSpeedSlider" class="form-label mb-0 fs-sm text-nowrap">
+                    <i class="bx bx-time"></i> 1 orbit =
+                  </label>
+                  <input 
+                    type="range" 
+                    class="form-range orbit-speed-slider" 
+                    id="orbitSpeedSlider" 
+                    min="0" 
+                    max="100" 
+                    value="50"
+                    data-exoplanet-viewer-target="orbitSpeedSlider"
+                    data-action="input->exoplanet-viewer#updateOrbitSpeed"
+                    style="width: 150px;">
+                  <span class="badge bg-primary text-nowrap" data-exoplanet-viewer-target="orbitSpeedValue">60.0s</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Instructions Overlay -->
+            <div class="position-absolute top-0 end-0 p-3 m-3 text-white bg-dark bg-opacity-75 rounded fs-sm" data-exoplanet-viewer-target="instructions">
+              <div class="mb-2"><strong>Controls:</strong></div>
+              <div><i class="bx bx-mouse"></i> Drag to rotate</div>
+              <div><i class="bx bx-mouse"></i> Scroll to zoom</div>
+              <div><i class="bx bx-mouse"></i> Right-click drag to pan</div>
+              <div id="systemInstructions" style="display: none;" class="mt-2 pt-2 border-top border-secondary">
+                <div><i class="bx bx-pointer"></i> Click planet to view details</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Panel: Information -->
+        <div class="col-lg-3 bg-light border-start" style="height: calc(100vh - 200px); overflow-y: auto;">
+          <div class="p-4">
+            <!-- Planet Info -->
+            <div data-exoplanet-viewer-target="planetInfo">
+              <div class="text-center py-5 text-muted">
+                <i class="bx bx-planet display-1 opacity-25"></i>
+                <p class="mt-3">Select a planet to view details</p>
+              </div>
+            </div>
+
+            <!-- Planet Details Template (hidden, will be shown when planet selected) -->
+            <div data-exoplanet-viewer-target="planetDetails" style="display: none;">
+              <h5 class="mb-3" data-exoplanet-viewer-target="planetName">Planet Name</h5>
+              
+              <div class="mb-4">
+                <div class="badge bg-primary mb-2" data-exoplanet-viewer-target="planetType">Type</div>
+              </div>
+
+              <h6 class="text-muted mb-3">Physical Properties</h6>
+              <table class="table table-sm">
+                <thead class="visually-hidden">
+                  <tr>
+                    <th>Property</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="text-muted">Radius</td>
+                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="radius">-</td>
+                  </tr>
+                  <tr>
+                    <td class="text-muted">Mass</td>
+                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="mass">-</td>
+                  </tr>
+                  <tr>
+                    <td class="text-muted">Temperature</td>
+                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="temperature">-</td>
+                  </tr>
+                  <tr>
+                    <td class="text-muted">Orbital Period</td>
+                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="orbitalPeriod">-</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <h6 class="text-muted mb-3 mt-4">Host Star</h6>
+              <table class="table table-sm">
+                <thead class="visually-hidden">
+                  <tr>
+                    <th>Property</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="text-muted">Star Name</td>
+                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="starName">-</td>
+                  </tr>
+                  <tr data-exoplanet-viewer-target="spectralTypeRow">
+                    <td class="text-muted">Spectral Type</td>
+                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="spectralType">-</td>
+                  </tr>
+                  <tr data-exoplanet-viewer-target="starAgeRow">
+                    <td class="text-muted">Star Age</td>
+                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="starAge">-</td>
+                  </tr>
+                  <tr>
+                    <td class="text-muted">Distance</td>
+                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="distance">-</td>
+                  </tr>
+                  <tr>
+                    <td class="text-muted">Discovery Year</td>
+                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="discoveryYear">-</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <h6 class="text-muted mb-3 mt-4">Discovery Context</h6>
+              <table class="table table-sm">
+                <thead class="visually-hidden">
+                  <tr>
+                    <th>Property</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="text-muted">Method</td>
+                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="discoveryMethod">-</td>
+                  </tr>
+                  <tr>
+                    <td class="text-muted">Telescope/Facility</td>
+                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="discoveryFacility">-</td>
+                  </tr>
+                  <tr data-exoplanet-viewer-target="systemContextRow">
+                    <td class="text-muted">System</td>
+                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="systemContext">-</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="alert alert-info mt-4">
+                <small>
+                  <i class="bx bx-info-circle me-1"></i>
+                  Visualization is a procedural approximation based on known properties. Actual appearance may differ.
+                </small>
+              </div>
+
+              <a href="#" class="btn btn-outline-primary w-100 mt-3" data-exoplanet-viewer-target="nasaLink" target="_blank" rel="noopener">
+                <i class="bx bx-link-external me-1"></i>
+                View on NASA Archive
+              </a>
+            </div>
+
+            <!-- System Details (hidden, shown in system view) -->
+            <div data-exoplanet-viewer-target="systemDetails" style="display: none;">
+              <h5 class="mb-3">
+                <i class="bx bx-sun me-2"></i>
+                <span data-exoplanet-viewer-target="systemStarName">Star System</span>
+              </h5>
+              
+              <div class="mb-4">
+                <div class="badge bg-info mb-2">
+                  <span data-exoplanet-viewer-target="systemPlanetCount">0</span> Planets
+                </div>
+              </div>
+
+              <h6 class="text-muted mb-3">System Information</h6>
+              <table class="table table-sm">
+                <thead class="visually-hidden">
+                  <tr>
+                    <th>Property</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="text-muted">Distance</td>
+                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="systemDistance">-</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <h6 class="text-muted mb-3 mt-4">Planet Comparison</h6>
+              <div class="table-responsive">
+                <table class="table table-sm table-striped">
+                  <thead>
+                    <tr class="fs-sm">
+                      <th>Planet</th>
+                      <th>Type</th>
+                      <th>Radius</th>
+                      <th>Mass</th>
+                      <th>Temp</th>
+                      <th>Orbit</th>
+                      <th>Period</th>
+                    </tr>
+                  </thead>
+                  <tbody data-exoplanet-viewer-target="systemComparisonBody" class="fs-sm">
+                    <!-- Planet rows will be inserted here -->
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="alert alert-info mt-4">
+                <small>
+                  <i class="bx bx-info-circle me-1"></i>
+                  System view shows relative orbital positions. Planet sizes are scaled for visibility.
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="bg-light py-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 mx-auto">
+          <h3 class="mb-4">About This Tool</h3>
+          <p class="text-muted">
+            This interactive 3D visualization tool brings exoplanets to life using data from NASA's Exoplanet Archive. 
+            The tool uses procedural generation to create realistic approximations of what these distant worlds might look like 
+            based on their known properties such as radius, mass, temperature, and host star characteristics.
+          </p>
+          <p class="text-muted">
+            <strong>System View:</strong> Explore entire star systems with multiple planets! Switch to System View to see 
+            all planets orbiting their host star with accurate relative spacing based on their orbital parameters. 
+            Compare planets within the same system and watch them orbit in real-time with animated orbital mechanics.
+          </p>
+          
+          <div class="row g-4 mt-3">
+            <div class="col-md-4">
+              <div class="text-center">
+                <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                  <i class="bx bx-data fs-2 text-primary"></i>
+                </div>
+                <h6>NASA Data</h6>
+                <p class="fs-sm text-muted mb-0">Real exoplanet data from NASA's archive</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="text-center">
+                <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                  <i class="bx bx-palette fs-2 text-success"></i>
+                </div>
+                <h6>Procedural Generation</h6>
+                <p class="fs-sm text-muted mb-0">Realistic appearance based on physics</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="text-center">
+                <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                  <i class="bx bx-cube fs-2 text-warning"></i>
+                </div>
+                <h6>3D Rendering</h6>
+                <p class="fs-sm text-muted mb-0">Interactive Three.js visualization</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="text-center">
+                <div class="bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                  <i class="bx bx-sun fs-2 text-info"></i>
+                </div>
+                <h6>System View</h6>
+                <p class="fs-sm text-muted mb-0">Multi-planet systems with orbital mechanics</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="alert alert-warning mt-4">
+            <strong>Note:</strong> This tool creates hypothetical visualizations based on scientific data. 
+            The actual appearance of exoplanets can only be confirmed through direct observation, which is not yet 
+            possible for most distant worlds.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
