@@ -37,17 +37,12 @@
 
             <!-- Search Input -->
             <div class="mb-3">
-              <div class="input-group">
-                <input 
-                  type="text" 
-                  class="form-control" 
-                  placeholder="Search by name..."
-                  data-exoplanet-viewer-target="searchInput"
-                  data-action="input->exoplanet-viewer#search">
-                <button class="btn btn-primary" type="button" data-action="click->exoplanet-viewer#search">
-                  <i class="bx bx-search"></i>
-                </button>
-              </div>
+              <input 
+                type="text" 
+                class="form-control" 
+                placeholder="Search by name..."
+                data-exoplanet-viewer-target="searchInput"
+                data-action="input->exoplanet-viewer#search">
             </div>
 
             <!-- Filters -->
@@ -174,13 +169,13 @@
             <div class="results-section">
               <h6 class="text-muted mb-3">
                 Results 
-                <output class="badge bg-secondary" data-exoplanet-viewer-target="resultCount">0</output>
+                <span class="badge bg-secondary" data-exoplanet-viewer-target="resultCount">0</span>
               </h6>
               
               <div class="d-flex align-items-center justify-content-center py-5" data-exoplanet-viewer-target="loadingIndicator">
-                <output class="spinner-border text-primary">
+                <div class="spinner-border text-primary" role="status">
                   <span class="visually-hidden">Loading...</span>
-                </output>
+                </div>
               </div>
 
               <div data-exoplanet-viewer-target="resultsList" class="list-group">
@@ -202,14 +197,14 @@
             </div>
 
             <!-- Loading Overlay -->
-            <output 
+            <div 
               class="position-absolute top-50 start-50 translate-middle text-white text-center"
               data-exoplanet-viewer-target="canvasLoading">
-              <div class="spinner-border mb-3">
+              <div class="spinner-border mb-3" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
               <p>Initializing 3D Viewer...</p>
-            </output>
+            </div>
 
             <!-- Controls Overlay -->
             <div class="position-absolute bottom-0 start-0 p-3 text-white bg-dark bg-opacity-75 rounded m-3" style="max-width: calc(100% - 2rem);">
@@ -248,7 +243,7 @@
                 </div>
                 
                 <!-- Orbit Speed Control (System View Only) -->
-                <div class="orbit-speed-inline d-flex align-items-center gap-2" id="orbitSpeedControl" style="display: none !important;">
+                <div class="orbit-speed-inline d-flex align-items-center gap-2" id="orbitSpeedControl" style="display: none;">
                   <label for="orbitSpeedSlider" class="form-label mb-0 fs-sm text-nowrap">
                     <i class="bx bx-time"></i> 1 orbit =
                   </label>
@@ -268,8 +263,11 @@
             </div>
 
             <!-- Instructions Overlay -->
-            <div class="position-absolute top-0 end-0 p-3 m-3 text-white bg-dark bg-opacity-75 rounded fs-sm" data-exoplanet-viewer-target="instructions">
-              <div class="mb-2"><strong>Controls:</strong></div>
+            <div class="position-absolute top-0 end-0 p-3 m-3 text-white bg-dark bg-opacity-75 rounded fs-sm" data-exoplanet-viewer-target="instructions" style="max-width: 250px;">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <strong>Controls:</strong>
+                <button type="button" class="btn-close btn-close-white btn-sm" aria-label="Close" onclick="this.parentElement.parentElement.style.display='none'"></button>
+              </div>
               <div><i class="bx bx-mouse"></i> Drag to rotate</div>
               <div><i class="bx bx-mouse"></i> Scroll to zoom</div>
               <div><i class="bx bx-mouse"></i> Right-click drag to pan</div>
@@ -301,10 +299,10 @@
 
               <h6 class="text-muted mb-3">Physical Properties</h6>
               <table class="table table-sm">
-                <thead class="visually-hidden">
+                <thead>
                   <tr>
-                    <th>Property</th>
-                    <th>Value</th>
+                    <th scope="col" class="border-0 text-muted fw-normal fs-sm">Property</th>
+                    <th scope="col" class="border-0 text-muted fw-normal fs-sm text-end">Value</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -329,10 +327,10 @@
 
               <h6 class="text-muted mb-3 mt-4">Host Star</h6>
               <table class="table table-sm">
-                <thead class="visually-hidden">
+                <thead>
                   <tr>
-                    <th>Property</th>
-                    <th>Value</th>
+                    <th scope="col" class="border-0 text-muted fw-normal fs-sm">Property</th>
+                    <th scope="col" class="border-0 text-muted fw-normal fs-sm text-end">Value</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -361,10 +359,10 @@
 
               <h6 class="text-muted mb-3 mt-4">Discovery Context</h6>
               <table class="table table-sm">
-                <thead class="visually-hidden">
+                <thead>
                   <tr>
-                    <th>Property</th>
-                    <th>Value</th>
+                    <th scope="col" class="border-0 text-muted fw-normal fs-sm">Property</th>
+                    <th scope="col" class="border-0 text-muted fw-normal fs-sm text-end">Value</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -411,10 +409,10 @@
 
               <h6 class="text-muted mb-3">System Information</h6>
               <table class="table table-sm">
-                <thead class="visually-hidden">
+                <thead>
                   <tr>
-                    <th>Property</th>
-                    <th>Value</th>
+                    <th scope="col" class="border-0 text-muted fw-normal fs-sm">Property</th>
+                    <th scope="col" class="border-0 text-muted fw-normal fs-sm text-end">Value</th>
                   </tr>
                 </thead>
                 <tbody>
