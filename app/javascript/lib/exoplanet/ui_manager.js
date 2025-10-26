@@ -8,6 +8,25 @@ export class UIManager {
   }
 
   /**
+   * Sanitize HTML to prevent XSS attacks
+   * Escapes HTML special characters
+   */
+  sanitizeHTML(str) {
+    if (str === null || str === undefined) return "";
+    const div = document.createElement("div");
+    div.textContent = String(str);
+    return div.innerHTML;
+  }
+
+  /**
+   * Sanitize URL component for safe use in URLs
+   */
+  sanitizeURL(str) {
+    if (str === null || str === undefined) return "";
+    return encodeURIComponent(String(str));
+  }
+
+  /**
    * Update results list
    */
   updateResultsList(filteredExoplanets, appendOnly = false) {
@@ -42,15 +61,18 @@ export class UIManager {
     itemsToRender.forEach((planet) => {
       const item = document.createElement("button");
       item.className = "list-group-item list-group-item-action";
+      // Security: Sanitize data before inserting to prevent XSS
       item.innerHTML = `
         <div class="d-flex justify-content-between align-items-start">
           <div>
-            <div class="fw-semibold">${planet.name}</div>
-            <div class="fs-sm text-muted">${planet.hostStar}</div>
+            <div class="fw-semibold">${this.sanitizeHTML(planet.name)}</div>
+            <div class="fs-sm text-muted">${this.sanitizeHTML(
+              planet.hostStar
+            )}</div>
           </div>
           <span class="badge bg-${this.getTypeColor(
             planet.type
-          )}">${this.getPlanetTypeName(planet.type)}</span>
+          )}">${this.sanitizeHTML(this.getPlanetTypeName(planet.type))}</span>
         </div>
       `;
       item.addEventListener("click", () => {
@@ -130,14 +152,19 @@ export class UIManager {
     const systemHeader = document.createElement("button");
     systemHeader.className =
       "btn btn-link w-100 text-start p-0 text-decoration-none";
+    // Security: Sanitize data before inserting to prevent XSS
     systemHeader.innerHTML = `
       <div class="d-flex justify-content-between align-items-center py-2">
         <div>
           <i class="bx bx-chevron-right expand-icon"></i>
           <i class="bx bx-sun text-warning me-2"></i>
-          <span class="fw-semibold">${systemData.starName}</span>
+          <span class="fw-semibold">${this.sanitizeHTML(
+            systemData.starName
+          )}</span>
         </div>
-        <span class="badge bg-info">${systemData.planetCount} planets</span>
+        <span class="badge bg-info">${this.sanitizeHTML(
+          systemData.planetCount
+        )} planets</span>
       </div>
     `;
 
@@ -152,17 +179,18 @@ export class UIManager {
     systemData.planets.forEach((planet) => {
       const planetItem = document.createElement("button");
       planetItem.className = "list-group-item list-group-item-action border-0";
+      // Security: Sanitize data before inserting to prevent XSS
       planetItem.innerHTML = `
         <div class="d-flex justify-content-between align-items-start">
           <div>
-            <div class="fw-semibold">${planet.name}</div>
-            <div class="fs-sm text-muted">${planet.temperature.toFixed(
-              0
+            <div class="fw-semibold">${this.sanitizeHTML(planet.name)}</div>
+            <div class="fs-sm text-muted">${this.sanitizeHTML(
+              planet.temperature.toFixed(0)
             )} K</div>
           </div>
           <span class="badge bg-${this.getTypeColor(
             planet.type
-          )}">${this.getPlanetTypeName(planet.type)}</span>
+          )}">${this.sanitizeHTML(this.getPlanetTypeName(planet.type))}</span>
         </div>
       `;
 
@@ -210,15 +238,18 @@ export class UIManager {
   renderPlanetItem(list, planet, systemData = null) {
     const item = document.createElement("button");
     item.className = "list-group-item list-group-item-action";
+    // Security: Sanitize data before inserting to prevent XSS
     item.innerHTML = `
       <div class="d-flex justify-content-between align-items-start">
         <div>
-          <div class="fw-semibold">${planet.name}</div>
-          <div class="fs-sm text-muted">${planet.hostStar}</div>
+          <div class="fw-semibold">${this.sanitizeHTML(planet.name)}</div>
+          <div class="fs-sm text-muted">${this.sanitizeHTML(
+            planet.hostStar
+          )}</div>
         </div>
         <span class="badge bg-${this.getTypeColor(
           planet.type
-        )}">${this.getPlanetTypeName(planet.type)}</span>
+        )}">${this.sanitizeHTML(this.getPlanetTypeName(planet.type))}</span>
       </div>
     `;
     item.addEventListener("click", () => {
@@ -371,7 +402,10 @@ export class UIManager {
       }
     }
 
-    const nasaUrl = `https://exoplanetarchive.ipac.caltech.edu/overview/${planet.name}`;
+    // Security: Encode planet name to prevent URL injection
+    const nasaUrl = `https://exoplanetarchive.ipac.caltech.edu/overview/${this.sanitizeURL(
+      planet.name
+    )}`;
     this.targets.nasaLink.href = nasaUrl;
   }
 
@@ -442,18 +476,19 @@ export class UIManager {
     systems.forEach((system) => {
       const item = document.createElement("button");
       item.className = "list-group-item list-group-item-action";
+      // Security: Sanitize data before inserting to prevent XSS
       item.innerHTML = `
         <div class="d-flex justify-content-between align-items-start">
           <div class="flex-grow-1">
             <div class="fw-semibold">
               <i class="bx bx-planet me-1"></i>
-              ${system.starName}
+              ${this.sanitizeHTML(system.starName)}
             </div>
             <div class="fs-sm text-muted">
-              ${system.count} planets
+              ${this.sanitizeHTML(system.count)} planets
             </div>
           </div>
-          <span class="badge bg-info">${system.count}P</span>
+          <span class="badge bg-info">${this.sanitizeHTML(system.count)}P</span>
         </div>
       `;
       item.addEventListener("click", () => {
@@ -501,22 +536,31 @@ export class UIManager {
     const fragment = document.createDocumentFragment();
     planets.forEach((planet) => {
       const row = document.createElement("tr");
+      // Security: Sanitize data before inserting to prevent XSS
       row.innerHTML = `
-        <td class="fw-semibold">${planet.name.split(" ").pop()}</td>
+        <td class="fw-semibold">${this.sanitizeHTML(
+          planet.name.split(" ").pop()
+        )}</td>
         <td>
           <span class="badge bg-${this.getTypeColor(planet.type)}">
-            ${this.getPlanetTypeName(planet.type)}
+            ${this.sanitizeHTML(this.getPlanetTypeName(planet.type))}
           </span>
         </td>
-        <td>${planet.radius.toFixed(2)} R⊕</td>
-        <td>${planet.mass ? planet.mass.toFixed(2) + " M⊕" : "N/A"}</td>
-        <td>${planet.temperature.toFixed(0)} K</td>
+        <td>${this.sanitizeHTML(planet.radius.toFixed(2))} R⊕</td>
         <td>${
-          planet.semiMajorAxis ? planet.semiMajorAxis.toFixed(3) + " AU" : "N/A"
+          planet.mass
+            ? this.sanitizeHTML(planet.mass.toFixed(2)) + " M⊕"
+            : "N/A"
+        }</td>
+        <td>${this.sanitizeHTML(planet.temperature.toFixed(0))} K</td>
+        <td>${
+          planet.semiMajorAxis
+            ? this.sanitizeHTML(planet.semiMajorAxis.toFixed(3)) + " AU"
+            : "N/A"
         }</td>
         <td>${
           planet.orbitalPeriod
-            ? planet.orbitalPeriod.toFixed(1) + " days"
+            ? this.sanitizeHTML(planet.orbitalPeriod.toFixed(1)) + " days"
             : "N/A"
         }</td>
       `;
