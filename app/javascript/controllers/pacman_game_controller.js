@@ -357,7 +357,12 @@ export default class extends Controller {
       // Remove event listener
       beginningAudio.removeEventListener('ended', onBeginningEnded)
       this.introMusicListener = null
-      this.introMusicTimeout = null
+      
+      // Clear timeout to prevent memory leak
+      if (this.introMusicTimeout) {
+        clearTimeout(this.introMusicTimeout)
+        this.introMusicTimeout = null
+      }
     }
 
     // Store listener for cleanup
@@ -1152,7 +1157,12 @@ export default class extends Controller {
       // Remove event listener
       beginningAudio.removeEventListener('ended', onBeginningEnded)
       this.introMusicListener = null
-      this.introMusicTimeout = null
+      
+      // Clear timeout to prevent memory leak
+      if (this.introMusicTimeout) {
+        clearTimeout(this.introMusicTimeout)
+        this.introMusicTimeout = null
+      }
     }
 
     // Store listener for cleanup
