@@ -74,10 +74,10 @@ export class GalaxyRenderer {
     this.galacticCenter = new THREE.Mesh(geometry, material);
     this.galacticCenter.position.set(0, 0, 0); // Sun/Solar System at origin
 
-    // Load realistic Sun texture from GitHub Solar System project
+    // Load realistic Sun texture from local assets
     const textureLoader = new THREE.TextureLoader();
     textureLoader.load(
-      "https://raw.githubusercontent.com/SoumyaEXE/3d-Solar-System-ThreeJS/main/public/textures/sun.jpg",
+      "/textures/planets/sun.jpg",
       (texture) => {
         material.map = texture;
         material.needsUpdate = true;
@@ -85,7 +85,9 @@ export class GalaxyRenderer {
       },
       undefined,
       (error) => {
-        console.warn("Failed to load Sun texture, using solid color");
+        console.warn(
+          "Failed to load Sun texture, using solid color. Ensure sun.jpg exists in public/textures/planets/"
+        );
       }
     );
 

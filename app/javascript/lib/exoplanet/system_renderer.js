@@ -592,10 +592,10 @@ export class SystemRenderer {
 
     this.centralStar = new THREE.Mesh(starGeometry, starMaterial);
 
-    // Load realistic Sun texture
+    // Load realistic Sun texture from local assets
     const textureLoader = new THREE.TextureLoader();
     textureLoader.load(
-      "https://raw.githubusercontent.com/SoumyaEXE/3d-Solar-System-ThreeJS/main/public/textures/sun.jpg",
+      "/textures/planets/sun.jpg",
       (texture) => {
         starMaterial.map = texture;
         starMaterial.needsUpdate = true;
@@ -603,7 +603,9 @@ export class SystemRenderer {
       },
       undefined,
       (error) => {
-        console.warn("Failed to load Sun texture, using solid color");
+        console.warn(
+          "Failed to load Sun texture, using solid color. Ensure sun.jpg exists in public/textures/planets/"
+        );
       }
     );
 

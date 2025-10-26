@@ -33,19 +33,19 @@ export class PlanetRenderer {
       rings: new Map(), // Ring textures
     };
 
-    // NASA-style texture URLs from GitHub Solar System project
-    // Using textures from: https://github.com/SoumyaEXE/3d-Solar-System-ThreeJS
-    const cdnBase =
-      "https://raw.githubusercontent.com/SoumyaEXE/3d-Solar-System-ThreeJS/main/public/textures";
+    // Texture paths - using locally hosted textures for security
+    // Textures should be placed in public/textures/planets/
+    // See public/textures/planets/README.md for download instructions
+    const localTexturePath = "/textures/planets";
     this.solarSystemTextureURLs = {
-      Mercury: `${cdnBase}/mercury.jpg`,
-      Venus: `${cdnBase}/venus.jpg`,
-      Earth: `${cdnBase}/earth.jpg`,
-      Mars: `${cdnBase}/mars.jpg`,
-      Jupiter: `${cdnBase}/jupiter.jpg`,
-      Saturn: `${cdnBase}/saturn.jpg`,
-      Uranus: `${cdnBase}/uranus.jpg`,
-      Neptune: `${cdnBase}/neptune.jpg`,
+      Mercury: `${localTexturePath}/mercury.jpg`,
+      Venus: `${localTexturePath}/venus.jpg`,
+      Earth: `${localTexturePath}/earth.jpg`,
+      Mars: `${localTexturePath}/mars.jpg`,
+      Jupiter: `${localTexturePath}/jupiter.jpg`,
+      Saturn: `${localTexturePath}/saturn.jpg`,
+      Uranus: `${localTexturePath}/uranus.jpg`,
+      Neptune: `${localTexturePath}/neptune.jpg`,
     };
   }
 
