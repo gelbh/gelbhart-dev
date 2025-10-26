@@ -139,8 +139,8 @@
         position: relative;
     }
 
-    /* Sliding underline effect */
-    .nav-link::after {
+    /* Sliding underline effect - only for non-dropdown links */
+    .nav-link:not(.dropdown-toggle)::after {
         content: '';
         position: absolute;
         bottom: 0;
@@ -156,18 +156,23 @@
         color: rgba(255, 255, 255, 1) !important;
     }
 
-    .nav-link:hover::after {
+    .nav-link:not(.dropdown-toggle):hover::after {
         width: 100%;
     }
 
-    /* Active link state */
-    .nav-link.active {
+    /* Active link state - but not for dropdown toggles (they show on hover only) */
+    .nav-link.active:not(.dropdown-toggle) {
         color: #6366f1 !important;
     }
 
-    .nav-link.active::after {
+    .nav-link.active:not(.dropdown-toggle)::after {
         width: 100%;
         background: #6366f1;
+    }
+
+    /* Dropdown toggles: only show color when active, underline only on hover */
+    .nav-link.dropdown-toggle.active {
+        color: #6366f1 !important;
     }
 
     .nav-link i {
@@ -205,7 +210,7 @@
 
     .dropdown-item:hover {
         background-color: rgba(99, 102, 241, 0.15);
-        color: #fff;
+        color: #6366f1 !important;
         transform: translateX(4px);
     }
 
