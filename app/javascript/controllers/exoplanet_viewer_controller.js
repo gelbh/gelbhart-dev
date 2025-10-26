@@ -1397,6 +1397,12 @@ export default class extends Controller {
   updateOrbitSpeedDisplay() {
     if (!this.hasOrbitSpeedValueTarget) return;
 
+    // Guard against invalid orbit speed
+    if (!this.orbitSpeed || this.orbitSpeed <= 0) {
+      this.orbitSpeedValueTarget.textContent = "--";
+      return;
+    }
+
     // Calculate seconds per orbit at current speed
     const secondsPerOrbit = 60 / this.orbitSpeed;
 
