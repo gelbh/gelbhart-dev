@@ -252,15 +252,21 @@
 
   // Responsive adjustments
   @media (max-width: 991.98px) {
-    // Stack panels vertically on mobile
+    // Stack panels vertically on tablet
     .col-lg-3,
     .col-lg-6 {
       height: auto !important;
-      min-height: 300px;
+      min-height: 250px;
+      max-height: 50vh; // Prevent any single panel from dominating the viewport
     }
+  }
 
+  // Extra small screens (phones)
+  @media (max-width: 575.98px) {
+    .col-lg-3,
     .col-lg-6 {
-      min-height: 400px;
+      min-height: 200px;
+      max-height: 60vh; // More flexible on very small screens
     }
   }
 
@@ -313,9 +319,14 @@
   vertical-align: middle;
 }
 
-// Scrollbar styling for panels
+// Scrollbar styling for panels (cross-browser)
 .exoplanet-viewer-page {
   [style*="overflow-y: auto"] {
+    // Firefox scrollbar styling
+    scrollbar-width: thin;
+    scrollbar-color: var(--bs-gray-400) var(--bs-gray-100);
+
+    // WebKit browsers (Chrome, Safari, Edge)
     &::-webkit-scrollbar {
       width: 8px;
     }
