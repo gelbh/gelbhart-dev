@@ -488,18 +488,18 @@
 // SPACE-THEMED CURSORS
 // ============================================
 
-// Custom cursor definitions using SVG data URIs
+// Custom cursor definitions using SVG data URIs with fallbacks for older browsers
 $cursor-default: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="%236366f1" opacity="0.8"/><circle cx="12" cy="12" r="6" fill="none" stroke="%236366f1" stroke-width="1" opacity="0.5"/><circle cx="12" cy="12" r="1.5" fill="%23ffffff"/></svg>')
     12 12,
   auto;
 
 $cursor-grab: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 2L15 8L21 9L16 14L17 20L12 17L7 20L8 14L3 9L9 8Z" fill="%236366f1" stroke="%23ffffff" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="%23ffffff" opacity="0.3"/></svg>')
     12 12,
-  grab;
+  grab, -webkit-grab, move;
 
 $cursor-grabbing: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 2L15 8L21 9L16 14L17 20L12 17L7 20L8 14L3 9L9 8Z" fill="%23f59e0b" stroke="%23ffffff" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="%23ffffff" opacity="0.5"/></svg>')
     12 12,
-  grabbing;
+  grabbing, -webkit-grabbing, move;
 
 $cursor-pointer: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="5" fill="%2322c55e" opacity="0.3"/><circle cx="14" cy="14" r="3" fill="%2322c55e" stroke="%23ffffff" stroke-width="2"/><path d="M14 2 L14 8 M14 20 L14 26 M2 14 L8 14 M20 14 L26 14" stroke="%2322c55e" stroke-width="2" opacity="0.6"/></svg>')
     14 14,
@@ -673,6 +673,45 @@ input[name="viewMode"]:checked + label {
         rgba(var(--bs-success-rgb), 0.6) 50%,
         rgba(var(--bs-warning-rgb), 0.4) 100%
       );
+      border-radius: 3px;
+    }
+
+    // Microsoft Edge/IE11 support
+    &::-ms-thumb {
+      width: 14px;
+      height: 14px;
+      background: var(--bs-primary);
+      cursor: pointer;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      transition: all 0.2s ease;
+
+      &:hover {
+        transform: scale(1.2);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+      }
+
+      &:active {
+        transform: scale(1.1);
+      }
+    }
+
+    &::-ms-track {
+      width: 100%;
+      height: 6px;
+      background: transparent;
+      border-color: transparent;
+      color: transparent;
+    }
+
+    &::-ms-fill-lower {
+      background: rgba(var(--bs-info-rgb), 0.4);
+      border-radius: 3px;
+    }
+
+    &::-ms-fill-upper {
+      background: rgba(var(--bs-warning-rgb), 0.4);
       border-radius: 3px;
     }
   }
