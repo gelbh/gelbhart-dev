@@ -84,9 +84,9 @@ class ContactsController < ApplicationController
   end
 
   def check_rate_limit
-    # Use Rails cache to track submission counts per IP
+    # Use dedicated rate limit cache with size limits to prevent unbounded growth
     cache_key = "contact_form_#{request.remote_ip}"
-    submission_count = Rails.cache.read(cache_key) || 0
+    submission_count = Rails.cache.rate_limit.read(cache_key) || 0
 
     if submission_count >= 3
       respond_to do |format|
@@ -95,7 +95,7 @@ class ContactsController < ApplicationController
       end
       return false  # Halt the before_action chain
     else
-      Rails.cache.write(cache_key, submission_count + 1, expires_in: 1.hour)
+      Rails.cache.rate_limit.write(cache_key, submission_count + 1, expires_in: 1.hour)
     end
   end
 end
