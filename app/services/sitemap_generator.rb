@@ -42,11 +42,29 @@ class SitemapGenerator
 
   def write_xml(content)
     File.write(Rails.public_path.join("sitemap.xml"), content)
+  rescue Errno::EACCES => e
+    Rails.logger.error "Sitemap generation failed: Permission denied - #{e.message}"
+    raise
+  rescue Errno::ENOSPC => e
+    Rails.logger.error "Sitemap generation failed: No space left on device - #{e.message}"
+    raise
+  rescue StandardError => e
+    Rails.logger.error "Sitemap generation failed: #{e.class} - #{e.message}"
+    raise
   end
 
   def compress_xml
     Zlib::GzipWriter.open(Rails.public_path.join("sitemap.xml.gz")) do |gz|
       gz.write File.read(Rails.public_path.join("sitemap.xml"))
     end
+  rescue Errno::EACCES => e
+    Rails.logger.error "Sitemap compression failed: Permission denied - #{e.message}"
+    raise
+  rescue Errno::ENOSPC => e
+    Rails.logger.error "Sitemap compression failed: No space left on device - #{e.message}"
+    raise
+  rescue StandardError => e
+    Rails.logger.error "Sitemap compression failed: #{e.class} - #{e.message}"
+    raise
   end
 end
