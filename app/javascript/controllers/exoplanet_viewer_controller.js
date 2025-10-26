@@ -750,8 +750,11 @@ export default class extends Controller {
         if (window.requestIdleCallback) {
           window.requestIdleCallback(buildList, { timeout: 2000 });
         } else {
-          // Fallback for browsers without requestIdleCallback
-          setTimeout(buildList, 0);
+          // Fallback for browsers without requestIdleCallback (Safari)
+          // Use requestAnimationFrame + setTimeout to better mimic idle behavior
+          requestAnimationFrame(() => {
+            setTimeout(buildList, 1);
+          });
         }
 
         // Ensure galaxy view is loaded
@@ -1826,12 +1829,21 @@ export default class extends Controller {
   toggleFullscreen() {
     const container = this.canvasTarget.parentElement;
 
-    if (!document.fullscreenElement) {
+    // Check for fullscreen element with vendor prefixes
+    const fullscreenElement =
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.mozFullScreenElement ||
+      document.msFullscreenElement;
+
+    if (!fullscreenElement) {
       // Enter fullscreen
       if (container.requestFullscreen) {
         container.requestFullscreen();
       } else if (container.webkitRequestFullscreen) {
         container.webkitRequestFullscreen();
+      } else if (container.mozRequestFullScreen) {
+        container.mozRequestFullScreen();
       } else if (container.msRequestFullscreen) {
         container.msRequestFullscreen();
       }
@@ -1841,6 +1853,8 @@ export default class extends Controller {
         document.exitFullscreen();
       } else if (document.webkitExitFullscreen) {
         document.webkitExitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
       } else if (document.msExitFullscreen) {
         document.msExitFullscreen();
       }
