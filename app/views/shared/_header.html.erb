@@ -8,17 +8,36 @@
         <!-- Collapsible navigation content - Left side -->
         <div class="collapse navbar-collapse order-lg-1" id="navbarNav">
             <ul class="navbar-nav">
-                <li class="nav-item">
-                    <%= link_to hevy_tracker_path, class: "nav-link d-flex align-items-center #{current_page?(hevy_tracker_path) ? 'active' : ''}" do %>
-                    <i class="bx bx-dumbbell fs-lg me-1"></i>
-                    Hevy Tracker
-                    <% end %>
-                </li>
-                <li class="nav-item">
-                    <%= link_to video_captioner_path, class: "nav-link d-flex align-items-center #{current_page?(video_captioner_path) ? 'active' : ''}" do %>
-                    <i class="bx bx-video fs-lg me-1"></i>
-                    Video Captioner
-                    <% end %>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center <%= 'active' if current_page?(hevy_tracker_path) || current_page?(video_captioner_path) || current_page?(exoplanet_viewer_path) %>" 
+                       href="#" 
+                       id="projectsDropdown" 
+                       role="button" 
+                       data-bs-toggle="dropdown" 
+                       aria-expanded="false">
+                        <i class="bx bx-code-alt fs-lg me-1"></i>
+                        Projects
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="projectsDropdown">
+                        <li>
+                            <%= link_to hevy_tracker_path, class: "dropdown-item d-flex align-items-center #{current_page?(hevy_tracker_path) ? 'active' : ''}" do %>
+                                <i class="bx bx-dumbbell fs-lg me-2"></i>
+                                Hevy Tracker
+                            <% end %>
+                        </li>
+                        <li>
+                            <%= link_to video_captioner_path, class: "dropdown-item d-flex align-items-center #{current_page?(video_captioner_path) ? 'active' : ''}" do %>
+                                <i class="bx bx-video fs-lg me-2"></i>
+                                Video Captioner
+                            <% end %>
+                        </li>
+                        <li>
+                            <%= link_to exoplanet_viewer_path, class: "dropdown-item d-flex align-items-center #{current_page?(exoplanet_viewer_path) ? 'active' : ''}" do %>
+                                <i class="bx bx-planet fs-lg me-2"></i>
+                                Exoplanet Viewer
+                            <% end %>
+                        </li>
+                    </ul>
                 </li>
                 <li class="nav-item">
                     <%= link_to contact_path, class: "nav-link d-flex align-items-center #{current_page?(contact_path) ? 'active' : ''}" do %>
@@ -161,6 +180,81 @@
         opacity: 1;
         color: #6366f1;
         transform: translateY(-2px);
+    }
+
+    /* Dropdown menu styling */
+    .dropdown-menu {
+        background-color: rgba(11, 15, 25, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        margin-top: 0.5rem;
+        min-width: 220px;
+    }
+
+    .dropdown-item {
+        color: rgba(255, 255, 255, 0.75);
+        padding: 0.625rem 1rem;
+        border-radius: 0.375rem;
+        transition: all 0.2s ease;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .dropdown-item:hover {
+        background-color: rgba(99, 102, 241, 0.15);
+        color: #fff;
+        transform: translateX(4px);
+    }
+
+    .dropdown-item.active {
+        background-color: rgba(99, 102, 241, 0.25);
+        color: #6366f1;
+    }
+
+    .dropdown-item i {
+        opacity: 0.8;
+        transition: all 0.2s ease;
+    }
+
+    .dropdown-item:hover i,
+    .dropdown-item.active i {
+        opacity: 1;
+        color: #6366f1;
+    }
+
+    /* Dropdown toggle styling - override all Bootstrap states */
+    .header .dropdown-toggle,
+    .header .nav-link.dropdown-toggle {
+        background-color: transparent !important;
+        background-image: none !important;
+    }
+
+    .header .dropdown-toggle:hover,
+    .header .dropdown-toggle:focus,
+    .header .dropdown-toggle:active,
+    .header .dropdown-toggle.show,
+    .header .nav-link.dropdown-toggle:hover,
+    .header .nav-link.dropdown-toggle:focus,
+    .header .nav-link.dropdown-toggle:active,
+    .header .nav-link.dropdown-toggle.show {
+        background-color: transparent !important;
+        background-image: none !important;
+        color: rgba(255, 255, 255, 1) !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+    /* Dropdown toggle arrow */
+    .dropdown-toggle::after {
+        margin-left: 0.35rem;
+        transition: transform 0.3s ease;
+    }
+
+    .dropdown-toggle[aria-expanded="true"]::after {
+        transform: rotate(180deg);
     }
 
     /* Add subtle separator between nav items */
