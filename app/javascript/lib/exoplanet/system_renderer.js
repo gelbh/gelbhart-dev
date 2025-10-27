@@ -520,7 +520,9 @@ export class SystemRenderer {
     }
 
     // Check if this is our Sun - use realistic texture
-    if (stellarData.starName === "Sun") {
+    // Note: stellarData is actually a planet object, so we check hostStar
+    const starName = stellarData.starName || stellarData.hostStar;
+    if (starName === "Sun") {
       this.addRealisticSun(stellarData);
       return;
     }
@@ -581,9 +583,7 @@ export class SystemRenderer {
 
     // Create material with realistic Sun appearance
     const starMaterial = new THREE.MeshBasicMaterial({
-      color: 0xfdb813,
-      emissive: 0xfdb813,
-      emissiveIntensity: 1.2,
+      color: 0xfdb813, // Fallback color if texture fails to load
     });
 
     this.centralStar = new THREE.Mesh(starGeometry, starMaterial);
@@ -594,6 +594,7 @@ export class SystemRenderer {
       "/textures/planets/sun.jpg",
       (texture) => {
         starMaterial.map = texture;
+        starMaterial.color.setHex(0xffffff); // Set to white so texture shows true colors
         starMaterial.needsUpdate = true;
       },
       undefined,
@@ -603,61 +604,6 @@ export class SystemRenderer {
         );
       }
     );
-
-    // Add multiple glow layers for realistic solar corona
-    const glowLayers = [
-      { scale: 1.3, opacity: 0.5, color: 0xfdb813 },
-      { scale: 1.6, opacity: 0.3, color: 0xffa500 },
-      { scale: 2.0, opacity: 0.15, color: 0xff8c00 },
-    ];
-
-    glowLayers.forEach((layer) => {
-      const glowGeometry = new THREE.SphereGeometry(
-        starRadius * layer.scale,
-        32,
-        32
-      );
-      const glowMaterial = new THREE.MeshBasicMaterial({
-        color: layer.color,
-        transparent: true,
-        opacity: layer.opacity,
-        side: THREE.BackSide,
-      });
-      const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-      this.centralStar.add(glow);
-    });
-
-    // Add solar flare effect (bright outer layer)
-    const flareGeometry = new THREE.SphereGeometry(starRadius * 2.5, 32, 32);
-    const flareMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        glowColor: { value: new THREE.Color(0xffaa00) },
-        viewVector: { value: new THREE.Vector3(0, 0, 5) },
-      },
-      vertexShader: `
-        uniform vec3 viewVector;
-        varying float intensity;
-        void main() {
-          vec3 vNormal = normalize(normalMatrix * normal);
-          vec3 vNormel = normalize(normalMatrix * viewVector);
-          intensity = pow(0.6 - dot(vNormal, vNormel), 3.0);
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform vec3 glowColor;
-        varying float intensity;
-        void main() {
-          vec3 glow = glowColor * intensity;
-          gl_FragColor = vec4(glow, intensity * 0.3);
-        }
-      `,
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      side: THREE.BackSide,
-    });
-    const flare = new THREE.Mesh(flareGeometry, flareMaterial);
-    this.centralStar.add(flare);
 
     this.centralStar.position.set(0, 0, 0);
     this.scene.add(this.centralStar);

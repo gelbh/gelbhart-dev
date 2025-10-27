@@ -19,6 +19,11 @@ export class GalaxyRenderer {
     this.systemMeshes = [];
     this.systemLabels = [];
     this.galacticCenter = null;
+    this.milkyWayStructure = null; // Visual representation of galaxy structure
+    this.galacticCenterMarker = null; // Sagittarius A* marker
+    this.spiralArms = []; // Visual spiral arm structures
+    this.milkyWayDisk = null; // Reference to the disk mesh
+    this.diskRotationZ = 0; // Current Z rotation of the disk
   }
 
   /**
@@ -35,8 +40,14 @@ export class GalaxyRenderer {
 
     this.starSystems = systems;
 
-    // Add galactic center (visual reference point)
+    // Add realistic Milky Way structure
+    this.addMilkyWayStructure();
+
+    // Add galactic center (visual reference point for our Sun/Solar System)
     this.addGalacticCenter();
+
+    // Add marker for actual galactic center (Sagittarius A*)
+    this.addGalacticCenterMarker();
 
     // Render each star system
     systems.forEach((system, index) => {
@@ -57,6 +68,96 @@ export class GalaxyRenderer {
       systemCount: systems.length,
       maxDistance: this.calculateMaxSystemDistance(),
     };
+  }
+
+  /**
+   * Add complete Milky Way galaxy structure
+   */
+  addMilkyWayStructure() {
+    this.milkyWayStructure = new THREE.Group();
+
+    // Add textured disk with realistic Milky Way image
+    this.addGalacticDiskTexture();
+
+    // Position the galaxy in galactic coordinates
+    this.positionGalaxyInGalacticCoordinates();
+
+    this.scene.add(this.milkyWayStructure);
+  }
+
+  /**
+   * Position the galaxy structure in galactic coordinates
+   */
+  positionGalaxyInGalacticCoordinates() {
+    const earthDistanceFromGC = 27000;
+    const scaledDistance = Math.log10(earthDistanceFromGC + 1) * 15;
+    this.milkyWayStructure.position.set(scaledDistance, 0, 0);
+  }
+
+  /**
+   * Add textured galactic disk showing the spiral structure
+   */
+  addGalacticDiskTexture() {
+    const diskGeometry = new THREE.CircleGeometry(180, 128);
+
+    const diskMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.25,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+
+    const disk = new THREE.Mesh(diskGeometry, diskMaterial);
+    this.milkyWayDisk = disk;
+    disk.rotation.x = Math.PI / 2;
+    disk.rotation.z = this.diskRotationZ;
+
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.load(
+      "/textures/galaxy/milky_way.png",
+      (texture) => {
+        diskMaterial.map = texture;
+        diskMaterial.needsUpdate = true;
+      },
+      undefined,
+      (error) => {
+        console.warn("Failed to load Milky Way texture");
+      }
+    );
+
+    this.milkyWayStructure.add(disk);
+  }
+
+  /**
+   * Add marker for galactic center (Sagittarius A*)
+   */
+  addGalacticCenterMarker() {
+    const earthDistanceFromGC = 27000;
+    const scaledDistance = Math.log10(earthDistanceFromGC + 1) * 15;
+
+    const geometry = new THREE.SphereGeometry(3, 32, 32);
+    const material = new THREE.MeshBasicMaterial({
+      color: 0xff6600,
+      transparent: true,
+      opacity: 0.8,
+    });
+
+    this.galacticCenterMarker = new THREE.Mesh(geometry, material);
+    this.galacticCenterMarker.position.set(scaledDistance, 0, 0);
+
+    const glowGeometry = new THREE.SphereGeometry(5, 32, 32);
+    const glowMaterial = new THREE.MeshBasicMaterial({
+      color: 0xff8800,
+      transparent: true,
+      opacity: 0.3,
+      blending: THREE.AdditiveBlending,
+    });
+    const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+    this.galacticCenterMarker.add(glow);
+
+    this.scene.add(this.galacticCenterMarker);
   }
 
   /**
@@ -88,57 +189,6 @@ export class GalaxyRenderer {
       }
     );
 
-    // Add multiple glow layers for realistic solar corona
-    const glowLayers = [
-      { scale: 1.6, opacity: 0.5, color: 0xfdb813 },
-      { scale: 2.1, opacity: 0.35, color: 0xffa500 },
-      { scale: 2.7, opacity: 0.2, color: 0xff8c00 },
-    ];
-
-    glowLayers.forEach((layer) => {
-      const glowGeometry = new THREE.SphereGeometry(1.5 * layer.scale, 32, 32);
-      const glowMaterial = new THREE.MeshBasicMaterial({
-        color: layer.color,
-        transparent: true,
-        opacity: layer.opacity,
-        side: THREE.BackSide,
-      });
-      const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-      this.galacticCenter.add(glow);
-    });
-
-    // Add solar flare effect (bright outer layer)
-    const flareGeometry = new THREE.SphereGeometry(1.5 * 3.0, 32, 32);
-    const flareMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        glowColor: { value: new THREE.Color(0xffaa00) },
-        viewVector: { value: new THREE.Vector3(0, 0, 5) },
-      },
-      vertexShader: `
-        uniform vec3 viewVector;
-        varying float intensity;
-        void main() {
-          vec3 vNormal = normalize(normalMatrix * normal);
-          vec3 vNormel = normalize(normalMatrix * viewVector);
-          intensity = pow(0.7 - dot(vNormal, vNormel), 2.5);
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform vec3 glowColor;
-        varying float intensity;
-        void main() {
-          vec3 glow = glowColor * intensity;
-          gl_FragColor = vec4(glow, intensity * 0.25);
-        }
-      `,
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      side: THREE.BackSide,
-    });
-    const flare = new THREE.Mesh(flareGeometry, flareMaterial);
-    this.galacticCenter.add(flare);
-
     this.scene.add(this.galacticCenter);
   }
 
@@ -167,64 +217,97 @@ export class GalaxyRenderer {
 
     this.systemMeshes.push(starMesh);
     this.scene.add(starMesh);
-
-    // Add subtle lines connecting nearby systems to Earth
-    // Only show for systems within 200 light-years
-    if (system.distance && system.distance < 200) {
-      this.addConnectionLine(position);
-    }
   }
 
   /**
-   * Calculate 3D position for a star system using real astronomical coordinates
-   * Converts RA (Right Ascension), Dec (Declination), and Distance into Cartesian coordinates
+   * Convert equatorial coordinates (RA, Dec) to galactic coordinates (l, b)
+   */
+  equatorialToGalactic(ra, dec) {
+    const galacticCenterRA = 266.4;
+    const galacticCenterDec = -28.9;
+    const northGalacticPoleRA = 192.85;
+    const northGalacticPoleDec = 27.13;
+    const galacticLongitudeOfNCP = 122.93;
+
+    const raRad = (ra * Math.PI) / 180;
+    const decRad = (dec * Math.PI) / 180;
+    const ngpRA = (northGalacticPoleRA * Math.PI) / 180;
+    const ngpDec = (northGalacticPoleDec * Math.PI) / 180;
+
+    const sinB =
+      Math.sin(decRad) * Math.sin(ngpDec) +
+      Math.cos(decRad) * Math.cos(ngpDec) * Math.cos(raRad - ngpRA);
+    const b = Math.asin(sinB);
+
+    const y = Math.cos(decRad) * Math.sin(raRad - ngpRA);
+    const x =
+      Math.sin(decRad) * Math.cos(ngpDec) -
+      Math.cos(decRad) * Math.sin(ngpDec) * Math.cos(raRad - ngpRA);
+    let l = Math.atan2(y, x) + (galacticLongitudeOfNCP * Math.PI) / 180;
+
+    if (l < 0) l += 2 * Math.PI;
+    if (l >= 2 * Math.PI) l -= 2 * Math.PI;
+
+    return { l, b };
+  }
+
+  /**
+   * Calculate 3D position for a star system using galactic coordinates
+   * Converts RA/Dec to galactic coordinates with 123° rotation offset
    * Earth is at the origin (0, 0, 0)
    */
   calculateSystemPosition(system, index, totalSystems) {
-    // Get the first planet to extract coordinate data
     const firstPlanet = system.planets[0];
     if (!firstPlanet) {
       console.warn("System has no planets:", system);
       return new THREE.Vector3(0, 0, 0);
     }
 
-    const distance = system.distance || 100; // Distance in light-years
-    const ra = firstPlanet.ra; // Right Ascension in degrees (0-360)
-    const dec = firstPlanet.dec; // Declination in degrees (-90 to +90)
+    const distance = system.distance || 100;
+    const ra = firstPlanet.ra;
+    const dec = firstPlanet.dec;
 
-    // If we don't have coordinates, fall back to a default position
+    const earthDistanceFromGC = 27000;
+    const earthScaledDist = Math.log10(earthDistanceFromGC + 1) * 15;
+
     if (ra === null || dec === null || ra === undefined || dec === undefined) {
       console.warn("Missing RA/Dec for system:", system.name);
-      // Place it randomly as fallback
       const theta = Math.random() * Math.PI * 2;
-      const phi = (Math.random() - 0.5) * Math.PI;
-      const scaledDist = Math.min(distance * 0.3, 100);
+      const height = (Math.random() - 0.5) * 4;
+      const radius = Math.random() * 10 + earthScaledDist - 5;
       return new THREE.Vector3(
-        scaledDist * Math.cos(phi) * Math.cos(theta),
-        scaledDist * Math.sin(phi),
-        scaledDist * Math.cos(phi) * Math.sin(theta)
+        radius * Math.cos(theta),
+        height,
+        radius * Math.sin(theta)
       );
     }
 
-    // Convert degrees to radians
-    const raRad = (ra * Math.PI) / 180;
-    const decRad = (dec * Math.PI) / 180;
+    // Convert equatorial to galactic coordinates
+    const galactic = this.equatorialToGalactic(ra, dec);
+    let l = galactic.l;
+    const b = galactic.b;
 
-    // Scale distance for visualization (map light-years to scene units)
-    // Most discovered exoplanets are within a few thousand light-years
-    // Use logarithmic scaling to compress distant systems while keeping nearby ones visible
-    const scaledDistance = Math.log10(distance + 1) * 15;
+    // Apply 123° rotation offset to align with Milky Way texture
+    const rotationOffset = (123 * Math.PI) / 180;
+    l = l + rotationOffset;
 
-    // Convert spherical coordinates (RA, Dec, Distance) to Cartesian (x, y, z)
-    // Standard astronomical coordinate conversion:
-    // x points toward RA=0°, Dec=0° (vernal equinox direction)
-    // y points toward Dec=+90° (north celestial pole)
-    // z points toward RA=90°, Dec=0°
-    const x = scaledDistance * Math.cos(decRad) * Math.cos(raRad);
-    const y = scaledDistance * Math.sin(decRad);
-    const z = scaledDistance * Math.cos(decRad) * Math.sin(raRad);
+    // Scale distance for visualization
+    const scaledDistanceFromEarth = Math.log10(distance + 1) * 8;
 
-    return new THREE.Vector3(x, y, z);
+    // Position relative to Earth in galactic coordinates
+    const xFromEarth = scaledDistanceFromEarth * Math.cos(b) * Math.cos(l);
+    const yFromEarth = scaledDistanceFromEarth * Math.sin(b) * 0.2;
+    const zFromEarth = scaledDistanceFromEarth * Math.cos(b) * Math.sin(l);
+
+    const earthPosGalactocentric = new THREE.Vector3(0, 0, 0);
+    const systemPosHeliocentric = new THREE.Vector3(
+      xFromEarth,
+      yFromEarth,
+      zFromEarth
+    );
+
+    const finalPosition = systemPosHeliocentric.add(earthPosGalactocentric);
+    return finalPosition;
   }
 
   /**
@@ -298,27 +381,6 @@ export class GalaxyRenderer {
   }
 
   /**
-   * Add subtle connection line from system to Earth
-   * Helps visualize distance and direction from our observation point
-   */
-  addConnectionLine(position) {
-    const points = [];
-    points.push(new THREE.Vector3(0, 0, 0)); // Earth at origin
-    points.push(position);
-
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    const material = new THREE.LineBasicMaterial({
-      color: 0x333333,
-      transparent: true,
-      opacity: 0.08,
-    });
-
-    const line = new THREE.Line(geometry, material);
-    this.systemMeshes.push(line);
-    this.scene.add(line);
-  }
-
-  /**
    * Calculate maximum distance of systems from center
    */
   calculateMaxSystemDistance() {
@@ -382,21 +444,24 @@ export class GalaxyRenderer {
 
   /**
    * Animate galaxy view
-   * Adds subtle visual effects without distorting the realistic positions
    */
   animateGalaxy(deltaTime) {
+    const time = Date.now() * 0.001;
+
     // Rotate the Sun at galactic center
     if (this.galacticCenter) {
       this.galacticCenter.rotation.y += deltaTime * 0.05;
-
-      // Pulse the Sun's glow
-      const time = Date.now() * 0.001;
       const pulse = Math.sin(time * 0.5) * 0.1 + 1.0;
       this.galacticCenter.scale.setScalar(pulse);
     }
 
+    // Animate galactic center marker (Sagittarius A*)
+    if (this.galacticCenterMarker) {
+      const pulse = Math.sin(time * 1.5) * 0.15 + 1.0;
+      this.galacticCenterMarker.scale.setScalar(pulse);
+    }
+
     // Subtle pulsing of stars (twinkling effect)
-    const time = Date.now() * 0.001;
     this.systemMeshes.forEach((mesh, index) => {
       if (mesh.userData.isStarSystem) {
         const pulse = Math.sin(time + index * 0.5) * 0.1 + 0.9;
@@ -462,9 +527,47 @@ export class GalaxyRenderer {
     // Remove Sun/Solar System representation
     if (this.galacticCenter) {
       this.scene.remove(this.galacticCenter);
+      if (this.galacticCenter.geometry) this.galacticCenter.geometry.dispose();
+      if (this.galacticCenter.material) this.galacticCenter.material.dispose();
+      this.galacticCenter.children.forEach((child) => {
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) child.material.dispose();
+      });
       this.galacticCenter = null;
     }
 
+    // Remove Milky Way structure
+    if (this.milkyWayStructure) {
+      this.scene.remove(this.milkyWayStructure);
+      this.milkyWayStructure.traverse((child) => {
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) {
+          if (Array.isArray(child.material)) {
+            child.material.forEach((m) => m.dispose());
+          } else {
+            child.material.dispose();
+          }
+        }
+      });
+      this.milkyWayStructure = null;
+    }
+
+    // Remove galactic center marker
+    if (this.galacticCenterMarker) {
+      this.scene.remove(this.galacticCenterMarker);
+      if (this.galacticCenterMarker.geometry)
+        this.galacticCenterMarker.geometry.dispose();
+      if (this.galacticCenterMarker.material)
+        this.galacticCenterMarker.material.dispose();
+      this.galacticCenterMarker.children.forEach((child) => {
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) child.material.dispose();
+      });
+      this.galacticCenterMarker = null;
+    }
+
+    this.spiralArms = [];
+    this.milkyWayDisk = null;
     this.starSystems = [];
   }
 }
