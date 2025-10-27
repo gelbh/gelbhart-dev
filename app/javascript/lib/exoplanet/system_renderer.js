@@ -372,6 +372,8 @@ export class SystemRenderer {
     const sprite = new THREE.Sprite(spriteMaterial);
     sprite.scale.set(1, 0.25, 1);
     sprite.position.set(0, planetRadius + 0.5, 0);
+    sprite.userData.isLabel = true;
+    sprite.visible = false; // Labels hidden by default
 
     planetMesh.add(sprite);
   }
@@ -971,6 +973,65 @@ export class SystemRenderer {
    */
   getPlanetMesh(planet) {
     return this.planetMeshes.find((mesh) => mesh.userData.planet === planet);
+  }
+
+  /**
+   * Toggle planet labels visibility
+   */
+  toggleLabels(show) {
+    this.planetMeshes.forEach((mesh) => {
+      // Find sprite label child
+      const label = mesh.children.find(
+        (child) => child.userData && child.userData.isLabel
+      );
+      if (label) {
+        label.visible = show;
+      }
+    });
+  }
+
+  /**
+   * Toggle orbit lines visibility
+   */
+  toggleOrbitLines(show) {
+    this.orbitLines.forEach((line) => {
+      line.visible = show;
+    });
+  }
+
+  /**
+   * Set rendering quality
+   * @param {boolean} high - Whether to use high quality rendering
+   */
+  setQuality(high) {
+    // Update material quality for all planet meshes
+    this.planetMeshes.forEach((mesh) => {
+      if (mesh.material) {
+        // Adjust material properties based on quality setting
+        if (high) {
+          mesh.material.flatShading = false;
+          if (mesh.material.map) {
+            mesh.material.map.anisotropy = 16; // Max anisotropic filtering
+          }
+        } else {
+          mesh.material.flatShading = true;
+          if (mesh.material.map) {
+            mesh.material.map.anisotropy = 1; // Min anisotropic filtering
+          }
+        }
+        mesh.material.needsUpdate = true;
+      }
+    });
+
+    // Update central star quality
+    if (this.centralStar && this.centralStar.material) {
+      if (high) {
+        this.centralStar.material.flatShading = false;
+      } else {
+        this.centralStar.material.flatShading = true;
+      }
+      this.centralStar.material.needsUpdate = true;
+    }
   }
 
   /**

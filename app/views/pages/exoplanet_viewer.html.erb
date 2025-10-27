@@ -52,50 +52,6 @@
           <button class="btn btn-sm btn-outline-light" data-action="click->exoplanet-viewer#toggleFullscreen">
             <i class="bx bx-fullscreen"></i> Fullscreen
           </button>
-          
-          <!-- Atmosphere Toggle -->
-          <div class="form-check">
-            <input 
-              class="form-check-input" 
-              type="checkbox" 
-              id="atmosphereToggle"
-              data-exoplanet-viewer-target="atmosphereToggle"
-              data-action="change->exoplanet-viewer#toggleAtmospheres">
-            <label class="form-check-label fs-sm text-nowrap" for="atmosphereToggle">
-              <i class="bx bx-cloud"></i> Atmospheres
-            </label>
-          </div>
-          
-          <!-- Orbital Inclination Toggle (System View Only) -->
-          <div class="form-check" id="orbitalInclinationControl" style="display: none;">
-            <input 
-              class="form-check-input" 
-              type="checkbox" 
-              id="orbitalInclinationToggle"
-              data-exoplanet-viewer-target="orbitalInclinationToggle"
-              data-action="change->exoplanet-viewer#toggleOrbitalInclination">
-            <label class="form-check-label fs-sm text-nowrap" for="orbitalInclinationToggle">
-              3D Orbits
-            </label>
-          </div>
-          
-          <!-- Orbit Speed Control (System View Only) -->
-          <div class="orbit-speed-inline d-flex align-items-center gap-2" id="orbitSpeedControl" style="display: none;">
-            <label for="orbitSpeedSlider" class="form-label mb-0 fs-sm text-nowrap">
-              <i class="bx bx-time"></i> 1 orbit =
-            </label>
-            <input 
-              type="range" 
-              class="form-range orbit-speed-slider" 
-              id="orbitSpeedSlider" 
-              min="0" 
-              max="100" 
-              value="50"
-              data-exoplanet-viewer-target="orbitSpeedSlider"
-              data-action="input->exoplanet-viewer#updateOrbitSpeed"
-              style="width: 150px;">
-            <span class="badge bg-primary text-nowrap" data-exoplanet-viewer-target="orbitSpeedValue">60.0s</span>
-          </div>
         </div>
       </div>
 
@@ -121,6 +77,11 @@
         <!-- Tabs Navigation -->
         <ul class="nav nav-tabs exoplanet-panel-tabs border-0 flex-grow-1" role="tablist">
           <li class="nav-item" role="presentation">
+            <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings-panel" type="button" role="tab" aria-controls="settings-panel" aria-selected="false">
+              <i class="bx bx-cog me-1"></i> Settings
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
             <button class="nav-link active" id="search-tab" data-bs-toggle="tab" data-bs-target="#search-panel" type="button" role="tab" aria-controls="search-panel" aria-selected="true">
               <i class="bx bx-search me-1"></i> Search
             </button>
@@ -142,6 +103,213 @@
       <!-- Panel Content with Tabs -->
       <div class="exoplanet-panel-content">
         <div class="tab-content" id="panelTabContent">
+          <!-- Settings Tab Content -->
+          <div class="tab-pane fade" id="settings-panel" role="tabpanel" aria-labelledby="settings-tab">
+            <div class="p-4">
+              <h6 class="text-white mb-4">Visualization Settings</h6>
+              
+              <!-- Visual Effects Section -->
+              <div class="settings-section mb-4" id="visualEffectsSection">
+                <div class="d-flex align-items-center mb-3">
+                  <i class="bx bx-paint text-primary me-2"></i>
+                  <h6 class="mb-0 text-white-50 fs-sm text-uppercase">Visual Effects</h6>
+                </div>
+                
+                <!-- Atmosphere Toggle -->
+                <div class="form-check mb-3" id="atmosphereSetting">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    id="atmosphereToggleSettings"
+                    data-exoplanet-viewer-target="atmosphereToggle"
+                    data-action="change->exoplanet-viewer#toggleAtmospheres">
+                  <label class="form-check-label text-white" for="atmosphereToggleSettings">
+                    <i class="bx bx-cloud me-1"></i> Show Atmospheres
+                    <small class="d-block text-white-50 mt-1">Display atmospheric halos around planets</small>
+                  </label>
+                </div>
+                
+                <!-- Star Visibility Toggle -->
+                <div class="form-check mb-3">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    id="starVisibilityToggle"
+                    checked
+                    data-exoplanet-viewer-target="starVisibilityToggle"
+                    data-action="change->exoplanet-viewer#toggleStarVisibility">
+                  <label class="form-check-label text-white" for="starVisibilityToggle">
+                    <i class="bx bx-star me-1"></i> Show Background Stars
+                    <small class="d-block text-white-50 mt-1">Display starfield in background</small>
+                  </label>
+                </div>
+                
+                <!-- Planet Labels Toggle -->
+                <div class="form-check mb-3" id="planetLabelsSetting">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    id="planetLabelsToggle"
+                    data-exoplanet-viewer-target="planetLabelsToggle"
+                    data-action="change->exoplanet-viewer#togglePlanetLabels">
+                  <label class="form-check-label text-white" for="planetLabelsToggle">
+                    <i class="bx bx-label me-1"></i> Show Planet Labels
+                    <small class="d-block text-white-50 mt-1">Display planet names in system view</small>
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Orbital Mechanics Section -->
+              <div class="settings-section mb-4" id="orbitalMechanicsSection">
+                <div class="d-flex align-items-center mb-3">
+                  <i class="bx bx-target-lock text-info me-2"></i>
+                  <h6 class="mb-0 text-white-50 fs-sm text-uppercase">Orbital Mechanics</h6>
+                </div>
+                
+                <!-- 3D Orbits Toggle -->
+                <div class="form-check mb-3">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    id="orbitalInclinationToggleSettings"
+                    data-exoplanet-viewer-target="orbitalInclinationToggle"
+                    data-action="change->exoplanet-viewer#toggleOrbitalInclination">
+                  <label class="form-check-label text-white" for="orbitalInclinationToggleSettings">
+                    <i class="bx bx-shape-circle me-1"></i> 3D Orbital Inclination
+                    <small class="d-block text-white-50 mt-1">Use realistic 3D orbital planes</small>
+                  </label>
+                </div>
+                
+                <!-- Orbit Lines Toggle -->
+                <div class="form-check mb-3">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    id="orbitLinesToggle"
+                    checked
+                    data-exoplanet-viewer-target="orbitLinesToggle"
+                    data-action="change->exoplanet-viewer#toggleOrbitLines">
+                  <label class="form-check-label text-white" for="orbitLinesToggle">
+                    <i class="bx bx-trip me-1"></i> Show Orbit Paths
+                    <small class="d-block text-white-50 mt-1">Display orbital trajectory lines</small>
+                  </label>
+                </div>
+                
+                <!-- Orbit Speed Control -->
+                <div class="mb-3">
+                  <label for="orbitSpeedSliderSettings" class="form-label text-white">
+                    <i class="bx bx-time me-1"></i> Orbit Animation Speed
+                  </label>
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <input 
+                      type="range" 
+                      class="form-range" 
+                      id="orbitSpeedSliderSettings" 
+                      min="0" 
+                      max="100" 
+                      value="50"
+                      data-exoplanet-viewer-target="orbitSpeedSlider"
+                      data-action="input->exoplanet-viewer#updateOrbitSpeed">
+                    <span class="badge bg-primary" data-exoplanet-viewer-target="orbitSpeedValue" style="min-width: 60px;">60.0s</span>
+                  </div>
+                  <small class="text-white-50">Time for one complete orbit</small>
+                </div>
+              </div>
+              
+              <!-- Performance Section -->
+              <div class="settings-section mb-4">
+                <div class="d-flex align-items-center mb-3">
+                  <i class="bx bx-tachometer text-warning me-2"></i>
+                  <h6 class="mb-0 text-white-50 fs-sm text-uppercase">Performance</h6>
+                </div>
+                
+                <!-- Star Density Control -->
+                <div class="mb-3">
+                  <label for="starDensitySlider" class="form-label text-white">
+                    <i class="bx bx-star me-1"></i> Star Density
+                  </label>
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <input 
+                      type="range" 
+                      class="form-range" 
+                      id="starDensitySlider" 
+                      min="0" 
+                      max="100" 
+                      value="50"
+                      data-exoplanet-viewer-target="starDensitySlider"
+                      data-action="input->exoplanet-viewer#updateStarDensity">
+                    <span class="badge bg-secondary" data-exoplanet-viewer-target="starDensityValue" style="min-width: 60px;">50%</span>
+                  </div>
+                  <small class="text-white-50">Number of background stars</small>
+                </div>
+                
+                <!-- Quality Toggle -->
+                <div class="form-check mb-3">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    id="highQualityToggle"
+                    checked
+                    data-exoplanet-viewer-target="highQualityToggle"
+                    data-action="change->exoplanet-viewer#toggleHighQuality">
+                  <label class="form-check-label text-white" for="highQualityToggle">
+                    <i class="bx bx-sparkle me-1"></i> High Quality Rendering
+                    <small class="d-block text-white-50 mt-1">Enhanced textures and effects (may reduce FPS)</small>
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Camera Controls Section -->
+              <div class="settings-section mb-4">
+                <div class="d-flex align-items-center mb-3">
+                  <i class="bx bx-camera text-success me-2"></i>
+                  <h6 class="mb-0 text-white-50 fs-sm text-uppercase">Camera</h6>
+                </div>
+                
+                <!-- Camera Speed Control -->
+                <div class="mb-3">
+                  <label for="cameraSpeedSlider" class="form-label text-white">
+                    <i class="bx bx-mouse me-1"></i> Camera Rotation Speed
+                  </label>
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <input 
+                      type="range" 
+                      class="form-range" 
+                      id="cameraSpeedSlider" 
+                      min="0" 
+                      max="100" 
+                      value="50"
+                      data-exoplanet-viewer-target="cameraSpeedSlider"
+                      data-action="input->exoplanet-viewer#updateCameraSpeed">
+                    <span class="badge bg-success" data-exoplanet-viewer-target="cameraSpeedValue" style="min-width: 60px;">1.0x</span>
+                  </div>
+                  <small class="text-white-50">Mouse rotation sensitivity</small>
+                </div>
+                
+                <!-- Auto-Rotate Toggle -->
+                <div class="form-check mb-3">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    id="autoRotateToggle"
+                    data-exoplanet-viewer-target="autoRotateToggle"
+                    data-action="change->exoplanet-viewer#toggleAutoRotate">
+                  <label class="form-check-label text-white" for="autoRotateToggle">
+                    <i class="bx bx-rotate-right me-1"></i> Auto-Rotate Camera
+                    <small class="d-block text-white-50 mt-1">Automatically rotate around objects</small>
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Reset Button -->
+              <div class="d-grid">
+                <button class="btn btn-outline-primary" data-action="click->exoplanet-viewer#resetSettings">
+                  <i class="bx bx-refresh me-1"></i> Reset All Settings
+                </button>
+              </div>
+            </div>
+          </div>
+          
           <!-- Search Tab Content -->
           <div class="tab-pane fade show active" id="search-panel" role="tabpanel" aria-labelledby="search-tab">
         <div class="p-4">

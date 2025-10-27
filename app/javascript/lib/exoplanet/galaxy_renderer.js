@@ -406,6 +406,42 @@ export class GalaxyRenderer {
   }
 
   /**
+   * Set rendering quality
+   * @param {boolean} high - Whether to use high quality rendering
+   */
+  setQuality(high) {
+    // Update quality for all system meshes
+    this.systemMeshes.forEach((mesh) => {
+      if (mesh.material) {
+        if (high) {
+          mesh.material.flatShading = false;
+          // Increase emissive intensity for better glow
+          if (mesh.material.emissive) {
+            mesh.material.emissiveIntensity = 1.0;
+          }
+        } else {
+          mesh.material.flatShading = true;
+          // Reduce emissive intensity for performance
+          if (mesh.material.emissive) {
+            mesh.material.emissiveIntensity = 0.7;
+          }
+        }
+        mesh.material.needsUpdate = true;
+      }
+    });
+
+    // Update galactic center quality if present
+    if (this.galacticCenter && this.galacticCenter.material) {
+      if (high) {
+        this.galacticCenter.material.flatShading = false;
+      } else {
+        this.galacticCenter.material.flatShading = true;
+      }
+      this.galacticCenter.material.needsUpdate = true;
+    }
+  }
+
+  /**
    * Cleanup all galaxy objects
    */
   cleanup() {
