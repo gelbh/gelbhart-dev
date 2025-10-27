@@ -711,8 +711,8 @@ export default class extends Controller {
 
             this.sceneManager.camera.position.set(
               0,
-              optimalDistance * 0.8,
-              optimalDistance * 0.8
+              optimalDistance * 0.3,
+              optimalDistance * 0.3
             );
             this.sceneManager.camera.lookAt(0, 0, 0);
             this.sceneManager.controls.target.set(0, 0, 0);
@@ -980,8 +980,8 @@ export default class extends Controller {
 
       this.sceneManager.camera.position.set(
         0,
-        optimalDistance * 0.8,
-        optimalDistance * 0.8
+        optimalDistance * 0.3,
+        optimalDistance * 0.3
       );
       this.sceneManager.camera.lookAt(0, 0, 0);
       this.sceneManager.controls.target.set(0, 0, 0);
@@ -1164,14 +1164,14 @@ export default class extends Controller {
         this.sceneManager.controls.update();
       } else {
         // Fallback to default galaxy view
-        this.sceneManager.camera.position.set(0, 80, 80);
+        this.sceneManager.camera.position.set(0, 30, 30);
         this.sceneManager.camera.lookAt(0, 0, 0);
         this.sceneManager.controls.target.set(0, 0, 0);
         this.sceneManager.controls.update();
       }
     } else {
       // Default galaxy view (looking at Earth/origin)
-      this.sceneManager.camera.position.set(0, 80, 80);
+      this.sceneManager.camera.position.set(0, 60, 60);
       this.sceneManager.camera.lookAt(0, 0, 0);
       this.sceneManager.controls.target.set(0, 0, 0);
       this.sceneManager.controls.update();
