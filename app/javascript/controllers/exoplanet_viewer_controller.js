@@ -58,6 +58,15 @@ export default class extends Controller {
     "resultsIcon",
     "resultsSection",
     "infoContent",
+    "starVisibilityToggle",
+    "planetLabelsToggle",
+    "orbitLinesToggle",
+    "starDensitySlider",
+    "starDensityValue",
+    "highQualityToggle",
+    "cameraSpeedSlider",
+    "cameraSpeedValue",
+    "autoRotateToggle",
   ];
 
   /**
@@ -72,6 +81,15 @@ export default class extends Controller {
     this.orbitSpeed = 1.0; // Speed multiplier: 1.0 = 1 orbit per 60 seconds (realistic)
     this.useOrbitalInclination = false; // Whether to show realistic 3D orbital inclinations
     this.animationId = null;
+
+    // Settings state
+    this.showStars = true;
+    this.showPlanetLabels = false;
+    this.showOrbitLines = true;
+    this.starDensity = 0.5; // 0.0 to 1.0
+    this.highQuality = true;
+    this.cameraSpeed = 1.0;
+    this.autoRotate = false;
 
     // Raycaster for planet click detection
     this.raycaster = null;
@@ -143,6 +161,8 @@ export default class extends Controller {
         this.fetchExoplanets();
         this.initPanelDragging();
         this.initInfoTabPlanetClicks();
+        // Set initial settings visibility for galaxy view
+        this.updateSettingsVisibility("galaxy");
       }, 100);
     });
   }
@@ -1162,6 +1182,9 @@ export default class extends Controller {
 
     // Auto-switch to info tab
     this.switchToInfoTab();
+
+    // Update settings visibility for galaxy view
+    this.updateSettingsVisibility("galaxy");
   }
 
   /**
@@ -1180,21 +1203,17 @@ export default class extends Controller {
     if (randomPlanetBtn) randomPlanetBtn.style.display = "none";
     if (randomSystemBtn) randomSystemBtn.style.display = "block";
 
-    // Show/hide appropriate controls
-    const orbitSpeedControl = document.getElementById("orbitSpeedControl");
-    const orbitalInclinationControl = document.getElementById(
-      "orbitalInclinationControl"
-    );
+    // Show/hide system instructions
     const systemInstructions = document.getElementById("systemInstructions");
-    if (orbitSpeedControl) orbitSpeedControl.style.display = "flex";
-    if (orbitalInclinationControl)
-      orbitalInclinationControl.style.display = "block";
     if (systemInstructions) systemInstructions.style.display = "block";
 
     // Update search placeholder
     if (this.hasSearchInputTarget) {
       this.searchInputTarget.placeholder = "Search star systems...";
     }
+
+    // Update settings visibility for system view
+    this.updateSettingsVisibility("system");
   }
 
   /**
@@ -1213,22 +1232,17 @@ export default class extends Controller {
     if (randomPlanetBtn) randomPlanetBtn.style.display = "block";
     if (randomSystemBtn) randomSystemBtn.style.display = "none";
 
-    // Show/hide appropriate controls
-    const orbitSpeedControl = document.getElementById("orbitSpeedControl");
-    const orbitalInclinationControl = document.getElementById(
-      "orbitalInclinationControl"
-    );
+    // Hide system instructions in planet view
     const systemInstructions = document.getElementById("systemInstructions");
-    // Hide orbit speed control and inclination toggle in planet view (only visible in system view)
-    if (orbitSpeedControl) orbitSpeedControl.style.display = "none";
-    if (orbitalInclinationControl)
-      orbitalInclinationControl.style.display = "none";
     if (systemInstructions) systemInstructions.style.display = "none";
 
     // Update search placeholder
     if (this.hasSearchInputTarget) {
       this.searchInputTarget.placeholder = "Search by name...";
     }
+
+    // Update settings visibility for planet view
+    this.updateSettingsVisibility("planet");
   }
 
   /**
@@ -2459,5 +2473,238 @@ export default class extends Controller {
       jupiter: "warning",
     };
     return colors[type] || "secondary";
+  }
+
+  // ============================================
+  // SETTINGS METHODS
+  // ============================================
+
+  /**
+   * Toggle background stars visibility
+   */
+  toggleStarVisibility() {
+    if (!this.hasStarVisibilityToggleTarget) return;
+
+    this.showStars = this.starVisibilityToggleTarget.checked;
+
+    if (this.sceneManager) {
+      if (this.showStars) {
+        this.sceneManager.showStars();
+      } else {
+        this.sceneManager.hideStars();
+      }
+    }
+  }
+
+  /**
+   * Toggle planet labels in system view
+   */
+  togglePlanetLabels() {
+    if (!this.hasPlanetLabelsToggleTarget) return;
+
+    this.showPlanetLabels = this.planetLabelsToggleTarget.checked;
+
+    if (this.systemRenderer) {
+      this.systemRenderer.toggleLabels(this.showPlanetLabels);
+    }
+  }
+
+  /**
+   * Toggle orbit lines visibility
+   */
+  toggleOrbitLines() {
+    if (!this.hasOrbitLinesToggleTarget) return;
+
+    this.showOrbitLines = this.orbitLinesToggleTarget.checked;
+
+    if (this.systemRenderer) {
+      this.systemRenderer.toggleOrbitLines(this.showOrbitLines);
+    }
+  }
+
+  /**
+   * Update star density
+   */
+  updateStarDensity(event) {
+    if (!this.hasStarDensitySliderTarget || !this.hasStarDensityValueTarget)
+      return;
+
+    const sliderValue = parseFloat(event.target.value);
+    this.starDensity = sliderValue / 100; // Convert to 0.0-1.0 range
+
+    // Update display
+    this.starDensityValueTarget.textContent = `${sliderValue}%`;
+
+    // Update scene manager
+    if (this.sceneManager) {
+      this.sceneManager.updateStarDensity(this.starDensity);
+    }
+  }
+
+  /**
+   * Toggle high quality rendering
+   */
+  toggleHighQuality() {
+    if (!this.hasHighQualityToggleTarget) return;
+
+    this.highQuality = this.highQualityToggleTarget.checked;
+
+    // Update all renderers
+    if (this.planetRenderer) {
+      this.planetRenderer.setQuality(this.highQuality);
+    }
+    if (this.systemRenderer) {
+      this.systemRenderer.setQuality(this.highQuality);
+    }
+    if (this.galaxyRenderer) {
+      this.galaxyRenderer.setQuality(this.highQuality);
+    }
+  }
+
+  /**
+   * Update camera rotation speed
+   */
+  updateCameraSpeed(event) {
+    if (!this.hasCameraSpeedSliderTarget || !this.hasCameraSpeedValueTarget)
+      return;
+
+    const sliderValue = parseFloat(event.target.value);
+
+    // Map 0-100 to 0.1x-2.0x (logarithmic scale for better control)
+    if (sliderValue <= 50) {
+      // 0-50 maps to 0.1-1.0
+      this.cameraSpeed = 0.1 + (sliderValue / 50) * 0.9;
+    } else {
+      // 50-100 maps to 1.0-2.0
+      this.cameraSpeed = 1.0 + ((sliderValue - 50) / 50) * 1.0;
+    }
+
+    // Update display
+    this.cameraSpeedValueTarget.textContent = `${this.cameraSpeed.toFixed(1)}x`;
+
+    // Update controls
+    if (this.sceneManager && this.sceneManager.controls) {
+      this.sceneManager.controls.rotateSpeed = this.cameraSpeed;
+    }
+  }
+
+  /**
+   * Toggle auto-rotate camera
+   */
+  toggleAutoRotate() {
+    if (!this.hasAutoRotateToggleTarget) return;
+
+    this.autoRotate = this.autoRotateToggleTarget.checked;
+
+    if (this.sceneManager && this.sceneManager.controls) {
+      this.sceneManager.controls.autoRotate = this.autoRotate;
+      this.sceneManager.controls.autoRotateSpeed = 0.5; // Slow rotation
+    }
+  }
+
+  /**
+   * Reset all settings to defaults
+   */
+  resetSettings() {
+    // Reset state variables
+    this.showStars = true;
+    this.showPlanetLabels = false;
+    this.showOrbitLines = true;
+    this.starDensity = 0.5;
+    this.highQuality = true;
+    this.cameraSpeed = 1.0;
+    this.autoRotate = false;
+    this.orbitSpeed = 1.0;
+    this.useOrbitalInclination = false;
+
+    // Update UI controls
+    if (this.hasStarVisibilityToggleTarget) {
+      this.starVisibilityToggleTarget.checked = this.showStars;
+    }
+    if (this.hasPlanetLabelsToggleTarget) {
+      this.planetLabelsToggleTarget.checked = this.showPlanetLabels;
+    }
+    if (this.hasOrbitLinesToggleTarget) {
+      this.orbitLinesToggleTarget.checked = this.showOrbitLines;
+    }
+    if (this.hasStarDensitySliderTarget) {
+      this.starDensitySliderTarget.value = "50";
+    }
+    if (this.hasStarDensityValueTarget) {
+      this.starDensityValueTarget.textContent = "50%";
+    }
+    if (this.hasHighQualityToggleTarget) {
+      this.highQualityToggleTarget.checked = this.highQuality;
+    }
+    if (this.hasCameraSpeedSliderTarget) {
+      this.cameraSpeedSliderTarget.value = "50";
+    }
+    if (this.hasCameraSpeedValueTarget) {
+      this.cameraSpeedValueTarget.textContent = "1.0x";
+    }
+    if (this.hasAutoRotateToggleTarget) {
+      this.autoRotateToggleTarget.checked = this.autoRotate;
+    }
+    if (this.hasOrbitSpeedSliderTarget) {
+      this.orbitSpeedSliderTarget.value = "50";
+    }
+    if (this.hasOrbitSpeedValueTarget) {
+      this.orbitSpeedValueTarget.textContent = "60.0s";
+    }
+    if (this.hasOrbitalInclinationToggleTarget) {
+      this.orbitalInclinationToggleTarget.checked = this.useOrbitalInclination;
+    }
+    if (this.hasAtmosphereToggleTarget) {
+      this.atmosphereToggleTarget.checked = false;
+    }
+
+    // Apply settings to renderers
+    this.toggleStarVisibility();
+    this.togglePlanetLabels();
+    this.toggleOrbitLines();
+    this.updateStarDensity({ target: { value: "50" } });
+    this.toggleHighQuality();
+    this.updateCameraSpeed({ target: { value: "50" } });
+    this.toggleAutoRotate();
+    this.toggleAtmospheres();
+  }
+
+  /**
+   * Update settings visibility based on current view mode
+   * @param {string} viewMode - Current view mode: 'galaxy', 'system', or 'planet'
+   */
+  updateSettingsVisibility(viewMode) {
+    // Get settings elements by ID
+    const atmosphereSetting = document.getElementById("atmosphereSetting");
+    const planetLabelsSetting = document.getElementById("planetLabelsSetting");
+    const orbitalMechanicsSection = document.getElementById(
+      "orbitalMechanicsSection"
+    );
+
+    switch (viewMode) {
+      case "galaxy":
+        // Galaxy view: Hide planet-specific and orbit settings
+        if (atmosphereSetting) atmosphereSetting.style.display = "none";
+        if (planetLabelsSetting) planetLabelsSetting.style.display = "none";
+        if (orbitalMechanicsSection)
+          orbitalMechanicsSection.style.display = "none";
+        break;
+
+      case "system":
+        // System view: Show all orbit-related settings
+        if (atmosphereSetting) atmosphereSetting.style.display = "block";
+        if (planetLabelsSetting) planetLabelsSetting.style.display = "block";
+        if (orbitalMechanicsSection)
+          orbitalMechanicsSection.style.display = "block";
+        break;
+
+      case "planet":
+        // Planet view: Show atmospheres but hide orbit settings
+        if (atmosphereSetting) atmosphereSetting.style.display = "block";
+        if (planetLabelsSetting) planetLabelsSetting.style.display = "none";
+        if (orbitalMechanicsSection)
+          orbitalMechanicsSection.style.display = "none";
+        break;
+    }
   }
 }

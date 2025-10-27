@@ -457,6 +457,94 @@ export class SceneManager {
   }
 
   /**
+   * Show background stars
+   */
+  showStars() {
+    if (this.starField) {
+      this.starField.visible = true;
+    }
+  }
+
+  /**
+   * Hide background stars
+   */
+  hideStars() {
+    if (this.starField) {
+      this.starField.visible = false;
+    }
+  }
+
+  /**
+   * Update star density (0.0 to 1.0)
+   * Regenerates the starfield with new density
+   */
+  updateStarDensity(density) {
+    // Remove existing starfield
+    if (this.starField) {
+      this.scene.remove(this.starField);
+      this.starField.geometry.dispose();
+      this.starField.material.dispose();
+    }
+
+    // Calculate number of stars based on density
+    const baseStarCount = 2000;
+    const starCount = Math.floor(baseStarCount * density);
+
+    // Don't create stars if density is 0
+    if (starCount === 0) {
+      this.starField = null;
+      return;
+    }
+
+    // Create new starfield with updated density
+    const starsGeometry = new THREE.BufferGeometry();
+    const starsVertices = [];
+    const starsSizes = [];
+    const starsColors = [];
+
+    for (let i = 0; i < starCount; i++) {
+      const x = (Math.random() - 0.5) * 200;
+      const y = (Math.random() - 0.5) * 200;
+      const z = (Math.random() - 0.5) * 200;
+      starsVertices.push(x, y, z);
+
+      starsSizes.push(Math.random() * 2 + 0.5);
+
+      const color = new THREE.Color();
+      color.setHSL(0.6, 0.2, 0.8 + Math.random() * 0.2);
+      starsColors.push(color.r, color.g, color.b);
+    }
+
+    starsGeometry.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(starsVertices, 3)
+    );
+    starsGeometry.setAttribute(
+      "size",
+      new THREE.Float32BufferAttribute(starsSizes, 1)
+    );
+    starsGeometry.setAttribute(
+      "color",
+      new THREE.Float32BufferAttribute(starsColors, 3)
+    );
+
+    const starsMaterial = new THREE.PointsMaterial({
+      size: 0.15,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.9,
+      sizeAttenuation: true,
+      blending: THREE.AdditiveBlending,
+      depthTest: true,
+      depthWrite: false,
+    });
+
+    this.starField = new THREE.Points(starsGeometry, starsMaterial);
+    this.starField.renderOrder = -1;
+    this.scene.add(this.starField);
+  }
+
+  /**
    * Cleanup scene objects
    */
   cleanup() {

@@ -1057,6 +1057,52 @@ export class PlanetRenderer {
   }
 
   /**
+   * Set rendering quality
+   * @param {boolean} high - Whether to use high quality rendering
+   */
+  setQuality(high) {
+    // Update planet material quality
+    if (this.planet && this.planet.material) {
+      if (high) {
+        this.planet.material.flatShading = false;
+        if (this.planet.material.map) {
+          this.planet.material.map.anisotropy = 16;
+        }
+      } else {
+        this.planet.material.flatShading = true;
+        if (this.planet.material.map) {
+          this.planet.material.map.anisotropy = 1;
+        }
+      }
+      this.planet.material.needsUpdate = true;
+    }
+
+    // Update atmosphere quality if present
+    if (this.atmosphere && this.atmosphere.material) {
+      if (high) {
+        this.atmosphere.material.transparent = true;
+        this.atmosphere.material.opacity = 0.3;
+      } else {
+        this.atmosphere.material.transparent = true;
+        this.atmosphere.material.opacity = 0.2;
+      }
+      this.atmosphere.material.needsUpdate = true;
+    }
+
+    // Update clouds quality if present
+    if (this.clouds && this.clouds.material) {
+      if (high) {
+        this.clouds.material.transparent = true;
+        this.clouds.material.opacity = 0.4;
+      } else {
+        this.clouds.material.transparent = true;
+        this.clouds.material.opacity = 0.3;
+      }
+      this.clouds.material.needsUpdate = true;
+    }
+  }
+
+  /**
    * Cleanup all planet-related objects
    */
   cleanup() {
