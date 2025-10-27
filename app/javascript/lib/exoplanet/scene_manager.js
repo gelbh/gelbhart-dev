@@ -106,8 +106,6 @@ export class SceneManager {
     canvas.addEventListener(
       "webglcontextrestored",
       () => {
-        console.log("WebGL context restored. Reinitializing scene...");
-
         // Reinitialize the scene
         this.initialize();
       },
@@ -209,9 +207,6 @@ export class SceneManager {
   setupPostProcessing(width, height) {
     // Skip post-processing on mobile devices for better performance
     if (this.isMobileDevice) {
-      console.log(
-        "Mobile device detected - post-processing disabled for performance"
-      );
       this.composer = null;
       return;
     }
@@ -228,8 +223,6 @@ export class SceneManager {
       0.85 // Threshold
     );
     this.composer.addPass(this.bloomPass);
-
-    console.log("Post-processing enabled (bloom effect)");
   }
 
   /**

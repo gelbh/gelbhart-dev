@@ -23,20 +23,130 @@
   </section>
 
   <!-- Main Viewer Section -->
-  <section class="py-4">
-    <div class="container-fluid">
-      <div class="row g-0">
-        
-        <!-- Left Panel: Search & Filter -->
-        <div class="col-lg-3 bg-light border-end position-relative" style="height: calc(100vh - 200px); overflow-y: auto;" data-exoplanet-viewer-target="leftPanel">
-          <div class="p-4">
-            <h5 class="mb-3">
-              <i class="bx bx-search me-2"></i>
-              <span id="searchTitle">Search</span>
-            </h5>
+  <section class="exoplanet-fullscreen-viewer">
+    
+    <!-- Full-page 3D Canvas -->
+    <div class="exoplanet-canvas-container">
+      <div
+        data-exoplanet-viewer-target="canvas"
+        class="exoplanet-threejs-canvas"
+        style="background: #000000;">
+      </div>
 
+      <!-- Loading Overlay -->
+      <div 
+        class="position-absolute top-50 start-50 translate-middle text-white text-center"
+        data-exoplanet-viewer-target="canvasLoading">
+        <div class="spinner-border mb-3" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p>Initializing 3D Viewer...</p>
+      </div>
+
+      <!-- Controls Overlay -->
+      <div class="exoplanet-controls-overlay">
+        <div class="d-flex gap-3 align-items-center flex-wrap">
+          <button class="btn btn-sm btn-outline-light" data-action="click->exoplanet-viewer#resetCamera">
+            <i class="bx bx-reset"></i> Reset View
+          </button>
+          <button class="btn btn-sm btn-outline-light" data-action="click->exoplanet-viewer#toggleFullscreen">
+            <i class="bx bx-fullscreen"></i> Fullscreen
+          </button>
+          
+          <!-- Atmosphere Toggle -->
+          <div class="form-check">
+            <input 
+              class="form-check-input" 
+              type="checkbox" 
+              id="atmosphereToggle"
+              data-exoplanet-viewer-target="atmosphereToggle"
+              data-action="change->exoplanet-viewer#toggleAtmospheres">
+            <label class="form-check-label fs-sm text-nowrap" for="atmosphereToggle">
+              <i class="bx bx-cloud"></i> Atmospheres
+            </label>
+          </div>
+          
+          <!-- Orbital Inclination Toggle (System View Only) -->
+          <div class="form-check" id="orbitalInclinationControl" style="display: none;">
+            <input 
+              class="form-check-input" 
+              type="checkbox" 
+              id="orbitalInclinationToggle"
+              data-exoplanet-viewer-target="orbitalInclinationToggle"
+              data-action="change->exoplanet-viewer#toggleOrbitalInclination">
+            <label class="form-check-label fs-sm text-nowrap" for="orbitalInclinationToggle">
+              3D Orbits
+            </label>
+          </div>
+          
+          <!-- Orbit Speed Control (System View Only) -->
+          <div class="orbit-speed-inline d-flex align-items-center gap-2" id="orbitSpeedControl" style="display: none;">
+            <label for="orbitSpeedSlider" class="form-label mb-0 fs-sm text-nowrap">
+              <i class="bx bx-time"></i> 1 orbit =
+            </label>
+            <input 
+              type="range" 
+              class="form-range orbit-speed-slider" 
+              id="orbitSpeedSlider" 
+              min="0" 
+              max="100" 
+              value="50"
+              data-exoplanet-viewer-target="orbitSpeedSlider"
+              data-action="input->exoplanet-viewer#updateOrbitSpeed"
+              style="width: 150px;">
+            <span class="badge bg-primary text-nowrap" data-exoplanet-viewer-target="orbitSpeedValue">60.0s</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Instructions Overlay -->
+      <div class="exoplanet-instructions-overlay" data-exoplanet-viewer-target="instructions">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <strong>Controls:</strong>
+          <button type="button" class="btn-close btn-close-white btn-sm" aria-label="Close" onclick="this.parentElement.parentElement.style.display='none'"></button>
+        </div>
+        <div><i class="bx bx-mouse"></i> Drag to rotate</div>
+        <div><i class="bx bx-mouse"></i> Scroll to zoom</div>
+        <div><i class="bx bx-mouse"></i> Right-click drag to pan</div>
+        <div id="systemInstructions" style="display: none;" class="mt-2 pt-2 border-top border-secondary">
+          <div><i class="bx bx-pointer"></i> Click planet to view details</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Combined Panel: Search & Information (Draggable Overlay) -->
+    <div class="exoplanet-overlay-panel exoplanet-combined-panel" data-exoplanet-viewer-target="leftPanel" data-panel="combined">
+      <!-- Panel Header with Drag Handle and Minimize Button -->
+      <div class="exoplanet-panel-header" data-drag-handle>
+        <!-- Tabs Navigation -->
+        <ul class="nav nav-tabs exoplanet-panel-tabs border-0 flex-grow-1" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="search-tab" data-bs-toggle="tab" data-bs-target="#search-panel" type="button" role="tab" aria-controls="search-panel" aria-selected="true">
+              <i class="bx bx-search me-1"></i> Search
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="info-tab" data-bs-toggle="tab" data-bs-target="#info-panel" type="button" role="tab" aria-controls="info-panel" aria-selected="false">
+              <i class="bx bx-info-circle me-1"></i> Info
+            </button>
+          </li>
+        </ul>
+        
+        <div class="exoplanet-panel-controls">
+          <button class="btn btn-sm btn-link text-white p-0" data-action="click->exoplanet-viewer#togglePanelMinimize" data-panel-target="combined" title="Minimize Panel">
+            <span class="exoplanet-minimize-icon">−</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Panel Content with Tabs -->
+      <div class="exoplanet-panel-content">
+        <div class="tab-content" id="panelTabContent">
+          <!-- Search Tab Content -->
+          <div class="tab-pane fade show active" id="search-panel" role="tabpanel" aria-labelledby="search-tab">
+        <div class="p-4">
             <!-- Search Input -->
-            <div class="mb-3">
+            <div class="mb-4">
               <input 
                 type="text" 
                 class="form-control" 
@@ -46,8 +156,13 @@
             </div>
 
             <!-- Filters -->
-            <div class="mb-4">
-              <h6 class="text-muted mb-3">Filters</h6>
+            <div class="mb-4 mt-4">
+              <button class="btn btn-link text-white p-0 w-100 text-start d-flex align-items-center justify-content-between" data-action="click->exoplanet-viewer#toggleFilters">
+                <h6 class="mb-0 text-white">Filters</h6>
+                <i class="bx bx-chevron-down fs-5" data-exoplanet-viewer-target="filtersIcon"></i>
+              </button>
+              
+              <div class="collapse" data-exoplanet-viewer-target="filtersSection" style="margin-top: 1rem;">
               
               <!-- Filter Mode Toggle -->
               <div class="mb-3">
@@ -163,298 +278,47 @@
               <button class="btn btn-outline-secondary w-100" data-action="click->exoplanet-viewer#clearFilters">
                 Clear All
               </button>
+              </div>
             </div>
 
             <!-- Results List -->
             <div class="results-section">
-              <h6 class="text-muted mb-3">
-                Results 
-                <span class="badge bg-secondary" data-exoplanet-viewer-target="resultCount">0</span>
-              </h6>
+              <button class="btn btn-link text-white p-0 w-100 text-start d-flex align-items-center justify-content-between mb-2" data-action="click->exoplanet-viewer#toggleResults">
+                <h6 class="mb-0 text-white">
+                  Results 
+                  <span class="badge bg-secondary" data-exoplanet-viewer-target="resultCount">0</span>
+                </h6>
+                <i class="bx bx-chevron-down fs-5" data-exoplanet-viewer-target="resultsIcon"></i>
+              </button>
               
-              <div class="d-flex align-items-center justify-content-center py-5" data-exoplanet-viewer-target="loadingIndicator">
-                <div class="spinner-border text-primary" role="status">
-                  <span class="visually-hidden">Loading...</span>
+              <div class="collapse" data-exoplanet-viewer-target="resultsSection">
+                <div class="d-flex align-items-center justify-content-center py-5" data-exoplanet-viewer-target="loadingIndicator">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
                 </div>
-              </div>
 
-              <div data-exoplanet-viewer-target="resultsList" class="list-group">
-                <!-- Planet results will be inserted here -->
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- Center Panel: 3D Viewer -->
-        <div class="col-lg-6 bg-dark position-relative">
-          <div class="w-100" style="height: calc(100vh - 200px);">
-            <!-- Three.js Canvas -->
-            <div
-              data-exoplanet-viewer-target="canvas"
-              class="w-100 h-100 position-relative"
-              style="background: #000000;">
-            </div>
-
-            <!-- Loading Overlay -->
-            <div 
-              class="position-absolute top-50 start-50 translate-middle text-white text-center"
-              data-exoplanet-viewer-target="canvasLoading">
-              <div class="spinner-border mb-3" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-              <p>Initializing 3D Viewer...</p>
-            </div>
-
-            <!-- Controls Overlay -->
-            <div class="position-absolute bottom-0 start-0 p-3 text-white bg-dark bg-opacity-75 rounded m-3" style="max-width: calc(100% - 2rem);">
-              <div class="d-flex gap-3 align-items-center flex-wrap">
-                <button class="btn btn-sm btn-outline-light" data-action="click->exoplanet-viewer#resetCamera">
-                  <i class="bx bx-reset"></i> Reset View
-                </button>
-                <button class="btn btn-sm btn-outline-light" data-action="click->exoplanet-viewer#toggleFullscreen">
-                  <i class="bx bx-fullscreen"></i> Fullscreen
-                </button>
-                
-                <!-- Atmosphere Toggle -->
-                <div class="form-check">
-                  <input 
-                    class="form-check-input" 
-                    type="checkbox" 
-                    id="atmosphereToggle"
-                    data-exoplanet-viewer-target="atmosphereToggle"
-                    data-action="change->exoplanet-viewer#toggleAtmospheres">
-                  <label class="form-check-label fs-sm text-nowrap" for="atmosphereToggle">
-                    <i class="bx bx-cloud"></i> Atmospheres
-                  </label>
+                <div data-exoplanet-viewer-target="resultsList" class="list-group">
+                  <!-- Planet results will be inserted here -->
                 </div>
-                
-                <!-- Orbital Inclination Toggle (System View Only) -->
-                <div class="form-check" id="orbitalInclinationControl" style="display: none;">
-                  <input 
-                    class="form-check-input" 
-                    type="checkbox" 
-                    id="orbitalInclinationToggle"
-                    data-exoplanet-viewer-target="orbitalInclinationToggle"
-                    data-action="change->exoplanet-viewer#toggleOrbitalInclination">
-                  <label class="form-check-label fs-sm text-nowrap" for="orbitalInclinationToggle">
-                    3D Orbits
-                  </label>
-                </div>
-                
-                <!-- Orbit Speed Control (System View Only) -->
-                <div class="orbit-speed-inline d-flex align-items-center gap-2" id="orbitSpeedControl" style="display: none;">
-                  <label for="orbitSpeedSlider" class="form-label mb-0 fs-sm text-nowrap">
-                    <i class="bx bx-time"></i> 1 orbit =
-                  </label>
-                  <input 
-                    type="range" 
-                    class="form-range orbit-speed-slider" 
-                    id="orbitSpeedSlider" 
-                    min="0" 
-                    max="100" 
-                    value="50"
-                    data-exoplanet-viewer-target="orbitSpeedSlider"
-                    data-action="input->exoplanet-viewer#updateOrbitSpeed"
-                    style="width: 150px;">
-                  <span class="badge bg-primary text-nowrap" data-exoplanet-viewer-target="orbitSpeedValue">60.0s</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Instructions Overlay -->
-            <div class="position-absolute top-0 end-0 p-3 m-3 text-white bg-dark bg-opacity-75 rounded fs-sm" data-exoplanet-viewer-target="instructions" style="max-width: 250px;">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <strong>Controls:</strong>
-                <button type="button" class="btn-close btn-close-white btn-sm" aria-label="Close" onclick="this.parentElement.parentElement.style.display='none'"></button>
-              </div>
-              <div><i class="bx bx-mouse"></i> Drag to rotate</div>
-              <div><i class="bx bx-mouse"></i> Scroll to zoom</div>
-              <div><i class="bx bx-mouse"></i> Right-click drag to pan</div>
-              <div id="systemInstructions" style="display: none;" class="mt-2 pt-2 border-top border-secondary">
-                <div><i class="bx bx-pointer"></i> Click planet to view details</div>
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- Right Panel: Information -->
-        <div class="col-lg-3 bg-light border-start" style="height: calc(100vh - 200px); overflow-y: auto;">
-          <div class="p-4">
-            <!-- Planet Info -->
-            <div data-exoplanet-viewer-target="planetInfo">
-              <div class="text-center py-5 text-muted">
-                <i class="bx bx-planet display-1 opacity-25"></i>
-                <p class="mt-3">Select a planet to view details</p>
-              </div>
-            </div>
-
-            <!-- Planet Details Template (hidden, will be shown when planet selected) -->
-            <div data-exoplanet-viewer-target="planetDetails" style="display: none;">
-              <h5 class="mb-3" data-exoplanet-viewer-target="planetName">Planet Name</h5>
-              
-              <div class="mb-4">
-                <div class="badge bg-primary mb-2" data-exoplanet-viewer-target="planetType">Type</div>
-              </div>
-
-              <h6 class="text-muted mb-3">Physical Properties</h6>
-              <table class="table table-sm">
-                <thead>
-                  <tr>
-                    <th scope="col" class="border-0 text-muted fw-normal fs-sm">Property</th>
-                    <th scope="col" class="border-0 text-muted fw-normal fs-sm text-end">Value</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="text-muted">Radius</td>
-                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="radius">-</td>
-                  </tr>
-                  <tr>
-                    <td class="text-muted">Mass</td>
-                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="mass">-</td>
-                  </tr>
-                  <tr>
-                    <td class="text-muted">Temperature</td>
-                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="temperature">-</td>
-                  </tr>
-                  <tr>
-                    <td class="text-muted">Orbital Period</td>
-                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="orbitalPeriod">-</td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <h6 class="text-muted mb-3 mt-4">Host Star</h6>
-              <table class="table table-sm">
-                <thead>
-                  <tr>
-                    <th scope="col" class="border-0 text-muted fw-normal fs-sm">Property</th>
-                    <th scope="col" class="border-0 text-muted fw-normal fs-sm text-end">Value</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="text-muted">Star Name</td>
-                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="starName">-</td>
-                  </tr>
-                  <tr data-exoplanet-viewer-target="spectralTypeRow">
-                    <td class="text-muted">Spectral Type</td>
-                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="spectralType">-</td>
-                  </tr>
-                  <tr data-exoplanet-viewer-target="starAgeRow">
-                    <td class="text-muted">Star Age</td>
-                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="starAge">-</td>
-                  </tr>
-                  <tr>
-                    <td class="text-muted">Distance</td>
-                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="distance">-</td>
-                  </tr>
-                  <tr>
-                    <td class="text-muted">Discovery Year</td>
-                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="discoveryYear">-</td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <h6 class="text-muted mb-3 mt-4">Discovery Context</h6>
-              <table class="table table-sm">
-                <thead>
-                  <tr>
-                    <th scope="col" class="border-0 text-muted fw-normal fs-sm">Property</th>
-                    <th scope="col" class="border-0 text-muted fw-normal fs-sm text-end">Value</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="text-muted">Method</td>
-                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="discoveryMethod">-</td>
-                  </tr>
-                  <tr>
-                    <td class="text-muted">Telescope/Facility</td>
-                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="discoveryFacility">-</td>
-                  </tr>
-                  <tr data-exoplanet-viewer-target="systemContextRow">
-                    <td class="text-muted">System</td>
-                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="systemContext">-</td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <div class="alert alert-info mt-4">
-                <small>
-                  <i class="bx bx-info-circle me-1"></i>
-                  Visualization is a procedural approximation based on known properties. Actual appearance may differ.
-                </small>
-              </div>
-
-              <a href="#" class="btn btn-outline-primary w-100 mt-3" data-exoplanet-viewer-target="nasaLink" target="_blank" rel="noopener">
-                <i class="bx bx-link-external me-1"></i>
-                View on NASA Archive
-              </a>
-            </div>
-
-            <!-- System Details (hidden, shown in system view) -->
-            <div data-exoplanet-viewer-target="systemDetails" style="display: none;">
-              <h5 class="mb-3">
-                <i class="bx bx-sun me-2"></i>
-                <span data-exoplanet-viewer-target="systemStarName">Star System</span>
-              </h5>
-              
-              <div class="mb-4">
-                <div class="badge bg-info mb-2">
-                  <span data-exoplanet-viewer-target="systemPlanetCount">0</span> Planets
-                </div>
-              </div>
-
-              <h6 class="text-muted mb-3">System Information</h6>
-              <table class="table table-sm">
-                <thead>
-                  <tr>
-                    <th scope="col" class="border-0 text-muted fw-normal fs-sm">Property</th>
-                    <th scope="col" class="border-0 text-muted fw-normal fs-sm text-end">Value</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="text-muted">Distance</td>
-                    <td class="text-end fw-semibold" data-exoplanet-viewer-target="systemDistance">-</td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <h6 class="text-muted mb-3 mt-4">Planet Comparison</h6>
-              <div class="table-responsive">
-                <table class="table table-sm table-striped">
-                  <thead>
-                    <tr class="fs-sm">
-                      <th>Planet</th>
-                      <th>Type</th>
-                      <th>Radius</th>
-                      <th>Mass</th>
-                      <th>Temp</th>
-                      <th>Orbit</th>
-                      <th>Period</th>
-                    </tr>
-                  </thead>
-                  <tbody data-exoplanet-viewer-target="systemComparisonBody" class="fs-sm">
-                    <!-- Planet rows will be inserted here -->
-                  </tbody>
-                </table>
-              </div>
-
-              <div class="alert alert-info mt-4">
-                <small>
-                  <i class="bx bx-info-circle me-1"></i>
-                  System view shows relative orbital positions. Planet sizes are scaled for visibility.
-                </small>
-              </div>
+          </div>
+          
+          <!-- Information Tab Content -->
+          <div class="tab-pane fade" id="info-panel" role="tabpanel" aria-labelledby="info-tab">
+            <div class="p-4" data-exoplanet-viewer-target="infoContent">
+              <h5 class="text-white mb-3">Information</h5>
+              <p class="text-white-50">
+                Loading information...
+              </p>
             </div>
           </div>
         </div>
-
       </div>
     </div>
+
   </section>
 
   <!-- About Section -->
@@ -523,4 +387,5 @@
     </div>
   </section>
 </div>
+
 

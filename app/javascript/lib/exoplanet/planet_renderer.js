@@ -151,9 +151,7 @@ export class PlanetRenderer {
 
       // Cache the texture for future use
       this.textureCache.planet.set(cacheKey, texture);
-      console.log(`Generated and cached texture for ${planet.name}`);
     } else {
-      console.log(`Using cached texture for ${planet.name}`);
     }
 
     return new THREE.MeshStandardMaterial({
@@ -189,7 +187,6 @@ export class PlanetRenderer {
         (texture) => {
           material.map = texture;
           material.needsUpdate = true;
-          console.log(`Loaded realistic texture for ${planet.name}`);
         },
         undefined,
         (error) => {
@@ -565,8 +562,6 @@ export class PlanetRenderer {
 
     this.atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
     this.scene.add(this.atmosphere);
-
-    console.log(`Added realistic atmosphere for ${planet.name}`);
   }
 
   /**
@@ -644,9 +639,7 @@ export class PlanetRenderer {
 
       // Cache the cloud texture
       this.textureCache.clouds.set(cacheKey, cloudTexture);
-      console.log(`Generated and cached cloud texture for ${planet.name}`);
     } else {
-      console.log(`Using cached cloud texture for ${planet.name}`);
     }
 
     const cloudMaterial = new THREE.MeshPhongMaterial({
@@ -738,9 +731,7 @@ export class PlanetRenderer {
 
       // Cache the ring texture
       this.textureCache.rings.set(cacheKey, ringTexture);
-      console.log("Generated and cached Saturn ring texture");
     } else {
-      console.log("Using cached Saturn ring texture");
     }
 
     const ringMaterial = new THREE.MeshBasicMaterial({
@@ -754,8 +745,6 @@ export class PlanetRenderer {
     // Saturn's rings are tilted at approximately 26.7 degrees from our viewing angle
     this.rings.rotation.x = Math.PI / 2 + (26.7 * Math.PI) / 180;
     this.planet.add(this.rings);
-
-    console.log("Added realistic Saturn rings");
   }
 
   /**

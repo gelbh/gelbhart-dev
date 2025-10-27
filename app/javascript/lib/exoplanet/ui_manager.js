@@ -1,6 +1,6 @@
 /**
  * UIManager
- * Handles UI updates for info panel, results list, and loading states
+ * Handles UI updates for results list and loading states
  */
 export class UIManager {
   constructor(targets) {
@@ -288,128 +288,6 @@ export class UIManager {
   }
 
   /**
-   * Show planet information in the info panel
-   */
-  showPlanetInfo(planet) {
-    if (this.targets.planetInfo) {
-      this.targets.planetInfo.style.display = "none";
-    }
-    if (this.targets.planetDetails) {
-      this.targets.planetDetails.style.display = "block";
-    }
-
-    this.targets.planetName.textContent = planet.name;
-    this.targets.planetType.textContent = this.getPlanetTypeName(planet.type);
-    this.targets.planetType.className = `badge bg-${this.getTypeColor(
-      planet.type
-    )} mb-2`;
-
-    // Show Jupiter units for gas giants, Earth units for smaller planets
-    if (planet.type === "jupiter" || planet.type === "neptune") {
-      // For gas giants, show Jupiter units with Earth units in parentheses
-      if (planet.radiusJupiter) {
-        this.targets.radius.textContent = `${planet.radiusJupiter.toFixed(
-          2
-        )} R♃ (${planet.radius.toFixed(2)} R⊕)`;
-      } else {
-        this.targets.radius.textContent = `${planet.radius.toFixed(2)} R⊕ (${(
-          planet.radius / 11.2
-        ).toFixed(2)} R♃)`;
-      }
-
-      if (planet.massJupiter) {
-        this.targets.mass.textContent = `${planet.massJupiter.toFixed(
-          2
-        )} M♃ (${planet.mass.toFixed(2)} M⊕)`;
-      } else if (planet.mass) {
-        this.targets.mass.textContent = `${planet.mass.toFixed(2)} M⊕ (${(
-          planet.mass / 318
-        ).toFixed(2)} M♃)`;
-      } else {
-        this.targets.mass.textContent = "Unknown";
-      }
-    } else {
-      // For terrestrial and super-Earths, show Earth units
-      this.targets.radius.textContent = `${planet.radius.toFixed(2)} R⊕`;
-      this.targets.mass.textContent = planet.mass
-        ? `${planet.mass.toFixed(2)} M⊕`
-        : "Unknown";
-    }
-    this.targets.temperature.textContent = `${planet.temperature.toFixed(0)} K`;
-    this.targets.orbitalPeriod.textContent = planet.orbitalPeriod
-      ? `${planet.orbitalPeriod.toFixed(2)} days`
-      : "Unknown";
-
-    this.targets.starName.textContent = planet.hostStar;
-
-    // NEW: Spectral type
-    if (this.targets.spectralType && this.targets.spectralTypeRow) {
-      if (planet.spectralType) {
-        this.targets.spectralType.textContent = planet.spectralType;
-        this.targets.spectralTypeRow.style.display = "";
-      } else {
-        this.targets.spectralTypeRow.style.display = "none";
-      }
-    }
-
-    // NEW: Star age
-    if (this.targets.starAge && this.targets.starAgeRow) {
-      if (planet.stellarAge) {
-        const ageText = `${planet.stellarAge.toFixed(2)} Gyr`;
-        const ageComparison =
-          planet.stellarAge < 1
-            ? " (young)"
-            : planet.stellarAge < 5
-            ? " (middle-aged)"
-            : " (old)";
-        this.targets.starAge.textContent = ageText + ageComparison;
-        this.targets.starAgeRow.style.display = "";
-      } else {
-        this.targets.starAgeRow.style.display = "none";
-      }
-    }
-
-    this.targets.distance.textContent = `${planet.distance.toFixed(
-      2
-    )} light-years`;
-    this.targets.discoveryYear.textContent = planet.discoveryYear;
-
-    // NEW: Discovery context
-    if (this.targets.discoveryMethod) {
-      this.targets.discoveryMethod.textContent =
-        planet.discoveryMethod || "Unknown";
-    }
-    if (this.targets.discoveryFacility) {
-      this.targets.discoveryFacility.textContent =
-        planet.discoveryFacility || "Unknown";
-    }
-
-    // NEW: System context (stars and planets)
-    if (this.targets.systemContext && this.targets.systemContextRow) {
-      const systemParts = [];
-      if (planet.numberOfStars > 1) {
-        systemParts.push(`${planet.numberOfStars} stars`);
-      }
-      if (planet.numberOfPlanets > 1) {
-        systemParts.push(`${planet.numberOfPlanets} planets`);
-      }
-
-      if (systemParts.length > 0) {
-        this.targets.systemContext.textContent = systemParts.join(", ");
-        this.targets.systemContextRow.style.display = "";
-      } else {
-        this.targets.systemContextRow.style.display = "none";
-      }
-    }
-
-    // Security: Encode planet name to prevent URL injection
-    const nasaUrl = `https://exoplanetarchive.ipac.caltech.edu/overview/${this.sanitizeURL(
-      planet.name
-    )}`;
-    this.targets.nasaLink.href = nasaUrl;
-  }
-
-  /**
    * Get planet type display name
    */
   getPlanetTypeName(type) {
@@ -509,81 +387,314 @@ export class UIManager {
   }
 
   /**
-   * Show system information panel
+   * Update info panel with galaxy view information
    */
-  showSystemInfo(system) {
-    if (this.targets.planetInfo) {
-      this.targets.planetInfo.style.display = "none";
-    }
-    if (this.targets.planetDetails) {
-      this.targets.planetDetails.style.display = "none";
-    }
-    if (this.targets.systemDetails) {
-      this.targets.systemDetails.style.display = "block";
-    }
+  updateInfoForGalaxyView(systemCount, totalPlanets) {
+    const infoContent = document.querySelector(
+      '[data-exoplanet-viewer-target="infoContent"]'
+    );
+    if (!infoContent) return;
+
+    infoContent.innerHTML = `
+      <div class="info-galaxy">
+        <h5 class="text-white mb-3"><i class="bx bx-bullseye me-2"></i>Galaxy View</h5>
+        
+        <div class="info-section">
+          <h6 class="text-white mb-2">Overview</h6>
+          <p class="text-white-50 fs-sm">
+            You are viewing a 3D representation of discovered exoplanet systems mapped to their 
+            galactic coordinates relative to Earth (at the center).
+          </p>
+        </div>
+
+        <div class="info-section">
+          <h6 class="text-white mb-2">Statistics</h6>
+          <div class="stat-item p-2 rounded mb-2" style="background: rgba(255, 255, 255, 0.05);">
+            <div class="d-flex justify-content-between">
+              <span class="text-white-50"><i class="bx bx-sun me-1"></i>Star Systems</span>
+              <strong class="text-white">${this.sanitizeHTML(
+                systemCount
+              )}</strong>
+            </div>
+          </div>
+          <div class="stat-item p-2 rounded mb-2" style="background: rgba(255, 255, 255, 0.05);">
+            <div class="d-flex justify-content-between">
+              <span class="text-white-50"><i class="bx bx-planet me-1"></i>Total Planets</span>
+              <strong class="text-white">${this.sanitizeHTML(
+                totalPlanets
+              )}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h6 class="text-white mb-2">Interactions</h6>
+          <ul class="text-white-50 fs-sm ps-3 mb-0">
+            <li>Click a star system to zoom in and view its planets</li>
+            <li>Drag to rotate the view</li>
+            <li>Scroll to zoom in/out</li>
+            <li>Search for specific systems in the Search tab</li>
+          </ul>
+        </div>
+      </div>
+    `;
   }
 
   /**
-   * Update system comparison table
+   * Update info panel with system view information
    */
-  updateSystemComparison(planets) {
-    const tbody = this.targets.systemComparisonBody;
-    if (!tbody) return;
+  updateInfoForSystemView(system) {
+    const infoContent = document.querySelector(
+      '[data-exoplanet-viewer-target="infoContent"]'
+    );
+    if (!infoContent) return;
 
-    tbody.innerHTML = "";
+    const planetListHTML = system.planets
+      .map(
+        (planet) => `
+      <div class="planet-item p-2 rounded mb-2" style="background: rgba(255, 255, 255, 0.05);">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <strong class="text-white d-block">${this.sanitizeHTML(
+              planet.name
+            )}</strong>
+            <small class="text-white-50">
+              <i class="bx bx-thermometer me-1"></i>${this.sanitizeHTML(
+                (planet.temperature || 0).toFixed(0)
+              )} K
+              ${
+                planet.radius
+                  ? `<span class="ms-2"><i class="bx bx-planet me-1"></i>${this.sanitizeHTML(
+                      planet.radius.toFixed(2)
+                    )} R⊕</span>`
+                  : ""
+              }
+            </small>
+          </div>
+          <span class="badge bg-${this.getTypeColor(
+            planet.type
+          )}">${this.sanitizeHTML(this.getPlanetTypeName(planet.type))}</span>
+        </div>
+      </div>
+    `
+      )
+      .join("");
 
-    // Use DocumentFragment to batch DOM insertions
-    const fragment = document.createDocumentFragment();
-    planets.forEach((planet) => {
-      const row = document.createElement("tr");
-      // Security: Sanitize data before inserting to prevent XSS
-      row.innerHTML = `
-        <td class="fw-semibold">${this.sanitizeHTML(
-          planet.name.split(" ").pop()
-        )}</td>
-        <td>
-          <span class="badge bg-${this.getTypeColor(planet.type)}">
-            ${this.sanitizeHTML(this.getPlanetTypeName(planet.type))}
-          </span>
-        </td>
-        <td>${this.sanitizeHTML(planet.radius.toFixed(2))} R⊕</td>
-        <td>${
-          planet.mass
-            ? this.sanitizeHTML(planet.mass.toFixed(2)) + " M⊕"
-            : "N/A"
-        }</td>
-        <td>${this.sanitizeHTML(planet.temperature.toFixed(0))} K</td>
-        <td>${
-          planet.semiMajorAxis
-            ? this.sanitizeHTML(planet.semiMajorAxis.toFixed(3)) + " AU"
-            : "N/A"
-        }</td>
-        <td>${
-          planet.orbitalPeriod
-            ? this.sanitizeHTML(planet.orbitalPeriod.toFixed(1)) + " days"
-            : "N/A"
-        }</td>
-      `;
-      fragment.appendChild(row);
-    });
-    tbody.appendChild(fragment);
+    infoContent.innerHTML = `
+      <div class="info-system">
+        <h5 class="text-white mb-3">
+          <i class="bx bx-sun text-warning me-2"></i>${this.sanitizeHTML(
+            system.starName || system.name
+          )}
+        </h5>
+        
+        <div class="info-section">
+          <h6 class="text-white mb-2">System Overview</h6>
+          <div class="property-item p-2 rounded mb-2" style="background: rgba(255, 255, 255, 0.05);">
+            <div class="d-flex justify-content-between">
+              <span class="text-white-50"><i class="bx bx-planet me-1"></i>Planets</span>
+              <strong class="text-white">${this.sanitizeHTML(
+                system.planets.length
+              )}</strong>
+            </div>
+          </div>
+          ${
+            system.distance
+              ? `
+          <div class="property-item p-2 rounded mb-2" style="background: rgba(255, 255, 255, 0.05);">
+            <div class="d-flex justify-content-between">
+              <span class="text-white-50"><i class="bx bx-trip me-1"></i>Distance</span>
+              <strong class="text-white">${this.sanitizeHTML(
+                system.distance.toFixed(1)
+              )} ly</strong>
+            </div>
+          </div>
+          `
+              : ""
+          }
+        </div>
+
+        <div class="info-section">
+          <h6 class="text-white mb-2">Planets in System</h6>
+          <div class="planet-list" style="max-height: 300px; overflow-y: auto;">
+            ${planetListHTML}
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h6 class="text-white mb-2">Interactions</h6>
+          <ul class="text-white-50 fs-sm ps-3 mb-0">
+            <li>Click a planet to view its details</li>
+            <li>Watch planets orbit their star in real-time</li>
+            <li>Adjust orbit speed with the slider below</li>
+            <li>Toggle 3D orbits to see inclinations</li>
+          </ul>
+        </div>
+      </div>
+    `;
   }
 
   /**
-   * Update system statistics display
+   * Update info panel with planet view information
    */
-  updateSystemStats(stats) {
-    if (this.targets.systemStarName) {
-      this.targets.systemStarName.textContent = stats.starName;
+  updateInfoForPlanetView(planet) {
+    const infoContent = document.querySelector(
+      '[data-exoplanet-viewer-target="infoContent"]'
+    );
+    if (!infoContent) return;
+
+    const properties = [];
+
+    if (planet.radius) {
+      properties.push(`
+        <div class="property-item p-2 rounded mb-2" style="background: rgba(255, 255, 255, 0.05);">
+          <div class="d-flex justify-content-between">
+            <span class="text-white-50"><i class="bx bx-planet me-1"></i>Radius</span>
+            <strong class="text-white">${this.sanitizeHTML(
+              planet.radius.toFixed(2)
+            )} R⊕</strong>
+          </div>
+        </div>
+      `);
     }
-    if (this.targets.systemPlanetCount) {
-      this.targets.systemPlanetCount.textContent = stats.planetCount;
+
+    if (planet.mass) {
+      properties.push(`
+        <div class="property-item p-2 rounded mb-2" style="background: rgba(255, 255, 255, 0.05);">
+          <div class="d-flex justify-content-between">
+            <span class="text-white-50"><i class="bx bx-dumbbell me-1"></i>Mass</span>
+            <strong class="text-white">${this.sanitizeHTML(
+              planet.mass.toFixed(2)
+            )} M⊕</strong>
+          </div>
+        </div>
+      `);
     }
-    if (this.targets.systemDistance) {
-      this.targets.systemDistance.textContent =
-        stats.planets && stats.planets[0]
-          ? `${stats.planets[0].distance.toFixed(2)} light-years`
-          : "Unknown";
+
+    if (planet.temperature) {
+      properties.push(`
+        <div class="property-item p-2 rounded mb-2" style="background: rgba(255, 255, 255, 0.05);">
+          <div class="d-flex justify-content-between">
+            <span class="text-white-50"><i class="bx bx-thermometer me-1"></i>Temperature</span>
+            <strong class="text-white">${this.sanitizeHTML(
+              planet.temperature.toFixed(0)
+            )} K</strong>
+          </div>
+        </div>
+      `);
     }
+
+    if (planet.orbitalPeriod) {
+      properties.push(`
+        <div class="property-item p-2 rounded mb-2" style="background: rgba(255, 255, 255, 0.05);">
+          <div class="d-flex justify-content-between">
+            <span class="text-white-50"><i class="bx bx-time me-1"></i>Orbital Period</span>
+            <strong class="text-white">${this.sanitizeHTML(
+              planet.orbitalPeriod.toFixed(1)
+            )} days</strong>
+          </div>
+        </div>
+      `);
+    }
+
+    if (planet.semiMajorAxis) {
+      properties.push(`
+        <div class="property-item p-2 rounded mb-2" style="background: rgba(255, 255, 255, 0.05);">
+          <div class="d-flex justify-content-between">
+            <span class="text-white-50"><i class="bx bx-trip me-1"></i>Distance from Star</span>
+            <strong class="text-white">${this.sanitizeHTML(
+              planet.semiMajorAxis.toFixed(3)
+            )} AU</strong>
+          </div>
+        </div>
+      `);
+    }
+
+    if (planet.discoveryMethod) {
+      properties.push(`
+        <div class="property-item p-2 rounded mb-2" style="background: rgba(255, 255, 255, 0.05);">
+          <div class="d-flex justify-content-between">
+            <span class="text-white-50"><i class="bx bx-search me-1"></i>Discovery Method</span>
+            <strong class="text-white">${this.sanitizeHTML(
+              planet.discoveryMethod
+            )}</strong>
+          </div>
+        </div>
+      `);
+    }
+
+    if (planet.discoveryYear) {
+      properties.push(`
+        <div class="property-item p-2 rounded mb-2" style="background: rgba(255, 255, 255, 0.05);">
+          <div class="d-flex justify-content-between">
+            <span class="text-white-50"><i class="bx bx-calendar me-1"></i>Discovered</span>
+            <strong class="text-white">${this.sanitizeHTML(
+              planet.discoveryYear
+            )}</strong>
+          </div>
+        </div>
+      `);
+    }
+
+    infoContent.innerHTML = `
+      <div class="info-planet">
+        <h5 class="text-white mb-3">
+          <i class="bx bx-planet text-primary me-2"></i>${this.sanitizeHTML(
+            planet.name
+          )}
+        </h5>
+        
+        <div class="info-section">
+          <h6 class="text-white mb-2">Classification</h6>
+          <div class="mb-3">
+            <span class="badge bg-${this.getTypeColor(
+              planet.type
+            )} fs-sm px-3 py-2">
+              ${this.sanitizeHTML(this.getPlanetTypeName(planet.type))}
+            </span>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h6 class="text-white mb-2">Host Star</h6>
+          <p class="text-white fs-6 mb-1">
+            <i class="bx bx-sun text-warning me-2"></i>${this.sanitizeHTML(
+              planet.hostStar
+            )}
+          </p>
+          ${
+            planet.distance
+              ? `
+          <p class="text-white-50 fs-sm mb-0">
+            <i class="bx bx-trip me-1"></i>${this.sanitizeHTML(
+              planet.distance.toFixed(1)
+            )} light-years from Earth
+          </p>
+          `
+              : ""
+          }
+        </div>
+
+        ${
+          properties.length > 0
+            ? `
+        <div class="info-section">
+          <h6 class="text-white mb-2">Physical Properties</h6>
+          ${properties.join("")}
+        </div>
+        `
+            : ""
+        }
+
+        <div class="info-section">
+          <h6 class="text-white mb-2">About This View</h6>
+          <p class="text-white-50 fs-sm mb-0">
+            This is a procedurally generated visualization based on real NASA data. 
+            The planet's appearance is computed from its known properties like radius, 
+            mass, temperature, and host star characteristics.
+          </p>
+        </div>
+      </div>
+    `;
   }
 }

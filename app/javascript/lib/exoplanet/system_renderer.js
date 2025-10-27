@@ -28,7 +28,6 @@ export class SystemRenderer {
     this.cleanup();
 
     if (!planets || planets.length === 0) {
-      console.warn("No planets provided for system view");
       return;
     }
 
@@ -399,9 +398,6 @@ export class SystemRenderer {
       };
 
       if (spectralColors[typeChar]) {
-        console.log(
-          `Using spectral type ${spectralType} for accurate star color`
-        );
         return spectralColors[typeChar];
       }
     }
@@ -414,8 +410,6 @@ export class SystemRenderer {
    * Add multiple stars for binary/triple star systems
    */
   addMultiStarSystem(stellarData, numberOfStars) {
-    console.log(`Rendering ${numberOfStars}-star system!`);
-
     const starRadius = Math.max(
       0.5,
       Math.min(2, stellarData.stellarRadius * 0.5)
@@ -599,7 +593,6 @@ export class SystemRenderer {
       (texture) => {
         starMaterial.map = texture;
         starMaterial.needsUpdate = true;
-        console.log("Loaded realistic Sun texture");
       },
       undefined,
       (error) => {

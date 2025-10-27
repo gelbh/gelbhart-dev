@@ -30,7 +30,6 @@ export class GalaxyRenderer {
     this.cleanup();
 
     if (!systems || systems.length === 0) {
-      console.warn("No systems provided for galaxy view");
       return;
     }
 
@@ -51,7 +50,6 @@ export class GalaxyRenderer {
         this.galacticCenter.userData.isStarSystem = true;
         this.galacticCenter.userData.systemData = solarSystem;
         this.systemMeshes.push(this.galacticCenter);
-        console.log("Solar System is clickable at galactic center!");
       }
     }
 
@@ -81,7 +79,6 @@ export class GalaxyRenderer {
       (texture) => {
         material.map = texture;
         material.needsUpdate = true;
-        console.log("Loaded realistic Sun texture for galaxy center");
       },
       undefined,
       (error) => {

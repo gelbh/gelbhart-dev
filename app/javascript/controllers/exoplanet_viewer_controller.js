@@ -46,46 +46,24 @@ export default class extends Controller {
     "spectralTypeFilter",
     "resultsList",
     "resultCount",
-    "planetInfo",
-    "planetDetails",
-    "planetName",
-    "planetType",
-    "radius",
-    "mass",
-    "temperature",
-    "orbitalPeriod",
-    "starName",
-    "spectralType",
-    "spectralTypeRow",
-    "starAge",
-    "starAgeRow",
-    "distance",
-    "discoveryYear",
-    "discoveryMethod",
-    "discoveryFacility",
-    "systemContext",
-    "systemContextRow",
-    "nasaLink",
     "loadingIndicator",
     "instructions",
     "leftPanel",
-    "systemDetails",
-    "systemComparisonBody",
-    "systemStarName",
-    "systemPlanetCount",
-    "systemDistance",
     "orbitSpeedSlider",
     "orbitSpeedValue",
     "orbitalInclinationToggle",
     "atmosphereToggle",
+    "filtersIcon",
+    "filtersSection",
+    "resultsIcon",
+    "resultsSection",
+    "infoContent",
   ];
 
   /**
    * Initialize controller and setup managers
    */
   connect() {
-    console.log("Exoplanet Viewer Controller Connected");
-
     // Current state
     this.currentPlanet = null;
     this.currentSystem = null;
@@ -119,6 +97,13 @@ export default class extends Controller {
     this.followPlanet = false; // Whether camera should follow orbiting planet
     this.lastPlanetPosition = null; // Store last planet position for delta calculation
 
+    // Panel dragging state
+    this.draggedPanel = null;
+    this.panelOffset = { x: 0, y: 0 };
+    this.boundPanelDragStart = this.onPanelDragStart.bind(this);
+    this.boundPanelDrag = this.onPanelDrag.bind(this);
+    this.boundPanelDragEnd = this.onPanelDragEnd.bind(this);
+
     // Auto-switch to system/galaxy view on zoom out
     this.systemZoomThreshold = 18; // Distance threshold to switch to system view
     this.galaxyZoomThreshold = 60; // Distance threshold to switch to galaxy view
@@ -135,40 +120,11 @@ export default class extends Controller {
     this.uiManager = new UIManager({
       resultsList: this.resultsListTarget,
       resultCount: this.resultCountTarget,
-      planetInfo: this.hasPlanetInfoTarget ? this.planetInfoTarget : null,
-      planetDetails: this.hasPlanetDetailsTarget
-        ? this.planetDetailsTarget
-        : null,
-      planetName: this.planetNameTarget,
-      planetType: this.planetTypeTarget,
-      radius: this.radiusTarget,
-      mass: this.massTarget,
-      temperature: this.temperatureTarget,
-      orbitalPeriod: this.orbitalPeriodTarget,
-      starName: this.starNameTarget,
-      distance: this.distanceTarget,
-      discoveryYear: this.discoveryYearTarget,
-      nasaLink: this.nasaLinkTarget,
       loadingIndicator: this.hasLoadingIndicatorTarget
         ? this.loadingIndicatorTarget
         : null,
       canvasLoading: this.hasCanvasLoadingTarget
         ? this.canvasLoadingTarget
-        : null,
-      systemDetails: this.hasSystemDetailsTarget
-        ? this.systemDetailsTarget
-        : null,
-      systemComparisonBody: this.hasSystemComparisonBodyTarget
-        ? this.systemComparisonBodyTarget
-        : null,
-      systemStarName: this.hasSystemStarNameTarget
-        ? this.systemStarNameTarget
-        : null,
-      systemPlanetCount: this.hasSystemPlanetCountTarget
-        ? this.systemPlanetCountTarget
-        : null,
-      systemDistance: this.hasSystemDistanceTarget
-        ? this.systemDistanceTarget
         : null,
     });
 
@@ -185,7 +141,39 @@ export default class extends Controller {
       setTimeout(() => {
         this.initThreeJS();
         this.fetchExoplanets();
+        this.initPanelDragging();
+        this.initInfoTabPlanetClicks();
       }, 100);
+    });
+  }
+
+  /**
+   * Initialize event listener for planet clicks in info tab
+   */
+  initInfoTabPlanetClicks() {
+    // Listen for custom planet-select events from info tab
+    this.element.addEventListener("planet-select", (event) => {
+      const planetName = event.detail;
+
+      // Find the planet by name
+      const allPlanets = this.filterManager.getAllExoplanets();
+      const planet = allPlanets.find((p) => p.name === planetName);
+
+      if (planet && this.currentSystem) {
+        // Get the planet mesh from the system
+        const planetMesh = this.systemRenderer.getPlanetMesh(planet);
+        if (planetMesh) {
+          const planetWorldPosition = new THREE.Vector3();
+          planetMesh.getWorldPosition(planetWorldPosition);
+
+          // Zoom into the planet
+          this.transitionToPlanetFromSystem(
+            planet,
+            planetWorldPosition,
+            planetMesh
+          );
+        }
+      }
     });
   }
 
@@ -391,7 +379,6 @@ export default class extends Controller {
       if (this.followPlanet) {
         this.followPlanet = false;
         this.lastPlanetPosition = null;
-        console.log("Camera following disabled by zoom");
       }
 
       // Hide tooltip when zooming
@@ -453,14 +440,10 @@ export default class extends Controller {
     this.isTabVisible = !document.hidden;
 
     if (this.isTabVisible) {
-      console.log("Tab visible - resuming animation");
       // Resume animation if it was paused
       if (!this.animationId) {
         this.animate();
       }
-    } else {
-      console.log("Tab hidden - pausing animation");
-      // Animation will naturally pause on next frame
     }
   }
 
@@ -595,12 +578,6 @@ export default class extends Controller {
       );
 
       if (systemPlanets.length > 1) {
-        console.log(
-          `Auto-switching to system view: ${
-            this.currentPlanet.hostStar
-          } (distance: ${cameraDistance.toFixed(2)})`
-        );
-
         // Set transitioning flag to prevent immediate re-triggering
         this.isTransitioning = true;
 
@@ -616,14 +593,11 @@ export default class extends Controller {
         // Update UI for system view
         this.updateUIForSystemView();
 
-        // Update system info
-        this.uiManager.showSystemInfo(this.currentSystem);
-        this.uiManager.updateSystemStats({
-          starName: this.currentPlanet.hostStar,
-          planetCount: systemPlanets.length,
-          planets: systemPlanets,
-        });
-        this.uiManager.updateSystemComparison(systemPlanets);
+        // Update info tab with system information
+        this.updateInfoTab();
+
+        // Auto-switch to info tab
+        this.switchToInfoTab();
 
         // Prevent immediate re-checking after switch
         this.lastCameraDistance = 100; // Set high to prevent re-triggering
@@ -657,10 +631,6 @@ export default class extends Controller {
       cameraDistance > this.galaxyZoomThreshold &&
       cameraDistance > this.lastCameraDistance + 0.1
     ) {
-      console.log(
-        `Auto-switching to galaxy view (distance: ${cameraDistance.toFixed(2)})`
-      );
-
       // Set transitioning flag
       this.isTransitioning = true;
 
@@ -713,9 +683,6 @@ export default class extends Controller {
           const systems = this.filterManager.getNotableSystems();
           if (systems.length > 0 && this.galaxyRenderer) {
             this.galaxyRenderer.renderGalaxy(systems);
-            console.log(
-              `Galaxy view initialized with ${systems.length} systems`
-            );
 
             // Set initial camera position - zoomed out to see entire galaxy
             const maxDistance =
@@ -735,14 +702,11 @@ export default class extends Controller {
       },
       // On complete
       (allExoplanets) => {
-        console.log(`Loaded all ${allExoplanets.length} exoplanets`);
-
         // Build unified search results list once (performance optimization)
         // Use requestIdleCallback to avoid blocking the main thread
         const buildList = () => {
           const results = this.filterManager.searchUnified("");
           this.uiManager.updateUnifiedResultsList(results);
-          console.log(`Built unified list with ${results.length} items`);
         };
 
         if (window.requestIdleCallback) {
@@ -760,6 +724,9 @@ export default class extends Controller {
         if (systems.length > 0 && this.galaxyRenderer) {
           this.galaxyRenderer.renderGalaxy(systems);
         }
+
+        // Update info tab with galaxy information
+        this.updateInfoTab();
       },
       // On error
       (error) => {
@@ -881,13 +848,8 @@ export default class extends Controller {
     // Set transition flag to prevent auto zoom-out detection
     this.isTransitioning = true;
 
-    // Update info panel
-    this.uiManager.showPlanetInfo(planet);
-
     // If we're in galaxy view and have system data, navigate: Galaxy → System → Planet
     if (this.viewMode === "galaxy" && systemData) {
-      console.log(`Navigating from galaxy to system to planet: ${planet.name}`);
-
       // First, select the system (this will load system view)
       this.selectSystem({
         starName: systemData.starName,
@@ -935,6 +897,12 @@ export default class extends Controller {
         }, 500); // Additional delay to prevent immediate re-triggering
       }
     );
+
+    // Update info tab with planet information
+    this.updateInfoTab();
+
+    // Auto-switch to info tab
+    this.switchToInfoTab();
   }
 
   /**
@@ -998,8 +966,6 @@ export default class extends Controller {
       this.sceneManager.camera.lookAt(0, 0, 0);
       this.sceneManager.controls.target.set(0, 0, 0);
       this.sceneManager.controls.update();
-
-      console.log(`Galaxy view reset: distance ${optimalDistance.toFixed(1)}`);
     } else if (this.viewMode === "system" && this.currentSystem) {
       // Reset to view entire system
       const maxOrbitRadius = this.systemRenderer.calculateMaxOrbitRadius(
@@ -1018,8 +984,6 @@ export default class extends Controller {
 
       // Reset last camera distance for zoom-out detection
       this.lastCameraDistance = optimalDistance;
-
-      console.log(`System view reset: distance ${optimalDistance.toFixed(1)}`);
     } else if (this.viewMode === "planet" && this.currentPlanet) {
       // Reset to view planet optimally
       const planetRadius = Math.max(
@@ -1159,8 +1123,6 @@ export default class extends Controller {
     // Render galaxy
     const galaxyInfo = this.galaxyRenderer.renderGalaxy(notableSystems);
 
-    console.log(`Galaxy view: ${galaxyInfo.systemCount} star systems`);
-
     // Position camera - if we were viewing a system, zoom out from its galactic position
     if (previousSystem) {
       const systemPosition =
@@ -1180,11 +1142,6 @@ export default class extends Controller {
         this.sceneManager.controls.target.copy(systemPosition);
         this.sceneManager.camera.lookAt(systemPosition);
         this.sceneManager.controls.update();
-
-        console.log(
-          `Galaxy view centered on ${previousSystem.name} at`,
-          systemPosition
-        );
       } else {
         // Fallback to default galaxy view
         this.sceneManager.camera.position.set(0, 80, 80);
@@ -1199,6 +1156,12 @@ export default class extends Controller {
       this.sceneManager.controls.target.set(0, 0, 0);
       this.sceneManager.controls.update();
     }
+
+    // Update info tab with galaxy information
+    this.updateInfoTab();
+
+    // Auto-switch to info tab
+    this.switchToInfoTab();
   }
 
   /**
@@ -1227,14 +1190,6 @@ export default class extends Controller {
     if (orbitalInclinationControl)
       orbitalInclinationControl.style.display = "block";
     if (systemInstructions) systemInstructions.style.display = "block";
-
-    // Show system details, hide planet details
-    if (this.hasSystemDetailsTarget) {
-      this.systemDetailsTarget.style.display = "block";
-    }
-    if (this.hasPlanetDetailsTarget) {
-      this.planetDetailsTarget.style.display = "none";
-    }
 
     // Update search placeholder
     if (this.hasSearchInputTarget) {
@@ -1270,14 +1225,6 @@ export default class extends Controller {
       orbitalInclinationControl.style.display = "none";
     if (systemInstructions) systemInstructions.style.display = "none";
 
-    // Hide system details, show planet details
-    if (this.hasSystemDetailsTarget) {
-      this.systemDetailsTarget.style.display = "none";
-    }
-    if (this.hasPlanetDetailsTarget) {
-      this.planetDetailsTarget.style.display = "block";
-    }
-
     // Update search placeholder
     if (this.hasSearchInputTarget) {
       this.searchInputTarget.placeholder = "Search by name...";
@@ -1292,9 +1239,6 @@ export default class extends Controller {
 
     // Clean up galaxy view if transitioning from galaxy
     if (this.viewMode === "galaxy") {
-      console.log(
-        `Transitioning from galaxy view to system: ${system.starName}`
-      );
       this.galaxyRenderer.cleanup();
     }
 
@@ -1311,7 +1255,6 @@ export default class extends Controller {
     if (this.currentPlanet) {
       this.followPlanet = true;
       this.lastPlanetPosition = null;
-      console.log("Camera following enabled for system view");
     }
 
     // Render the system
@@ -1320,15 +1263,6 @@ export default class extends Controller {
       this.animateOrbits,
       this.useOrbitalInclination
     );
-
-    // Update info panel with system details
-    this.uiManager.showSystemInfo(system);
-    this.uiManager.updateSystemStats({
-      starName: system.starName,
-      planetCount: system.planets.length,
-      planets: system.planets,
-    });
-    this.uiManager.updateSystemComparison(system.planets);
 
     // Calculate optimal camera distance
     const maxRadius = systemInfo.maxOrbitRadius * systemInfo.scaleFactor;
@@ -1350,6 +1284,12 @@ export default class extends Controller {
         }, 500);
       }
     );
+
+    // Update info tab with system information
+    this.updateInfoTab();
+
+    // Auto-switch to info tab
+    this.switchToInfoTab();
   }
 
   /**
@@ -1460,11 +1400,6 @@ export default class extends Controller {
           clickedMesh.userData.system || clickedMesh.userData.systemData;
 
         if (system) {
-          // Single-click to zoom into system
-          console.log(
-            `Zooming into star system: ${system.starName} (${system.planets.length} planets)`
-          );
-
           // Hide any existing tooltip
           this.hideTooltip();
 
@@ -1525,9 +1460,6 @@ export default class extends Controller {
 
         if (clickedMesh.userData.planet) {
           const planet = clickedMesh.userData.planet;
-
-          // Single-click to zoom into planet
-          console.log(`Zooming into planet: ${planet.name}`);
 
           // Hide any existing tooltip
           this.hideTooltip();
@@ -1596,7 +1528,6 @@ export default class extends Controller {
 
         // Update UI
         this.updateUIForPlanetView();
-        this.uiManager.showPlanetInfo(planet);
         this.uiManager.updateResultsList(
           this.filterManager.getFilteredExoplanets()
         );
@@ -1612,6 +1543,12 @@ export default class extends Controller {
         // Disable camera following initially (will be enabled if user turns on orbit)
         this.followPlanet = false;
         this.lastPlanetPosition = null;
+
+        // Update info tab with planet information
+        this.updateInfoTab();
+
+        // Auto-switch to info tab
+        this.switchToInfoTab();
 
         // Clear transition flag
         setTimeout(() => {
@@ -1655,7 +1592,6 @@ export default class extends Controller {
       if (this.followPlanet) {
         this.followPlanet = false;
         this.lastPlanetPosition = null;
-        console.log("Camera following disabled by panning");
       }
     }
   }
@@ -1798,11 +1734,6 @@ export default class extends Controller {
    */
   toggleOrbitalInclination() {
     this.useOrbitalInclination = this.orbitalInclinationToggleTarget.checked;
-    console.log(
-      `Orbital inclination ${
-        this.useOrbitalInclination ? "enabled" : "disabled"
-      }`
-    );
 
     // Update the system renderer's inclination setting
     if (this.systemRenderer) {
@@ -1825,7 +1756,6 @@ export default class extends Controller {
    */
   toggleAtmospheres() {
     const showAtmospheres = this.atmosphereToggleTarget.checked;
-    console.log(`Atmospheres ${showAtmospheres ? "enabled" : "disabled"}`);
 
     // Update the system renderer's atmosphere setting
     if (this.systemRenderer) {
@@ -1837,7 +1767,8 @@ export default class extends Controller {
    * Toggle fullscreen mode
    */
   toggleFullscreen() {
-    const container = this.canvasTarget.parentElement;
+    // Get the entire viewer section (includes canvas and panels)
+    const container = document.querySelector(".exoplanet-fullscreen-viewer");
 
     // Check for fullscreen element with vendor prefixes
     const fullscreenElement =
@@ -1869,5 +1800,664 @@ export default class extends Controller {
         document.msExitFullscreen();
       }
     }
+  }
+
+  // ============================================
+  // PANEL DRAGGING & TOGGLING
+  // ============================================
+
+  /**
+   * Initialize panel dragging functionality
+   */
+  initPanelDragging() {
+    // Find all drag handles
+    const dragHandles = document.querySelectorAll("[data-drag-handle]");
+
+    dragHandles.forEach((handle) => {
+      handle.addEventListener("mousedown", this.boundPanelDragStart);
+      handle.addEventListener("touchstart", this.boundPanelDragStart, {
+        passive: false,
+      });
+    });
+  }
+
+  /**
+   * Start dragging a panel
+   */
+  onPanelDragStart(event) {
+    // Prevent default to avoid text selection
+    event.preventDefault();
+
+    // Find the panel container
+    this.draggedPanel = event.currentTarget.closest(".exoplanet-overlay-panel");
+    if (!this.draggedPanel) return;
+
+    // Get initial mouse/touch position
+    const clientX = event.clientX || event.touches[0].clientX;
+    const clientY = event.clientY || event.touches[0].clientY;
+
+    // Calculate offset from panel top-left to click position
+    const rect = this.draggedPanel.getBoundingClientRect();
+    this.panelOffset = {
+      x: clientX - rect.left,
+      y: clientY - rect.top,
+    };
+
+    // Add event listeners for dragging
+    document.addEventListener("mousemove", this.boundPanelDrag);
+    document.addEventListener("touchmove", this.boundPanelDrag, {
+      passive: false,
+    });
+    document.addEventListener("mouseup", this.boundPanelDragEnd);
+    document.addEventListener("touchend", this.boundPanelDragEnd);
+
+    // Add visual feedback
+    this.draggedPanel.style.transition = "none";
+    this.draggedPanel.style.cursor = "grabbing";
+  }
+
+  /**
+   * Drag the panel
+   */
+  onPanelDrag(event) {
+    if (!this.draggedPanel) return;
+
+    event.preventDefault();
+
+    const clientX = event.clientX || event.touches[0].clientX;
+    const clientY = event.clientY || event.touches[0].clientY;
+
+    // Calculate new position
+    let newX = clientX - this.panelOffset.x;
+    let newY = clientY - this.panelOffset.y;
+
+    // Constrain to viewport with some margin
+    const margin = 20;
+    const maxX = window.innerWidth - this.draggedPanel.offsetWidth - margin;
+    const maxY = window.innerHeight - this.draggedPanel.offsetHeight - margin;
+
+    newX = Math.max(margin, Math.min(newX, maxX));
+    newY = Math.max(margin, Math.min(newY, maxY));
+
+    // Apply new position
+    this.draggedPanel.style.left = `${newX}px`;
+    this.draggedPanel.style.top = `${newY}px`;
+    this.draggedPanel.style.right = "auto";
+    this.draggedPanel.style.bottom = "auto";
+  }
+
+  /**
+   * End dragging
+   */
+  onPanelDragEnd() {
+    if (!this.draggedPanel) return;
+
+    // Remove event listeners
+    document.removeEventListener("mousemove", this.boundPanelDrag);
+    document.removeEventListener("touchmove", this.boundPanelDrag);
+    document.removeEventListener("mouseup", this.boundPanelDragEnd);
+    document.removeEventListener("touchend", this.boundPanelDragEnd);
+
+    // Restore transition and cursor
+    this.draggedPanel.style.transition = "";
+    this.draggedPanel.style.cursor = "";
+
+    // Clear dragged panel reference
+    this.draggedPanel = null;
+  }
+
+  /**
+   * Toggle panel minimize state
+   */
+  togglePanelMinimize(event) {
+    const button = event.currentTarget;
+    const panelName = button.dataset.panelTarget;
+
+    let panel;
+    if (panelName === "combined" && this.hasLeftPanelTarget) {
+      panel = this.leftPanelTarget;
+    }
+
+    if (!panel) return;
+
+    // Toggle minimized class
+    panel.classList.toggle("minimized");
+  }
+
+  /**
+   * Toggle filters section visibility
+   */
+  toggleFilters(event) {
+    const button = event.currentTarget;
+
+    if (!this.hasFiltersSectionTarget || !this.hasFiltersIconTarget) return;
+
+    const filtersSection = this.filtersSectionTarget;
+
+    // Toggle collapse
+    if (filtersSection.classList.contains("show")) {
+      filtersSection.classList.remove("show");
+      button.setAttribute("aria-expanded", "false");
+    } else {
+      filtersSection.classList.add("show");
+      button.setAttribute("aria-expanded", "true");
+    }
+  }
+
+  /**
+   * Toggle results section visibility
+   */
+  toggleResults(event) {
+    const button = event.currentTarget;
+
+    if (!this.hasResultsSectionTarget || !this.hasResultsIconTarget) return;
+
+    const resultsSection = this.resultsSectionTarget;
+
+    // Toggle collapse
+    if (resultsSection.classList.contains("show")) {
+      resultsSection.classList.remove("show");
+      button.setAttribute("aria-expanded", "false");
+    } else {
+      resultsSection.classList.add("show");
+      button.setAttribute("aria-expanded", "true");
+    }
+  }
+
+  // ============================================
+  // INFORMATION TAB UPDATES
+  // ============================================
+
+  /**
+   * Switch to the info tab
+   */
+  switchToInfoTab() {
+    const infoTab = document.getElementById("info-tab");
+    if (infoTab) {
+      const bsTab = new bootstrap.Tab(infoTab);
+      bsTab.show();
+    }
+  }
+
+  /**
+   * Update information tab based on current view mode
+   */
+  updateInfoTab() {
+    if (!this.hasInfoContentTarget) return;
+
+    if (this.viewMode === "galaxy") {
+      this.updateGalaxyInfo();
+    } else if (this.viewMode === "system" && this.currentSystem) {
+      this.updateSystemInfo(this.currentSystem);
+    } else if (this.viewMode === "planet" && this.currentPlanet) {
+      this.updatePlanetInfo(this.currentPlanet);
+    }
+  }
+
+  /**
+   * Update info tab with galaxy (Milky Way) information
+   */
+  updateGalaxyInfo() {
+    if (!this.hasInfoContentTarget) return;
+
+    const totalSystems = this.filterManager.getNotableSystems().length;
+    const totalPlanets = this.filterManager.getAllExoplanets().length;
+
+    // Calculate some statistics
+    const allPlanets = this.filterManager.getAllExoplanets();
+    const avgDistance =
+      allPlanets.length > 0
+        ? (
+            allPlanets.reduce((sum, p) => sum + (p.distance || 0), 0) /
+            allPlanets.length
+          ).toFixed(1)
+        : 0;
+
+    const closestPlanet = allPlanets.reduce((closest, planet) => {
+      if (!planet.distance) return closest;
+      if (!closest || planet.distance < closest.distance) return planet;
+      return closest;
+    }, null);
+
+    this.infoContentTarget.innerHTML = `
+      <div class="info-galaxy">
+        <h5 class="text-white mb-3 d-flex align-items-center">
+          <i class="bx bx-globe me-2 text-primary"></i> Milky Way Galaxy
+        </h5>
+        
+        <div class="info-section mb-4">
+          <h6 class="text-white-50 mb-3 fs-sm text-uppercase">Overview</h6>
+          <p class="text-white-50 mb-3" style="font-size: 0.9rem; line-height: 1.6;">
+            Our galaxy contains an estimated 100-400 billion stars. Currently, we have confirmed 
+            <strong class="text-white">${totalPlanets.toLocaleString()}</strong> exoplanets across 
+            <strong class="text-white">${totalSystems.toLocaleString()}</strong> star systems.
+          </p>
+        </div>
+
+        <div class="info-section mb-4">
+          <h6 class="text-white-50 mb-3 fs-sm text-uppercase">Statistics</h6>
+          <div class="info-stats">
+            <div class="stat-item mb-3 p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="text-white-50">Total Confirmed Exoplanets</span>
+                <span class="badge bg-primary">${totalPlanets.toLocaleString()}</span>
+              </div>
+            </div>
+            <div class="stat-item mb-3 p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="text-white-50">Multi-Planet Systems</span>
+                <span class="badge bg-info">${totalSystems.toLocaleString()}</span>
+              </div>
+            </div>
+            <div class="stat-item mb-3 p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="text-white-50">Average Distance</span>
+                <span class="badge bg-secondary">${avgDistance} ly</span>
+              </div>
+            </div>
+            ${
+              closestPlanet
+                ? `
+              <div class="stat-item mb-3 p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="text-white-50">Closest Exoplanet</span>
+                  <span class="text-white fs-sm">${this.escapeHtml(
+                    closestPlanet.name
+                  )}</span>
+                </div>
+                <div class="text-end mt-1">
+                  <span class="badge bg-success">${this.formatDistance(
+                    closestPlanet.distance
+                  )}</span>
+                </div>
+              </div>
+            `
+                : ""
+            }
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h6 class="text-white-50 mb-3 fs-sm text-uppercase">About</h6>
+          <p class="text-white-50 mb-2" style="font-size: 0.85rem; line-height: 1.5;">
+            The Milky Way is a barred spiral galaxy approximately 13.6 billion years old, 
+            containing our Solar System. It spans about 100,000 light-years in diameter.
+          </p>
+          <p class="text-white-50 mb-0" style="font-size: 0.85rem; line-height: 1.5;">
+            Click on any star system to explore its planets in detail.
+          </p>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Update info tab with system information
+   */
+  updateSystemInfo(system) {
+    if (!this.hasInfoContentTarget) return;
+
+    const planets = system.planets || [];
+    const starName = system.starName || "Unknown";
+    const distance = system.distance || planets[0]?.distance || 0;
+
+    // Calculate system statistics
+    const planetTypes = planets.reduce((acc, planet) => {
+      const type = planet.type || "unknown";
+      acc[type] = (acc[type] || 0) + 1;
+      return acc;
+    }, {});
+
+    const avgTemp =
+      planets.length > 0 && planets.some((p) => p.temperature)
+        ? (
+            planets
+              .filter((p) => p.temperature)
+              .reduce((sum, p) => sum + p.temperature, 0) /
+            planets.filter((p) => p.temperature).length
+          ).toFixed(0)
+        : null;
+
+    const avgRadius =
+      planets.length > 0 && planets.some((p) => p.radius)
+        ? (
+            planets
+              .filter((p) => p.radius)
+              .reduce((sum, p) => sum + p.radius, 0) /
+            planets.filter((p) => p.radius).length
+          ).toFixed(2)
+        : null;
+
+    // Get spectral type if available
+    const spectralType = planets[0]?.spectralType || null;
+    const starTemp = planets[0]?.starTemperature || null;
+
+    this.infoContentTarget.innerHTML = `
+      <div class="info-system">
+        <h5 class="text-white mb-3 d-flex align-items-center">
+          <i class="bx bx-sun me-2 text-warning"></i> ${this.escapeHtml(
+            starName
+          )}
+        </h5>
+        
+        <div class="info-section mb-4">
+          <h6 class="text-white-50 mb-3 fs-sm text-uppercase">Star System</h6>
+          <div class="info-stats">
+            <div class="stat-item mb-2 p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="text-white-50">Distance from Earth</span>
+                <span class="badge bg-primary">${this.formatDistance(
+                  distance
+                )}</span>
+              </div>
+            </div>
+            <div class="stat-item mb-2 p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="text-white-50">Number of Planets</span>
+                <span class="badge bg-info">${planets.length}</span>
+              </div>
+            </div>
+            ${
+              spectralType
+                ? `
+              <div class="stat-item mb-2 p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="text-white-50">Spectral Type</span>
+                  <span class="badge bg-secondary">${this.escapeHtml(
+                    spectralType
+                  )}</span>
+                </div>
+              </div>
+            `
+                : ""
+            }
+            ${
+              starTemp
+                ? `
+              <div class="stat-item mb-2 p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="text-white-50">Star Temperature</span>
+                  <span class="badge bg-warning text-dark">${starTemp} K</span>
+                </div>
+              </div>
+            `
+                : ""
+            }
+          </div>
+        </div>
+
+        <div class="info-section mb-4">
+          <h6 class="text-white-50 mb-3 fs-sm text-uppercase">Planetary Composition</h6>
+          <div class="planet-types">
+            ${Object.entries(planetTypes)
+              .map(
+                ([type, count]) => `
+              <div class="d-flex justify-content-between align-items-center mb-2 p-2 rounded" 
+                   style="background: rgba(255, 255, 255, 0.03);">
+                <span class="text-white-50">${this.getPlanetTypeName(
+                  type
+                )}</span>
+                <span class="badge bg-${this.getTypeColor(
+                  type
+                )}">${count}</span>
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+        </div>
+
+        ${
+          avgTemp || avgRadius
+            ? `
+          <div class="info-section mb-4">
+            <h6 class="text-white-50 mb-3 fs-sm text-uppercase">Average Values</h6>
+            <div class="info-stats">
+              ${
+                avgTemp
+                  ? `
+                <div class="stat-item mb-2 p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-white-50">Temperature</span>
+                    <span class="badge bg-warning text-dark">${avgTemp} K</span>
+                  </div>
+                </div>
+              `
+                  : ""
+              }
+              ${
+                avgRadius
+                  ? `
+                <div class="stat-item mb-2 p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-white-50">Radius</span>
+                    <span class="badge bg-info">${avgRadius} R⊕</span>
+                  </div>
+                </div>
+              `
+                  : ""
+              }
+            </div>
+          </div>
+        `
+            : ""
+        }
+
+        <div class="info-section">
+          <h6 class="text-white-50 mb-3 fs-sm text-uppercase">Planets</h6>
+          <div class="planet-list" style="max-height: 200px; overflow-y: auto;">
+            ${planets
+              .map(
+                (planet) => `
+              <div class="planet-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.03); cursor: pointer;"
+                   onclick="this.closest('[data-controller]').dispatchEvent(new CustomEvent('planet-select', {detail: '${this.escapeHtml(
+                     planet.name
+                   )}'}))">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <div class="text-white fw-semibold fs-sm">${this.escapeHtml(
+                      planet.name
+                    )}</div>
+                    ${
+                      planet.temperature
+                        ? `
+                      <div class="text-white-50" style="font-size: 0.75rem;">${planet.temperature.toFixed(
+                        0
+                      )} K</div>
+                    `
+                        : ""
+                    }
+                  </div>
+                  <span class="badge bg-${this.getTypeColor(
+                    planet.type
+                  )}">${this.getPlanetTypeName(planet.type)}</span>
+                </div>
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Update info tab with planet information
+   */
+  updatePlanetInfo(planet) {
+    if (!this.hasInfoContentTarget) return;
+
+    const name = planet.name || "Unknown";
+    const hostStar = planet.hostStar || "Unknown";
+    const type = this.getPlanetTypeName(planet.type);
+    const temperature = planet.temperature
+      ? `${planet.temperature.toFixed(0)} K`
+      : "Unknown";
+    const radius = planet.radius ? `${planet.radius.toFixed(2)} R⊕` : "Unknown";
+    const mass = planet.mass ? `${planet.mass.toFixed(2)} M⊕` : "Unknown";
+    const distance = planet.distance
+      ? this.formatDistance(planet.distance)
+      : "Unknown";
+    const orbitalPeriod = planet.orbitalPeriod
+      ? `${planet.orbitalPeriod.toFixed(2)} days`
+      : "Unknown";
+    const semiMajorAxis = planet.semiMajorAxis
+      ? `${planet.semiMajorAxis.toFixed(3)} AU`
+      : "Unknown";
+    const discoveryYear = planet.discoveryYear || "Unknown";
+    const discoveryMethod = planet.discoveryMethod || "Unknown";
+    const discoveryFacility = planet.discoveryFacility || "Unknown";
+
+    this.infoContentTarget.innerHTML = `
+      <div class="info-planet">
+        <h5 class="text-white mb-3 d-flex align-items-center">
+          <i class="bx bx-planet me-2 text-primary"></i> ${this.escapeHtml(
+            name
+          )}
+        </h5>
+        
+        <div class="info-section mb-4">
+          <h6 class="text-white-50 mb-3 fs-sm text-uppercase">Basic Properties</h6>
+          <div class="property-grid">
+            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
+              <div class="text-white-50 fs-sm">Host Star</div>
+              <div class="text-white fw-semibold">${this.escapeHtml(
+                hostStar
+              )}</div>
+            </div>
+            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
+              <div class="text-white-50 fs-sm">Type</div>
+              <div>
+                <span class="badge bg-${this.getTypeColor(
+                  planet.type
+                )}">${this.escapeHtml(type)}</span>
+              </div>
+            </div>
+            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
+              <div class="text-white-50 fs-sm">Distance</div>
+              <div class="text-white fw-semibold">${distance}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section mb-4">
+          <h6 class="text-white-50 mb-3 fs-sm text-uppercase">Physical Characteristics</h6>
+          <div class="property-grid">
+            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
+              <div class="text-white-50 fs-sm">Temperature</div>
+              <div class="text-white fw-semibold">${temperature}</div>
+            </div>
+            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
+              <div class="text-white-50 fs-sm">Radius</div>
+              <div class="text-white fw-semibold">${radius}</div>
+            </div>
+            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
+              <div class="text-white-50 fs-sm">Mass</div>
+              <div class="text-white fw-semibold">${mass}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section mb-4">
+          <h6 class="text-white-50 mb-3 fs-sm text-uppercase">Orbital Parameters</h6>
+          <div class="property-grid">
+            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
+              <div class="text-white-50 fs-sm">Orbital Period</div>
+              <div class="text-white fw-semibold">${orbitalPeriod}</div>
+            </div>
+            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
+              <div class="text-white-50 fs-sm">Semi-Major Axis</div>
+              <div class="text-white fw-semibold">${semiMajorAxis}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section mb-4">
+          <h6 class="text-white-50 mb-3 fs-sm text-uppercase">Discovery Information</h6>
+          <div class="property-grid">
+            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
+              <div class="text-white-50 fs-sm">Discovery Year</div>
+              <div class="text-white fw-semibold">${discoveryYear}</div>
+            </div>
+            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
+              <div class="text-white-50 fs-sm">Method</div>
+              <div class="text-white fw-semibold">${this.escapeHtml(
+                discoveryMethod
+              )}</div>
+            </div>
+            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
+              <div class="text-white-50 fs-sm">Facility</div>
+              <div class="text-white fw-semibold">${this.escapeHtml(
+                discoveryFacility
+              )}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Format distance with appropriate units
+   * @param {number} distanceLightYears - Distance in light years
+   * @returns {string} Formatted distance string
+   */
+  formatDistance(distanceLightYears) {
+    if (!distanceLightYears || distanceLightYears === 0) {
+      // For Sun or very close objects, show in AU
+      return "1 AU (Sun)";
+    }
+
+    // If distance is less than 0.01 light years, show in AU
+    // 1 light year ≈ 63,241 AU
+    if (distanceLightYears < 0.01) {
+      const distanceAU = (distanceLightYears * 63241).toFixed(0);
+      return `${distanceAU} AU`;
+    }
+
+    // Otherwise show in light years
+    return `${distanceLightYears.toFixed(1)} ly`;
+  }
+
+  /**
+   * Helper method to escape HTML and prevent XSS
+   */
+  escapeHtml(text) {
+    if (text === null || text === undefined) return "";
+    const map = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;",
+    };
+    return String(text).replace(/[&<>"']/g, (m) => map[m]);
+  }
+
+  /**
+   * Get planet type display name
+   */
+  getPlanetTypeName(type) {
+    const names = {
+      terrestrial: "Terrestrial",
+      "super-earth": "Super-Earth",
+      neptune: "Neptune-like",
+      jupiter: "Jupiter-like",
+    };
+    return names[type] || "Unknown";
+  }
+
+  /**
+   * Get badge color for planet type
+   */
+  getTypeColor(type) {
+    const colors = {
+      terrestrial: "success",
+      "super-earth": "info",
+      neptune: "primary",
+      jupiter: "warning",
+    };
+    return colors[type] || "secondary";
   }
 }

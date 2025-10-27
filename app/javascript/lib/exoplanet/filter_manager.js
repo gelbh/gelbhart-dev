@@ -277,7 +277,6 @@ export class FilterManager {
     const solarSystem = this.generateSolarSystemData();
     this.exoplanets = [...solarSystem, ...exoplanets];
     this.filteredExoplanets = [...this.exoplanets];
-    console.log(`Added Solar System (8 planets) to exoplanet database`);
   }
 
   /**
@@ -652,5 +651,13 @@ export class FilterManager {
       starName: starName,
       planets: planets,
     };
+  }
+
+  /**
+   * Get all exoplanets (unfiltered)
+   * @returns {Array} All exoplanets
+   */
+  getAllExoplanets() {
+    return this.exoplanets;
   }
 }
