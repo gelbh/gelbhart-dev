@@ -1,3 +1,6 @@
+import { escapeHtml } from "./utils";
+import { getPlanetTypeName, getTypeColor } from "./planet_constants";
+
 /**
  * UIManager
  * Handles UI updates for results list and loading states
@@ -12,10 +15,7 @@ export class UIManager {
    * Escapes HTML special characters
    */
   sanitizeHTML(str) {
-    if (str === null || str === undefined) return "";
-    const div = document.createElement("div");
-    div.textContent = String(str);
-    return div.innerHTML;
+    return escapeHtml(str);
   }
 
   /**
@@ -70,9 +70,9 @@ export class UIManager {
               planet.hostStar
             )}</div>
           </div>
-          <span class="badge bg-${this.getTypeColor(
+          <span class="badge bg-${getTypeColor(
             planet.type
-          )}">${this.sanitizeHTML(this.getPlanetTypeName(planet.type))}</span>
+          )}">${this.sanitizeHTML(getPlanetTypeName(planet.type))}</span>
         </div>
       `;
       item.addEventListener("click", () => {
@@ -188,9 +188,9 @@ export class UIManager {
               planet.temperature.toFixed(0)
             )} K</div>
           </div>
-          <span class="badge bg-${this.getTypeColor(
+          <span class="badge bg-${getTypeColor(
             planet.type
-          )}">${this.sanitizeHTML(this.getPlanetTypeName(planet.type))}</span>
+          )}">${this.sanitizeHTML(getPlanetTypeName(planet.type))}</span>
         </div>
       `;
 
@@ -247,9 +247,9 @@ export class UIManager {
             planet.hostStar
           )}</div>
         </div>
-        <span class="badge bg-${this.getTypeColor(
+        <span class="badge bg-${getTypeColor(
           planet.type
-        )}">${this.sanitizeHTML(this.getPlanetTypeName(planet.type))}</span>
+        )}">${this.sanitizeHTML(getPlanetTypeName(planet.type))}</span>
       </div>
     `;
     item.addEventListener("click", () => {
@@ -285,32 +285,6 @@ export class UIManager {
     if (planetIndex !== -1 && planetIndex < 500) {
       items[planetIndex]?.classList.add("active");
     }
-  }
-
-  /**
-   * Get planet type display name
-   */
-  getPlanetTypeName(type) {
-    const names = {
-      terrestrial: "Terrestrial/Rocky",
-      "super-earth": "Super-Earth",
-      neptune: "Neptune-like",
-      jupiter: "Jupiter-like",
-    };
-    return names[type] || "Unknown";
-  }
-
-  /**
-   * Get badge color for planet type
-   */
-  getTypeColor(type) {
-    const colors = {
-      terrestrial: "success",
-      "super-earth": "info",
-      neptune: "primary",
-      jupiter: "warning",
-    };
-    return colors[type] || "secondary";
   }
 
   /**
@@ -471,9 +445,9 @@ export class UIManager {
               }
             </small>
           </div>
-          <span class="badge bg-${this.getTypeColor(
+          <span class="badge bg-${getTypeColor(
             planet.type
-          )}">${this.sanitizeHTML(this.getPlanetTypeName(planet.type))}</span>
+          )}">${this.sanitizeHTML(getPlanetTypeName(planet.type))}</span>
         </div>
       </div>
     `
@@ -647,10 +621,10 @@ export class UIManager {
         <div class="info-section">
           <h6 class="text-white mb-2">Classification</h6>
           <div class="mb-3">
-            <span class="badge bg-${this.getTypeColor(
+            <span class="badge bg-${getTypeColor(
               planet.type
             )} fs-sm px-3 py-2">
-              ${this.sanitizeHTML(this.getPlanetTypeName(planet.type))}
+              ${this.sanitizeHTML(getPlanetTypeName(planet.type))}
             </span>
           </div>
         </div>

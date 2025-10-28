@@ -1,4 +1,8 @@
 import * as THREE from "three";
+import { getStarColor } from "./utils";
+import { PlanetMaterialGenerator } from "./planet_material_generator";
+import { PlanetAtmosphereRenderer } from "./planet_atmosphere_renderer";
+import { PlanetRingRenderer } from "./planet_ring_renderer";
 
 /**
  * PlanetRenderer
@@ -47,6 +51,22 @@ export class PlanetRenderer {
       Uranus: `${localTexturePath}/uranus.jpg`,
       Neptune: `${localTexturePath}/neptune.jpg`,
     };
+
+    // Initialize extracted renderer classes
+    this.materialGenerator = new PlanetMaterialGenerator(
+      this.textureCache,
+      this.solarSystemTextureURLs
+    );
+    this.atmosphereRenderer = new PlanetAtmosphereRenderer(
+      this.scene,
+      this.textureCache,
+      this.materialGenerator
+    );
+    this.ringRenderer = new PlanetRingRenderer(
+      this.scene,
+      this.textureCache,
+      this.materialGenerator
+    );
   }
 
   /**
@@ -58,13 +78,29 @@ export class PlanetRenderer {
 
     const radius = Math.max(0.5, Math.min(3, planetData.radius * 0.5));
     const geometry = new THREE.SphereGeometry(radius, 64, 64);
-    const material = this.generatePlanetMaterial(planetData);
+
+    // Prepare star information for realistic rendering
+    const starPosition = new THREE.Vector3(5, 3, 5);
+    const starColor = this.getStarColorVector(planetData);
+    const starIntensity = 2.0 + (planetData.stellarLuminosity || 0) * 0.3;
+
+    // Generate material with realistic physics
+    const material = this.materialGenerator.generatePlanetMaterial(planetData, {
+      starPosition,
+      starColor,
+      starIntensity,
+      planetRadius: radius,
+    });
 
     this.planet = new THREE.Mesh(geometry, material);
     this.scene.add(this.planet);
 
     // Add visual effects based on planet type
-    this.addVisualEffects(planetData, radius);
+    this.addVisualEffects(planetData, radius, {
+      starPosition,
+      starColor,
+      starIntensity,
+    });
 
     // Update lighting for stellar properties
     this.updateLightingForStar(planetData);
@@ -78,16 +114,35 @@ export class PlanetRenderer {
   }
 
   /**
+   * Get star color as THREE.Vector3 for shaders
+   */
+  getStarColorVector(planet) {
+    const starColor = getStarColor({
+      spectralType: planet.spectralType,
+      stellarTemp: planet.stellarTemp,
+    });
+
+    // Convert THREE.Color hex to RGB vector
+    const color = new THREE.Color(starColor);
+    return new THREE.Vector3(color.r, color.g, color.b);
+  }
+
+  /**
    * Add visual effects (atmosphere, clouds, rings, lava glow)
    */
-  addVisualEffects(planet, radius) {
+  addVisualEffects(planet, radius, options = {}) {
     // Add atmosphere for certain planet types
     if (
       planet.type === "terrestrial" ||
       planet.type === "super-earth" ||
-      planet.type === "neptune"
+      planet.type === "neptune" ||
+      planet.type === "jupiter"
     ) {
-      this.addAtmosphere(planet, radius);
+      this.atmosphere = this.atmosphereRenderer.addAtmosphere(
+        planet,
+        radius,
+        options
+      );
     }
 
     // Add cloud layers for terrestrial planets in temperate zones
@@ -96,710 +151,38 @@ export class PlanetRenderer {
       planet.temperature >= 250 &&
       planet.temperature <= 400
     ) {
-      this.addCloudLayer(planet, radius);
-    }
-
-    // Add rings for Saturn (always) or other gas giants (30% chance, seeded)
-    if (planet.name === "Saturn") {
-      this.addSaturnRings(radius);
-    } else if (planet.type === "jupiter" || planet.type === "neptune") {
-      // Use seeded random to ensure consistent ring presence for same planet
-      const seed = this.hashCode(planet.name + "_hasRings");
-      const random = this.seededRandom(seed);
-      if (random() > 0.7) {
-        this.addPlanetRings(planet, radius);
-      }
-    }
-
-    // Add lava glow for ultra-hot planets
-    if (planet.temperature >= 1000) {
-      this.addLavaGlow(planet, radius);
-    }
-  }
-
-  /**
-   * Generate procedural planet material
-   */
-  generatePlanetMaterial(planet) {
-    // Check if this is a Solar System planet - use realistic texture
-    if (this.isSolarSystemPlanet(planet)) {
-      return this.createSolarSystemMaterial(planet);
-    }
-
-    // Otherwise, use procedural generation for exoplanets
-    // Check cache first to avoid regenerating the same texture
-    const cacheKey = planet.name;
-    let texture = this.textureCache.planet.get(cacheKey);
-
-    if (!texture) {
-      // Generate texture if not cached
-      const color = this.getPlanetColor(planet);
-
-      const canvas = document.createElement("canvas");
-      canvas.width = 512;
-      canvas.height = 512;
-      const ctx = canvas.getContext("2d");
-
-      // Base color
-      ctx.fillStyle = color;
-      ctx.fillRect(0, 0, 512, 512);
-
-      // Add noise/texture based on planet type
-      this.addProceduralTexture(ctx, planet);
-
-      texture = new THREE.CanvasTexture(canvas);
-
-      // Cache the texture for future use
-      this.textureCache.planet.set(cacheKey, texture);
-    } else {
-    }
-
-    return new THREE.MeshStandardMaterial({
-      map: texture,
-      roughness: this.getPlanetRoughness(planet),
-      metalness: 0.1,
-    });
-  }
-
-  /**
-   * Check if a planet is from our Solar System
-   */
-  isSolarSystemPlanet(planet) {
-    return (
-      planet.hostStar === "Sun" && this.solarSystemTextureURLs[planet.name]
-    );
-  }
-
-  /**
-   * Create realistic material for Solar System planets
-   */
-  createSolarSystemMaterial(planet) {
-    const material = new THREE.MeshStandardMaterial({
-      roughness: this.getPlanetRoughness(planet),
-      metalness: planet.name === "Earth" ? 0.3 : 0.1,
-    });
-
-    // Load texture asynchronously
-    const textureURL = this.solarSystemTextureURLs[planet.name];
-    if (textureURL) {
-      this.textureLoader.load(
-        textureURL,
-        (texture) => {
-          material.map = texture;
-          material.needsUpdate = true;
-        },
-        undefined,
-        (error) => {
-          console.warn(
-            `Failed to load texture for ${planet.name}, using procedural texture`
-          );
-          // Fallback to procedural texture
-          const color = this.getPlanetColor(planet);
-          const canvas = document.createElement("canvas");
-          canvas.width = 512;
-          canvas.height = 512;
-          const ctx = canvas.getContext("2d");
-          ctx.fillStyle = color;
-          ctx.fillRect(0, 0, 512, 512);
-          this.addProceduralTexture(ctx, planet);
-          material.map = new THREE.CanvasTexture(canvas);
-          material.needsUpdate = true;
-        }
+      this.clouds = this.atmosphereRenderer.addCloudLayer(
+        planet,
+        radius,
+        options
       );
     }
 
-    // Special handling for Earth - add specular map for oceans
-    if (planet.name === "Earth") {
-      material.roughness = 0.7;
-      material.metalness = 0.2;
-    }
-
-    // Special handling for Saturn - it has rings
+    // Add rings for Saturn (always), Neptune (always, faint), or other gas giants (30% chance, seeded)
     if (planet.name === "Saturn") {
-      material.roughness = 0.8;
-    }
-
-    return material;
-  }
-
-  /**
-   * Get planet color based on temperature, type, insolation, and density
-   */
-  getPlanetColor(planet) {
-    const temp = planet.temperature;
-    const type = planet.type;
-    const insolation = planet.insolationFlux;
-    const density = planet.density;
-
-    // Gas Giants (Jupiter-like)
-    if (type === "jupiter") {
-      if (temp < 150) return "#c8d4e8";
-      else if (temp < 400) return "#d4c4a8";
-      else if (temp < 800) return "#d4a574";
-      else if (temp < 1500) return "#8b6f47";
-      else return "#4a3728";
-    }
-
-    // Ice Giants (Neptune-like)
-    if (type === "neptune") {
-      if (temp < 150) return "#b8d4ff";
-      else if (temp < 300) return "#a0c8e8";
-      else if (temp < 600) return "#98b8d8";
-      else return "#b8a898";
-    }
-
-    // Rocky Planets (Terrestrial & Super-Earth)
-    if (type === "terrestrial" || type === "super-earth") {
-      const isHighDensity = density !== null && density > 4.5;
-
-      if (temp < 200) {
-        return insolation && insolation < 0.3 ? "#e8f0ff" : "#d8e8f8";
-      } else if (temp < 273) {
-        return "#c8d8e8";
-      } else if (temp < 320) {
-        if (isHighDensity) {
-          return "#6b8e9f";
-        } else if (insolation && insolation > 0.8 && insolation < 1.2) {
-          return "#5a7d8f";
-        } else {
-          return "#8ba3b5";
-        }
-      } else if (temp < 500) {
-        return "#d4b48a";
-      } else if (temp < 800) {
-        return "#c89464";
-      } else if (temp < 1500) {
-        return "#a85532";
-      } else {
-        return "#8b3a1f";
+      this.rings = this.ringRenderer.addSaturnRings(radius, this.planet);
+    } else if (planet.name === "Neptune") {
+      this.rings = this.ringRenderer.addNeptuneRings(radius, this.planet);
+    } else if (planet.type === "jupiter" || planet.type === "neptune") {
+      // Use seeded random to ensure consistent ring presence for same planet
+      const seed = this.materialGenerator.hashCode(planet.name + "_hasRings");
+      const random = this.materialGenerator.seededRandom(seed);
+      if (random() > 0.7) {
+        this.rings = this.ringRenderer.addPlanetRings(
+          planet,
+          radius,
+          this.planet
+        );
       }
     }
 
-    // Fallback
-    if (temp < 250) return "#b8d4e8";
-    else if (temp < 400) return "#8ba3b5";
-    else if (temp < 800) return "#d4a574";
-    else return "#d47d5a";
-  }
-
-  /**
-   * Add procedural texture to planet
-   */
-  addProceduralTexture(ctx, planet) {
-    const seed = this.hashCode(planet.name);
-    const random = this.seededRandom(seed);
-
-    const noiseIntensity =
-      planet.type === "jupiter" || planet.type === "neptune" ? 0.15 : 0.2;
-    const noiseCount =
-      planet.type === "jupiter" || planet.type === "neptune" ? 7000 : 5000;
-
-    for (let i = 0; i < noiseCount; i++) {
-      const x = random() * 512;
-      const y = random() * 512;
-      const size = random() * 3;
-
-      ctx.fillStyle = `rgba(0, 0, 0, ${random() * noiseIntensity})`;
-      ctx.beginPath();
-      ctx.arc(x, y, size, 0, Math.PI * 2);
-      ctx.fill();
+    // Add lava glow for ultra-hot planets (thermal emission is now handled in shaders)
+    if (
+      planet.temperature >= 1000 &&
+      !this.materialGenerator.useRealisticShaders
+    ) {
+      this.addLavaGlow(planet, radius);
     }
-
-    // Add features based on planet type
-    if (planet.type === "jupiter") {
-      this.addGasGiantFeatures(ctx, random);
-    } else if (planet.type === "neptune") {
-      this.addIceGiantFeatures(ctx, random);
-    } else if (planet.type === "terrestrial" || planet.type === "super-earth") {
-      this.addTerrestrialFeatures(ctx, planet, random);
-    }
-  }
-
-  /**
-   * Add gas giant atmospheric features
-   */
-  addGasGiantFeatures(ctx, random) {
-    // Atmospheric bands
-    const numBands = 8 + Math.floor(random() * 4);
-    for (let i = 0; i < numBands; i++) {
-      const y = (i / numBands) * 512 + random() * 20 - 10;
-      const bandHeight = 512 / (numBands * 2);
-      ctx.fillStyle = `rgba(0, 0, 0, ${0.1 + random() * 0.1})`;
-      ctx.fillRect(0, y, 512, bandHeight);
-    }
-
-    // Storm features
-    for (let i = 0; i < 3; i++) {
-      const x = random() * 512;
-      const y = random() * 512;
-      const width = 40 + random() * 60;
-      const height = 20 + random() * 30;
-
-      ctx.fillStyle = `rgba(100, 50, 30, ${0.2 + random() * 0.2})`;
-      ctx.beginPath();
-      ctx.ellipse(x, y, width, height, random() * Math.PI, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-
-  /**
-   * Add ice giant features
-   */
-  addIceGiantFeatures(ctx, random) {
-    // Smoother bands
-    const numBands = 6 + Math.floor(random() * 3);
-    for (let i = 0; i < numBands; i++) {
-      const y = (i / numBands) * 512;
-      ctx.fillStyle = `rgba(0, 0, 0, ${random() * 0.12})`;
-      ctx.fillRect(0, y, 512, 512 / (numBands * 2));
-    }
-
-    // Atmospheric features
-    for (let i = 0; i < 5; i++) {
-      const x = random() * 512;
-      const y = random() * 512;
-      const size = 20 + random() * 40;
-
-      ctx.fillStyle = `rgba(255, 255, 255, ${0.05 + random() * 0.1})`;
-      ctx.beginPath();
-      ctx.arc(x, y, size, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-
-  /**
-   * Add terrestrial planet features
-   */
-  addTerrestrialFeatures(ctx, planet, random) {
-    if (planet.temperature > 1000) {
-      // Lava features
-      for (let i = 0; i < 30; i++) {
-        const x = random() * 512;
-        const y = random() * 512;
-        const size = 10 + random() * 30;
-
-        ctx.strokeStyle = `rgba(255, 100, 0, ${0.3 + random() * 0.3})`;
-        ctx.lineWidth = 2 + random() * 3;
-        ctx.beginPath();
-        ctx.arc(x, y, size, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-    } else if (planet.temperature < 250) {
-      // Ice features
-      for (let i = 0; i < 40; i++) {
-        const x = random() * 512;
-        const y = random() * 512;
-        const length = 20 + random() * 60;
-        const angle = random() * Math.PI * 2;
-
-        ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 + random() * 0.15})`;
-        ctx.lineWidth = 1 + random() * 2;
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + Math.cos(angle) * length, y + Math.sin(angle) * length);
-        ctx.stroke();
-      }
-    } else {
-      // Craters
-      const craterCount = planet.density && planet.density > 4.0 ? 25 : 20;
-      for (let i = 0; i < craterCount; i++) {
-        const x = random() * 512;
-        const y = random() * 512;
-        const size = random() * 30 + 10;
-
-        ctx.strokeStyle = `rgba(0, 0, 0, ${random() * 0.3})`;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(x, y, size, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.fillStyle = `rgba(0, 0, 0, ${random() * 0.15})`;
-        ctx.beginPath();
-        ctx.arc(x + size * 0.2, y + size * 0.2, size * 0.8, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-  }
-
-  /**
-   * Get planet surface roughness
-   */
-  getPlanetRoughness(planet) {
-    if (planet.type === "jupiter" || planet.type === "neptune") {
-      return 0.7;
-    }
-
-    if (planet.density !== null && planet.density !== undefined) {
-      if (planet.density > 5.0) return 0.95;
-      else if (planet.density > 3.5) return 0.85;
-    }
-
-    if (planet.temperature > 1000) return 0.6;
-
-    return 0.9;
-  }
-
-  /**
-   * Add atmosphere effect
-   */
-  addAtmosphere(planet, planetRadius) {
-    // Special handling for Solar System planets - use realistic atmosphere settings
-    if (this.isSolarSystemPlanet(planet)) {
-      this.addRealisticAtmosphere(planet, planetRadius);
-      return;
-    }
-
-    // Generic atmosphere for exoplanets
-    let atmosphereThickness = 1.1;
-    let atmosphereOpacity = 0.15; // Reduced from 0.2 for better visibility
-
-    if (planet.type === "jupiter" || planet.type === "neptune") {
-      atmosphereThickness = 1.15;
-      atmosphereOpacity = 0.25; // Reduced from 0.35
-    }
-
-    if (planet.type === "super-earth") {
-      atmosphereThickness = 1.12;
-      atmosphereOpacity = 0.18; // Reduced from 0.25
-    }
-
-    if (planet.temperature > 1500) {
-      atmosphereOpacity = 0.08; // Reduced from 0.1
-      atmosphereThickness = 1.05;
-    } else if (planet.temperature > 800) {
-      atmosphereThickness = 1.2;
-      atmosphereOpacity = 0.12; // Reduced from 0.15
-    }
-
-    if (planet.temperature < 150 && planet.type === "terrestrial") {
-      atmosphereThickness = 1.15;
-      atmosphereOpacity = 0.22; // Reduced from 0.3
-    }
-
-    const atmosphereGeometry = new THREE.SphereGeometry(
-      planetRadius * atmosphereThickness,
-      64,
-      64
-    );
-    const atmosphereMaterial = new THREE.MeshBasicMaterial({
-      color: this.getAtmosphereColor(planet),
-      transparent: true,
-      opacity: atmosphereOpacity,
-      side: THREE.BackSide,
-    });
-
-    this.atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
-    this.scene.add(this.atmosphere);
-  }
-
-  /**
-   * Add realistic atmosphere for Solar System planets
-   */
-  addRealisticAtmosphere(planet, planetRadius) {
-    let atmosphereColor;
-    let atmosphereOpacity;
-    let atmosphereThickness;
-
-    switch (planet.name) {
-      case "Earth":
-        atmosphereColor = 0x4da6ff; // Beautiful blue
-        atmosphereOpacity = 0.08; // Very subtle
-        atmosphereThickness = 1.08;
-        break;
-      case "Mars":
-        atmosphereColor = 0xffb380; // Reddish-orange
-        atmosphereOpacity = 0.05; // Very thin
-        atmosphereThickness = 1.05;
-        break;
-      case "Venus":
-        atmosphereColor = 0xfff4cc; // Yellowish
-        atmosphereOpacity = 0.12; // Thick atmosphere
-        atmosphereThickness = 1.12;
-        break;
-      case "Jupiter":
-        atmosphereColor = 0xf8e8d8; // Creamy
-        atmosphereOpacity = 0.15;
-        atmosphereThickness = 1.15;
-        break;
-      case "Saturn":
-        atmosphereColor = 0xffe8b8; // Pale gold
-        atmosphereOpacity = 0.12;
-        atmosphereThickness = 1.12;
-        break;
-      case "Uranus":
-        atmosphereColor = 0xafffff; // Cyan
-        atmosphereOpacity = 0.1;
-        atmosphereThickness = 1.1;
-        break;
-      case "Neptune":
-        atmosphereColor = 0x5599ff; // Deep blue
-        atmosphereOpacity = 0.12;
-        atmosphereThickness = 1.12;
-        break;
-      case "Mercury":
-        // Mercury has no atmosphere
-        return;
-      default:
-        // Fallback for any other Solar System body
-        atmosphereColor = 0xccddff;
-        atmosphereOpacity = 0.08;
-        atmosphereThickness = 1.08;
-    }
-
-    const atmosphereGeometry = new THREE.SphereGeometry(
-      planetRadius * atmosphereThickness,
-      64,
-      64
-    );
-
-    const atmosphereMaterial = new THREE.MeshBasicMaterial({
-      color: atmosphereColor,
-      transparent: true,
-      opacity: atmosphereOpacity,
-      side: THREE.BackSide,
-      blending: THREE.AdditiveBlending, // Makes it glow nicely
-    });
-
-    this.atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
-    this.scene.add(this.atmosphere);
-  }
-
-  /**
-   * Get atmosphere color
-   */
-  getAtmosphereColor(planet) {
-    const temp = planet.temperature;
-    const type = planet.type;
-
-    if (type === "jupiter") {
-      if (temp < 200) return 0xd8e4f8;
-      else if (temp < 600) return 0xf8e8d8;
-      else if (temp < 1200) return 0xf8d8c8;
-      else return 0xe8c8b8;
-    }
-
-    if (type === "neptune") {
-      if (temp < 100) return 0xc8d8ff;
-      else if (temp < 300) return 0xa8c8f8;
-      else if (temp < 600) return 0x98b8e8;
-      else return 0xb8a8c8;
-    }
-
-    if (temp < 150) return 0xd8e8ff;
-    else if (temp < 250) return 0xb8d4ff;
-    else if (temp < 350) return 0x88b8ff;
-    else if (temp < 600) return 0xf8d8a8;
-    else if (temp < 1000) return 0xffcc88;
-    else if (temp < 2000) return 0xff8844;
-    else return 0xff6644;
-  }
-
-  /**
-   * Add cloud layer
-   */
-  addCloudLayer(planet, planetRadius) {
-    const cloudGeometry = new THREE.SphereGeometry(
-      planetRadius * 1.015,
-      64,
-      64
-    );
-
-    // Check cache first to avoid regenerating cloud texture
-    const cacheKey = planet.name + "_clouds";
-    let cloudTexture = this.textureCache.clouds.get(cacheKey);
-
-    if (!cloudTexture) {
-      // Generate cloud texture if not cached
-      const canvas = document.createElement("canvas");
-      canvas.width = 512;
-      canvas.height = 512;
-      const ctx = canvas.getContext("2d");
-
-      ctx.fillStyle = "rgba(0,0,0,0)";
-      ctx.fillRect(0, 0, 512, 512);
-
-      const seed = this.hashCode(planet.name + "_clouds");
-      const random = this.seededRandom(seed);
-
-      for (let i = 0; i < 150; i++) {
-        const x = random() * 512;
-        const y = random() * 512;
-        const size = random() * 80 + 40;
-        const opacity = random() * 0.4 + 0.2;
-
-        const gradient = ctx.createRadialGradient(x, y, 0, x, y, size);
-        gradient.addColorStop(0, `rgba(255, 255, 255, ${opacity})`);
-        gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
-
-        ctx.fillStyle = gradient;
-        ctx.fillRect(x - size, y - size, size * 2, size * 2);
-      }
-
-      cloudTexture = new THREE.CanvasTexture(canvas);
-
-      // Cache the cloud texture
-      this.textureCache.clouds.set(cacheKey, cloudTexture);
-    } else {
-    }
-
-    const cloudMaterial = new THREE.MeshPhongMaterial({
-      map: cloudTexture,
-      transparent: true,
-      opacity: 0.6,
-      depthWrite: false,
-    });
-
-    this.clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
-    this.scene.add(this.clouds);
-  }
-
-  /**
-   * Add realistic Saturn rings
-   */
-  addSaturnRings(planetRadius) {
-    const ringGeometry = new THREE.RingGeometry(
-      planetRadius * 1.2, // Inner radius (closer to Saturn)
-      planetRadius * 2.3, // Outer radius
-      128 // High detail for Saturn's rings
-    );
-
-    // Check cache first - Saturn rings are always the same
-    const cacheKey = "saturn_rings";
-    let ringTexture = this.textureCache.rings.get(cacheKey);
-
-    if (!ringTexture) {
-      // Generate ring texture if not cached
-      const canvas = document.createElement("canvas");
-      canvas.width = 1024;
-      canvas.height = 64;
-      const ctx = canvas.getContext("2d");
-
-      // Saturn's ring system has distinct bands (A, B, C rings)
-      for (let i = 0; i < 1024; i++) {
-        const position = i / 1024;
-
-        let opacity = 0;
-        let colorVariation = 0;
-
-        // C Ring (inner, faint)
-        if (position < 0.15) {
-          opacity = 0.15 + Math.random() * 0.1;
-          colorVariation = 0.9;
-        }
-        // Cassini Division (gap)
-        else if (position < 0.18) {
-          opacity = 0.02;
-          colorVariation = 0.7;
-        }
-        // B Ring (bright, wide)
-        else if (position < 0.55) {
-          opacity = 0.6 + Math.random() * 0.2;
-          colorVariation = 1.0;
-        }
-        // Cassini Division (gap)
-        else if (position < 0.58) {
-          opacity = 0.05;
-          colorVariation = 0.7;
-        }
-        // A Ring (medium brightness)
-        else if (position < 0.85) {
-          opacity = 0.4 + Math.random() * 0.15;
-          colorVariation = 0.95;
-        }
-        // Encke Gap
-        else if (position < 0.87) {
-          opacity = 0.03;
-          colorVariation = 0.7;
-        }
-        // Outer A Ring
-        else {
-          opacity = 0.3 + Math.random() * 0.1;
-          colorVariation = 0.9;
-        }
-
-        // Saturn rings are golden-beige color
-        const baseColor = 220;
-        const r = baseColor * colorVariation;
-        const g = baseColor * 0.9 * colorVariation;
-        const b = baseColor * 0.7 * colorVariation;
-
-        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-        ctx.fillRect(i, 0, 1, 64);
-      }
-
-      ringTexture = new THREE.CanvasTexture(canvas);
-
-      // Cache the ring texture
-      this.textureCache.rings.set(cacheKey, ringTexture);
-    } else {
-    }
-
-    const ringMaterial = new THREE.MeshBasicMaterial({
-      map: ringTexture,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.95,
-    });
-
-    this.rings = new THREE.Mesh(ringGeometry, ringMaterial);
-    // Saturn's rings are tilted at approximately 26.7 degrees from our viewing angle
-    this.rings.rotation.x = Math.PI / 2 + (26.7 * Math.PI) / 180;
-    this.planet.add(this.rings);
-  }
-
-  /**
-   * Add rings to gas giants
-   */
-  addPlanetRings(planet, planetRadius) {
-    const ringGeometry = new THREE.RingGeometry(
-      planetRadius * 1.5,
-      planetRadius * 2.5,
-      64
-    );
-
-    const canvas = document.createElement("canvas");
-    canvas.width = 512;
-    canvas.height = 64;
-    const ctx = canvas.getContext("2d");
-
-    const seed = this.hashCode(planet.name + "_rings");
-    const random = this.seededRandom(seed);
-
-    for (let i = 0; i < 512; i++) {
-      const position = i / 512;
-
-      let opacity = 0;
-      if (position < 0.3) {
-        opacity = 0.3 + random() * 0.2;
-      } else if (position < 0.35) {
-        opacity = 0.05;
-      } else if (position < 0.7) {
-        opacity = 0.4 + random() * 0.3;
-      } else if (position < 0.75) {
-        opacity = 0.1;
-      } else {
-        opacity = 0.2 + random() * 0.2;
-      }
-
-      const brightness = 180 + random() * 50;
-      ctx.fillStyle = `rgba(${brightness}, ${brightness * 0.95}, ${
-        brightness * 0.9
-      }, ${opacity})`;
-      ctx.fillRect(i, 0, 1, 64);
-    }
-
-    const ringTexture = new THREE.CanvasTexture(canvas);
-
-    const ringMaterial = new THREE.MeshBasicMaterial({
-      map: ringTexture,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.9,
-    });
-
-    this.rings = new THREE.Mesh(ringGeometry, ringMaterial);
-    this.rings.rotation.x = Math.PI / 2 + (random() * 0.4 - 0.2);
-    this.planet.add(this.rings);
   }
 
   /**
@@ -837,7 +220,10 @@ export class PlanetRenderer {
       this.scene.remove(this.dynamicStarLight);
     }
 
-    const starColor = this.getStellarColor(planet.stellarTemp);
+    const starColor = getStarColor({
+      spectralType: planet.spectralType,
+      stellarTemp: planet.stellarTemp,
+    });
     const luminosity = planet.stellarLuminosity || 0;
     const intensity = 2 + luminosity * 0.3;
 
@@ -845,19 +231,6 @@ export class PlanetRenderer {
     this.dynamicStarLight.position.set(5, 3, 5);
 
     this.scene.add(this.dynamicStarLight);
-  }
-
-  /**
-   * Get stellar color based on temperature
-   */
-  getStellarColor(temp) {
-    if (temp < 3500) return 0xff6644;
-    else if (temp < 5000) return 0xffaa66;
-    else if (temp < 6000) return 0xffd700;
-    else if (temp < 7500) return 0xffffee;
-    else if (temp < 10000) return 0xffffff;
-    else if (temp < 30000) return 0xccddff;
-    else return 0xaabbff;
   }
 
   /**
@@ -929,6 +302,7 @@ export class PlanetRenderer {
       if (this.clouds) {
         this.clouds.position.set(orbitRadius, 0, 0);
       }
+      // Rings are children of planet, so they move automatically
     }
 
     return orbitRadius;
@@ -940,12 +314,13 @@ export class PlanetRenderer {
   addCentralStar(planet, planetRadius) {
     const starRadius = Math.max(0.3, Math.min(1.5, planet.stellarRadius * 0.4));
     const starGeometry = new THREE.SphereGeometry(starRadius, 32, 32);
-    const starColor = this.getStellarColor(planet.stellarTemp);
+    const starColor = getStarColor({
+      spectralType: planet.spectralType,
+      stellarTemp: planet.stellarTemp,
+    });
 
     const starMaterial = new THREE.MeshBasicMaterial({
       color: starColor,
-      emissive: starColor,
-      emissiveIntensity: 1,
     });
     this.centralStar = new THREE.Mesh(starGeometry, starMaterial);
 
@@ -990,6 +365,42 @@ export class PlanetRenderer {
   }
 
   /**
+   * Update shader uniforms for realistic rendering
+   * Must be called every frame for shaders to work properly
+   * @param {THREE.Camera} camera - The scene camera for position updates
+   */
+  updateShaderUniforms(camera) {
+    if (!this.planet || !this.planet.material) return;
+
+    // Update camera position for atmospheric scattering
+    if (
+      this.planet.material.uniforms &&
+      this.planet.material.uniforms.cameraPosition
+    ) {
+      this.planet.material.uniforms.cameraPosition.value.copy(camera.position);
+    }
+
+    // Update gas giant rotation offset
+    if (
+      this.planet.material.userData &&
+      this.planet.material.userData.isGasGiant
+    ) {
+      if (this.planet.material.uniforms.rotationOffset) {
+        this.planet.material.uniforms.rotationOffset.value += 0.0002;
+      }
+    }
+
+    // Update atmosphere shader uniforms
+    if (this.atmosphere && this.atmosphere.material.uniforms) {
+      if (this.atmosphere.material.uniforms.cameraPosition) {
+        this.atmosphere.material.uniforms.cameraPosition.value.copy(
+          camera.position
+        );
+      }
+    }
+  }
+
+  /**
    * Rotate planet
    */
   rotatePlanet(speed = 0.005) {
@@ -1030,30 +441,8 @@ export class PlanetRenderer {
     if (this.clouds) {
       this.clouds.position.set(x, 0, z);
     }
-  }
 
-  /**
-   * Hash string to number
-   */
-  hashCode(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash;
-    }
-    return Math.abs(hash);
-  }
-
-  /**
-   * Seeded random number generator
-   */
-  seededRandom(seed) {
-    let value = seed;
-    return function () {
-      value = (value * 9301 + 49297) % 233280;
-      return value / 233280;
-    };
+    // Rings are children of planet, so they move automatically
   }
 
   /**
@@ -1119,6 +508,10 @@ export class PlanetRenderer {
       this.clouds = null;
     }
     if (this.rings) {
+      // Rings are children of planet mesh, so they'll be removed with it
+      // Just dispose of geometry and material
+      if (this.rings.geometry) this.rings.geometry.dispose();
+      if (this.rings.material) this.rings.material.dispose();
       this.rings = null;
     }
     if (this.lavaGlow) {
