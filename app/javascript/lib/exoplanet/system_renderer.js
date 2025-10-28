@@ -1,4 +1,6 @@
 import * as THREE from "three";
+import { getStarColor, hashCode, seededRandom } from "./utils";
+import { StarRenderer } from "./star_renderer";
 
 /**
  * SystemRenderer
@@ -16,6 +18,15 @@ export class SystemRenderer {
     this.planetMeshes = [];
     this.animationTime = 0;
     this.showAtmospheres = false; // Toggle for atmosphere visibility
+    this.multiStarMinOrbitRadius = null; // Minimum orbit radius for multi-star systems
+    this.useRealisticStars = true; // Toggle for realistic star rendering
+    this.useRealisticDistances = false; // Toggle for realistic orbital distances (vs compressed)
+
+    // Use the material generator from the planet renderer
+    this.materialGenerator = planetRenderer.materialGenerator;
+
+    // Initialize star renderer for realistic stars
+    this.starRenderer = new StarRenderer(scene);
   }
 
   /**
@@ -115,6 +126,9 @@ export class SystemRenderer {
 
     // Add planet label
     this.addPlanetLabel(planetMesh, planet.name, planetRadius);
+
+    // Add rings for Saturn or other ringed planets
+    this.addPlanetRings(planet, planetRadius, planetMesh);
   }
 
   /**
@@ -138,8 +152,24 @@ export class SystemRenderer {
       orbitRadius = (index + 1) * 3;
     }
 
-    // Ensure minimum spacing between planets
-    const minRadius = 2 + index * 2;
+    // In realistic distance mode, don't enforce minimum spacing
+    // This preserves the actual relative distances between planets
+    if (this.useRealisticDistances) {
+      // For multi-star systems, still ensure planets orbit outside the star system
+      if (this.multiStarMinOrbitRadius) {
+        return Math.max(orbitRadius, this.multiStarMinOrbitRadius);
+      }
+      return orbitRadius;
+    }
+
+    // Compressed mode: ensure minimum spacing between planets for visibility
+    let minRadius = 2 + index * 2;
+
+    // For multi-star systems, ensure all planets orbit outside the star system extent
+    if (this.multiStarMinOrbitRadius) {
+      minRadius = Math.max(minRadius, this.multiStarMinOrbitRadius);
+    }
+
     return Math.max(orbitRadius, minRadius);
   }
 
@@ -172,21 +202,29 @@ export class SystemRenderer {
    * Calculate scale factor to fit system in view
    */
   calculateScaleFactor(maxOrbitRadius) {
-    // We want the outermost planet at roughly 15-20 units from center
-    const targetMaxRadius = 18;
-
-    if (maxOrbitRadius < 1) {
-      // Very compact system (hot Jupiters, etc.)
-      return 30;
-    } else if (maxOrbitRadius < 5) {
-      // Compact system
-      return targetMaxRadius / maxOrbitRadius;
-    } else if (maxOrbitRadius < 50) {
-      // Normal system
-      return targetMaxRadius / maxOrbitRadius;
+    if (this.useRealisticDistances) {
+      // Realistic mode: use logarithmic scaling for better visualization
+      // 1 AU = 3 units (allows viewing of wide-range systems)
+      // This shows true relative distances while keeping everything visible
+      return 3.0;
     } else {
-      // Very large system
-      return targetMaxRadius / maxOrbitRadius;
+      // Compressed mode: fit everything into viewable area
+      // We want the outermost planet at roughly 15-20 units from center
+      const targetMaxRadius = 18;
+
+      if (maxOrbitRadius < 1) {
+        // Very compact system (hot Jupiters, etc.)
+        return 30;
+      } else if (maxOrbitRadius < 5) {
+        // Compact system
+        return targetMaxRadius / maxOrbitRadius;
+      } else if (maxOrbitRadius < 50) {
+        // Normal system
+        return targetMaxRadius / maxOrbitRadius;
+      } else {
+        // Very large system
+        return targetMaxRadius / maxOrbitRadius;
+      }
     }
   }
 
@@ -212,7 +250,17 @@ export class SystemRenderer {
    */
   createPlanetMesh(planet, radius) {
     const geometry = new THREE.SphereGeometry(radius, 32, 32);
-    const material = this.planetRenderer.generatePlanetMaterial(planet);
+
+    // Get star color for realistic rendering
+    const starColor = this.getStarColorVector(planet);
+
+    // Generate material with realistic shader support
+    const material = this.materialGenerator.generatePlanetMaterial(planet, {
+      starPosition: new THREE.Vector3(0, 0, 0), // Star at origin in system view
+      starColor: starColor,
+      starIntensity: 2.0 + (planet.stellarLuminosity || 0) * 0.3,
+      planetRadius: radius,
+    });
 
     const mesh = new THREE.Mesh(geometry, material);
 
@@ -248,6 +296,52 @@ export class SystemRenderer {
     mesh.userData.baseRadius = radius;
 
     return mesh;
+  }
+
+  /**
+   * Get star color as THREE.Vector3 for shaders
+   */
+  getStarColorVector(planet) {
+    const starColor = getStarColor({
+      spectralType: planet.spectralType,
+      stellarTemp: planet.stellarTemp,
+    });
+
+    // Convert THREE.Color hex to RGB vector
+    const color = new THREE.Color(starColor);
+    return new THREE.Vector3(color.r, color.g, color.b);
+  }
+
+  /**
+   * Add rings to a planet if appropriate
+   * @param {Object} planet - Planet data object
+   * @param {number} planetRadius - Radius of the planet mesh
+   * @param {THREE.Mesh} planetMesh - The planet mesh to attach rings to
+   */
+  addPlanetRings(planet, planetRadius, planetMesh) {
+    const ringRenderer = this.planetRenderer.ringRenderer;
+
+    // Add rings for Saturn (always, bright and prominent)
+    if (planet.name === "Saturn") {
+      const rings = ringRenderer.addSaturnRings(planetRadius, planetMesh);
+    }
+    // Add rings for Neptune (always, faint and dark)
+    else if (planet.name === "Neptune") {
+      const rings = ringRenderer.addNeptuneRings(planetRadius, planetMesh);
+    }
+    // Add rings for other gas giants (30% chance, seeded)
+    else if (planet.type === "jupiter" || planet.type === "neptune") {
+      // Use seeded random to ensure consistent ring presence for same planet
+      const seed = hashCode(planet.name + "_hasRings");
+      const random = seededRandom(seed);
+      if (random() > 0.7) {
+        const rings = ringRenderer.addPlanetRings(
+          planet,
+          planetRadius,
+          planetMesh
+        );
+      }
+    }
   }
 
   /**
@@ -379,36 +473,6 @@ export class SystemRenderer {
   }
 
   /**
-   * Get accurate star color from spectral type (with temperature fallback)
-   */
-  getStarColorFromSpectralType(stellarData) {
-    const spectralType = stellarData.spectralType;
-
-    // If spectral type is available, use it for accurate colors
-    if (spectralType) {
-      const typeChar = spectralType.charAt(0).toUpperCase();
-
-      // Based on Harvard spectral classification
-      const spectralColors = {
-        O: 0x9bb0ff, // Blue (30,000-50,000 K)
-        B: 0xaabfff, // Blue-white (10,000-30,000 K)
-        A: 0xcad7ff, // White (7,500-10,000 K)
-        F: 0xf8f7ff, // Yellow-white (6,000-7,500 K)
-        G: 0xfff4e8, // Yellow (5,200-6,000 K) - Like our Sun
-        K: 0xffd2a1, // Orange (3,700-5,200 K)
-        M: 0xffbd6f, // Red (2,400-3,700 K)
-      };
-
-      if (spectralColors[typeChar]) {
-        return spectralColors[typeChar];
-      }
-    }
-
-    // Fallback to temperature-based color
-    return this.planetRenderer.getStellarColor(stellarData.stellarTemp);
-  }
-
-  /**
    * Add multiple stars for binary/triple star systems
    */
   addMultiStarSystem(stellarData, numberOfStars) {
@@ -416,7 +480,10 @@ export class SystemRenderer {
       0.5,
       Math.min(2, stellarData.stellarRadius * 0.5)
     );
-    const starColor = this.getStarColorFromSpectralType(stellarData);
+    const starColor = getStarColor({
+      spectralType: stellarData.spectralType,
+      stellarTemp: stellarData.stellarTemp,
+    });
 
     // Create a container for the multi-star system
     this.centralStar = new THREE.Group();
@@ -426,6 +493,18 @@ export class SystemRenderer {
       numberOfStars,
       starRadius
     );
+
+    // Calculate minimum orbit radius for planets
+    // Planets must orbit outside the entire multi-star configuration
+    // Account for star radius, glow (1.5x), and corona (2x for hot stars)
+    const maxStarExtent = stellarData.stellarTemp > 6000 ? 2.0 : 1.5;
+    const separation = starRadius * 4; // Distance between stars
+
+    // For circular arrangements (3+ stars), planets must orbit outside
+    // the circle that contains all stars plus their glows
+    // Add extra margin for safety and visual clarity (1.5x buffer)
+    this.multiStarMinOrbitRadius =
+      (separation + starRadius * maxStarExtent) * 1.5;
 
     starPositions.forEach((position, index) => {
       const starGeometry = new THREE.SphereGeometry(starRadius, 32, 32);
@@ -439,8 +518,6 @@ export class SystemRenderer {
 
       const starMaterial = new THREE.MeshBasicMaterial({
         color: individualStarColor,
-        emissive: individualStarColor,
-        emissiveIntensity: 1,
       });
 
       const star = new THREE.Mesh(starGeometry, starMaterial);
@@ -508,6 +585,26 @@ export class SystemRenderer {
   }
 
   /**
+   * Calculate star radius based on stellar data and distance mode
+   */
+  calculateStarRadius(stellarData) {
+    const stellarRadius = stellarData.stellarRadius || 1.0; // In solar radii
+
+    if (this.useRealisticDistances) {
+      // Realistic mode: 1 solar radius = 0.00465 AU
+      // Scale it up by 100x to keep it visible (otherwise it's a tiny dot)
+      // This keeps relative sizes accurate while maintaining visibility
+      const solarRadiusInAU = 0.00465;
+      const scaleFactor = 3.0; // Same as orbit scaling (1 AU = 3 units)
+      const visibilityBoost = 100; // Make it visible but keep proportions
+      return stellarRadius * solarRadiusInAU * scaleFactor * visibilityBoost;
+    } else {
+      // Compressed mode: Use clamped visual size
+      return Math.max(0.5, Math.min(2, stellarRadius * 0.5));
+    }
+  }
+
+  /**
    * Add central star (or multiple stars for binary/triple systems)
    */
   addCentralStar(stellarData) {
@@ -519,52 +616,72 @@ export class SystemRenderer {
       return;
     }
 
+    // Reset multi-star minimum orbit radius for single-star systems
+    this.multiStarMinOrbitRadius = null;
+
+    // Calculate realistic star radius
+    const starRadius = this.calculateStarRadius(stellarData);
+
     // Check if this is our Sun - use realistic texture
     // Note: stellarData is actually a planet object, so we check hostStar
     const starName = stellarData.starName || stellarData.hostStar;
     if (starName === "Sun") {
-      this.addRealisticSun(stellarData);
+      this.addRealisticSun(stellarData, starRadius);
       return;
     }
 
-    // Single star system (generic)
-    const starRadius = Math.max(
-      0.5,
-      Math.min(2, stellarData.stellarRadius * 0.5)
-    );
-    const starGeometry = new THREE.SphereGeometry(starRadius, 32, 32);
-    const starColor = this.getStarColorFromSpectralType(stellarData);
-
-    const starMaterial = new THREE.MeshBasicMaterial({
-      color: starColor, // MeshBasicMaterial is always full brightness (self-lit)
-    });
-
-    this.centralStar = new THREE.Mesh(starGeometry, starMaterial);
-
-    // Add glow
-    const glowGeometry = new THREE.SphereGeometry(starRadius * 1.5, 32, 32);
-    const glowMaterial = new THREE.MeshBasicMaterial({
-      color: starColor,
-      transparent: true,
-      opacity: 0.4,
-    });
-    const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-    this.centralStar.add(glow);
-
-    // Add corona for hot stars
-    if (stellarData.stellarTemp > 6000) {
-      const coronaGeometry = new THREE.SphereGeometry(starRadius * 2, 32, 32);
-      const coronaMaterial = new THREE.MeshBasicMaterial({
-        color: 0xffffff,
-        transparent: true,
-        opacity: 0.2,
+    // Use realistic star renderer if enabled
+    if (this.useRealisticStars) {
+      this.centralStar = this.starRenderer.createRealisticStar(
+        stellarData,
+        new THREE.Vector3(0, 0, 0),
+        {
+          showCorona: true,
+          showFlares: stellarData.stellarTemp > 3000,
+          animate: true,
+          customRadius: starRadius,
+        }
+      );
+      this.scene.add(this.centralStar);
+    } else {
+      // Legacy: Simple star system (generic)
+      const starGeometry = new THREE.SphereGeometry(starRadius, 32, 32);
+      const starColor = getStarColor({
+        spectralType: stellarData.spectralType,
+        stellarTemp: stellarData.stellarTemp,
       });
-      const corona = new THREE.Mesh(coronaGeometry, coronaMaterial);
-      this.centralStar.add(corona);
-    }
 
-    this.centralStar.position.set(0, 0, 0);
-    this.scene.add(this.centralStar);
+      const starMaterial = new THREE.MeshBasicMaterial({
+        color: starColor, // MeshBasicMaterial is always full brightness (self-lit)
+      });
+
+      this.centralStar = new THREE.Mesh(starGeometry, starMaterial);
+
+      // Add glow
+      const glowGeometry = new THREE.SphereGeometry(starRadius * 1.5, 32, 32);
+      const glowMaterial = new THREE.MeshBasicMaterial({
+        color: starColor,
+        transparent: true,
+        opacity: 0.4,
+      });
+      const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+      this.centralStar.add(glow);
+
+      // Add corona for hot stars
+      if (stellarData.stellarTemp > 6000) {
+        const coronaGeometry = new THREE.SphereGeometry(starRadius * 2, 32, 32);
+        const coronaMaterial = new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+          transparent: true,
+          opacity: 0.2,
+        });
+        const corona = new THREE.Mesh(coronaGeometry, coronaMaterial);
+        this.centralStar.add(corona);
+      }
+
+      this.centralStar.position.set(0, 0, 0);
+      this.scene.add(this.centralStar);
+    }
 
     // Update lighting
     this.updateLighting(stellarData);
@@ -573,12 +690,7 @@ export class SystemRenderer {
   /**
    * Add realistic Sun with texture
    */
-  addRealisticSun(stellarData) {
-    const starRadius = Math.max(
-      0.5,
-      Math.min(2, stellarData.stellarRadius * 0.5)
-    );
-
+  addRealisticSun(stellarData, starRadius) {
     const starGeometry = new THREE.SphereGeometry(starRadius, 64, 64);
 
     // Create material with realistic Sun appearance
@@ -620,7 +732,10 @@ export class SystemRenderer {
       this.scene.remove(this.dynamicStarLight);
     }
 
-    const starColor = this.getStarColorFromSpectralType(stellarData);
+    const starColor = getStarColor({
+      spectralType: stellarData.spectralType,
+      stellarTemp: stellarData.stellarTemp,
+    });
     const luminosity = stellarData.stellarLuminosity || 0;
     const intensity = 2.5 + luminosity * 0.3;
 
@@ -709,6 +824,46 @@ export class SystemRenderer {
   }
 
   /**
+   * Update shader uniforms for all planets in the system
+   * Must be called every frame for realistic shaders to work
+   * @param {THREE.Camera} camera - The scene camera
+   */
+  updateShaderUniforms(camera) {
+    this.planetMeshes.forEach((mesh) => {
+      if (!mesh.material || !mesh.material.uniforms) return;
+
+      // Update camera position for shaders
+      if (mesh.material.uniforms.cameraPosition) {
+        mesh.material.uniforms.cameraPosition.value.copy(camera.position);
+      }
+
+      // Update gas giant rotation offset
+      if (mesh.material.userData && mesh.material.userData.isGasGiant) {
+        if (mesh.material.uniforms.rotationOffset) {
+          mesh.material.uniforms.rotationOffset.value += 0.0002;
+        }
+      }
+
+      // Update atmosphere for each planet (if it has shader-based atmosphere)
+      const atmosphere = mesh.children.find(
+        (child) => child.name === "atmosphere"
+      );
+      if (atmosphere && atmosphere.material && atmosphere.material.uniforms) {
+        if (atmosphere.material.uniforms.cameraPosition) {
+          atmosphere.material.uniforms.cameraPosition.value.copy(
+            camera.position
+          );
+        }
+      }
+    });
+
+    // Animate realistic stars
+    if (this.useRealisticStars) {
+      this.starRenderer.animateStars(0.016);
+    }
+  }
+
+  /**
    * Get all planet meshes
    */
   getAllPlanetMeshes() {
@@ -767,7 +922,7 @@ export class SystemRenderer {
    */
   focusOnPlanet(planet) {
     this.planetMeshes.forEach((mesh) => {
-      if (mesh.userData.planet === planet) {
+      if (mesh.userData.planet.name === planet.name) {
         // Keep the focused planet visible
         mesh.visible = true;
         // Stop its orbital animation
@@ -805,11 +960,37 @@ export class SystemRenderer {
   }
 
   /**
+   * Toggle between realistic and compressed orbital distances
+   * @param {boolean} realistic - Whether to use realistic distances
+   */
+  setRealisticDistances(realistic) {
+    this.useRealisticDistances = realistic;
+  }
+
+  /**
+   * Re-render the entire system (used when settings change)
+   */
+  rerenderSystem() {
+    if (this.systemPlanets.length === 0) return;
+
+    // Store current settings AND system planets (cleanup will clear them!)
+    const planets = [...this.systemPlanets]; // Create a copy
+    const animateOrbits = this.planetMeshes[0]?.userData?.animateOrbits ?? true;
+    const useInclination = this.useInclination;
+
+    // Cleanup existing system (this clears this.systemPlanets)
+    this.cleanup();
+
+    // Re-render with new settings using our saved copy
+    this.renderSystem(planets, animateOrbits, useInclination);
+  }
+
+  /**
    * Show orbit line for a specific planet
    */
   showOrbitForPlanet(planet, show = true) {
     const planetIndex = this.planetMeshes.findIndex(
-      (mesh) => mesh.userData.planet === planet
+      (mesh) => mesh.userData.planet.name === planet.name
     );
 
     if (planetIndex >= 0 && this.orbitLines[planetIndex]) {
@@ -918,7 +1099,9 @@ export class SystemRenderer {
    * Get the mesh for a specific planet
    */
   getPlanetMesh(planet) {
-    return this.planetMeshes.find((mesh) => mesh.userData.planet === planet);
+    return this.planetMeshes.find(
+      (mesh) => mesh.userData.planet.name === planet.name
+    );
   }
 
   /**
@@ -1020,5 +1203,6 @@ export class SystemRenderer {
 
     this.systemPlanets = [];
     this.animationTime = 0;
+    this.multiStarMinOrbitRadius = null; // Reset multi-star configuration
   }
 }

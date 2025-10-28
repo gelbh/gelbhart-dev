@@ -1,4 +1,6 @@
 import * as THREE from "three";
+import { getStarColor } from "./utils";
+import { StarRenderer } from "./star_renderer";
 
 /**
  * GalaxyRenderer
@@ -24,6 +26,8 @@ export class GalaxyRenderer {
     this.spiralArms = []; // Visual spiral arm structures
     this.milkyWayDisk = null; // Reference to the disk mesh
     this.diskRotationZ = 0; // Current Z rotation of the disk
+    this.starRenderer = new StarRenderer(scene); // Realistic star rendering
+    this.useRealisticStars = false; // Toggle for realistic star rendering (disabled by default for performance)
   }
 
   /**
@@ -132,30 +136,136 @@ export class GalaxyRenderer {
 
   /**
    * Add marker for galactic center (Sagittarius A*)
+   * Creates a supermassive black hole visualization with accretion disk
    */
   addGalacticCenterMarker() {
     const earthDistanceFromGC = 27000;
     const scaledDistance = Math.log10(earthDistanceFromGC + 1) * 15;
 
-    const geometry = new THREE.SphereGeometry(3, 32, 32);
-    const material = new THREE.MeshBasicMaterial({
-      color: 0xff6600,
-      transparent: true,
-      opacity: 0.8,
-    });
-
-    this.galacticCenterMarker = new THREE.Mesh(geometry, material);
+    this.galacticCenterMarker = new THREE.Group();
     this.galacticCenterMarker.position.set(scaledDistance, 0, 0);
 
-    const glowGeometry = new THREE.SphereGeometry(5, 32, 32);
-    const glowMaterial = new THREE.MeshBasicMaterial({
-      color: 0xff8800,
+    // Make it clickable
+    this.galacticCenterMarker.userData.isGalacticCenter = true;
+    this.galacticCenterMarker.userData.name = "Sagittarius A*";
+    this.galacticCenterMarker.userData.description =
+      "Supermassive Black Hole at the center of the Milky Way";
+    this.galacticCenterMarker.userData.mass = "4.15 million solar masses";
+    this.galacticCenterMarker.userData.distance =
+      "27,000 light-years from Earth";
+
+    // Central black sphere (event horizon)
+    const blackHoleGeometry = new THREE.SphereGeometry(2, 32, 32);
+    const blackHoleMaterial = new THREE.MeshBasicMaterial({
+      color: 0x000000,
       transparent: true,
-      opacity: 0.3,
+      opacity: 1.0,
+    });
+    const blackHole = new THREE.Mesh(blackHoleGeometry, blackHoleMaterial);
+    blackHole.userData.isClickable = true; // Make clickable for raycasting
+    this.galacticCenterMarker.add(blackHole);
+
+    // Inner photon sphere (gravitational lensing effect)
+    const photonSphereGeometry = new THREE.SphereGeometry(2.5, 32, 32);
+    const photonSphereMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffaa00,
+      transparent: true,
+      opacity: 0.6,
+      blending: THREE.AdditiveBlending,
+      side: THREE.BackSide,
+    });
+    const photonSphere = new THREE.Mesh(
+      photonSphereGeometry,
+      photonSphereMaterial
+    );
+    this.galacticCenterMarker.add(photonSphere);
+
+    // Accretion disk
+    const diskGeometry = new THREE.RingGeometry(3, 8, 64);
+    const diskMaterial = new THREE.MeshBasicMaterial({
+      color: 0xff6600,
+      transparent: true,
+      opacity: 0.7,
+      side: THREE.DoubleSide,
       blending: THREE.AdditiveBlending,
     });
-    const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-    this.galacticCenterMarker.add(glow);
+    const accretionDisk = new THREE.Mesh(diskGeometry, diskMaterial);
+    accretionDisk.rotation.x = Math.PI / 2;
+    accretionDisk.userData.isAccretionDisk = true;
+    this.galacticCenterMarker.add(accretionDisk);
+
+    // Inner hot disk region
+    const hotDiskGeometry = new THREE.RingGeometry(3, 5, 64);
+    const hotDiskMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffff88,
+      transparent: true,
+      opacity: 0.9,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+    });
+    const hotDisk = new THREE.Mesh(hotDiskGeometry, hotDiskMaterial);
+    hotDisk.rotation.x = Math.PI / 2;
+    hotDisk.userData.isHotDisk = true;
+    this.galacticCenterMarker.add(hotDisk);
+
+    // Multiple energy glow layers
+    const glowLayers = [
+      { radius: 4, color: 0xffaa00, opacity: 0.5 },
+      { radius: 6, color: 0xff8800, opacity: 0.35 },
+      { radius: 9, color: 0xff6600, opacity: 0.2 },
+      { radius: 12, color: 0xff4400, opacity: 0.1 },
+    ];
+
+    glowLayers.forEach((layer, index) => {
+      const glowGeometry = new THREE.SphereGeometry(layer.radius, 32, 32);
+      const glowMaterial = new THREE.MeshBasicMaterial({
+        color: layer.color,
+        transparent: true,
+        opacity: layer.opacity,
+        blending: THREE.AdditiveBlending,
+        side: THREE.BackSide,
+        depthWrite: false,
+      });
+      const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+      glow.userData.glowLayer = index;
+      this.galacticCenterMarker.add(glow);
+    });
+
+    // X-ray emission corona
+    const coronaGeometry = new THREE.SphereGeometry(7, 32, 32);
+    const coronaMaterial = new THREE.MeshBasicMaterial({
+      color: 0x88ccff,
+      transparent: true,
+      opacity: 0.15,
+      blending: THREE.AdditiveBlending,
+      side: THREE.BackSide,
+      depthWrite: false,
+    });
+    const corona = new THREE.Mesh(coronaGeometry, coronaMaterial);
+    corona.userData.isCorona = true;
+    this.galacticCenterMarker.add(corona);
+
+    // Polar jets (perpendicular to accretion disk)
+    const createJet = (direction) => {
+      const jetGeometry = new THREE.CylinderGeometry(0.5, 1.5, 15, 16);
+      const jetMaterial = new THREE.MeshBasicMaterial({
+        color: 0x4488ff,
+        transparent: true,
+        opacity: 0.6,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+      const jet = new THREE.Mesh(jetGeometry, jetMaterial);
+      jet.position.y = direction * 10;
+      jet.userData.isJet = true;
+      jet.userData.direction = direction;
+      return jet;
+    };
+
+    const jetTop = createJet(1);
+    const jetBottom = createJet(-1);
+    this.galacticCenterMarker.add(jetTop);
+    this.galacticCenterMarker.add(jetBottom);
 
     this.scene.add(this.galacticCenterMarker);
   }
@@ -164,32 +274,56 @@ export class GalaxyRenderer {
    * Add a visual representation of the Sun (Solar System at galactic center)
    */
   addGalacticCenter() {
-    // Create the Sun at the center with realistic appearance
-    const geometry = new THREE.SphereGeometry(1.5, 64, 64);
-    const material = new THREE.MeshBasicMaterial({
-      color: 0xfdb813, // Realistic Sun color (MeshBasicMaterial is always full brightness)
-    });
+    if (this.useRealisticStars) {
+      // Use simplified star renderer for the Sun for better performance
+      const solarData = {
+        spectralType: "G2V",
+        stellarTemp: 5778,
+        stellarRadius: 1.0,
+        stellarLuminosity: 1.0,
+      };
 
-    this.galacticCenter = new THREE.Mesh(geometry, material);
-    this.galacticCenter.position.set(0, 0, 0); // Sun/Solar System at origin
+      this.galacticCenter = this.starRenderer.createRealisticStar(
+        solarData,
+        new THREE.Vector3(0, 0, 0),
+        {
+          showCorona: false,
+          showFlares: false,
+          animate: true,
+          simplified: true, // Use simplified rendering for performance
+        }
+      );
 
-    // Load realistic Sun texture from local assets
-    const textureLoader = new THREE.TextureLoader();
-    textureLoader.load(
-      "/textures/planets/sun.jpg",
-      (texture) => {
-        material.map = texture;
-        material.needsUpdate = true;
-      },
-      undefined,
-      (error) => {
-        console.warn(
-          "Failed to load Sun texture, using solid color. Ensure sun.jpg exists in public/textures/planets/"
-        );
-      }
-    );
+      // Scale for galaxy view
+      this.galacticCenter.scale.setScalar(1.5);
+      this.scene.add(this.galacticCenter);
+    } else {
+      // Legacy rendering
+      const geometry = new THREE.SphereGeometry(1.5, 64, 64);
+      const material = new THREE.MeshBasicMaterial({
+        color: 0xfdb813,
+      });
 
-    this.scene.add(this.galacticCenter);
+      this.galacticCenter = new THREE.Mesh(geometry, material);
+      this.galacticCenter.position.set(0, 0, 0);
+
+      const textureLoader = new THREE.TextureLoader();
+      textureLoader.load(
+        "/textures/planets/sun.jpg",
+        (texture) => {
+          material.map = texture;
+          material.needsUpdate = true;
+        },
+        undefined,
+        (error) => {
+          console.warn(
+            "Failed to load Sun texture, using solid color. Ensure sun.jpg exists in public/textures/planets/"
+          );
+        }
+      );
+
+      this.scene.add(this.galacticCenter);
+    }
   }
 
   /**
@@ -311,73 +445,65 @@ export class GalaxyRenderer {
   }
 
   /**
-   * Get accurate star color from spectral type
-   */
-  getStarColor(planet) {
-    // Try spectral type first for accuracy
-    if (planet && planet.spectralType) {
-      const typeChar = planet.spectralType.charAt(0).toUpperCase();
-
-      // Harvard spectral classification
-      const spectralColors = {
-        O: 0x9bb0ff, // Blue
-        B: 0xaabfff, // Blue-white
-        A: 0xcad7ff, // White
-        F: 0xf8f7ff, // Yellow-white
-        G: 0xfff4e8, // Yellow (like our Sun)
-        K: 0xffd2a1, // Orange
-        M: 0xffbd6f, // Red
-      };
-
-      if (spectralColors[typeChar]) {
-        return spectralColors[typeChar];
-      }
-    }
-
-    // Fallback to temperature-based color
-    if (planet && planet.stellarTemp) {
-      const temp = planet.stellarTemp;
-      if (temp > 7500) return 0xaaaaff; // Blue
-      else if (temp > 6000) return 0xffffee; // White
-      else if (temp > 5000) return 0xffffaa; // Yellow
-      else if (temp > 3500) return 0xffaa44; // Orange
-      else return 0xff6644; // Red
-    }
-
-    // Default yellow
-    return 0xffffaa;
-  }
-
-  /**
    * Create star mesh with color based on stellar properties
    */
   createStarMesh(system, size) {
-    const geometry = new THREE.SphereGeometry(size, 16, 16);
+    if (this.useRealisticStars) {
+      // Use simplified star renderer for performance in galaxy view
+      const firstPlanet = system.planets[0];
+      const stellarData = {
+        spectralType: firstPlanet?.spectralType || "G",
+        stellarTemp: firstPlanet?.stellarTemp || 5778,
+        stellarRadius: firstPlanet?.stellarRadius || 1.0,
+        stellarLuminosity: firstPlanet?.stellarLuminosity || 1.0,
+      };
 
-    // Get accurate star color using spectral type
-    const firstPlanet = system.planets[0];
-    const starColor = this.getStarColor(firstPlanet);
+      const starGroup = this.starRenderer.createRealisticStar(
+        stellarData,
+        new THREE.Vector3(0, 0, 0),
+        {
+          showCorona: false,
+          showFlares: false,
+          animate: false, // Disable animation for distant stars
+          simplified: true, // Use simplified rendering for performance
+        }
+      );
 
-    const material = new THREE.MeshBasicMaterial({
-      color: starColor,
-      transparent: true,
-      opacity: 0.9,
-    });
+      // Scale to appropriate size for galaxy view
+      starGroup.scale.setScalar(size);
 
-    const mesh = new THREE.Mesh(geometry, material);
+      return starGroup;
+    } else {
+      // Legacy rendering
+      const geometry = new THREE.SphereGeometry(size, 16, 16);
 
-    // Add subtle glow
-    const glowGeometry = new THREE.SphereGeometry(size * 1.5, 16, 16);
-    const glowMaterial = new THREE.MeshBasicMaterial({
-      color: starColor,
-      transparent: true,
-      opacity: 0.3,
-      side: THREE.BackSide,
-    });
-    const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-    mesh.add(glow);
+      const firstPlanet = system.planets[0];
+      const starColor = getStarColor({
+        spectralType: firstPlanet?.spectralType,
+        stellarTemp: firstPlanet?.stellarTemp,
+      });
 
-    return mesh;
+      const material = new THREE.MeshBasicMaterial({
+        color: starColor,
+        transparent: true,
+        opacity: 0.9,
+      });
+
+      const mesh = new THREE.Mesh(geometry, material);
+
+      // Add subtle glow
+      const glowGeometry = new THREE.SphereGeometry(size * 1.5, 16, 16);
+      const glowMaterial = new THREE.MeshBasicMaterial({
+        color: starColor,
+        transparent: true,
+        opacity: 0.3,
+        side: THREE.BackSide,
+      });
+      const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+      mesh.add(glow);
+
+      return mesh;
+    }
   }
 
   /**
@@ -399,6 +525,36 @@ export class GalaxyRenderer {
    */
   getAllSystemMeshes() {
     return this.systemMeshes.filter((mesh) => mesh.userData.isStarSystem);
+  }
+
+  /**
+   * Get all clickable objects (systems + galactic center)
+   */
+  getAllClickableObjects() {
+    const clickable = [
+      ...this.systemMeshes.filter((mesh) => mesh.userData.isStarSystem),
+    ];
+
+    // Add galactic center's clickable children
+    if (this.galacticCenterMarker) {
+      this.galacticCenterMarker.traverse((child) => {
+        if (child.userData.isClickable) {
+          clickable.push(child);
+        }
+      });
+    }
+
+    return clickable;
+  }
+
+  /**
+   * Get the galactic center marker position
+   */
+  getGalacticCenterPosition() {
+    if (this.galacticCenterMarker) {
+      return this.galacticCenterMarker.position.clone();
+    }
+    return null;
   }
 
   /**
@@ -448,26 +604,67 @@ export class GalaxyRenderer {
   animateGalaxy(deltaTime) {
     const time = Date.now() * 0.001;
 
-    // Rotate the Sun at galactic center
-    if (this.galacticCenter) {
-      this.galacticCenter.rotation.y += deltaTime * 0.05;
-      const pulse = Math.sin(time * 0.5) * 0.1 + 1.0;
-      this.galacticCenter.scale.setScalar(pulse);
+    // Animate realistic stars
+    if (this.useRealisticStars) {
+      this.starRenderer.animateStars(deltaTime);
+    } else {
+      // Legacy animation
+      // Rotate the Sun at galactic center
+      if (this.galacticCenter) {
+        this.galacticCenter.rotation.y += deltaTime * 0.05;
+        const pulse = Math.sin(time * 0.5) * 0.1 + 1.0;
+        this.galacticCenter.scale.setScalar(pulse);
+      }
+
+      // Subtle pulsing of stars (twinkling effect)
+      this.systemMeshes.forEach((mesh, index) => {
+        if (mesh.userData.isStarSystem) {
+          const pulse = Math.sin(time + index * 0.5) * 0.1 + 0.9;
+          mesh.scale.setScalar(pulse);
+        }
+      });
     }
 
     // Animate galactic center marker (Sagittarius A*)
     if (this.galacticCenterMarker) {
-      const pulse = Math.sin(time * 1.5) * 0.15 + 1.0;
-      this.galacticCenterMarker.scale.setScalar(pulse);
-    }
+      // Rotate accretion disk
+      this.galacticCenterMarker.children.forEach((child) => {
+        if (child.userData.isAccretionDisk) {
+          child.rotation.z += deltaTime * 0.3; // Fast inner rotation
+        }
+        if (child.userData.isHotDisk) {
+          child.rotation.z += deltaTime * 0.5; // Even faster hot disk
+        }
 
-    // Subtle pulsing of stars (twinkling effect)
-    this.systemMeshes.forEach((mesh, index) => {
-      if (mesh.userData.isStarSystem) {
-        const pulse = Math.sin(time + index * 0.5) * 0.1 + 0.9;
-        mesh.scale.setScalar(pulse);
-      }
-    });
+        // Pulsing glow layers with different frequencies
+        if (child.userData.glowLayer !== undefined) {
+          const layerIndex = child.userData.glowLayer;
+          const pulseFreq = 1.0 + layerIndex * 0.3;
+          const pulse = Math.sin(time * pulseFreq) * 0.15 + 1.0;
+          child.scale.setScalar(pulse);
+        }
+
+        // Shimmer X-ray corona
+        if (child.userData.isCorona) {
+          const shimmer = Math.sin(time * 2.5) * 0.2 + 1.0;
+          child.scale.setScalar(shimmer);
+        }
+
+        // Pulse jets
+        if (child.userData.isJet) {
+          const jetPulse =
+            Math.sin(time * 1.5 + child.userData.direction) * 0.3 + 1.0;
+          child.scale.y = jetPulse;
+
+          // Add slight opacity variation
+          const opacityPulse = Math.sin(time * 2) * 0.2 + 0.6;
+          child.material.opacity = opacityPulse;
+        }
+      });
+
+      // Subtle overall rotation
+      this.galacticCenterMarker.rotation.y += deltaTime * 0.05;
+    }
   }
 
   /**
@@ -555,15 +752,25 @@ export class GalaxyRenderer {
     // Remove galactic center marker
     if (this.galacticCenterMarker) {
       this.scene.remove(this.galacticCenterMarker);
-      if (this.galacticCenterMarker.geometry)
-        this.galacticCenterMarker.geometry.dispose();
-      if (this.galacticCenterMarker.material)
-        this.galacticCenterMarker.material.dispose();
-      this.galacticCenterMarker.children.forEach((child) => {
+
+      // Recursively cleanup all children
+      this.galacticCenterMarker.traverse((child) => {
         if (child.geometry) child.geometry.dispose();
-        if (child.material) child.material.dispose();
+        if (child.material) {
+          if (Array.isArray(child.material)) {
+            child.material.forEach((m) => m.dispose());
+          } else {
+            child.material.dispose();
+          }
+        }
       });
+
       this.galacticCenterMarker = null;
+    }
+
+    // Cleanup realistic star renderer
+    if (this.starRenderer) {
+      this.starRenderer.cleanup();
     }
 
     this.spiralArms = [];

@@ -7,6 +7,12 @@ import { GalaxyRenderer } from "../lib/exoplanet/galaxy_renderer";
 import { ApiManager } from "../lib/exoplanet/api_manager";
 import { FilterManager } from "../lib/exoplanet/filter_manager";
 import { UIManager } from "../lib/exoplanet/ui_manager";
+import { TooltipManager } from "../lib/exoplanet/tooltip_manager";
+import { SettingsManager } from "../lib/exoplanet/settings_manager";
+import { CameraManager } from "../lib/exoplanet/camera_manager";
+import { InfoTabManager } from "../lib/exoplanet/info_tab_manager";
+import { PanelManager } from "../lib/exoplanet/panel_manager";
+import { SearchCoordinator } from "../lib/exoplanet/search_coordinator";
 
 // NASA Exoplanet Archive API endpoint (proxied through our backend to avoid CORS)
 // Documentation: https://exoplanetarchive.ipac.caltech.edu/docs/program_interfaces.html
@@ -52,6 +58,7 @@ export default class extends Controller {
     "orbitSpeedSlider",
     "orbitSpeedValue",
     "orbitalInclinationToggle",
+    "realisticDistancesToggle",
     "atmosphereToggle",
     "filtersIcon",
     "filtersSection",
@@ -78,27 +85,13 @@ export default class extends Controller {
     this.currentSystem = null;
     this.viewMode = "galaxy"; // Always start with galaxy view
     this.animateOrbits = true; // Always animate in system view
-    this.orbitSpeed = 1.0; // Speed multiplier: 1.0 = 1 orbit per 60 seconds (realistic)
-    this.useOrbitalInclination = false; // Whether to show realistic 3D orbital inclinations
     this.animationId = null;
-
-    // Settings state
-    this.showStars = true;
-    this.showPlanetLabels = false;
-    this.showOrbitLines = true;
-    this.starDensity = 0.5; // 0.0 to 1.0
-    this.highQuality = true;
-    this.cameraSpeed = 1.0;
-    this.autoRotate = false;
 
     // Raycaster for planet click detection
     this.raycaster = null;
     this.mouse = null;
 
     // Two-click selection system
-    this.selectedObjectForTooltip = null; // Track selected object for tooltip
-    this.tooltip = null; // Reference to tooltip element
-    this.tooltipTimeout = null; // Auto-hide timer for tooltip
     this.clickStartTime = 0; // Track click duration to detect accidental clicks
     this.clickStartPos = { x: 0, y: 0 }; // Track click position for drag detection
 
@@ -108,25 +101,15 @@ export default class extends Controller {
     // Animation state
     this.isTabVisible = true;
 
-    // Search debouncing
-    this.searchTimeout = null;
-
-    // Camera following state
-    this.followPlanet = false; // Whether camera should follow orbiting planet
-    this.lastPlanetPosition = null; // Store last planet position for delta calculation
-
-    // Panel dragging state
-    this.draggedPanel = null;
-    this.panelOffset = { x: 0, y: 0 };
-    this.boundPanelDragStart = this.onPanelDragStart.bind(this);
-    this.boundPanelDrag = this.onPanelDrag.bind(this);
-    this.boundPanelDragEnd = this.onPanelDragEnd.bind(this);
-
-    // Auto-switch to system/galaxy view on zoom out
-    this.systemZoomThreshold = 18; // Distance threshold to switch to system view
-    this.galaxyZoomThreshold = 60; // Distance threshold to switch to galaxy view
-    this.lastCameraDistance = 5;
-    this.isTransitioning = false; // Prevent zoom detection during view transitions
+    // Initialize managers
+    this.tooltipManager = new TooltipManager(this.canvasTarget);
+    this.settingsManager = new SettingsManager();
+    this.cameraManager = null; // Will be initialized after sceneManager
+    this.infoTabManager = new InfoTabManager(
+      this.hasInfoContentTarget ? this.infoContentTarget : null
+    );
+    this.panelManager = new PanelManager();
+    this.searchCoordinator = null; // Initialize after targets are available
 
     // Initialize managers
     this.sceneManager = null;
@@ -159,7 +142,29 @@ export default class extends Controller {
       setTimeout(() => {
         this.initThreeJS();
         this.fetchExoplanets();
-        this.initPanelDragging();
+
+        // Initialize SearchCoordinator after targets are available
+        this.searchCoordinator = new SearchCoordinator({
+          filterManager: this.filterManager,
+          uiManager: this.uiManager,
+          targets: {
+            searchInput: this.searchInputTarget,
+            filterMode: this.filterModeTarget,
+            planetFilters: this.planetFiltersTarget,
+            systemFilters: this.systemFiltersTarget,
+            typeFilter: this.typeFilterTarget,
+            tempMin: this.tempMinTarget,
+            tempMax: this.tempMaxTarget,
+            distanceMax: this.distanceMaxTarget,
+            discoveryMethodFilter: this.discoveryMethodFilterTarget,
+            discoveryFacilityFilter: this.discoveryFacilityFilterTarget,
+            minPlanets: this.minPlanetsTarget,
+            systemDistanceMax: this.systemDistanceMaxTarget,
+            spectralTypeFilter: this.spectralTypeFilterTarget,
+          },
+        });
+
+        this.panelManager.initialize();
         this.initInfoTabPlanetClicks();
         // Set initial settings visibility for galaxy view
         this.updateSettingsVisibility("galaxy");
@@ -207,16 +212,14 @@ export default class extends Controller {
     if (this.sceneManager) {
       this.sceneManager.cleanup();
     }
-    if (this.tooltipTimeout) {
-      clearTimeout(this.tooltipTimeout);
-      this.tooltipTimeout = null;
+    if (this.tooltipManager) {
+      this.tooltipManager.cleanup();
     }
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
-      this.searchTimeout = null;
+    if (this.panelManager) {
+      this.panelManager.cleanup();
     }
-    if (this.tooltip && this.tooltip.parentElement) {
-      this.tooltip.parentElement.removeChild(this.tooltip);
+    if (this.searchCoordinator) {
+      this.searchCoordinator.cleanup();
     }
 
     // Remove all event listeners
@@ -264,95 +267,17 @@ export default class extends Controller {
   // ============================================
 
   /**
-   * Create tooltip element for two-click selection
-   */
-  createTooltip() {
-    this.tooltip = document.createElement("div");
-    this.tooltip.className =
-      "exoplanet-tooltip position-absolute bg-dark text-white p-3 rounded shadow-lg";
-    this.tooltip.style.display = "none";
-    this.tooltip.style.zIndex = "1000";
-    this.tooltip.style.maxWidth = "300px";
-    this.tooltip.style.pointerEvents = "none";
-    this.tooltip.style.opacity = "0.9"; // Add transparency
-    this.tooltip.style.transition = "opacity 0.3s ease"; // Smooth fade effect
-    this.canvasTarget.appendChild(this.tooltip);
-  }
-
-  /**
-   * Show tooltip with object information
+   * Show tooltip with object information (delegates to TooltipManager)
    */
   showTooltip(objectData, x, y) {
-    if (!this.tooltip) return;
-
-    // Clear any existing auto-hide timer
-    if (this.tooltipTimeout) {
-      clearTimeout(this.tooltipTimeout);
-    }
-
-    let content = "";
-
-    if (objectData.type === "system") {
-      content = `
-        <div class="fw-bold mb-2"><i class="bx bx-sun text-warning me-1"></i> ${
-          objectData.starName
-        }</div>
-        <div class="small">
-          <div><i class="bx bx-planet me-1"></i> ${
-            objectData.planetCount
-          } planets</div>
-          <div><i class="bx bx-trip me-1"></i> ${objectData.distance.toFixed(
-            1
-          )} light-years</div>
-        </div>
-      `;
-    } else if (objectData.type === "planet") {
-      content = `
-        <div class="fw-bold mb-2"><i class="bx bx-planet text-primary me-1"></i> ${
-          objectData.name
-        }</div>
-        <div class="small">
-          <div><i class="bx bx-sun me-1"></i> ${objectData.hostStar}</div>
-          <div><i class="bx bx-thermometer me-1"></i> ${
-            objectData.temperature
-              ? objectData.temperature.toFixed(0) + " K"
-              : "Unknown"
-          }</div>
-        </div>
-      `;
-    }
-
-    this.tooltip.innerHTML = content;
-    this.tooltip.style.display = "block";
-    this.tooltip.style.opacity = "0.9";
-    this.tooltip.style.left = `${x + 15}px`;
-    this.tooltip.style.top = `${y + 15}px`;
-
-    // Auto-hide tooltip after 4 seconds
-    this.tooltipTimeout = setTimeout(() => {
-      this.hideTooltip();
-    }, 4000);
+    this.tooltipManager.show(objectData, x, y);
   }
 
   /**
-   * Hide tooltip
+   * Hide tooltip (delegates to TooltipManager)
    */
   hideTooltip() {
-    if (this.tooltip) {
-      this.tooltip.style.opacity = "0";
-      setTimeout(() => {
-        if (this.tooltip) {
-          this.tooltip.style.display = "none";
-        }
-      }, 300); // Wait for fade animation
-    }
-    this.selectedObjectForTooltip = null;
-
-    // Clear auto-hide timer
-    if (this.tooltipTimeout) {
-      clearTimeout(this.tooltipTimeout);
-      this.tooltipTimeout = null;
-    }
+    this.tooltipManager.hide();
   }
 
   /**
@@ -372,12 +297,25 @@ export default class extends Controller {
     );
     this.galaxyRenderer = new GalaxyRenderer(this.sceneManager.scene);
 
+    // Initialize camera manager now that sceneManager is ready
+    this.cameraManager = new CameraManager(this.sceneManager);
+    this.cameraManager.setCallbacks({
+      onSwitchToSystemView: (system) => this.selectSystem(system),
+      onSwitchToGalaxyView: () => this.switchToGalaxyView(),
+    });
+
+    // Set renderer references for managers
+    this.settingsManager.setRenderers({
+      sceneManager: this.sceneManager,
+      planetRenderer: this.planetRenderer,
+      systemRenderer: this.systemRenderer,
+      galaxyRenderer: this.galaxyRenderer,
+    });
+    this.infoTabManager.setFilterManager(this.filterManager);
+
     // Setup raycaster for planet click detection
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
-
-    // Create tooltip element
-    this.createTooltip();
 
     // Track interaction states for cursor changes
     this.isDragging = false;
@@ -396,14 +334,13 @@ export default class extends Controller {
     this.boundEventListeners.canvasContextMenu = (event) =>
       event.preventDefault();
     this.boundEventListeners.canvasWheel = () => {
-      if (this.followPlanet) {
-        this.followPlanet = false;
-        this.lastPlanetPosition = null;
+      if (this.cameraManager.followPlanet) {
+        this.cameraManager.setFollowPlanet(false);
       }
 
       // Hide tooltip when zooming
-      if (this.selectedObjectForTooltip) {
-        this.hideTooltip();
+      if (this.tooltipManager.getSelectedObject()) {
+        this.tooltipManager.hide();
       }
     };
 
@@ -483,9 +420,12 @@ export default class extends Controller {
 
     // Check for auto-switch on zoom out (planet → system → galaxy)
     if (this.viewMode === "planet" && this.currentPlanet) {
-      this.checkZoomOutSwitch();
+      this.cameraManager.checkZoomOutToSystemView(
+        this.currentPlanet,
+        this.filterManager
+      );
     } else if (this.viewMode === "system" && this.currentSystem) {
-      this.checkGalaxyZoomOut();
+      this.cameraManager.checkZoomOutToGalaxyView();
     }
 
     // Handle different view modes
@@ -496,6 +436,9 @@ export default class extends Controller {
         // Don't animate orbits in planet view (just rotate the planet on its axis)
         // Always rotate planets realistically
         this.systemRenderer.rotatePlanets(0.005);
+
+        // Update shader uniforms for realistic rendering
+        this.systemRenderer.updateShaderUniforms(this.sceneManager.camera);
       } else {
         // Standalone planet view: use planetRenderer
         // Always rotate planet realistically
@@ -503,6 +446,9 @@ export default class extends Controller {
 
         // Animate effects (clouds, lava glow)
         this.planetRenderer.animateEffects();
+
+        // Update shader uniforms for realistic rendering
+        this.planetRenderer.updateShaderUniforms(this.sceneManager.camera);
       }
     } else if (this.viewMode === "system") {
       // Animate orbital motion if enabled
@@ -510,21 +456,30 @@ export default class extends Controller {
         // Apply speed multiplier and inclination setting to animation
         this.systemRenderer.animateOrbits(
           0.016,
-          this.orbitSpeed,
-          this.useOrbitalInclination
+          this.settingsManager.orbitSpeed,
+          this.settingsManager.useOrbitalInclination
         );
       }
 
       // Always rotate planets realistically
       this.systemRenderer.rotatePlanets(0.005);
-    } else if (this.viewMode === "galaxy") {
-      // Animate galaxy (subtle rotation and star pulsing)
+
+      // Update shader uniforms for realistic rendering
+      this.systemRenderer.updateShaderUniforms(this.sceneManager.camera);
+    } else if (
+      this.viewMode === "galaxy" ||
+      this.viewMode === "galacticCenter"
+    ) {
+      // Animate galaxy (subtle rotation and star pulsing, galactic center effects)
       this.galaxyRenderer.animateGalaxy(0.016);
     }
 
     // Follow planet if enabled (camera tracks orbiting planet in both planet and system view)
-    if (this.followPlanet && this.currentPlanet) {
-      this.updateCameraFollowing();
+    if (this.cameraManager.followPlanet && this.currentPlanet) {
+      this.cameraManager.updateCameraFollowing(
+        this.currentPlanet,
+        this.systemRenderer
+      );
     }
 
     // Animate stars
@@ -534,146 +489,12 @@ export default class extends Controller {
     this.sceneManager.render();
   }
 
-  /**
-   * Update camera position to follow orbiting planet
-   * Allows user to rotate around the planet while following its orbital motion
-   */
-  updateCameraFollowing() {
-    if (!this.currentSystem || !this.systemRenderer.systemPlanets.length) {
-      return;
-    }
-
-    // Get the planet mesh
-    const planetMesh = this.systemRenderer.getPlanetMesh(this.currentPlanet);
-    if (!planetMesh) return;
-
-    // Get planet's current world position
-    const planetPosition = new THREE.Vector3();
-    planetMesh.getWorldPosition(planetPosition);
-
-    // Get the previous planet position (or use current if first frame)
-    if (!this.lastPlanetPosition) {
-      this.lastPlanetPosition = planetPosition.clone();
-      return;
-    }
-
-    // Calculate how much the planet moved this frame
-    const planetDelta = planetPosition.clone().sub(this.lastPlanetPosition);
-
-    // Move the camera by the same delta (following the planet)
-    this.sceneManager.camera.position.add(planetDelta);
-
-    // Move the controls target by the same delta (keep looking at the planet)
-    this.sceneManager.controls.target.add(planetDelta);
-
-    // Store current position for next frame
-    this.lastPlanetPosition.copy(planetPosition);
-  }
-
-  /**
-   * Check if camera has zoomed out far enough to switch to system view
-   */
-  checkZoomOutSwitch() {
-    // Don't check during transitions or in wrong view mode
-    if (
-      this.isTransitioning ||
-      this.viewMode !== "planet" ||
-      !this.currentPlanet
-    ) {
-      return;
-    }
-
-    const camera = this.sceneManager.camera;
-    const cameraDistance = camera.position.length();
-
-    // Only switch if zooming out (not zooming back in)
-    // Add a small buffer to prevent immediate re-triggering
-    if (
-      cameraDistance > this.systemZoomThreshold &&
-      cameraDistance > this.lastCameraDistance + 0.1
-    ) {
-      // Check if current planet has a multi-planet system
-      const systemPlanets = this.filterManager.getPlanetsForSystem(
-        this.currentPlanet.hostStar
-      );
-
-      if (systemPlanets.length > 1) {
-        // Set transitioning flag to prevent immediate re-triggering
-        this.isTransitioning = true;
-
-        // Switch to system view mode
-        this.viewMode = "system";
-
-        // Show all planets again (unified view)
-        this.systemRenderer.showAllPlanets();
-
-        // Keep camera following enabled when auto-zooming to system view
-        // (will only disable if user manually pans)
-
-        // Update UI for system view
-        this.updateUIForSystemView();
-
-        // Update info tab with system information
-        this.updateInfoTab();
-
-        // Auto-switch to info tab
-        this.switchToInfoTab();
-
-        // Prevent immediate re-checking after switch
-        this.lastCameraDistance = 100; // Set high to prevent re-triggering
-
-        // Clear transition flag after delay
-        setTimeout(() => {
-          this.isTransitioning = false;
-        }, 1500);
-
-        return;
-      }
-    }
-
-    this.lastCameraDistance = cameraDistance;
-  }
-
-  /**
-   * Check if camera has zoomed out far enough to switch to galaxy view
-   */
-  checkGalaxyZoomOut() {
-    // Don't check during transitions or in wrong view mode
-    if (this.isTransitioning || this.viewMode !== "system") {
-      return;
-    }
-
-    const camera = this.sceneManager.camera;
-    const cameraDistance = camera.position.length();
-
-    // Only switch if zooming out beyond galaxy threshold
-    if (
-      cameraDistance > this.galaxyZoomThreshold &&
-      cameraDistance > this.lastCameraDistance + 0.1
-    ) {
-      // Set transitioning flag
-      this.isTransitioning = true;
-
-      // Disable camera following when entering galaxy view
-      this.followPlanet = false;
-      this.lastPlanetPosition = null;
-
-      // Switch to galaxy view
-      this.switchToGalaxyView();
-
-      // Prevent immediate re-checking
-      this.lastCameraDistance = 200;
-
-      // Clear transition flag after delay
-      setTimeout(() => {
-        this.isTransitioning = false;
-      }, 1500);
-
-      return;
-    }
-
-    this.lastCameraDistance = cameraDistance;
-  }
+  // Camera methods delegated to CameraManager
+  // CameraManager handles:
+  // - updateCameraFollowing
+  // - checkZoomOutToSystemView (with callbacks to controller)
+  // - checkZoomOutToGalaxyView (with callbacks to controller)
+  // - resetCamera
 
   // ============================================
   // DATA FETCHING
@@ -766,93 +587,28 @@ export default class extends Controller {
    * Debounced to avoid rebuilding list on every keystroke
    */
   search() {
-    // Clear existing timeout
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
-    }
-
-    // Debounce search by 300ms
-    this.searchTimeout = setTimeout(() => {
-      const query = this.searchInputTarget.value;
-      const results = this.filterManager.searchUnified(query);
-      this.uiManager.updateUnifiedResultsList(results);
-      this.searchTimeout = null;
-    }, 300);
+    this.searchCoordinator.search();
   }
 
   /**
    * Change filter mode (planet vs system filters)
    */
   changeFilterMode() {
-    const mode = this.filterModeTarget.value;
-
-    if (mode === "planets") {
-      this.planetFiltersTarget.style.display = "";
-      this.systemFiltersTarget.style.display = "none";
-    } else {
-      this.planetFiltersTarget.style.display = "none";
-      this.systemFiltersTarget.style.display = "";
-    }
-
-    // Re-apply filters with current mode
-    this.applyFilters();
+    this.searchCoordinator.changeFilterMode();
   }
 
   /**
    * Apply filters (handles both planet and system filters)
    */
   applyFilters() {
-    const filterMode = this.filterModeTarget.value;
-
-    if (filterMode === "planets") {
-      // Apply planet filters
-      const filters = {
-        type: this.typeFilterTarget.value,
-        tempMin: this.tempMinTarget.value,
-        tempMax: this.tempMaxTarget.value,
-        distMax: this.distanceMaxTarget.value,
-        discoveryMethod: this.discoveryMethodFilterTarget.value,
-        discoveryFacility: this.discoveryFacilityFilterTarget.value,
-      };
-
-      const filtered = this.filterManager.applyFilters(filters);
-      const results = this.filterManager.searchUnified("");
-      this.uiManager.updateUnifiedResultsList(results);
-    } else {
-      // Apply system filters
-      const systemFilters = {
-        minPlanets: this.minPlanetsTarget.value,
-        distMax: this.systemDistanceMaxTarget.value,
-        spectralType: this.spectralTypeFilterTarget.value,
-      };
-
-      const results = this.filterManager.applySystemFilters(systemFilters);
-      this.uiManager.updateUnifiedResultsList(results);
-    }
+    this.searchCoordinator.applyFilters();
   }
 
   /**
    * Clear all filters (handles both planet and system filters)
    */
   clearFilters() {
-    this.searchInputTarget.value = "";
-
-    // Clear planet filters
-    this.typeFilterTarget.value = "";
-    this.tempMinTarget.value = "";
-    this.tempMaxTarget.value = "";
-    this.distanceMaxTarget.value = "";
-    this.discoveryMethodFilterTarget.value = "";
-    this.discoveryFacilityFilterTarget.value = "";
-
-    // Clear system filters
-    this.minPlanetsTarget.value = "";
-    this.systemDistanceMaxTarget.value = "";
-    this.spectralTypeFilterTarget.value = "";
-
-    const filtered = this.filterManager.clearFilters();
-    const results = this.filterManager.searchUnified("");
-    this.uiManager.updateUnifiedResultsList(results);
+    this.searchCoordinator.clearFilters();
   }
 
   // ============================================
@@ -866,20 +622,59 @@ export default class extends Controller {
     this.currentPlanet = planet;
 
     // Set transition flag to prevent auto zoom-out detection
-    this.isTransitioning = true;
+    this.cameraManager.setTransitioning(true);
 
-    // If we're in galaxy view and have system data, navigate: Galaxy → System → Planet
-    if (this.viewMode === "galaxy" && systemData) {
-      // First, select the system (this will load system view)
-      this.selectSystem({
-        starName: systemData.starName,
-        planets: systemData.planets,
-        distance: systemData.distance,
-      });
+    // If systemData is not provided, try to get planets for this system
+    if (!systemData && planet.hostStar) {
+      const systemPlanets = this.filterManager.getPlanetsForSystem(
+        planet.hostStar
+      );
 
-      // After a short delay, select the specific planet within the system
-      setTimeout(() => {
-        // Find the planet in the rendered system
+      if (systemPlanets.length > 0) {
+        systemData = {
+          starName: planet.hostStar,
+          planets: systemPlanets,
+          distance: planet.distance,
+        };
+      }
+    }
+
+    // If we have system data, always navigate through system view first
+    if (systemData) {
+      // Check if we're already viewing this system
+      const alreadyInSystem =
+        this.viewMode === "system" &&
+        this.currentSystem &&
+        this.currentSystem.starName === systemData.starName;
+
+      if (!alreadyInSystem) {
+        // First, select the system (this will load system view)
+        this.selectSystem({
+          starName: systemData.starName,
+          planets: systemData.planets,
+          distance: systemData.distance,
+        });
+
+        // After a short delay, select the specific planet within the system
+        setTimeout(() => {
+          // Find the planet in the rendered system
+          const planetMesh = this.systemRenderer.getPlanetMesh(planet);
+          if (planetMesh) {
+            const planetWorldPosition = new THREE.Vector3();
+            planetMesh.getWorldPosition(planetWorldPosition);
+
+            // Transition to focus on this planet
+            this.transitionToPlanetFromSystem(
+              planet,
+              planetWorldPosition,
+              planetMesh
+            );
+          } else {
+            console.error("Could not find planet mesh for:", planet.name);
+          }
+        }, 1500); // Wait for system view to load
+      } else {
+        // Already in the right system, just focus on the planet
         const planetMesh = this.systemRenderer.getPlanetMesh(planet);
         if (planetMesh) {
           const planetWorldPosition = new THREE.Vector3();
@@ -891,13 +686,15 @@ export default class extends Controller {
             planetWorldPosition,
             planetMesh
           );
+        } else {
+          console.error("Could not find planet mesh for:", planet.name);
         }
-      }, 1500); // Wait for system view to load
+      }
 
       return;
     }
 
-    // Standard planet view rendering (for standalone planets or direct navigation)
+    // Fallback: Standard planet view rendering (for standalone planets without system data)
     // Render planet in 3D
     const planetRadius = this.planetRenderer.renderPlanet(planet);
 
@@ -911,9 +708,9 @@ export default class extends Controller {
       1500, // Longer duration for smoother transition
       () => {
         // Clear transition flag and update last camera distance after transition completes
-        this.lastCameraDistance = targetDistance;
+        this.cameraManager.updateLastCameraDistance(targetDistance);
         setTimeout(() => {
-          this.isTransitioning = false;
+          this.cameraManager.setTransitioning(false);
         }, 500); // Additional delay to prevent immediate re-triggering
       }
     );
@@ -968,64 +765,12 @@ export default class extends Controller {
    * Reset camera to default position based on current view mode
    */
   resetCamera() {
-    if (!this.sceneManager) return;
-
-    // Set transition flag during camera reset
-    this.isTransitioning = true;
-
-    if (this.viewMode === "galaxy") {
-      // Reset to view entire galaxy - zoomed way out
-      const maxDistance = this.galaxyRenderer.calculateMaxSystemDistance();
-      const optimalDistance = Math.max(150, maxDistance * 2.5); // Much more zoomed out
-
-      this.sceneManager.camera.position.set(
-        0,
-        optimalDistance * 0.3,
-        optimalDistance * 0.3
-      );
-      this.sceneManager.camera.lookAt(0, 0, 0);
-      this.sceneManager.controls.target.set(0, 0, 0);
-      this.sceneManager.controls.update();
-    } else if (this.viewMode === "system" && this.currentSystem) {
-      // Reset to view entire system
-      const maxOrbitRadius = this.systemRenderer.calculateMaxOrbitRadius(
-        this.currentSystem.planets
-      );
-      const optimalDistance = Math.max(15, maxOrbitRadius * 2.5);
-
-      this.sceneManager.camera.position.set(
-        0,
-        optimalDistance * 0.4,
-        optimalDistance
-      );
-      this.sceneManager.camera.lookAt(0, 0, 0);
-      this.sceneManager.controls.target.set(0, 0, 0);
-      this.sceneManager.controls.update();
-
-      // Reset last camera distance for zoom-out detection
-      this.lastCameraDistance = optimalDistance;
-    } else if (this.viewMode === "planet" && this.currentPlanet) {
-      // Reset to view planet optimally
-      const planetRadius = Math.max(
-        0.5,
-        Math.min(3, this.currentPlanet.radius * 0.5)
-      );
-      const optimalDistance =
-        this.sceneManager.calculateOptimalCameraDistance(planetRadius);
-
-      this.sceneManager.resetCamera(optimalDistance);
-
-      // Reset last camera distance for zoom-out detection
-      this.lastCameraDistance = optimalDistance;
-    } else {
-      // Fallback
-      this.sceneManager.resetCamera(5);
-    }
-
-    // Clear transition flag after a short delay
-    setTimeout(() => {
-      this.isTransitioning = false;
-    }, 500);
+    this.cameraManager.resetCamera(this.viewMode, {
+      currentSystem: this.currentSystem,
+      currentPlanet: this.currentPlanet,
+      galaxyRenderer: this.galaxyRenderer,
+      systemRenderer: this.systemRenderer,
+    });
   }
 
   // ============================================
@@ -1054,8 +799,7 @@ export default class extends Controller {
    */
   switchToSystemView() {
     // Reset camera following state when switching to system view
-    this.followPlanet = false;
-    this.lastPlanetPosition = null;
+    this.cameraManager.setFollowPlanet(false);
 
     // Update UI elements
     this.updateUIForSystemView();
@@ -1100,8 +844,7 @@ export default class extends Controller {
    */
   switchToPlanetView() {
     // Disable camera following when switching to planet view
-    this.followPlanet = false;
-    this.lastPlanetPosition = null;
+    this.cameraManager.setFollowPlanet(false);
 
     // Update UI elements
     this.updateUIForPlanetView();
@@ -1262,20 +1005,19 @@ export default class extends Controller {
     this.updateUIForSystemView();
 
     // Set transition flag to prevent immediate switching
-    this.isTransitioning = true;
+    this.cameraManager.setTransitioning(true);
 
     // Enable camera following for system view
     // (will follow the current planet if one is set)
     if (this.currentPlanet) {
-      this.followPlanet = true;
-      this.lastPlanetPosition = null;
+      this.cameraManager.setFollowPlanet(true);
     }
 
     // Render the system
     const systemInfo = this.systemRenderer.renderSystem(
       system.planets,
       this.animateOrbits,
-      this.useOrbitalInclination
+      this.settingsManager.useOrbitalInclination
     );
 
     // Calculate optimal camera distance
@@ -1292,9 +1034,9 @@ export default class extends Controller {
       1500, // Longer duration for smoother transition
       () => {
         // Clear transition flag after transition completes
-        this.lastCameraDistance = cameraDistance;
+        this.cameraManager.updateLastCameraDistance(cameraDistance);
         setTimeout(() => {
-          this.isTransitioning = false;
+          this.cameraManager.setTransitioning(false);
         }, 500);
       }
     );
@@ -1320,9 +1062,7 @@ export default class extends Controller {
    * Search for systems
    */
   searchSystems() {
-    const query = this.searchInputTarget.value;
-    const results = this.filterManager.searchSystems(query);
-    this.uiManager.updateSystemsList(results);
+    this.searchCoordinator.searchSystems();
   }
 
   /**
@@ -1330,19 +1070,11 @@ export default class extends Controller {
    */
   updateOrbitSpeed(event) {
     const sliderValue = parseFloat(event.target.value);
-    // Map slider value (0-100) to speed multiplier
-    // 50 (middle) = 1.0 (1 orbit = 60 seconds)
-    // Range: 0.1x to 10x
-    if (sliderValue <= 50) {
-      // 0-50 maps to 0.1-1.0
-      this.orbitSpeed = 0.1 + (sliderValue / 50) * 0.9;
-    } else {
-      // 50-100 maps to 1.0-10.0
-      this.orbitSpeed = 1.0 + ((sliderValue - 50) / 50) * 9.0;
-    }
+    const displayText = this.settingsManager.updateOrbitSpeed(sliderValue);
 
-    // Update display value
-    this.updateOrbitSpeedDisplay();
+    if (this.hasOrbitSpeedValueTarget) {
+      this.orbitSpeedValueTarget.textContent = displayText;
+    }
   }
 
   /**
@@ -1350,27 +1082,7 @@ export default class extends Controller {
    */
   updateOrbitSpeedDisplay() {
     if (!this.hasOrbitSpeedValueTarget) return;
-
-    // Guard against invalid orbit speed
-    if (!this.orbitSpeed || this.orbitSpeed <= 0) {
-      this.orbitSpeedValueTarget.textContent = "--";
-      return;
-    }
-
-    // Calculate seconds per orbit at current speed
-    const secondsPerOrbit = 60 / this.orbitSpeed;
-
-    let displayText;
-    if (secondsPerOrbit < 1) {
-      displayText = `${(secondsPerOrbit * 1000).toFixed(0)}ms`;
-    } else if (secondsPerOrbit < 60) {
-      displayText = `${secondsPerOrbit.toFixed(1)}s`;
-    } else if (secondsPerOrbit < 3600) {
-      displayText = `${(secondsPerOrbit / 60).toFixed(1)}m`;
-    } else {
-      displayText = `${(secondsPerOrbit / 3600).toFixed(1)}h`;
-    }
-
+    const displayText = this.settingsManager.getOrbitSpeedDisplay();
     this.orbitSpeedValueTarget.textContent = displayText;
   }
 
@@ -1396,13 +1108,30 @@ export default class extends Controller {
     this.raycaster.setFromCamera(this.mouse, this.sceneManager.camera);
 
     // Handle clicks based on view mode
-    if (this.viewMode === "galaxy") {
-      // Click on star system in galaxy view
-      const systemMeshes = this.galaxyRenderer.getAllSystemMeshes();
-      const intersects = this.raycaster.intersectObjects(systemMeshes, true);
+    if (this.viewMode === "galaxy" || this.viewMode === "galacticCenter") {
+      // Check for clicks on all clickable objects (systems + galactic center)
+      const clickableObjects = this.galaxyRenderer.getAllClickableObjects();
+      const intersects = this.raycaster.intersectObjects(
+        clickableObjects,
+        true
+      );
 
       if (intersects.length > 0) {
         let clickedMesh = intersects[0].object;
+
+        // Check if clicked on galactic center (Sagittarius A*)
+        let galacticCenterParent = clickedMesh;
+        while (galacticCenterParent) {
+          if (galacticCenterParent.userData?.isGalacticCenter) {
+            // Clicked on Sagittarius A* - only zoom if not already in galacticCenter view
+            if (this.viewMode !== "galacticCenter") {
+              this.hideTooltip();
+              this.zoomToGalacticCenter();
+            }
+            return;
+          }
+          galacticCenterParent = galacticCenterParent.parent;
+        }
 
         // Find the system mesh
         while (clickedMesh.parent && !clickedMesh.userData.isStarSystem) {
@@ -1422,7 +1151,7 @@ export default class extends Controller {
 
           if (systemPosition) {
             // Set transitioning flag
-            this.isTransitioning = true;
+            this.cameraManager.setTransitioning(true);
 
             // Calculate zoom-in camera position (closer to the system)
             const zoomDistance = 8; // Much closer than galaxy view
@@ -1448,7 +1177,7 @@ export default class extends Controller {
 
                 // Clear transition flag
                 setTimeout(() => {
-                  this.isTransitioning = false;
+                  this.cameraManager.setTransitioning(false);
                 }, 300);
               }
             );
@@ -1503,7 +1232,7 @@ export default class extends Controller {
    */
   transitionToPlanetFromSystem(planet, planetWorldPosition, planetMesh) {
     // Set transition flag to prevent auto zoom-out detection
-    this.isTransitioning = true;
+    this.cameraManager.setTransitioning(true);
 
     // Get the actual size of the planet mesh using bounding box
     const boundingBox = new THREE.Box3().setFromObject(planetMesh);
@@ -1552,11 +1281,10 @@ export default class extends Controller {
 
         // Update camera distance tracking
         const currentDistance = this.sceneManager.camera.position.length();
-        this.lastCameraDistance = currentDistance;
+        this.cameraManager.updateLastCameraDistance(currentDistance);
 
         // Disable camera following initially (will be enabled if user turns on orbit)
-        this.followPlanet = false;
-        this.lastPlanetPosition = null;
+        this.cameraManager.setFollowPlanet(false);
 
         // Update info tab with planet information
         this.updateInfoTab();
@@ -1566,10 +1294,181 @@ export default class extends Controller {
 
         // Clear transition flag
         setTimeout(() => {
-          this.isTransitioning = false;
+          this.cameraManager.setTransitioning(false);
         }, 500);
       }
     );
+  }
+
+  /**
+   * Zoom to Sagittarius A* (galactic center)
+   * Creates a close-up view of the supermassive black hole
+   */
+  zoomToGalacticCenter() {
+    const galacticCenterPos = this.galaxyRenderer.getGalacticCenterPosition();
+
+    if (!galacticCenterPos) {
+      console.warn("Galactic center position not found");
+      return;
+    }
+
+    // Set transitioning flag
+    this.cameraManager.setTransitioning(true);
+
+    // Track that we're viewing galactic center
+    this.viewMode = "galacticCenter";
+
+    // Calculate camera position for dramatic close-up
+    const zoomDistance = 25; // Close enough to see details
+    const currentDir = this.sceneManager.camera.position
+      .clone()
+      .sub(galacticCenterPos)
+      .normalize();
+
+    // Position camera at an angle for better view of accretion disk
+    const targetCameraPos = galacticCenterPos.clone().add(
+      new THREE.Vector3(
+        currentDir.x * zoomDistance,
+        zoomDistance * 0.3, // Slightly above for dramatic angle
+        currentDir.z * zoomDistance
+      )
+    );
+
+    // Smooth transition
+    this.sceneManager.smoothCameraTransitionWithTarget(
+      targetCameraPos,
+      galacticCenterPos,
+      1500, // Longer transition for dramatic effect
+      () => {
+        // Update info tab with galactic center information
+        this.displayGalacticCenterInfo();
+        this.switchToInfoTab();
+
+        // Clear transition flag
+        setTimeout(() => {
+          this.cameraManager.setTransitioning(false);
+        }, 300);
+      }
+    );
+  }
+
+  /**
+   * Display galactic center information in info tab
+   */
+  displayGalacticCenterInfo() {
+    const marker = this.galaxyRenderer.galacticCenterMarker;
+    if (!marker) return;
+
+    const info = marker.userData;
+
+    const html = `
+      <div class="space-y-4">
+        <div>
+          <h3 class="text-xl font-bold text-purple-300 mb-2">${info.name}</h3>
+          <p class="text-gray-300 text-sm mb-4">${info.description}</p>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-xs text-gray-400 uppercase">Mass</p>
+            <p class="text-lg text-white font-semibold">${info.mass}</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 uppercase">Distance</p>
+            <p class="text-lg text-white font-semibold">${info.distance}</p>
+          </div>
+        </div>
+
+        <div class="space-y-2 mt-4">
+          <div class="bg-gray-800/50 p-3 rounded">
+            <p class="text-xs text-gray-400 uppercase mb-1">Type</p>
+            <p class="text-white">Supermassive Black Hole</p>
+          </div>
+          
+          <div class="bg-gray-800/50 p-3 rounded">
+            <p class="text-xs text-gray-400 uppercase mb-1">Schwarzschild Radius</p>
+            <p class="text-white">~12 million km</p>
+            <p class="text-xs text-gray-400 mt-1">Approximately 17 times the Sun's radius</p>
+          </div>
+          
+          <div class="bg-gray-800/50 p-3 rounded">
+            <p class="text-xs text-gray-400 uppercase mb-1">First Image</p>
+            <p class="text-white">May 12, 2022</p>
+            <p class="text-xs text-gray-400 mt-1">By Event Horizon Telescope collaboration</p>
+          </div>
+          
+          <div class="bg-gray-800/50 p-3 rounded">
+            <p class="text-xs text-gray-400 uppercase mb-1">About</p>
+            <p class="text-white text-sm leading-relaxed">
+              Sagittarius A* is the supermassive black hole at the center of our galaxy. 
+              It has a mass of 4.15 million times that of our Sun and is surrounded by 
+              a superheated accretion disk of gas and dust spiraling into the event horizon 
+              at near light speed.
+            </p>
+          </div>
+        </div>
+
+        <button 
+          class="w-full mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors"
+          data-action="click->exoplanet-viewer#returnToGalaxyView"
+        >
+          ← Return to Galaxy View
+        </button>
+      </div>
+    `;
+
+    this.infoContentTarget.innerHTML = html;
+  }
+
+  /**
+   * Return from galactic center view to galaxy view
+   */
+  returnToGalaxyView() {
+    // Set transitioning flag
+    this.cameraManager.setTransitioning(true);
+
+    // Reset view mode
+    this.viewMode = "galaxy";
+
+    // Clear current planet/system to reset state
+    this.currentPlanet = null;
+    this.currentSystem = null;
+
+    // Calculate zoom-out camera position
+    const currentPos = this.sceneManager.camera.position.clone();
+    const targetCameraPos = currentPos.multiplyScalar(3); // Zoom out
+
+    // Smooth transition back
+    this.sceneManager.smoothCameraTransitionWithTarget(
+      targetCameraPos,
+      new THREE.Vector3(0, 0, 0), // Look at origin (Earth/Sun)
+      1000,
+      () => {
+        // Update settings visibility
+        this.updateSettingsVisibility("galaxy");
+
+        // Clear info tab
+        this.clearInfoTab();
+
+        // Clear transition flag
+        setTimeout(() => {
+          this.cameraManager.setTransitioning(false);
+        }, 300);
+      }
+    );
+  }
+
+  /**
+   * Clear the info tab content
+   */
+  clearInfoTab() {
+    if (this.infoContentTarget) {
+      this.infoContentTarget.innerHTML = `
+        <div class="text-center text-gray-400 py-8">
+          <p>Click on a star system or Sagittarius A* to view details</p>
+        </div>
+      `;
+    }
   }
 
   /**
@@ -1603,9 +1502,8 @@ export default class extends Controller {
       this.canvasTarget.classList.remove("grab", "pointer");
 
       // Disable following when panning
-      if (this.followPlanet) {
-        this.followPlanet = false;
-        this.lastPlanetPosition = null;
+      if (this.cameraManager.followPlanet) {
+        this.cameraManager.setFollowPlanet(false);
       }
     }
   }
@@ -1655,8 +1553,11 @@ export default class extends Controller {
     if (!event.buttons && !this.isPanning) {
       if (this.viewMode === "system") {
         this.updateCanvasCursor(event);
-      } else if (this.viewMode === "galaxy") {
-        // In galaxy view, show pointer cursor when hovering over systems
+      } else if (
+        this.viewMode === "galaxy" ||
+        this.viewMode === "galacticCenter"
+      ) {
+        // In galaxy/galacticCenter view, show pointer cursor when hovering over systems or Sag A*
         this.updateGalaxyCursor(event);
       }
     }
@@ -1714,21 +1615,24 @@ export default class extends Controller {
    * Update canvas cursor based on hover state in galaxy view
    */
   updateGalaxyCursor(event = null) {
-    if (this.viewMode !== "galaxy") {
+    if (this.viewMode !== "galaxy" && this.viewMode !== "galacticCenter") {
       this.canvasTarget.classList.remove("pointer");
       this.canvasTarget.classList.add("grab");
       return;
     }
 
     if (event) {
-      // Check if hovering over a star system
+      // Check if hovering over a star system or galactic center
       const rect = this.canvasTarget.getBoundingClientRect();
       this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
       this.raycaster.setFromCamera(this.mouse, this.sceneManager.camera);
-      const systemMeshes = this.galaxyRenderer.getAllSystemMeshes();
-      const intersects = this.raycaster.intersectObjects(systemMeshes, true);
+      const clickableObjects = this.galaxyRenderer.getAllClickableObjects();
+      const intersects = this.raycaster.intersectObjects(
+        clickableObjects,
+        true
+      );
 
       if (intersects.length > 0) {
         this.canvasTarget.classList.add("pointer");
@@ -1747,21 +1651,48 @@ export default class extends Controller {
    * Toggle orbital inclination (3D orbits)
    */
   toggleOrbitalInclination() {
-    this.useOrbitalInclination = this.orbitalInclinationToggleTarget.checked;
+    const checked = this.orbitalInclinationToggleTarget.checked;
+    this.settingsManager.toggleOrbitalInclination(
+      checked,
+      this.currentSystem,
+      this.animateOrbits
+    );
+  }
 
-    // Update the system renderer's inclination setting
-    if (this.systemRenderer) {
-      this.systemRenderer.useInclination = this.useOrbitalInclination;
-    }
+  /**
+   * Toggle realistic orbital distances
+   */
+  toggleRealisticDistances() {
+    const checked = this.realisticDistancesToggleTarget.checked;
 
-    // Re-render current system if we're in system view
-    // This is necessary to update the orbit lines
-    if (this.viewMode === "system" && this.currentSystem) {
-      this.systemRenderer.renderSystem(
-        this.currentSystem.planets,
-        this.animateOrbits,
-        this.useOrbitalInclination
-      );
+    if (this.systemRenderer && this.currentSystem) {
+      // Store current camera distance
+      const currentDistance = this.sceneManager.camera.position.length();
+
+      // Update camera manager zoom threshold for realistic distances
+      this.cameraManager.setRealisticDistancesMode(checked);
+
+      // Set realistic distances (this will trigger re-render)
+      this.systemRenderer.setRealisticDistances(checked);
+
+      // Wait a frame for cleanup to complete, then re-render and adjust camera
+      requestAnimationFrame(() => {
+        // Re-render the system with new settings
+        this.systemRenderer.rerenderSystem();
+
+        // Calculate appropriate camera distance based on mode
+        const targetDistance = checked
+          ? currentDistance * 2.0
+          : currentDistance * 0.5;
+
+        // Smooth camera adjustment
+        const currentPos = this.sceneManager.camera.position.clone();
+        const direction = currentPos.normalize();
+        const targetPos = direction.multiplyScalar(targetDistance);
+
+        // Animate camera transition
+        this.sceneManager.smoothCameraTransition(targetPos, 800);
+      });
     }
   }
 
@@ -1769,12 +1700,8 @@ export default class extends Controller {
    * Toggle atmosphere visibility
    */
   toggleAtmospheres() {
-    const showAtmospheres = this.atmosphereToggleTarget.checked;
-
-    // Update the system renderer's atmosphere setting
-    if (this.systemRenderer) {
-      this.systemRenderer.toggleAtmospheres(showAtmospheres);
-    }
+    const checked = this.atmosphereToggleTarget.checked;
+    this.settingsManager.toggleAtmospheres(checked);
   }
 
   /**
@@ -1817,108 +1744,8 @@ export default class extends Controller {
   }
 
   // ============================================
-  // PANEL DRAGGING & TOGGLING
+  // PANEL TOGGLING
   // ============================================
-
-  /**
-   * Initialize panel dragging functionality
-   */
-  initPanelDragging() {
-    // Find all drag handles
-    const dragHandles = document.querySelectorAll("[data-drag-handle]");
-
-    dragHandles.forEach((handle) => {
-      handle.addEventListener("mousedown", this.boundPanelDragStart);
-      handle.addEventListener("touchstart", this.boundPanelDragStart, {
-        passive: false,
-      });
-    });
-  }
-
-  /**
-   * Start dragging a panel
-   */
-  onPanelDragStart(event) {
-    // Prevent default to avoid text selection
-    event.preventDefault();
-
-    // Find the panel container
-    this.draggedPanel = event.currentTarget.closest(".exoplanet-overlay-panel");
-    if (!this.draggedPanel) return;
-
-    // Get initial mouse/touch position
-    const clientX = event.clientX || event.touches[0].clientX;
-    const clientY = event.clientY || event.touches[0].clientY;
-
-    // Calculate offset from panel top-left to click position
-    const rect = this.draggedPanel.getBoundingClientRect();
-    this.panelOffset = {
-      x: clientX - rect.left,
-      y: clientY - rect.top,
-    };
-
-    // Add event listeners for dragging
-    document.addEventListener("mousemove", this.boundPanelDrag);
-    document.addEventListener("touchmove", this.boundPanelDrag, {
-      passive: false,
-    });
-    document.addEventListener("mouseup", this.boundPanelDragEnd);
-    document.addEventListener("touchend", this.boundPanelDragEnd);
-
-    // Add visual feedback
-    this.draggedPanel.style.transition = "none";
-    this.draggedPanel.style.cursor = "grabbing";
-  }
-
-  /**
-   * Drag the panel
-   */
-  onPanelDrag(event) {
-    if (!this.draggedPanel) return;
-
-    event.preventDefault();
-
-    const clientX = event.clientX || event.touches[0].clientX;
-    const clientY = event.clientY || event.touches[0].clientY;
-
-    // Calculate new position
-    let newX = clientX - this.panelOffset.x;
-    let newY = clientY - this.panelOffset.y;
-
-    // Constrain to viewport with some margin
-    const margin = 20;
-    const maxX = window.innerWidth - this.draggedPanel.offsetWidth - margin;
-    const maxY = window.innerHeight - this.draggedPanel.offsetHeight - margin;
-
-    newX = Math.max(margin, Math.min(newX, maxX));
-    newY = Math.max(margin, Math.min(newY, maxY));
-
-    // Apply new position
-    this.draggedPanel.style.left = `${newX}px`;
-    this.draggedPanel.style.top = `${newY}px`;
-    this.draggedPanel.style.right = "auto";
-    this.draggedPanel.style.bottom = "auto";
-  }
-
-  /**
-   * End dragging
-   */
-  onPanelDragEnd() {
-    if (!this.draggedPanel) return;
-
-    // Remove event listeners
-    document.removeEventListener("mousemove", this.boundPanelDrag);
-    document.removeEventListener("touchmove", this.boundPanelDrag);
-    document.removeEventListener("mouseup", this.boundPanelDragEnd);
-    document.removeEventListener("touchend", this.boundPanelDragEnd);
-
-    // Restore transition and cursor
-    this.draggedPanel.style.transition = "";
-    this.draggedPanel.style.cursor = "";
-
-    // Clear dragged panel reference
-    this.draggedPanel = null;
-  }
 
   /**
    * Toggle panel minimize state
@@ -1986,493 +1813,17 @@ export default class extends Controller {
    * Switch to the info tab
    */
   switchToInfoTab() {
-    const infoTab = document.getElementById("info-tab");
-    if (infoTab) {
-      const bsTab = new bootstrap.Tab(infoTab);
-      bsTab.show();
-    }
+    this.infoTabManager.switchToInfoTab();
   }
 
   /**
    * Update information tab based on current view mode
    */
   updateInfoTab() {
-    if (!this.hasInfoContentTarget) return;
-
-    if (this.viewMode === "galaxy") {
-      this.updateGalaxyInfo();
-    } else if (this.viewMode === "system" && this.currentSystem) {
-      this.updateSystemInfo(this.currentSystem);
-    } else if (this.viewMode === "planet" && this.currentPlanet) {
-      this.updatePlanetInfo(this.currentPlanet);
-    }
-  }
-
-  /**
-   * Update info tab with galaxy (Milky Way) information
-   */
-  updateGalaxyInfo() {
-    if (!this.hasInfoContentTarget) return;
-
-    const totalSystems = this.filterManager.getNotableSystems().length;
-    const totalPlanets = this.filterManager.getAllExoplanets().length;
-
-    // Calculate some statistics
-    const allPlanets = this.filterManager.getAllExoplanets();
-    const avgDistance =
-      allPlanets.length > 0
-        ? (
-            allPlanets.reduce((sum, p) => sum + (p.distance || 0), 0) /
-            allPlanets.length
-          ).toFixed(1)
-        : 0;
-
-    const closestPlanet = allPlanets.reduce((closest, planet) => {
-      if (!planet.distance) return closest;
-      if (!closest || planet.distance < closest.distance) return planet;
-      return closest;
-    }, null);
-
-    this.infoContentTarget.innerHTML = `
-      <div class="info-galaxy">
-        <h5 class="text-white mb-3 d-flex align-items-center">
-          <i class="bx bx-globe me-2 text-primary"></i> Milky Way Galaxy
-        </h5>
-        
-        <div class="info-section mb-4">
-          <h6 class="text-white-50 mb-3 fs-sm text-uppercase">Overview</h6>
-          <p class="text-white-50 mb-3" style="font-size: 0.9rem; line-height: 1.6;">
-            Our galaxy contains an estimated 100-400 billion stars. Currently, we have confirmed 
-            <strong class="text-white">${totalPlanets.toLocaleString()}</strong> exoplanets across 
-            <strong class="text-white">${totalSystems.toLocaleString()}</strong> star systems.
-          </p>
-        </div>
-
-        <div class="info-section mb-4">
-          <h6 class="text-white-50 mb-3 fs-sm text-uppercase">Statistics</h6>
-          <div class="info-stats">
-            <div class="stat-item mb-3 p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
-              <div class="d-flex justify-content-between align-items-center">
-                <span class="text-white-50">Total Confirmed Exoplanets</span>
-                <span class="badge bg-primary">${totalPlanets.toLocaleString()}</span>
-              </div>
-            </div>
-            <div class="stat-item mb-3 p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
-              <div class="d-flex justify-content-between align-items-center">
-                <span class="text-white-50">Multi-Planet Systems</span>
-                <span class="badge bg-info">${totalSystems.toLocaleString()}</span>
-              </div>
-            </div>
-            <div class="stat-item mb-3 p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
-              <div class="d-flex justify-content-between align-items-center">
-                <span class="text-white-50">Average Distance</span>
-                <span class="badge bg-secondary">${avgDistance} ly</span>
-              </div>
-            </div>
-            ${
-              closestPlanet
-                ? `
-              <div class="stat-item mb-3 p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
-                <div class="d-flex justify-content-between align-items-center">
-                  <span class="text-white-50">Closest Exoplanet</span>
-                  <span class="text-white fs-sm">${this.escapeHtml(
-                    closestPlanet.name
-                  )}</span>
-                </div>
-                <div class="text-end mt-1">
-                  <span class="badge bg-success">${this.formatDistance(
-                    closestPlanet.distance
-                  )}</span>
-                </div>
-              </div>
-            `
-                : ""
-            }
-          </div>
-        </div>
-
-        <div class="info-section">
-          <h6 class="text-white-50 mb-3 fs-sm text-uppercase">About</h6>
-          <p class="text-white-50 mb-2" style="font-size: 0.85rem; line-height: 1.5;">
-            The Milky Way is a barred spiral galaxy approximately 13.6 billion years old, 
-            containing our Solar System. It spans about 100,000 light-years in diameter.
-          </p>
-          <p class="text-white-50 mb-0" style="font-size: 0.85rem; line-height: 1.5;">
-            Click on any star system to explore its planets in detail.
-          </p>
-        </div>
-      </div>
-    `;
-  }
-
-  /**
-   * Update info tab with system information
-   */
-  updateSystemInfo(system) {
-    if (!this.hasInfoContentTarget) return;
-
-    const planets = system.planets || [];
-    const starName = system.starName || "Unknown";
-    const distance = system.distance || planets[0]?.distance || 0;
-
-    // Calculate system statistics
-    const planetTypes = planets.reduce((acc, planet) => {
-      const type = planet.type || "unknown";
-      acc[type] = (acc[type] || 0) + 1;
-      return acc;
-    }, {});
-
-    const avgTemp =
-      planets.length > 0 && planets.some((p) => p.temperature)
-        ? (
-            planets
-              .filter((p) => p.temperature)
-              .reduce((sum, p) => sum + p.temperature, 0) /
-            planets.filter((p) => p.temperature).length
-          ).toFixed(0)
-        : null;
-
-    const avgRadius =
-      planets.length > 0 && planets.some((p) => p.radius)
-        ? (
-            planets
-              .filter((p) => p.radius)
-              .reduce((sum, p) => sum + p.radius, 0) /
-            planets.filter((p) => p.radius).length
-          ).toFixed(2)
-        : null;
-
-    // Get spectral type if available
-    const spectralType = planets[0]?.spectralType || null;
-    const starTemp = planets[0]?.starTemperature || null;
-
-    this.infoContentTarget.innerHTML = `
-      <div class="info-system">
-        <h5 class="text-white mb-3 d-flex align-items-center">
-          <i class="bx bx-sun me-2 text-warning"></i> ${this.escapeHtml(
-            starName
-          )}
-        </h5>
-        
-        <div class="info-section mb-4">
-          <h6 class="text-white-50 mb-3 fs-sm text-uppercase">Star System</h6>
-          <div class="info-stats">
-            <div class="stat-item mb-2 p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
-              <div class="d-flex justify-content-between align-items-center">
-                <span class="text-white-50">Distance from Earth</span>
-                <span class="badge bg-primary">${this.formatDistance(
-                  distance
-                )}</span>
-              </div>
-            </div>
-            <div class="stat-item mb-2 p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
-              <div class="d-flex justify-content-between align-items-center">
-                <span class="text-white-50">Number of Planets</span>
-                <span class="badge bg-info">${planets.length}</span>
-              </div>
-            </div>
-            ${
-              spectralType
-                ? `
-              <div class="stat-item mb-2 p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
-                <div class="d-flex justify-content-between align-items-center">
-                  <span class="text-white-50">Spectral Type</span>
-                  <span class="badge bg-secondary">${this.escapeHtml(
-                    spectralType
-                  )}</span>
-                </div>
-              </div>
-            `
-                : ""
-            }
-            ${
-              starTemp
-                ? `
-              <div class="stat-item mb-2 p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
-                <div class="d-flex justify-content-between align-items-center">
-                  <span class="text-white-50">Star Temperature</span>
-                  <span class="badge bg-warning text-dark">${starTemp} K</span>
-                </div>
-              </div>
-            `
-                : ""
-            }
-          </div>
-        </div>
-
-        <div class="info-section mb-4">
-          <h6 class="text-white-50 mb-3 fs-sm text-uppercase">Planetary Composition</h6>
-          <div class="planet-types">
-            ${Object.entries(planetTypes)
-              .map(
-                ([type, count]) => `
-              <div class="d-flex justify-content-between align-items-center mb-2 p-2 rounded" 
-                   style="background: rgba(255, 255, 255, 0.03);">
-                <span class="text-white-50">${this.getPlanetTypeName(
-                  type
-                )}</span>
-                <span class="badge bg-${this.getTypeColor(
-                  type
-                )}">${count}</span>
-              </div>
-            `
-              )
-              .join("")}
-          </div>
-        </div>
-
-        ${
-          avgTemp || avgRadius
-            ? `
-          <div class="info-section mb-4">
-            <h6 class="text-white-50 mb-3 fs-sm text-uppercase">Average Values</h6>
-            <div class="info-stats">
-              ${
-                avgTemp
-                  ? `
-                <div class="stat-item mb-2 p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <span class="text-white-50">Temperature</span>
-                    <span class="badge bg-warning text-dark">${avgTemp} K</span>
-                  </div>
-                </div>
-              `
-                  : ""
-              }
-              ${
-                avgRadius
-                  ? `
-                <div class="stat-item mb-2 p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <span class="text-white-50">Radius</span>
-                    <span class="badge bg-info">${avgRadius} R⊕</span>
-                  </div>
-                </div>
-              `
-                  : ""
-              }
-            </div>
-          </div>
-        `
-            : ""
-        }
-
-        <div class="info-section">
-          <h6 class="text-white-50 mb-3 fs-sm text-uppercase">Planets</h6>
-          <div class="planet-list" style="max-height: 200px; overflow-y: auto;">
-            ${planets
-              .map(
-                (planet) => `
-              <div class="planet-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.03); cursor: pointer;"
-                   onclick="this.closest('[data-controller]').dispatchEvent(new CustomEvent('planet-select', {detail: '${this.escapeHtml(
-                     planet.name
-                   )}'}))">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <div class="text-white fw-semibold fs-sm">${this.escapeHtml(
-                      planet.name
-                    )}</div>
-                    ${
-                      planet.temperature
-                        ? `
-                      <div class="text-white-50" style="font-size: 0.75rem;">${planet.temperature.toFixed(
-                        0
-                      )} K</div>
-                    `
-                        : ""
-                    }
-                  </div>
-                  <span class="badge bg-${this.getTypeColor(
-                    planet.type
-                  )}">${this.getPlanetTypeName(planet.type)}</span>
-                </div>
-              </div>
-            `
-              )
-              .join("")}
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  /**
-   * Update info tab with planet information
-   */
-  updatePlanetInfo(planet) {
-    if (!this.hasInfoContentTarget) return;
-
-    const name = planet.name || "Unknown";
-    const hostStar = planet.hostStar || "Unknown";
-    const type = this.getPlanetTypeName(planet.type);
-    const temperature = planet.temperature
-      ? `${planet.temperature.toFixed(0)} K`
-      : "Unknown";
-    const radius = planet.radius ? `${planet.radius.toFixed(2)} R⊕` : "Unknown";
-    const mass = planet.mass ? `${planet.mass.toFixed(2)} M⊕` : "Unknown";
-    const distance = planet.distance
-      ? this.formatDistance(planet.distance)
-      : "Unknown";
-    const orbitalPeriod = planet.orbitalPeriod
-      ? `${planet.orbitalPeriod.toFixed(2)} days`
-      : "Unknown";
-    const semiMajorAxis = planet.semiMajorAxis
-      ? `${planet.semiMajorAxis.toFixed(3)} AU`
-      : "Unknown";
-    const discoveryYear = planet.discoveryYear || "Unknown";
-    const discoveryMethod = planet.discoveryMethod || "Unknown";
-    const discoveryFacility = planet.discoveryFacility || "Unknown";
-
-    this.infoContentTarget.innerHTML = `
-      <div class="info-planet">
-        <h5 class="text-white mb-3 d-flex align-items-center">
-          <i class="bx bx-planet me-2 text-primary"></i> ${this.escapeHtml(
-            name
-          )}
-        </h5>
-        
-        <div class="info-section mb-4">
-          <h6 class="text-white-50 mb-3 fs-sm text-uppercase">Basic Properties</h6>
-          <div class="property-grid">
-            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
-              <div class="text-white-50 fs-sm">Host Star</div>
-              <div class="text-white fw-semibold">${this.escapeHtml(
-                hostStar
-              )}</div>
-            </div>
-            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
-              <div class="text-white-50 fs-sm">Type</div>
-              <div>
-                <span class="badge bg-${this.getTypeColor(
-                  planet.type
-                )}">${this.escapeHtml(type)}</span>
-              </div>
-            </div>
-            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
-              <div class="text-white-50 fs-sm">Distance</div>
-              <div class="text-white fw-semibold">${distance}</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="info-section mb-4">
-          <h6 class="text-white-50 mb-3 fs-sm text-uppercase">Physical Characteristics</h6>
-          <div class="property-grid">
-            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
-              <div class="text-white-50 fs-sm">Temperature</div>
-              <div class="text-white fw-semibold">${temperature}</div>
-            </div>
-            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
-              <div class="text-white-50 fs-sm">Radius</div>
-              <div class="text-white fw-semibold">${radius}</div>
-            </div>
-            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
-              <div class="text-white-50 fs-sm">Mass</div>
-              <div class="text-white fw-semibold">${mass}</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="info-section mb-4">
-          <h6 class="text-white-50 mb-3 fs-sm text-uppercase">Orbital Parameters</h6>
-          <div class="property-grid">
-            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
-              <div class="text-white-50 fs-sm">Orbital Period</div>
-              <div class="text-white fw-semibold">${orbitalPeriod}</div>
-            </div>
-            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
-              <div class="text-white-50 fs-sm">Semi-Major Axis</div>
-              <div class="text-white fw-semibold">${semiMajorAxis}</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="info-section mb-4">
-          <h6 class="text-white-50 mb-3 fs-sm text-uppercase">Discovery Information</h6>
-          <div class="property-grid">
-            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
-              <div class="text-white-50 fs-sm">Discovery Year</div>
-              <div class="text-white fw-semibold">${discoveryYear}</div>
-            </div>
-            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
-              <div class="text-white-50 fs-sm">Method</div>
-              <div class="text-white fw-semibold">${this.escapeHtml(
-                discoveryMethod
-              )}</div>
-            </div>
-            <div class="property-item mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
-              <div class="text-white-50 fs-sm">Facility</div>
-              <div class="text-white fw-semibold">${this.escapeHtml(
-                discoveryFacility
-              )}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  /**
-   * Format distance with appropriate units
-   * @param {number} distanceLightYears - Distance in light years
-   * @returns {string} Formatted distance string
-   */
-  formatDistance(distanceLightYears) {
-    if (!distanceLightYears || distanceLightYears === 0) {
-      // For Sun or very close objects, show in AU
-      return "1 AU (Sun)";
-    }
-
-    // If distance is less than 0.01 light years, show in AU
-    // 1 light year ≈ 63,241 AU
-    if (distanceLightYears < 0.01) {
-      const distanceAU = (distanceLightYears * 63241).toFixed(0);
-      return `${distanceAU} AU`;
-    }
-
-    // Otherwise show in light years
-    return `${distanceLightYears.toFixed(1)} ly`;
-  }
-
-  /**
-   * Helper method to escape HTML and prevent XSS
-   */
-  escapeHtml(text) {
-    if (text === null || text === undefined) return "";
-    const map = {
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#039;",
-    };
-    return String(text).replace(/[&<>"']/g, (m) => map[m]);
-  }
-
-  /**
-   * Get planet type display name
-   */
-  getPlanetTypeName(type) {
-    const names = {
-      terrestrial: "Terrestrial",
-      "super-earth": "Super-Earth",
-      neptune: "Neptune-like",
-      jupiter: "Jupiter-like",
-    };
-    return names[type] || "Unknown";
-  }
-
-  /**
-   * Get badge color for planet type
-   */
-  getTypeColor(type) {
-    const colors = {
-      terrestrial: "success",
-      "super-earth": "info",
-      neptune: "primary",
-      jupiter: "warning",
-    };
-    return colors[type] || "secondary";
+    this.infoTabManager.updateInfoTab(this.viewMode, {
+      currentSystem: this.currentSystem,
+      currentPlanet: this.currentPlanet,
+    });
   }
 
   // ============================================
@@ -2484,16 +1835,9 @@ export default class extends Controller {
    */
   toggleStarVisibility() {
     if (!this.hasStarVisibilityToggleTarget) return;
-
-    this.showStars = this.starVisibilityToggleTarget.checked;
-
-    if (this.sceneManager) {
-      if (this.showStars) {
-        this.sceneManager.showStars();
-      } else {
-        this.sceneManager.hideStars();
-      }
-    }
+    this.settingsManager.toggleStarVisibility(
+      this.starVisibilityToggleTarget.checked
+    );
   }
 
   /**
@@ -2501,12 +1845,9 @@ export default class extends Controller {
    */
   togglePlanetLabels() {
     if (!this.hasPlanetLabelsToggleTarget) return;
-
-    this.showPlanetLabels = this.planetLabelsToggleTarget.checked;
-
-    if (this.systemRenderer) {
-      this.systemRenderer.toggleLabels(this.showPlanetLabels);
-    }
+    this.settingsManager.togglePlanetLabels(
+      this.planetLabelsToggleTarget.checked
+    );
   }
 
   /**
@@ -2514,12 +1855,7 @@ export default class extends Controller {
    */
   toggleOrbitLines() {
     if (!this.hasOrbitLinesToggleTarget) return;
-
-    this.showOrbitLines = this.orbitLinesToggleTarget.checked;
-
-    if (this.systemRenderer) {
-      this.systemRenderer.toggleOrbitLines(this.showOrbitLines);
-    }
+    this.settingsManager.toggleOrbitLines(this.orbitLinesToggleTarget.checked);
   }
 
   /**
@@ -2530,15 +1866,8 @@ export default class extends Controller {
       return;
 
     const sliderValue = parseFloat(event.target.value);
-    this.starDensity = sliderValue / 100; // Convert to 0.0-1.0 range
-
-    // Update display
-    this.starDensityValueTarget.textContent = `${sliderValue}%`;
-
-    // Update scene manager
-    if (this.sceneManager) {
-      this.sceneManager.updateStarDensity(this.starDensity);
-    }
+    const displayText = this.settingsManager.updateStarDensity(sliderValue);
+    this.starDensityValueTarget.textContent = displayText;
   }
 
   /**
@@ -2546,19 +1875,9 @@ export default class extends Controller {
    */
   toggleHighQuality() {
     if (!this.hasHighQualityToggleTarget) return;
-
-    this.highQuality = this.highQualityToggleTarget.checked;
-
-    // Update all renderers
-    if (this.planetRenderer) {
-      this.planetRenderer.setQuality(this.highQuality);
-    }
-    if (this.systemRenderer) {
-      this.systemRenderer.setQuality(this.highQuality);
-    }
-    if (this.galaxyRenderer) {
-      this.galaxyRenderer.setQuality(this.highQuality);
-    }
+    this.settingsManager.toggleHighQuality(
+      this.highQualityToggleTarget.checked
+    );
   }
 
   /**
@@ -2569,23 +1888,8 @@ export default class extends Controller {
       return;
 
     const sliderValue = parseFloat(event.target.value);
-
-    // Map 0-100 to 0.1x-2.0x (logarithmic scale for better control)
-    if (sliderValue <= 50) {
-      // 0-50 maps to 0.1-1.0
-      this.cameraSpeed = 0.1 + (sliderValue / 50) * 0.9;
-    } else {
-      // 50-100 maps to 1.0-2.0
-      this.cameraSpeed = 1.0 + ((sliderValue - 50) / 50) * 1.0;
-    }
-
-    // Update display
-    this.cameraSpeedValueTarget.textContent = `${this.cameraSpeed.toFixed(1)}x`;
-
-    // Update controls
-    if (this.sceneManager && this.sceneManager.controls) {
-      this.sceneManager.controls.rotateSpeed = this.cameraSpeed;
-    }
+    const displayText = this.settingsManager.updateCameraSpeed(sliderValue);
+    this.cameraSpeedValueTarget.textContent = displayText;
   }
 
   /**
@@ -2593,80 +1897,56 @@ export default class extends Controller {
    */
   toggleAutoRotate() {
     if (!this.hasAutoRotateToggleTarget) return;
-
-    this.autoRotate = this.autoRotateToggleTarget.checked;
-
-    if (this.sceneManager && this.sceneManager.controls) {
-      this.sceneManager.controls.autoRotate = this.autoRotate;
-      this.sceneManager.controls.autoRotateSpeed = 0.5; // Slow rotation
-    }
+    this.settingsManager.toggleAutoRotate(this.autoRotateToggleTarget.checked);
   }
 
   /**
    * Reset all settings to defaults
    */
   resetSettings() {
-    // Reset state variables
-    this.showStars = true;
-    this.showPlanetLabels = false;
-    this.showOrbitLines = true;
-    this.starDensity = 0.5;
-    this.highQuality = true;
-    this.cameraSpeed = 1.0;
-    this.autoRotate = false;
-    this.orbitSpeed = 1.0;
-    this.useOrbitalInclination = false;
+    const defaults = this.settingsManager.reset();
 
-    // Update UI controls
+    // Update UI controls to match reset values
     if (this.hasStarVisibilityToggleTarget) {
-      this.starVisibilityToggleTarget.checked = this.showStars;
+      this.starVisibilityToggleTarget.checked = defaults.showStars;
     }
     if (this.hasPlanetLabelsToggleTarget) {
-      this.planetLabelsToggleTarget.checked = this.showPlanetLabels;
+      this.planetLabelsToggleTarget.checked = defaults.showPlanetLabels;
     }
     if (this.hasOrbitLinesToggleTarget) {
-      this.orbitLinesToggleTarget.checked = this.showOrbitLines;
+      this.orbitLinesToggleTarget.checked = defaults.showOrbitLines;
     }
     if (this.hasStarDensitySliderTarget) {
-      this.starDensitySliderTarget.value = "50";
+      this.starDensitySliderTarget.value = defaults.starDensity;
     }
     if (this.hasStarDensityValueTarget) {
-      this.starDensityValueTarget.textContent = "50%";
+      this.starDensityValueTarget.textContent = defaults.starDensityText;
     }
     if (this.hasHighQualityToggleTarget) {
-      this.highQualityToggleTarget.checked = this.highQuality;
+      this.highQualityToggleTarget.checked = defaults.highQuality;
     }
     if (this.hasCameraSpeedSliderTarget) {
-      this.cameraSpeedSliderTarget.value = "50";
+      this.cameraSpeedSliderTarget.value = defaults.cameraSpeed;
     }
     if (this.hasCameraSpeedValueTarget) {
-      this.cameraSpeedValueTarget.textContent = "1.0x";
+      this.cameraSpeedValueTarget.textContent = defaults.cameraSpeedText;
     }
     if (this.hasAutoRotateToggleTarget) {
-      this.autoRotateToggleTarget.checked = this.autoRotate;
+      this.autoRotateToggleTarget.checked = defaults.autoRotate;
     }
     if (this.hasOrbitSpeedSliderTarget) {
-      this.orbitSpeedSliderTarget.value = "50";
+      this.orbitSpeedSliderTarget.value = defaults.orbitSpeed;
     }
     if (this.hasOrbitSpeedValueTarget) {
-      this.orbitSpeedValueTarget.textContent = "60.0s";
+      this.orbitSpeedValueTarget.textContent = defaults.orbitSpeedText;
     }
     if (this.hasOrbitalInclinationToggleTarget) {
-      this.orbitalInclinationToggleTarget.checked = this.useOrbitalInclination;
+      this.orbitalInclinationToggleTarget.checked =
+        defaults.useOrbitalInclination;
     }
     if (this.hasAtmosphereToggleTarget) {
-      this.atmosphereToggleTarget.checked = false;
+      this.atmosphereToggleTarget.checked = defaults.showAtmospheres;
     }
-
-    // Apply settings to renderers
-    this.toggleStarVisibility();
-    this.togglePlanetLabels();
-    this.toggleOrbitLines();
-    this.updateStarDensity({ target: { value: "50" } });
-    this.toggleHighQuality();
-    this.updateCameraSpeed({ target: { value: "50" } });
-    this.toggleAutoRotate();
-    this.toggleAtmospheres();
   }
 
   /**
@@ -2674,37 +1954,6 @@ export default class extends Controller {
    * @param {string} viewMode - Current view mode: 'galaxy', 'system', or 'planet'
    */
   updateSettingsVisibility(viewMode) {
-    // Get settings elements by ID
-    const atmosphereSetting = document.getElementById("atmosphereSetting");
-    const planetLabelsSetting = document.getElementById("planetLabelsSetting");
-    const orbitalMechanicsSection = document.getElementById(
-      "orbitalMechanicsSection"
-    );
-
-    switch (viewMode) {
-      case "galaxy":
-        // Galaxy view: Hide planet-specific and orbit settings
-        if (atmosphereSetting) atmosphereSetting.style.display = "none";
-        if (planetLabelsSetting) planetLabelsSetting.style.display = "none";
-        if (orbitalMechanicsSection)
-          orbitalMechanicsSection.style.display = "none";
-        break;
-
-      case "system":
-        // System view: Show all orbit-related settings
-        if (atmosphereSetting) atmosphereSetting.style.display = "block";
-        if (planetLabelsSetting) planetLabelsSetting.style.display = "block";
-        if (orbitalMechanicsSection)
-          orbitalMechanicsSection.style.display = "block";
-        break;
-
-      case "planet":
-        // Planet view: Show atmospheres but hide orbit settings
-        if (atmosphereSetting) atmosphereSetting.style.display = "block";
-        if (planetLabelsSetting) planetLabelsSetting.style.display = "none";
-        if (orbitalMechanicsSection)
-          orbitalMechanicsSection.style.display = "none";
-        break;
-    }
+    this.settingsManager.updateSettingsVisibility(viewMode);
   }
 }
