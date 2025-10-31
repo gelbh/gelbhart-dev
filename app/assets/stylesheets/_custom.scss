@@ -2,12 +2,6 @@
 // CUSTOM STYLES FOR GELBHART.DEV
 // ============================================
 //
-// This file has been refactored into modular components for better
-// maintainability and organization. All styles are now split into
-// logical component files located in /components/
-//
-// Import order matters! Variables and animations should come first,
-// followed by base styles, then component-specific styles.
 
 // ---- Foundation ----
 // CSS variables, colors, spacing, transitions, z-index layers
@@ -32,16 +26,7 @@
 // Project cards with hover effects and animations
 @import "components/projects";
 
-// ---- Interactive Features ----
-// Comprehensive Pac-Man game styles including:
-// - Game container & overlay
-// - Pac-Man character & power-ups
-// - Ghosts & ghost indicators
-// - Dots, pellets, and items
-// - HUD & controls
-// - Modals (game over, pause, leaderboard)
-// - Section locking system
-// - Hover effects for interactive elements
+// Pac-Man game styles:
 @import "components/pacman";
 
 // ---- Project Pages ----
@@ -50,6 +35,3 @@
 
 // Hevy Tracker page with hero, cards, gallery, and steps
 @import "components/hevy-tracker";
-
-// Exoplanet Viewer page with 3D visualization and panels
-@import "components/exoplanet-viewer";

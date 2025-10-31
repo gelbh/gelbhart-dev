@@ -181,24 +181,6 @@
                 animation_delay: 'fade-in-view delay-2' %>
         </div>
 
-        <!-- Exoplanet Viewer Card -->
-        <div class="col-lg-4 col-md-6">
-            <%= render 'shared/project_card',
-                icon: 'bx-planet',
-                color: 'info',
-                title: 'Exoplanet 3D Viewer',
-                subtitle: 'Interactive Visualization',
-                description: 'Explore discovered exoplanets in stunning 3D visualization powered by NASA data. Features procedural generation and real-time rendering.',
-                badges: [
-                    {text: 'Three.js', color: 'success'},
-                    {text: 'NASA API', color: 'primary'},
-                    {text: 'WebGL', color: 'warning'}
-                ],
-                link_text: 'Explore Exoplanets',
-                link_url: exoplanet_viewer_path,
-                animation_delay: 'fade-in-view delay-3' %>
-        </div>
-
         <!-- Robot Motion Planning Card -->
         <div class="col-lg-4 col-md-6">
             <%= render 'shared/project_card',
