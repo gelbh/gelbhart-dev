@@ -9,9 +9,6 @@ Rails.application.routes.draw do
     resources :pacman_scores, only: [ :create ]
     get "pacman_scores/global", to: "pacman_scores#global"
     get "pacman_scores/player/:player_name", to: "pacman_scores#player"
-
-    # Exoplanet data proxy
-    get "exoplanets", to: "exoplanets#index"
   end
 
   # Hevy Tracker pages
@@ -28,8 +25,11 @@ Rails.application.routes.draw do
   # Video Captioner (static page for desktop tool download)
   get "video-captioner", to: "pages#video_captioner", as: :video_captioner
 
-  # Exoplanet Viewer (3D visualization tool)
-  get "exoplanet-viewer", to: "pages#exoplanet_viewer", as: :exoplanet_viewer
+  # Legacy exoplanet endpoints -> 410 Gone
+  match "/exoplanet-viewer(/*path)", to: "errors#gone", via: :all
+  match "/exoplanets(/*path)", to: "errors#gone", via: :all
+  match "/exoplanet(/*path)", to: "errors#gone", via: :all
+  match "/api/exoplanets(/*path)", to: "errors#gone", via: :all
 
   get "/robots.txt", to: "pages#robots"
 

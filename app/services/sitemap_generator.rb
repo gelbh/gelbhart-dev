@@ -10,8 +10,7 @@ class SitemapGenerator
       { path: "/hevy-tracker/privacy", changefreq: "yearly", priority: 0.5 },
       { path: "/hevy-tracker/terms", changefreq: "yearly", priority: 0.5 },
       { path: "/contact", changefreq: "monthly", priority: 0.8 },
-      { path: "/video-captioner", changefreq: "monthly", priority: 0.7 },
-      { path: "/exoplanet-viewer", changefreq: "monthly", priority: 0.8 }
+      { path: "/video-captioner", changefreq: "monthly", priority: 0.7 }
     ]
   end
 
