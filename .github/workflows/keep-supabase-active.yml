@@ -1,0 +1,24 @@
+name: Keep Supabase Active
+
+on:
+  schedule:
+    # Run twice weekly: Wednesday at 3 AM UTC and Sunday at 3 AM UTC
+    # This prevents Supabase free tier from pausing after 7 days of inactivity
+    - cron: '0 3 * * 3'  # Wednesday
+    - cron: '0 3 * * 0'  # Sunday
+  workflow_dispatch:  # Allow manual triggering for testing
+
+jobs:
+  ping-database:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping health endpoint
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://gelbhart.dev/_up)
+          if [ $response -eq 200 ]; then
+            echo "✓ Health check passed (HTTP $response)"
+            echo "Database connection verified - Supabase remains active"
+          else
+            echo "⚠ Health check returned HTTP $response"
+            exit 1
+          fi
