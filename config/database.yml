@@ -1,0 +1,22 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  connect_timeout: 5
+  checkout_timeout: 5
+  reaping_frequency: 10
+
+development:
+  <<: *default
+  database: gelbhart_dev_development
+
+test:
+  <<: *default
+  database: gelbhart_dev_test
+
+production:
+  <<: *default
+  url: <%= ENV['DATABASE_URL'] %>
+  database: gelbhart_dev_production
+  connect_timeout: 5
+  checkout_timeout: 5
