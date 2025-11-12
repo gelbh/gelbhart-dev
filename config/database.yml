@@ -20,3 +20,4 @@ production:
   database: gelbhart_dev_production
   connect_timeout: 5
   checkout_timeout: 5
+  prepared_statements: false
