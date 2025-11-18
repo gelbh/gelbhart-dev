@@ -3,15 +3,6 @@ require "active_support/core_ext/integer/time"
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
-  config.assets.debug = true
-  config.assets.quiet = true
-  config.assets.compile = true
-  config.assets.digest = true
-
-  # Enable cache for better performance with theme assets
-  config.action_controller.perform_caching = true
-  config.cache_classes = false
-
   # Make code changes take effect immediately without server restart.
   config.enable_reloading = true
 
@@ -42,12 +33,6 @@ Rails.application.configure do
 
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false
-  
-  # Use :letter_opener to preview emails in browser during development
-  # Install with: gem 'letter_opener', group: :development
-  # Or use :test to not send emails
-  config.action_mailer.delivery_method = :test
-  config.action_mailer.perform_deliveries = true
 
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false
@@ -69,6 +54,9 @@ Rails.application.configure do
 
   # Highlight code that enqueued background job in logs.
   config.active_job.verbose_enqueue_logs = true
+
+  # Highlight code that triggered redirect in logs.
+  config.action_dispatch.verbose_redirect_logs = true
 
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true
