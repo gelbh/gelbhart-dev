@@ -15,6 +15,7 @@ gem "rack-cors"
 gem "google-analytics-data"
 gem "googleauth"
 gem "webrick"
+gem "image_processing", "~> 1.2"
 
 gem "mini_racer"
 
