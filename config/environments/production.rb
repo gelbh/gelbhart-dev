@@ -79,10 +79,11 @@ Rails.application.configure do
   ]
 
   # Asset pipeline configuration
-  # Enable compilation as fallback for importmap JavaScript files
-  config.assets.compile = true
+  # Disable runtime compilation - all assets should be precompiled during build
+  # This reduces memory usage by preventing on-demand asset compilation
+  config.assets.compile = false
   config.assets.css_compressor = :sass
-  
+
   # Configure Terser to support modern ES6+ syntax
   config.assets.js_compressor = Terser.new(
     compress: {
@@ -97,7 +98,7 @@ Rails.application.configure do
       comments: false
     }
   )
-  
+
   config.assets.digest = true
   config.assets.version = "1.0"
   config.assets.debug = false
@@ -125,7 +126,7 @@ Rails.application.configure do
 
   # Enable asset host for CDN support
   # Use CDN for assets to reduce load on the main server
-  config.asset_host = ENV['ASSET_HOST'] if ENV['ASSET_HOST'].present?
+  config.asset_host = ENV["ASSET_HOST"] if ENV["ASSET_HOST"].present?
 
   # Alternative: Use the main domain with Cloudflare caching
   # Cloudflare will automatically cache /assets/* paths
@@ -148,7 +149,7 @@ Rails.application.configure do
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.default_url_options = { host: "gelbhart.dev", protocol: "https" }
-  
+
   # SMTP settings - configure via environment variables
   # Set these in your Render dashboard or hosting platform:
   # SMTP_ADDRESS, SMTP_PORT, SMTP_DOMAIN, SMTP_USERNAME (or SMTP_USER), SMTP_PASSWORD (or SMTP_PASS)

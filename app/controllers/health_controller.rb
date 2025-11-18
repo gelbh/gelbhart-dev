@@ -10,7 +10,8 @@ class HealthController < ApplicationController
     render json: {
       status: "ok",
       timestamp: Time.current,
-      database: "connected"
+      database: "connected",
+      memory_mb: get_memory_usage_mb
     }, status: :ok
   rescue PG::ConnectionBad, ActiveRecord::ConnectionNotEstablished => e
     render json: {
@@ -22,5 +23,21 @@ class HealthController < ApplicationController
       status: "error",
       message: e.message
     }, status: :service_unavailable
+  end
+
+  private
+
+  # Helper method to get current process memory usage in MB
+  def get_memory_usage_mb
+    return 0 unless File.exist?("/proc/self/status")
+
+    status = File.read("/proc/self/status")
+    if status =~ /VmRSS:\s+(\d+)\s+kB/
+      ($1.to_f / 1024).round(2)
+    else
+      0
+    end
+  rescue
+    0
   end
 end
