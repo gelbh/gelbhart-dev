@@ -25,12 +25,6 @@ Rails.application.routes.draw do
   # Video Captioner (static page for desktop tool download)
   get "video-captioner", to: "pages#video_captioner", as: :video_captioner
 
-  # Legacy exoplanet endpoints -> 410 Gone
-  match "/exoplanet-viewer(/*path)", to: "errors#gone", via: :all
-  match "/exoplanets(/*path)", to: "errors#gone", via: :all
-  match "/exoplanet(/*path)", to: "errors#gone", via: :all
-  match "/api/exoplanets(/*path)", to: "errors#gone", via: :all
-
   get "/robots.txt", to: "pages#robots"
 
   # Ignore Chrome DevTools requests
