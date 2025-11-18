@@ -1,12 +1,11 @@
 import { Application } from "@hotwired/stimulus";
 
-const application = Application.start();
+// Create application instance but don't start it yet
+// It will be started in index.js after all controllers are registered
+const application = new Application();
 
 // Configure Stimulus development experience
 application.debug = false;
-
-// Disable automatic lazy-loading - all controllers are eagerly loaded in index.js
-application.loadDefinitionsFromContext = false;
 
 window.Stimulus = application;
 
