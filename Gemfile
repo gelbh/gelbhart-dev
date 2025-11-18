@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-gem "rails", "~> 8.0.0"
+gem "rails", "~> 8.1.0"
 gem "sprockets-rails"
 gem "sassc-rails"
 gem "bootstrap", "~> 5.3.0"
@@ -31,7 +31,7 @@ end
 group :development do
   gem "web-console"
   gem "error_highlight", ">= 0.4.0", platforms: [ :ruby ]
-  gem 'solargraph'
+  gem "solargraph"
 end
 
 group :test do
