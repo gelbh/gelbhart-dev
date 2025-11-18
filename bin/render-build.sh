@@ -12,5 +12,5 @@ npm install
 bundle exec rake assets:precompile
 bundle exec rake assets:clean
 
-# Run database migrations
-bundle exec rails db:migrate
+# Note: Database migrations should be run separately or during startup
+# They are not run here because the database may not be available during build
