@@ -1,9 +1,23 @@
 import { application } from "./application";
-import { eagerLoadControllersFrom } from "@hotwired/stimulus-loading";
 
-// Load all controllers
-eagerLoadControllersFrom("controllers", application);
+// Explicitly import and register all controllers
+// This ensures all controllers are bundled and available in production
 
-// Lazy load controllers
+import AnalyticsStatsController from "./analytics_stats_controller";
+import CodeTyperController from "./code_typer_controller";
+import CounterController from "./counter_controller";
+import PacmanGameController from "./pacman_game_controller";
+import PacmanPreviewController from "./pacman-preview_controller";
+import ScrollAnimationController from "./scroll_animation_controller";
+import ScrollToTopController from "./scroll_to_top_controller";
 import ThemeController from "./theme_controller";
+
+// Register all controllers with their kebab-case names
+application.register("analytics-stats", AnalyticsStatsController);
+application.register("code-typer", CodeTyperController);
+application.register("counter", CounterController);
+application.register("pacman-game", PacmanGameController);
+application.register("pacman-preview", PacmanPreviewController);
+application.register("scroll-animation", ScrollAnimationController);
+application.register("scroll-to-top", ScrollToTopController);
 application.register("theme", ThemeController);
