@@ -10,16 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_26_174642) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_18_133746) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
   create_table "pacman_scores", force: :cascade do |t|
-    t.string "player_name"
-    t.integer "score"
+    t.datetime "created_at", null: false
     t.boolean "is_win"
     t.datetime "played_at"
-    t.datetime "created_at", null: false
+    t.string "player_name"
+    t.integer "score"
     t.datetime "updated_at", null: false
     t.index ["player_name", "score", "played_at"], name: "index_pacman_scores_on_player_score_played", order: { score: :desc, played_at: :desc }
     t.index ["score"], name: "index_pacman_scores_on_score_desc", order: :desc
