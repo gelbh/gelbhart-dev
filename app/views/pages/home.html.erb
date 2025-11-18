@@ -181,6 +181,28 @@
                 animation_delay: 'fade-in-view delay-2' %>
         </div>
 
+        <!-- NASA Exoplanet Explorer Card -->
+        <div class="col-lg-4 col-md-6">
+            <%= render 'shared/project_card',
+                icon: 'bx-planet',
+                color: 'info',
+                title: 'NASA Exoplanet Explorer',
+                subtitle: '3D Visualization Tool',
+                description: 'Interactive 3D visualization tool for exploring 5000+ confirmed exoplanets from NASA\'s Exoplanet Archive. Built with React, Three.js, and Express.',
+                badges: [
+                    {text: 'React', color: 'primary'},
+                    {text: 'Three.js', color: 'warning'},
+                    {text: 'Node.js', color: 'success'}
+                ],
+                link_text: 'View Live Demo',
+                link_url: 'https://nasa-exoplanet-explorer.vercel.app',
+                link_icon: 'bx-right-arrow-alt',
+                link_target: '_blank',
+                link_rel: 'noopener noreferrer',
+                github_url: 'https://github.com/gelbh/nasa-exoplanet-explorer',
+                animation_delay: 'fade-in-view delay-3' %>
+        </div>
+
         <!-- Robot Motion Planning Card -->
         <div class="col-lg-4 col-md-6">
             <%= render 'shared/project_card',

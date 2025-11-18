@@ -2,6 +2,7 @@
 <% animation_delay = local_assigns.fetch(:animation_delay, '') %>
 <% link_target = local_assigns[:link_target] %>
 <% link_rel = local_assigns[:link_rel] %>
+<% github_url = local_assigns[:github_url] %>
 
 <article class="card project-card border-0 shadow-sm h-100 <%= animation_delay %>">
     <div class="card-body p-4">
@@ -12,8 +13,17 @@
                 </div>
             </div>
             <div class="flex-grow-1 ms-3">
-                <h3 class="h5 mb-0"><%= title %></h3>
-                <span class="fs-sm text-muted"><%= subtitle %></span>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h3 class="h5 mb-0"><%= title %></h3>
+                        <span class="fs-sm text-muted"><%= subtitle %></span>
+                    </div>
+                    <% if github_url.present? %>
+                    <a href="<%= github_url %>" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-link text-muted p-1 ms-2" title="View on GitHub" onclick="event.stopPropagation();">
+                        <i class="bx bxl-github fs-5"></i>
+                    </a>
+                    <% end %>
+                </div>
             </div>
         </div>
         <p class="card-text mb-4"><%= description %></p>
