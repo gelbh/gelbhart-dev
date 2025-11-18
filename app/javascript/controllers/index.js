@@ -1,7 +1,8 @@
 import { application } from "./application";
 
-// Explicitly import and register all controllers
-// This ensures all controllers are bundled and available in production
+// Explicitly import and register all controllers BEFORE starting Stimulus
+// This ensures all controllers are registered before Stimulus scans the DOM
+// and prevents lazy-loading attempts that cause 404 errors
 
 import AnalyticsStatsController from "./analytics_stats_controller";
 import CodeTyperController from "./code_typer_controller";
@@ -21,3 +22,7 @@ application.register("pacman-preview", PacmanPreviewController);
 application.register("scroll-animation", ScrollAnimationController);
 application.register("scroll-to-top", ScrollToTopController);
 application.register("theme", ThemeController);
+
+// Start Stimulus AFTER all controllers are registered
+// This prevents Stimulus from attempting to lazy-load controllers
+application.start();
