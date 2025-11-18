@@ -9,7 +9,8 @@ pin "@popperjs/core", to: "https://ga.jspm.io/npm:@popperjs/core@2.11.8/lib/inde
 
 # Controllers - pin all controller files so relative imports in index.js can resolve
 # All controllers are explicitly imported in index.js, so they load eagerly (not lazy)
-pin_all_from "app/javascript/controllers", under: "controllers"
+# Preload ensures controllers are available before Stimulus attempts lazy-loading
+pin_all_from "app/javascript/controllers", under: "controllers", preload: true
 
 # Theme files
 pin_all_from "app/javascript/theme", under: "theme"
