@@ -38,4 +38,10 @@ end
 group :test do
   gem "capybara"
   gem "selenium-webdriver"
+  gem "simplecov", require: false
+  gem "factory_bot_rails"
+  gem "faker"
+  gem "shoulda-matchers"
+  gem "webmock"
+  gem "mocha"
 end

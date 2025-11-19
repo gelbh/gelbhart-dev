@@ -1,1 +1,10 @@
-bundle exec rails test
+#!/bin/sh
+# Run fast tests before push (skip slow system tests)
+# System tests run in CI for faster local development
+
+echo "Running fast tests (models, requests, services, mailers)..."
+bundle exec rails test:models test:requests test:services test:mailers
+
+# Run JavaScript tests
+echo "Running JavaScript tests..."
+npm test -- --passWithNoTests
