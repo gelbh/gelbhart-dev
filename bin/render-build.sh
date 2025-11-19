@@ -35,7 +35,8 @@ fi
 echo "==== Listing compiled assets ===="
 ls -la public/assets/ | head -20
 
-bundle exec rake assets:clean
+# Note: Assets clean is DISABLED - it was removing newly compiled files
+# bundle exec rake assets:clean
 
 # Note: Database migrations should be run separately or during startup
 # They are not run here because the database may not be available during build
