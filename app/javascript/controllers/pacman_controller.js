@@ -10,7 +10,7 @@ import { AnimationManager } from "../lib/pacman/animation_manager";
 
 
 /**
- * Pac-Man Game Controller
+ * Pac-Man Game Controller - v2.0
  *
  * A fully functional Pac-Man game that plays across the entire webpage.
  * Features authentic arcade AI, smooth scrolling, and responsive gameplay.
