@@ -45,6 +45,7 @@ export default class extends Controller {
    * Initialize game state and setup
    */
   connect() {
+    console.log("Pacman v2.1"); // Force rebuild
     // Store asset manifest for production asset paths
     this.assetPaths = this.hasAssetManifestValue ? this.assetManifestValue : {};
 
