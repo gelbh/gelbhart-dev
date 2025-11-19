@@ -84,7 +84,7 @@
             <%= render 'shared/header' %>
         <% end %>
 
-        <div class="container mt-1 py-1 min-vh-100">
+        <div class="container <%= 'mt-1 py-1 min-vh-100' unless controller_name == 'errors' %>">
             <%= yield %>
         </div>
 
