@@ -14,6 +14,3 @@ bundle exec rake assets:clobber
 # Compile assets
 bundle exec rake assets:precompile
 bundle exec rake assets:clean
-
-# Note: Database migrations should be run separately or during startup
-# They are not run here because the database may not be available during build
