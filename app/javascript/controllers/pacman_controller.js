@@ -1,13 +1,12 @@
 import { Controller } from "@hotwired/stimulus";
-import { AudioManager } from "../lib/pacman/audio_manager";
-import { SpriteManager } from "../lib/pacman/sprite_manager";
-import { CollisionManager } from "../lib/pacman/collision_manager";
-import { GhostAI } from "../lib/pacman/ghost_ai";
-import { ItemManager } from "../lib/pacman/item_manager";
-import { SectionManager } from "../lib/pacman/section_manager";
-import { UIManager } from "../lib/pacman/ui_manager";
-import { AnimationManager } from "../lib/pacman/animation_manager";
-
+import { AudioManager } from "lib/pacman/audio_manager";
+import { SpriteManager } from "lib/pacman/sprite_manager";
+import { CollisionManager } from "lib/pacman/collision_manager";
+import { GhostAI } from "lib/pacman/ghost_ai";
+import { ItemManager } from "lib/pacman/item_manager";
+import { SectionManager } from "lib/pacman/section_manager";
+import { UIManager } from "lib/pacman/ui_manager";
+import { AnimationManager } from "lib/pacman/animation_manager";
 
 /**
  * Pac-Man Game Controller - v2.0
