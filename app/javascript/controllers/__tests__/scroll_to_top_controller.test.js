@@ -6,31 +6,55 @@ describe("ScrollToTopController", () => {
   let button;
 
   beforeEach(() => {
+    // Set up window mocks before connecting
+    global.window.scrollY = 0;
+    global.window.scrollTo = jest.fn();
+
     element = document.createElement("div");
     element.setAttribute("data-controller", "scroll-to-top");
     button = document.createElement("button");
     button.setAttribute("data-scroll-to-top-target", "button");
     element.appendChild(button);
-    document.body.appendChild(element);
 
-    controller = new ScrollToTopController();
-    controller.element = element;
-    controller.buttonTarget = button;
+    // Setup controller with skipConnect first, then manually set targets, then connect
+    controller = global.setupController(
+      "scroll-to-top",
+      ScrollToTopController,
+      element,
+      true
+    );
 
-    global.window.scrollY = 0;
-    global.window.scrollTo = jest.fn();
+    // Manually set buttonTarget before connecting
+    Object.defineProperty(controller, "buttonTarget", {
+      get: () => button,
+      configurable: true,
+    });
+    Object.defineProperty(controller, "hasButtonTarget", {
+      get: () => true,
+      configurable: true,
+    });
+
+    // Now connect the controller
+    controller.connect();
   });
 
   afterEach(() => {
-    if (element.parentNode) {
-      document.body.removeChild(element);
-    }
+    global.cleanupController(element, controller);
   });
 
   test("connect adds scroll event listener", () => {
-    global.window.addEventListener = jest.fn();
+    // Controller already connected in beforeEach, so addEventListener should have been called
+    // Mock it before setup to verify
+    const addEventListenerSpy = jest.fn();
+    global.window.addEventListener = addEventListenerSpy;
+
+    // Re-connect to test
+    controller.disconnect();
     controller.connect();
-    expect(global.window.addEventListener).toHaveBeenCalledWith("scroll", expect.any(Function));
+    expect(addEventListenerSpy).toHaveBeenCalledWith(
+      "scroll",
+      expect.any(Function)
+    );
   });
 
   test("checkScroll shows button when scrolled down", () => {
@@ -52,8 +76,7 @@ describe("ScrollToTopController", () => {
     expect(event.preventDefault).toHaveBeenCalled();
     expect(global.window.scrollTo).toHaveBeenCalledWith({
       top: 0,
-      behavior: "smooth"
+      behavior: "smooth",
     });
   });
 });
-

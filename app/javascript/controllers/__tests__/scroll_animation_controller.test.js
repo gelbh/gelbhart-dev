@@ -7,20 +7,19 @@ describe("ScrollAnimationController", () => {
   beforeEach(() => {
     element = document.createElement("div");
     element.setAttribute("data-controller", "scroll-animation");
-    document.body.appendChild(element);
-
-    controller = new ScrollAnimationController();
-    controller.element = element;
+    controller = global.setupController(
+      "scroll-animation",
+      ScrollAnimationController,
+      element
+    );
   });
 
   afterEach(() => {
-    if (element.parentNode) {
-      document.body.removeChild(element);
-    }
+    global.cleanupController(element, controller);
   });
 
   test("controller initializes", () => {
     expect(controller).toBeDefined();
+    expect(controller.element).toBe(element);
   });
 });
-

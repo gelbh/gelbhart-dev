@@ -1,4 +1,4 @@
-import PacmanGameController from "../pacman_game_controller";
+import PacmanGameController from "../pacman_controller";
 
 describe("PacmanGameController", () => {
   let controller;
@@ -7,20 +7,21 @@ describe("PacmanGameController", () => {
   beforeEach(() => {
     element = document.createElement("div");
     element.setAttribute("data-controller", "pacman-game");
-    document.body.appendChild(element);
-
-    controller = new PacmanGameController();
-    controller.element = element;
+    // Skip connect since pacman controller requires many targets
+    controller = global.setupController(
+      "pacman-game",
+      PacmanGameController,
+      element,
+      true
+    );
   });
 
   afterEach(() => {
-    if (element.parentNode) {
-      document.body.removeChild(element);
-    }
+    global.cleanupController(element, controller);
   });
 
   test("controller initializes", () => {
     expect(controller).toBeDefined();
+    expect(controller.element).toBe(element);
   });
 });
-
