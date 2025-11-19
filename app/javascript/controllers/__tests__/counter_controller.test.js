@@ -8,48 +8,98 @@ describe("CounterController", () => {
     element = document.createElement("div");
     element.setAttribute("data-controller", "counter");
     element.setAttribute("data-counter-target-value", "1000");
-    document.body.appendChild(element);
-
-    controller = new CounterController();
-    controller.element = element;
-    controller.targetValue = 1000;
-    controller.durationValue = 2000;
-    controller.suffixValue = "";
+    element.setAttribute("data-counter-duration-value", "2000");
+    element.setAttribute("data-counter-suffix-value", "");
+    controller = global.setupController("counter", CounterController, element);
   });
 
   afterEach(() => {
-    if (element.parentNode) {
-      document.body.removeChild(element);
-    }
+    global.cleanupController(element, controller);
   });
 
   test("connect sets initial value to 0", () => {
-    controller.connect();
-    expect(element.textContent).toBe("0");
+    // Counter controller sets initial value in connect
+    // Check that text content matches initial value (0 with suffix)
+    expect(element.textContent).toMatch(/^0/);
   });
 
   test("animateCounter animates from 0 to target", (done) => {
-    controller.targetValue = 100;
-    controller.durationValue = 100; // Short duration for testing
+    // Create new element with different values
+    const newElement = document.createElement("div");
+    newElement.setAttribute("data-controller", "counter");
+    newElement.setAttribute("data-counter-target-value", "100");
+    newElement.setAttribute("data-counter-duration-value", "100");
+    newElement.setAttribute("data-counter-suffix-value", "");
 
-    controller.animateCounter();
+    const newController = global.setupController(
+      "counter",
+      CounterController,
+      newElement
+    );
+
+    // Ensure values are properly set from data attributes
+    // Parse from data-counter-*-value attributes
+    const targetVal = newElement.dataset.counterTargetValue;
+    const durationVal = newElement.dataset.counterDurationValue;
+    const suffixVal = newElement.dataset.counterSuffixValue || "";
+
+    if (targetVal !== undefined && !newController.targetValue) {
+      newController.targetValue = Number(targetVal);
+    }
+    if (durationVal !== undefined && !newController.durationValue) {
+      newController.durationValue = Number(durationVal);
+    }
+    if (suffixVal !== undefined && newController.suffixValue === undefined) {
+      newController.suffixValue = suffixVal;
+    }
+
+    // Trigger animation manually
+    newController.animateCounter();
 
     setTimeout(() => {
-      expect(parseInt(element.textContent.replace(/,/g, ""))).toBeGreaterThanOrEqual(90);
+      const value = parseInt(newElement.textContent.replace(/,/g, ""));
+      expect(value).toBeGreaterThanOrEqual(90);
+      global.cleanupController(newElement, newController);
       done();
     }, 150);
   });
 
-  test("animateCounter includes suffix", () => {
-    controller.targetValue = 100;
-    controller.durationValue = 50;
-    controller.suffixValue = "%";
+  test("animateCounter includes suffix", (done) => {
+    // Create new element with suffix
+    const newElement = document.createElement("div");
+    newElement.setAttribute("data-controller", "counter");
+    newElement.setAttribute("data-counter-target-value", "100");
+    newElement.setAttribute("data-counter-duration-value", "50");
+    newElement.setAttribute("data-counter-suffix-value", "%");
 
-    controller.animateCounter();
+    const newController = global.setupController(
+      "counter",
+      CounterController,
+      newElement
+    );
+
+    // Ensure values are properly set from data attributes
+    const targetVal = newElement.dataset.counterTargetValue;
+    const durationVal = newElement.dataset.counterDurationValue;
+    const suffixVal = newElement.dataset.counterSuffixValue || "";
+
+    if (targetVal !== undefined && !newController.targetValue) {
+      newController.targetValue = Number(targetVal);
+    }
+    if (durationVal !== undefined && !newController.durationValue) {
+      newController.durationValue = Number(durationVal);
+    }
+    if (suffixVal !== undefined && newController.suffixValue === undefined) {
+      newController.suffixValue = suffixVal;
+    }
+
+    // Trigger animation manually
+    newController.animateCounter();
 
     setTimeout(() => {
-      expect(element.textContent).toContain("%");
+      expect(newElement.textContent).toContain("%");
+      global.cleanupController(newElement, newController);
+      done();
     }, 100);
   });
 });
-

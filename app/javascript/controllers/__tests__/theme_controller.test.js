@@ -8,6 +8,14 @@ describe("ThemeController", () => {
   let darkLabel;
 
   beforeEach(() => {
+    // Mock matchMedia before controller connects
+    global.window.matchMedia = jest.fn(() => ({
+      matches: false,
+      media: "(prefers-color-scheme: dark)",
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+    }));
+
     element = document.createElement("div");
     element.setAttribute("data-controller", "theme");
     checkbox = document.createElement("input");
@@ -20,37 +28,27 @@ describe("ThemeController", () => {
     element.appendChild(checkbox);
     element.appendChild(lightLabel);
     element.appendChild(darkLabel);
-    document.body.appendChild(element);
     document.documentElement.setAttribute("data-bs-theme", "light");
 
-    controller = new ThemeController();
-    controller.element = element;
-    controller.checkboxTarget = checkbox;
-    controller.lightLabelTarget = lightLabel;
-    controller.darkLabelTarget = darkLabel;
-
     global.localStorage.clear();
-    global.window.matchMedia = jest.fn(() => ({
-      matches: false,
-      addEventListener: jest.fn()
-    }));
+    controller = global.setupController("theme", ThemeController, element);
   });
 
   afterEach(() => {
-    if (element.parentNode) {
-      document.body.removeChild(element);
-    }
+    global.cleanupController(element, controller);
     global.localStorage.clear();
   });
 
   test("connect initializes theme from localStorage", () => {
     global.localStorage.setItem("theme", "dark");
-    controller.connect();
+    // Re-initialize controller with new localStorage value
+    global.cleanupController(element, controller);
+    controller = global.setupController("theme", ThemeController, element);
     expect(document.documentElement.getAttribute("data-bs-theme")).toBe("dark");
   });
 
   test("connect defaults to dark theme if no stored preference", () => {
-    controller.connect();
+    // Controller already connected in beforeEach, check the result
     expect(document.documentElement.getAttribute("data-bs-theme")).toBe("dark");
   });
 
@@ -60,7 +58,9 @@ describe("ThemeController", () => {
     expect(document.documentElement.getAttribute("data-bs-theme")).toBe("dark");
 
     controller.toggleTheme();
-    expect(document.documentElement.getAttribute("data-bs-theme")).toBe("light");
+    expect(document.documentElement.getAttribute("data-bs-theme")).toBe(
+      "light"
+    );
   });
 
   test("handleThemeChange updates localStorage", () => {
@@ -72,6 +72,21 @@ describe("ThemeController", () => {
   });
 
   test("handleThemeChange updates checkbox state", () => {
+    // Ensure checkboxTarget is accessible
+    if (!controller.checkboxTarget) {
+      Object.defineProperty(controller, "checkboxTarget", {
+        get: () => checkbox,
+        configurable: true,
+      });
+      Object.defineProperty(controller, "hasCheckboxTarget", {
+        get: () => true,
+        configurable: true,
+      });
+    }
+
+    // Reset checkbox state
+    checkbox.checked = false;
+
     controller.handleThemeChange("dark");
     expect(checkbox.checked).toBe(true);
 
@@ -79,4 +94,3 @@ describe("ThemeController", () => {
     expect(checkbox.checked).toBe(false);
   });
 });
-

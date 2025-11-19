@@ -7,20 +7,36 @@ describe("CodeTyperController", () => {
   beforeEach(() => {
     element = document.createElement("div");
     element.setAttribute("data-controller", "code-typer");
-    document.body.appendChild(element);
+    // Create output target element - must be inside element
+    const output = document.createElement("pre");
+    output.setAttribute("data-code-typer-target", "output");
+    element.appendChild(output);
 
-    controller = new CodeTyperController();
-    controller.element = element;
+    // Skip connect since code-typer needs proper target setup
+    controller = global.setupController(
+      "code-typer",
+      CodeTyperController,
+      element,
+      true
+    );
+
+    // Manually set outputTarget for testing
+    Object.defineProperty(controller, "outputTarget", {
+      get: () => output,
+      configurable: true,
+    });
+    Object.defineProperty(controller, "hasOutputTarget", {
+      get: () => true,
+      configurable: true,
+    });
   });
 
   afterEach(() => {
-    if (element.parentNode) {
-      document.body.removeChild(element);
-    }
+    global.cleanupController(element, controller);
   });
 
   test("controller initializes", () => {
     expect(controller).toBeDefined();
+    expect(controller.element).toBe(element);
   });
 });
-
