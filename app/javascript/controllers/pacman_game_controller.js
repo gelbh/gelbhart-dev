@@ -8,6 +8,7 @@ import { SectionManager } from "../lib/pacman/section_manager";
 import { UIManager } from "../lib/pacman/ui_manager";
 import { AnimationManager } from "../lib/pacman/animation_manager";
 
+
 /**
  * Pac-Man Game Controller
  *
