@@ -8,11 +8,12 @@ bundle install
 # Install Node dependencies
 npm install
 
-# Clean old assets and cache before recompiling
-bundle exec rake assets:clobber
+# NUCLEAR OPTION: Remove all possible cached assets
+rm -rf public/assets
 rm -rf tmp/cache
+bundle exec rake assets:clobber
 
-# Compile assets
+# Compile assets fresh
 bundle exec rake assets:precompile
 bundle exec rake assets:clean
 
