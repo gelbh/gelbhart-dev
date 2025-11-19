@@ -9,7 +9,7 @@ import { UIManager } from "lib/pacman/ui_manager";
 import { AnimationManager } from "lib/pacman/animation_manager";
 
 /**
- * Pac-Man Game Controller - v2.0
+ * Pac-Man Game Controller
  *
  * A fully functional Pac-Man game that plays across the entire webpage.
  * Features authentic arcade AI, smooth scrolling, and responsive gameplay.
@@ -44,7 +44,6 @@ export default class extends Controller {
    * Initialize game state and setup
    */
   connect() {
-    console.log("Pacman v2.1"); // Force rebuild
     // Store asset manifest for production asset paths
     this.assetPaths = this.hasAssetManifestValue ? this.assetManifestValue : {};
 
