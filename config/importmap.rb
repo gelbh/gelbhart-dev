@@ -7,9 +7,7 @@ pin "@hotwired/stimulus", to: "stimulus.min.js", preload: true
 pin "bootstrap", to: "https://ga.jspm.io/npm:bootstrap@5.3.3/dist/js/bootstrap.esm.js"
 pin "@popperjs/core", to: "https://ga.jspm.io/npm:@popperjs/core@2.11.8/lib/index.js"
 
-# Controllers - pin all controller files so relative imports in index.js can resolve
-# All controllers are explicitly imported in index.js, so they load eagerly (not lazy)
-# Preload ensures controllers are available before Stimulus attempts lazy-loading
+# Controllers
 pin_all_from "app/javascript/controllers", under: "controllers", preload: true
 
 # Theme files
