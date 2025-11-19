@@ -35,3 +35,17 @@
 
 // Hevy Tracker page with hero, cards, gallery, and steps
 @import "components/hevy-tracker";
+
+// Error page styles
+// Ensure error page buttons use solid indigo color matching logo (not pink gradient)
+.error-page .btn-primary {
+  background-color: #6366f1 !important;
+  border-color: #6366f1 !important;
+
+  &:hover,
+  &:focus,
+  &:active {
+    background-color: #4f46e5 !important;
+    border-color: #4f46e5 !important;
+  }
+}

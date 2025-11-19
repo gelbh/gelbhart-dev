@@ -7,7 +7,7 @@ import { application } from "controllers/application";
 import AnalyticsStatsController from "controllers/analytics_stats_controller";
 import CodeTyperController from "controllers/code_typer_controller";
 import CounterController from "controllers/counter_controller";
-import PacmanGameController from "controllers/pacman_game_controller";
+import PacmanGameController from "controllers/pacman_controller";
 import PacmanPreviewController from "controllers/pacman-preview_controller";
 import ScrollAnimationController from "controllers/scroll_animation_controller";
 import ScrollToTopController from "controllers/scroll_to_top_controller";

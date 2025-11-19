@@ -6,10 +6,10 @@
 :root {
   // Primary brand colors
   --color-primary: #6366f1;
-  --color-primary-dark: #667eea;
-  --color-secondary: #764ba2;
-  --color-accent: #f093fb;
-  --color-purple: #764ba2;
+  --color-primary-dark: #4f46e5;
+  --color-secondary: #7c3aed;
+  --color-accent: #a78bfa;
+  --color-purple: #7c3aed;
 
   // Pac-Man colors
   --color-pacman-yellow: #ffd700;
@@ -25,11 +25,31 @@
   --color-code-green-dark: #5af636;
 
   // Gradients
-  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-  --gradient-reverse: linear-gradient(135deg, #f093fb 0%, #764ba2 50%, #667eea 100%);
-  --gradient-dark: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
-  --gradient-dark-alt: linear-gradient(135deg, #000000 0%, #0d0d0d 50%, #050505 100%);
-  --gradient-button: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-primary: linear-gradient(
+    135deg,
+    #6366f1 0%,
+    #7c3aed 50%,
+    #a78bfa 100%
+  );
+  --gradient-reverse: linear-gradient(
+    135deg,
+    #a78bfa 0%,
+    #7c3aed 50%,
+    #6366f1 100%
+  );
+  --gradient-dark: linear-gradient(
+    135deg,
+    #0a0a0a 0%,
+    #1a1a1a 50%,
+    #0f0f0f 100%
+  );
+  --gradient-dark-alt: linear-gradient(
+    135deg,
+    #000000 0%,
+    #0d0d0d 50%,
+    #050505 100%
+  );
+  --gradient-button: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
   --gradient-gold: linear-gradient(to bottom, #ffd700, #ffed4e);
 
   // Spacing
@@ -69,7 +89,7 @@
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
-  --shadow-primary: 0 0.5rem 1.125rem -0.5rem rgba(102, 126, 234, 0.9);
+  --shadow-primary: 0 0.5rem 1.125rem -0.5rem rgba(99, 102, 241, 0.9);
   --shadow-glow: 0 0 20px rgba(255, 215, 0, 0.3);
 
   // Opacity levels
