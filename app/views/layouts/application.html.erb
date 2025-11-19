@@ -80,17 +80,21 @@
 
 <body>
     <main class="page-wrapper">
-        <%= render 'shared/header' %>
+        <% unless controller_name == 'errors' %>
+            <%= render 'shared/header' %>
+        <% end %>
 
         <div class="container mt-1 py-1 min-vh-100">
             <%= yield %>
         </div>
 
-        <%= render 'shared/footer' %>
+        <% unless controller_name == 'errors' %>
+            <%= render 'shared/footer' %>
 
-        <%= link_to "#top", class: "btn-scroll-top", data: { scroll: "" } do %>
-        <span class="btn-scroll-top-tooltip text-muted fs-sm me-2">Top</span>
-        <i class="btn-scroll-top-icon bx bx-chevron-up"></i>
+            <%= link_to "#top", class: "btn-scroll-top", data: { scroll: "" } do %>
+            <span class="btn-scroll-top-tooltip text-muted fs-sm me-2">Top</span>
+            <i class="btn-scroll-top-icon bx bx-chevron-up"></i>
+            <% end %>
         <% end %>
     </main>
 </body>
