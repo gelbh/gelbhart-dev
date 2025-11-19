@@ -49,3 +49,15 @@
     border-color: #4f46e5 !important;
   }
 }
+
+// Prevent scrolling on error pages
+body:has(.error-page) {
+  overflow: hidden;
+  max-height: 100vh;
+}
+
+.error-page {
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+}
