@@ -1,6 +1,6 @@
 class ErrorsController < ApplicationController
   def not_found
-    render_error(404, "The page you are looking for was moved, removed or might never existed.")
+    render_error(404, "The page you are looking for was moved, removed or might have never existed.")
   end
 
   def internal_server_error
