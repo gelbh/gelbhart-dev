@@ -8,6 +8,7 @@
 //= link_tree ../../javascript/theme .js
 //= link_tree ../../javascript/theme/components js
 //= link_tree ../../javascript/controllers .jsx
+//= link_tree ../../javascript/lib .js
 
 //= link_directory ../stylesheets .css
 //= link_directory ../stylesheets .scss

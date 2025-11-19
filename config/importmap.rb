@@ -14,3 +14,6 @@ pin_all_from "app/javascript/controllers", under: "controllers", preload: true
 
 # Theme files
 pin_all_from "app/javascript/theme", under: "theme"
+
+# Library files (pacman game modules, etc.)
+pin_all_from "app/javascript/lib", under: "lib"
