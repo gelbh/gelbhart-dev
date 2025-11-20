@@ -1,205 +1,212 @@
 <% content_for :title, page_title("Video Captioner") %>
 <% meta_description "Generate and translate video captions from YouTube videos or local files. Powered by AI transcription with support for multiple languages." %>
-
 <!-- Hero Section with Gradient Background -->
 <section class="position-relative video-captioner-hero" data-controller="scroll-animation">
-    <!-- Animated Gradient Background -->
-    <div class="video-captioner-gradient-bg"></div>
-
-    <div class="container py-4 position-relative zindex-5">
-        <div class="row justify-content-center text-center">
-            <div class="col-lg-8 fade-in-view">
-                <%= render 'shared/icon_circle', icon: 'bx-video', color: 'primary', size: 'lg' %>
-                <h1 class="display-5 mb-2 mt-3">Video Captioner</h1>
-                <p class="lead text-light mb-2">AI-Powered Transcription & Translation Tool</p>
-                <p class="text-light opacity-75 mb-0">
-                    Generate subtitles from any video with automatic speech recognition. Translate to 15+ languages. All processing happens locally on your computer - no uploads, no file size limits, 100% private.
-                </p>
-            </div>
-        </div>
+  <!-- Animated Gradient Background -->
+  <div class="video-captioner-gradient-bg"></div>
+  <div class="container py-4 position-relative zindex-5">
+    <div class="row justify-content-center text-center">
+      <div class="col-lg-8 fade-in-view">
+        <%= render 'shared/icon_circle', icon: 'bx-video', color: 'primary', size: 'lg' %>
+        <h1 class="display-5 mb-2 mt-3">Video Captioner</h1>
+        <p class="lead text-light mb-2">AI-Powered Transcription & Translation Tool</p>
+        <p class="text-light opacity-75 mb-0">
+          Generate subtitles from any video with automatic speech recognition. Translate to 15+ languages. All processing happens locally on your computer - no uploads, no file size limits, 100% private.
+        </p>
+      </div>
     </div>
+  </div>
 </section>
-
 <!-- Main Content -->
 <section class="container py-5 mt-4" data-controller="scroll-animation">
-    <div class="row justify-content-center">
-        <div class="col-lg-10 col-xl-9">
-
-            <!-- Download Section - Featured Card -->
-            <div class="card video-captioner-card border-0 shadow-lg mb-4 fade-in-view delay-1">
-                <div class="card-body p-5 text-center">
-                    <!-- Mobile Notice -->
-                    <div class="alert alert-warning d-md-none mb-4">
-                        <i class="bx bx-desktop fs-4 me-2"></i>
-                        <strong>Desktop Only:</strong> This tool requires a PC/Mac with Python installed. It cannot run on mobile devices.
-                    </div>
-
-                    <div class="mb-4">
-                        <%= render 'shared/icon_circle', icon: 'bx-download', color: 'primary', size: 'xl' %>
-                    </div>
-                    <h2 class="h3 mb-3">Download Desktop Tool</h2>
-                    <p class="text-muted mb-4">Just double-click to launch! The app automatically installs everything it needs on first run.</p>
-                    <div class="d-grid gap-3 mb-4 col-lg-8 mx-auto">
-                        <a href="/downloads/video_captioner.pyw" download class="btn btn-primary btn-lg text-nowrap text-truncate">
-                            <i class="bx bx-download me-2"></i><span class="d-none d-sm-inline">Download GUI Version (Recommended)</span><span class="d-inline d-sm-none">Download GUI</span>
-                        </a>
-                    </div>
-                    <small class="text-muted d-block mb-4">Windows: Use .pyw | Mac/Linux: Use .py</small>
-                    <div class="d-flex gap-3 justify-content-center flex-wrap">
-                        <a href="/downloads/video_captioner.py" download class="btn btn-outline-primary">
-                            <i class="bx bx-download me-2"></i>.py version
-                        </a>
-                        <a href="/downloads/video_captioner_standalone.py" download class="btn btn-outline-secondary">
-                            <i class="bx bx-terminal me-2"></i>CLI Version
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Features Grid -->
-            <div class="row g-4 mb-4 fade-in-view delay-2">
-                <div class="col-md-6">
-                    <%= render 'shared/feature_card',
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+      <!-- Download Section - Featured Card -->
+      <div class="card video-captioner-card border-0 shadow-lg mb-4 fade-in-view delay-1">
+        <div class="card-body p-5 text-center">
+          <!-- Mobile Notice -->
+          <div class="alert alert-warning d-md-none mb-4">
+            <i class="bx bx-desktop fs-4 me-2"></i>
+            <strong>Desktop Only:</strong> This tool requires a PC/Mac with Python installed. It cannot run on mobile devices.
+          </div>
+          <div class="mb-4">
+            <%= render 'shared/icon_circle', icon: 'bx-download', color: 'primary', size: 'xl' %>
+          </div>
+          <h2 class="h3 mb-3">Download Desktop Tool</h2>
+          <p class="text-muted mb-4">Just double-click to launch! The app automatically installs everything it needs on first run.</p>
+          <div class="d-grid gap-3 mb-4 col-lg-8 mx-auto">
+            <a href="/downloads/video_captioner.pyw" download class="btn btn-primary btn-lg text-nowrap text-truncate">
+              <i class="bx bx-download me-2"></i><span class="d-none d-sm-inline">Download GUI Version (Recommended)</span><span class="d-inline d-sm-none">Download GUI</span>
+            </a>
+          </div>
+          <small class="text-muted d-block mb-4">Windows: Use .pyw | Mac/Linux: Use .py</small>
+          <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="/downloads/video_captioner.py" download class="btn btn-outline-primary">
+              <i class="bx bx-download me-2"></i>.py version
+            </a>
+            <a href="/downloads/video_captioner_standalone.py" download class="btn btn-outline-secondary">
+              <i class="bx bx-terminal me-2"></i>CLI Version
+            </a>
+          </div>
+        </div>
+      </div>
+      <!-- Features Grid -->
+      <div class="row g-4 mb-4 fade-in-view delay-2">
+        <div class="col-md-6">
+          <%= render 'shared/feature_card',
                         icon: 'bx-lock-alt',
                         color: 'success',
                         title: '100% Private',
                         description: 'All processing happens locally on your computer. Your videos never leave your device.',
                         card_classes: 'video-captioner-card' %>
-                </div>
-                <div class="col-md-6">
-                    <%= render 'shared/feature_card',
+        </div>
+        <div class="col-md-6">
+          <%= render 'shared/feature_card',
                         icon: 'bx-world',
                         color: 'info',
                         title: '15+ Languages',
                         description: 'Auto-detect source language and translate to multiple target languages.',
                         card_classes: 'video-captioner-card' %>
-                </div>
-                <div class="col-md-6">
-                    <%= render 'shared/feature_card',
+        </div>
+        <div class="col-md-6">
+          <%= render 'shared/feature_card',
                         icon: 'bxl-youtube',
                         color: 'warning',
                         title: 'YouTube Support',
                         description: 'Download and caption videos directly from YouTube URLs.',
                         card_classes: 'video-captioner-card' %>
-                </div>
-                <div class="col-md-6">
-                    <%= render 'shared/feature_card',
+        </div>
+        <div class="col-md-6">
+          <%= render 'shared/feature_card',
                         icon: 'bx-movie-play',
                         color: 'danger',
                         title: 'Burn Captions',
                         description: 'Export SRT files or burn captions directly into your video.',
                         card_classes: 'video-captioner-card' %>
-                </div>
-            </div>
-
-            <!-- Requirements -->
-            <div class="card video-captioner-card border-0 shadow mb-4 fade-in-view delay-3">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="me-3">
-                            <%= render 'shared/icon_circle', icon: 'bx-list-check', color: 'primary', size: 'md' %>
-                        </div>
-                        <h3 class="h4 mb-0">Requirements</h3>
-                    </div>
-                    <ul class="list-unstyled mb-0">
-                        <li class="d-flex align-items-start mb-2">
-                            <i class="bx bx-check-circle text-success me-2 mt-1 fs-5"></i>
-                            <div>
-                                <strong>Python 3.8+</strong> -
-                                <a href="https://www.python.org/downloads/" target="_blank" rel="noopener" class="text-primary">Download here</a>
-                            </div>
-                        </li>
-                        <li class="d-flex align-items-start">
-                            <i class="bx bx-check-circle text-success me-2 mt-1 fs-5"></i>
-                            <div class="text-muted">
-                                <small>All dependencies (whisper, yt-dlp, deep-translator, FFmpeg) are automatically installed on first run. No manual installation needed!</small>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Usage Guide -->
-            <div class="card video-captioner-card border-0 shadow mb-4 fade-in-view delay-4">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center mb-4">
-                        <div class="me-3">
-                            <%= render 'shared/icon_circle', icon: 'bx-rocket', color: 'primary', size: 'md' %>
-                        </div>
-                        <h3 class="h4 mb-0">How to Use</h3>
-                    </div>
-
-                    <div class="alert alert-info mb-4">
-                        <div class="d-flex">
-                            <i class="bx bx-info-circle fs-4 me-3"></i>
-                            <div>
-                                <strong>Quick Start:</strong><br>
-                                <strong>Windows (.pyw):</strong> Double-click the file<br>
-                                <strong>Windows (.py):</strong> Right-click → "Open with" → "Python"<br>
-                                <strong>Mac/Linux:</strong> Terminal → <code>python3 [drag file here]</code>
-                            </div>
-                        </div>
-                    </div>
-
-                    <ol class="ps-3">
-                        <li class="mb-3">
-                            <strong>Launch the application</strong>
-                            <p class="text-muted mb-0 mt-1">Double-click the downloaded file (or use Python for .py files)</p>
-                        </li>
-                        <li class="mb-3">
-                            <strong>First-time setup</strong>
-                            <ul class="mt-2 text-muted">
-                                <li>Click "Install" when prompted for dependencies</li>
-                                <li>Wait 5-10 minutes for automatic installation</li>
-                                <li>App will restart automatically when complete</li>
-                            </ul>
-                        </li>
-                        <li class="mb-3">
-                            <strong>Configure your settings</strong>
-                            <ul class="mt-2 text-muted">
-                                <li>Browse for a local video or paste a YouTube URL</li>
-                                <li>Choose source language (or auto-detect)</li>
-                                <li>Optionally translate to another language</li>
-                                <li>Select output format (SRT file or burned captions)</li>
-                                <li>Choose AI model size (base recommended)</li>
-                            </ul>
-                        </li>
-                        <li class="mb-3">
-                            <strong>Generate captions</strong>
-                            <p class="text-muted mb-0 mt-1">Click "Generate Captions" and watch the progress</p>
-                        </li>
-                        <li>
-                            <strong>Done!</strong>
-                            <p class="text-muted mb-0 mt-1">Your captioned file will be saved to your chosen output folder</p>
-                        </li>
-                    </ol>
-
-                    <div class="alert alert-success mt-4 mb-0">
-                        <i class="bx bx-bulb me-2"></i>
-                        <strong>Tip:</strong> After the first run, you can double-click the file to launch it directly!
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tech Stack -->
-            <div class="card video-captioner-card border-0 shadow fade-in-view delay-5">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-primary bg-opacity-10 rounded-circle p-3 me-3">
-                            <i class="bx bx-code-alt fs-4 text-primary"></i>
-                        </div>
-                        <h3 class="h4 mb-0">Powered By</h3>
-                    </div>
-                    <div class="d-flex flex-wrap gap-2">
-                        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">OpenAI Whisper</span>
-                        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">Python</span>
-                        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">yt-dlp</span>
-                        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">FFmpeg</span>
-                        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">deep-translator</span>
-                    </div>
-                </div>
-            </div>
-
         </div>
+      </div>
+      <!-- Requirements -->
+      <div class="card video-captioner-card border-0 shadow mb-4 fade-in-view delay-3">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+              <%= render 'shared/icon_circle', icon: 'bx-list-check', color: 'primary', size: 'md' %>
+            </div>
+            <h3 class="h4 mb-0">Requirements</h3>
+          </div>
+          <ul class="list-unstyled mb-0">
+            <li class="d-flex align-items-start mb-2">
+              <i class="bx bx-check-circle text-success me-2 mt-1 fs-5"></i>
+              <div>
+                <strong>Python 3.8+</strong> -
+                <a href="https://www.python.org/downloads/" target="_blank" rel="noopener" class="text-primary">Download here</a>
+              </div>
+            </li>
+            <li class="d-flex align-items-start">
+              <i class="bx bx-check-circle text-success me-2 mt-1 fs-5"></i>
+              <div class="text-muted">
+                <small>All dependencies (whisper, yt-dlp, deep-translator, FFmpeg) are automatically installed on first run. No manual installation needed!</small>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <!-- Usage Guide -->
+      <div class="card video-captioner-card border-0 shadow mb-4 fade-in-view delay-4">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center mb-4">
+            <div class="me-3">
+              <%= render 'shared/icon_circle', icon: 'bx-rocket', color: 'primary', size: 'md' %>
+            </div>
+            <h3 class="h4 mb-0">How to Use</h3>
+          </div>
+          <div class="alert alert-info mb-4">
+            <div class="d-flex">
+              <i class="bx bx-info-circle fs-4 me-3"></i>
+              <div>
+                <strong>Quick Start:</strong><br>
+                <strong>Windows (.pyw):</strong> Double-click the file<br>
+                <strong>Windows (.py):</strong> Right-click → "Open with" → "Python"<br>
+                <strong>Mac/Linux:</strong> Terminal → <code>python3 [drag file here]</code>
+              </div>
+            </div>
+          </div>
+          <ol class="ps-3">
+            <li class="mb-3">
+              <strong>Launch the application</strong>
+              <p class="text-muted mb-0 mt-1">Double-click the downloaded file (or use Python for .py files)</p>
+            </li>
+            <li class="mb-3">
+              <strong>First-time setup</strong>
+              <ul class="mt-2 text-muted">
+                <li>Click "Install" when prompted for dependencies</li>
+                <li>Wait 5-10 minutes for automatic installation</li>
+                <li>App will restart automatically when complete</li>
+              </ul>
+            </li>
+            <li class="mb-3">
+              <strong>Configure your settings</strong>
+              <ul class="mt-2 text-muted">
+                <li>Browse for a local video or paste a YouTube URL</li>
+                <li>Choose source language (or auto-detect)</li>
+                <li>Optionally translate to another language</li>
+                <li>Select output format (SRT file or burned captions)</li>
+                <li>Choose AI model size (base recommended)</li>
+              </ul>
+            </li>
+            <li class="mb-3">
+              <strong>Generate captions</strong>
+              <p class="text-muted mb-0 mt-1">Click "Generate Captions" and watch the progress</p>
+            </li>
+            <li>
+              <strong>Done!</strong>
+              <p class="text-muted mb-0 mt-1">Your captioned file will be saved to your chosen output folder</p>
+            </li>
+          </ol>
+          <div class="alert alert-success mt-4 mb-0">
+            <i class="bx bx-bulb me-2"></i>
+            <strong>Tip:</strong> After the first run, you can double-click the file to launch it directly!
+          </div>
+        </div>
+      </div>
+      <!-- Tech Stack -->
+      <div class="card video-captioner-card border-0 shadow fade-in-view delay-5">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+              <%= render 'shared/icon_circle', icon: 'bx-code-alt', color: 'primary', size: 'md' %>
+            </div>
+            <h3 class="h4 mb-0">Powered By</h3>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <%= render 'shared/tech_badge', 
+                                    text: 'OpenAI Whisper', 
+                                    color: 'primary', 
+                                    url: 'https://openai.com/research/whisper',
+                                    extra_classes: 'px-3 py-2' %>
+            <%= render 'shared/tech_badge', 
+                                    text: 'Python', 
+                                    color: 'warning', 
+                                    url: 'https://www.python.org/',
+                                    extra_classes: 'px-3 py-2' %>
+            <%= render 'shared/tech_badge', 
+                                    text: 'yt-dlp', 
+                                    color: 'success', 
+                                    url: 'https://github.com/yt-dlp/yt-dlp',
+                                    extra_classes: 'px-3 py-2' %>
+            <%= render 'shared/tech_badge', 
+                                    text: 'FFmpeg', 
+                                    color: 'info', 
+                                    url: 'https://ffmpeg.org/',
+                                    extra_classes: 'px-3 py-2' %>
+            <%= render 'shared/tech_badge', 
+                                    text: 'deep-translator', 
+                                    color: 'danger', 
+                                    url: 'https://github.com/nidhaloff/deep-translator',
+                                    extra_classes: 'px-3 py-2' %>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </section>
