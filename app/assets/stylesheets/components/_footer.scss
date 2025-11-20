@@ -1,0 +1,160 @@
+// ============================================
+// FOOTER & SCROLL-TO-TOP BUTTON STYLES
+// ============================================
+
+.footer .logo-wrapper {
+  transition: all 0.3s ease-in-out;
+  background: rgba(30, 32, 40, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: none;
+}
+
+.footer .navbar-brand:hover .logo-wrapper {
+  transform: translateY(-6px);
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 0 15px rgba(99, 102, 241, 0.3),
+    0 0 30px rgba(99, 102, 241, 0.2), inset 0 0 20px rgba(99, 102, 241, 0.1);
+}
+
+.footer .navbar-brand span {
+  transition: all 0.3s ease-in-out;
+  opacity: 0.9;
+}
+
+.footer .navbar-brand:hover span {
+  opacity: 1;
+  text-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+}
+
+// Social button enhancements with brand colors
+.social-btn {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.social-btn i {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
+}
+
+.social-btn:hover i {
+  transform: scale(1.2) rotate(5deg);
+}
+
+// GitHub hover - dark gray/black
+.social-github:hover {
+  background-color: #333 !important;
+  border-color: #333 !important;
+  box-shadow: 0 4px 12px rgba(51, 51, 51, 0.4);
+  transform: translateY(-3px);
+}
+
+// LinkedIn hover - LinkedIn blue
+.social-linkedin:hover {
+  background-color: #0077b5 !important;
+  border-color: #0077b5 !important;
+  box-shadow: 0 4px 12px rgba(0, 119, 181, 0.4);
+  transform: translateY(-3px);
+}
+
+// Email hover - primary color
+.social-email:hover {
+  background-color: #6366f1 !important;
+  border-color: #6366f1 !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  transform: translateY(-3px);
+}
+
+// Footer link hover with underline animation
+.footer-link {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.footer-link::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: #6366f1;
+  transform: translateX(-50%);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.footer-link:hover {
+  color: #6366f1 !important;
+}
+
+.footer-link:hover::after {
+  width: 80%;
+}
+
+// Back to Top Button
+.btn-scroll-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
+  color: white;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  z-index: 1020;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  text-decoration: none;
+}
+
+.btn-scroll-top.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.btn-scroll-top:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.6);
+  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+}
+
+.btn-scroll-top i {
+  font-size: 1.5rem;
+  animation: bounce-arrow 2s ease-in-out infinite;
+}
+
+@keyframes bounce-arrow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .btn-scroll-top {
+    bottom: 1rem;
+    right: 1rem;
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .btn-scroll-top i {
+    font-size: 1.25rem;
+  }
+}
