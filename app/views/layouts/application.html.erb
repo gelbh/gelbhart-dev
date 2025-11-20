@@ -1,50 +1,43 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
-
-<head>
+  <head>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-VZ8VBVE21B"></script>
     <script>
-        window.dataLayer = window.dataLayer || [];
+      window.dataLayer = window.dataLayer || [];
 
-        function gtag() {
-            dataLayer.push(arguments);
-        }
-        gtag('js', new Date());
+      function gtag() {
+          dataLayer.push(arguments);
+      }
+      gtag('js', new Date());
 
-        gtag('config', 'G-VZ8VBVE21B');
+      gtag('config', 'G-VZ8VBVE21B');
     </script>
-
     <%# Basic Meta Tags %>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
     <title><%= content_for?(:title) ? yield(:title) : page_title("") %></title>
-
     <%# SEO Meta Tags %>
     <meta name="description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : 'Personal portfolio and development projects by Tomer Gelbhart. Full-stack developer specializing in Ruby on Rails and modern web applications.' %>">
     <meta name="author" content="Tomer Gelbhart">
     <meta name="language" content="English">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="<%= request.original_url %>">
-
     <%# Open Graph Meta Tags %>
     <meta property="og:type" content="website">
     <meta property="og:url" content="<%= request.original_url %>">
     <meta property="og:title" content="<%= content_for?(:title) ? yield(:title) : page_title("") %>">
     <meta property="og:description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : 'Personal portfolio and development projects by Tomer Gelbhart. Full-stack developer specializing in Ruby on Rails and modern web applications.' %>">
     <meta property="og:image" content="<%= asset_url('logos/source/logo_social.svg') %>">
-
     <%# Twitter Card Meta Tags %>
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="<%= request.original_url %>">
     <meta name="twitter:title" content="<%= content_for?(:title) ? yield(:title) : page_title("") %>">
     <meta name="twitter:description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : 'Personal portfolio and development projects by Tomer Gelbhart. Full-stack developer specializing in Ruby on Rails and modern web applications.' %>">
     <meta name="twitter:image" content="<%= asset_url('logos/source/logo_social.svg') %>">
-
     <%# Security Tags %>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-
     <%# Favicon Links %>
     <%= favicon_link_tag '/favicon.ico' %>
     <%= favicon_link_tag '/icons/favicons/favicon.svg', rel: 'icon', type: 'image/svg+xml' %>
@@ -56,47 +49,36 @@
     <%= tag :link, rel: 'manifest', href: asset_path('/site.webmanifest') %>
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="msapplication-config" content="/browserconfig.xml">
-
     <%# Preconnect to external domains %>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://unpkg.com">
-
     <%# Critical CSS and fonts %>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
     <%# Boxicons %>
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-
     <%# Flag Icons %>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css">
-
     <%# Application CSS %>
     <%= stylesheet_link_tag "application", media: "all" %>
-
     <%# JavaScript %>
     <%= javascript_importmap_tags %>
-</head>
-
-<body>
+  </head>
+  <body>
     <main class="page-wrapper">
-        <% unless controller_name == 'errors' %>
-            <%= render 'shared/header' %>
+      <% unless controller_name == 'errors' %>
+        <%= render 'shared/header' %>
+      <% end %>
+      <div class="container <%= 'mt-1 py-1 min-vh-100' unless controller_name == 'errors' %>">
+        <%= yield %>
+      </div>
+      <% unless controller_name == 'errors' %>
+        <%= render 'shared/footer' %>
+        <%= link_to "#top", class: "btn-scroll-top", data: { scroll: "" } do %>
+          <span class="btn-scroll-top-tooltip text-muted fs-sm me-2">Top</span>
+          <i class="btn-scroll-top-icon bx bx-chevron-up"></i>
         <% end %>
-
-        <div class="container <%= 'mt-1 py-1 min-vh-100' unless controller_name == 'errors' %>">
-            <%= yield %>
-        </div>
-
-        <% unless controller_name == 'errors' %>
-            <%= render 'shared/footer' %>
-
-            <%= link_to "#top", class: "btn-scroll-top", data: { scroll: "" } do %>
-            <span class="btn-scroll-top-tooltip text-muted fs-sm me-2">Top</span>
-            <i class="btn-scroll-top-icon bx bx-chevron-up"></i>
-            <% end %>
-        <% end %>
+      <% end %>
     </main>
-</body>
-
+  </body>
 </html>
