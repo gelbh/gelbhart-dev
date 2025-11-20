@@ -1,4 +1,4 @@
-import PacmanPreviewController from "../pacman-preview_controller";
+import PacmanPreviewController from "../pacman/preview_controller";
 
 describe("PacmanPreviewController", () => {
   let controller;

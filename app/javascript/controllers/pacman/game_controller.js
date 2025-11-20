@@ -39,11 +39,16 @@ export default class extends Controller {
     "mutedIndicator",
   ];
   static values = { assetManifest: Object };
+  static outlets = ["pacman-input", "pacman-menu"];
 
   /**
    * Initialize game state and setup
    */
   connect() {
+    // Store reference to this controller on the element for access by other controllers
+    // This allows input/menu controllers on the same element to find us
+    this.element._pacmanGameController = this;
+
     // Store asset manifest for production asset paths
     this.assetPaths = this.hasAssetManifestValue ? this.assetManifestValue : {};
 
@@ -150,13 +155,6 @@ export default class extends Controller {
 
     this.animationManager = new AnimationManager(this);
 
-    // Setup keyboard controls
-    this.keydownHandler = this.handleKeydown.bind(this);
-    document.addEventListener("keydown", this.keydownHandler);
-
-    // Setup touch controls for mobile devices
-    this.initializeTouchControls();
-
     // Position Pac-Man at the starting hint location
     this.initializePacmanPosition();
 
@@ -169,8 +167,10 @@ export default class extends Controller {
   disconnect() {
     this.stopGame();
     this.audioManager.stopAll();
-    document.removeEventListener("keydown", this.keydownHandler);
-    this.cleanupTouchControls();
+    // Clean up reference
+    if (this.element._pacmanGameController) {
+      delete this.element._pacmanGameController;
+    }
   }
 
   // ============================================
@@ -198,489 +198,56 @@ export default class extends Controller {
   }
 
   // ============================================
-  // KEYBOARD CONTROLS
+  // OUTLET METHODS (for input and menu controllers)
   // ============================================
 
   /**
-   * Handle keyboard input for movement and controls
+   * Get current game state (for input controller)
+   * @returns {Object} Game state {isGameActive, isStarting, isDying}
    */
-  handleKeydown(event) {
-    // Handle mute toggle (M key)
-    if (
-      (event.key === "m" || event.key === "M") &&
-      (this.isGameActive || this.isStarting)
-    ) {
-      this.toggleMute();
-      event.preventDefault();
-      return;
-    }
+  getGameState() {
+    return {
+      isGameActive: this.isGameActive,
+      isStarting: this.isStarting,
+      isDying: this.isDying,
+    };
+  }
 
-    // Handle menu (Escape key)
-    if (event.key === "Escape") {
-      if (this.isGameActive || this.isStarting) {
-        // Check if menu modal is already open
-        if (!document.querySelector(".pacman-menu-modal")) {
-          this.showMenu();
-          event.preventDefault();
-        }
-        return;
-      }
-    }
-
-    // Auto-start game on first movement key press
-    const movementKeys = [
-      "ArrowUp",
-      "ArrowDown",
-      "ArrowLeft",
-      "ArrowRight",
-      "w",
-      "W",
-      "a",
-      "A",
-      "s",
-      "S",
-      "d",
-      "D",
-    ];
-
-    if (
-      movementKeys.includes(event.key) &&
-      !this.isGameActive &&
-      !this.isStarting
-    ) {
+  /**
+   * Request game start (called by input controller)
+   */
+  requestStart() {
+    if (!this.isGameActive && !this.isStarting) {
       this.startGame();
-      // Don't process movement yet - wait for intro music
-      event.preventDefault();
-      return;
     }
+  }
 
+  /**
+   * Handle movement from input controller
+   * @param {Object} velocity - Normalized velocity {x, y} (-1 to 1)
+   * @param {string} direction - Direction string ("up", "down", "left", "right")
+   */
+  handleMovement(velocity, direction) {
     // Prevent movement during intro music or death
     if (this.isStarting || !this.isGameActive || this.isDying) {
-      if (movementKeys.includes(event.key)) {
-        event.preventDefault();
-      }
       return;
     }
 
-    // Immediately apply movement for responsive controls
-    switch (event.key) {
-      case "ArrowUp":
-      case "w":
-      case "W":
-        this.pacmanVelocity = { x: 0, y: -this.pacmanSpeed };
-        this.pacmanDirection = "up";
-        event.preventDefault();
-        break;
-      case "ArrowDown":
-      case "s":
-      case "S":
-        this.pacmanVelocity = { x: 0, y: this.pacmanSpeed };
-        this.pacmanDirection = "down";
-        event.preventDefault();
-        break;
-      case "ArrowLeft":
-      case "a":
-      case "A":
-        this.pacmanVelocity = { x: -this.pacmanSpeed, y: 0 };
-        this.pacmanDirection = "left";
-        event.preventDefault();
-        break;
-      case "ArrowRight":
-      case "d":
-      case "D":
-        this.pacmanVelocity = { x: this.pacmanSpeed, y: 0 };
-        this.pacmanDirection = "right";
-        event.preventDefault();
-        break;
-    }
-  }
-
-  // ============================================
-  // TOUCH CONTROLS (D-PAD)
-  // ============================================
-
-  /**
-   * Initialize touch controls (joystick) for mobile devices
-   */
-  initializeTouchControls() {
-    // Check if device supports touch
-    const isTouchDevice = window.matchMedia("(any-pointer: coarse)").matches;
-    if (!isTouchDevice) return;
-
-    // Create joystick if it doesn't exist
-    this.createDpad();
-
-    // Setup pointer event handlers for joystick
-    this.setupDpadHandlers();
+    // Apply velocity with game speed
+    this.pacmanVelocity = {
+      x: velocity.x * this.pacmanSpeed,
+      y: velocity.y * this.pacmanSpeed,
+    };
+    this.pacmanDirection = direction;
   }
 
   /**
-   * Reinitialize touch controls if they're missing (called after section unlocks)
+   * Ensure touch controls are still working (delegated to input controller)
    */
   ensureTouchControls() {
-    const isTouchDevice = window.matchMedia("(any-pointer: coarse)").matches;
-    if (!isTouchDevice) return;
-
-    // Check if joystick exists and handlers are set up
-    const joystickExists = document.getElementById("pacman-joystick");
-    const handlersExist =
-      this.joystickHandlers !== null && this.joystickHandlers !== undefined;
-
-    if (!joystickExists || !handlersExist) {
-      // Reinitialize if missing
-      this.initializeTouchControls();
-    } else {
-      // Just verify references are still valid
-      this.dpadElement = document.getElementById("pacman-joystick");
-      if (this.dpadElement) {
-        this.joystickBase = this.dpadElement.querySelector(".joystick-base");
-        this.joystickStick = this.dpadElement.querySelector(".joystick-stick");
-      }
+    if (this.hasPacmanInputOutlet) {
+      this.pacmanInputOutlet.ensureTouchControls();
     }
-  }
-
-  /**
-   * Create joystick UI element
-   */
-  createDpad() {
-    // Remove existing joystick if it exists (to recreate fresh)
-    const existing = document.getElementById("pacman-joystick");
-    if (existing && existing.parentNode) {
-      existing.parentNode.removeChild(existing);
-    }
-
-    const joystick = document.createElement("div");
-    joystick.id = "pacman-joystick";
-    joystick.className = "pacman-joystick";
-    joystick.innerHTML = `
-      <div class="joystick-base" aria-label="Joystick control">
-        <div class="joystick-stick"></div>
-      </div>
-    `;
-
-    // Append to body to ensure position: fixed works correctly
-    // and to avoid clipping issues with game container
-    document.body.appendChild(joystick);
-
-    this.dpadElement = joystick; // Keep same property name for compatibility
-    this.joystickBase = joystick.querySelector(".joystick-base");
-    this.joystickStick = joystick.querySelector(".joystick-stick");
-    this.joystickCenter = { x: 0, y: 0 };
-    this.joystickRadius = 0;
-    this.isJoystickActive = false;
-    this.activePointerId = null;
-    this.joystickInitialTouch = null;
-  }
-
-  /**
-   * Setup pointer event handlers for joystick
-   * Joystick appears wherever user touches on the screen
-   */
-  setupDpadHandlers() {
-    // Ensure joystick elements exist, recreate if needed
-    if (!this.dpadElement || !document.getElementById("pacman-joystick")) {
-      this.createDpad();
-    }
-
-    // Re-get references in case they were lost
-    this.dpadElement = document.getElementById("pacman-joystick");
-    if (!this.dpadElement) return;
-
-    this.joystickBase = this.dpadElement.querySelector(".joystick-base");
-    this.joystickStick = this.dpadElement.querySelector(".joystick-stick");
-
-    if (!this.joystickBase || !this.joystickStick) return;
-
-    // Remove any existing handlers to prevent duplicates
-    if (this.joystickHandlers) {
-      this.cleanupTouchControls();
-    }
-
-    const isInteractiveElement = (target) => {
-      // Only block touches on game UI elements, allow touches on general page elements
-      return (
-        target.closest(".pacman-hud") ||
-        target.closest(".pacman-menu-modal") ||
-        target.closest(".pacman-modal") ||
-        (target.closest(".modal") && target.closest(".pacman-game-container"))
-      );
-    };
-
-    const getJoystickRadius = () => {
-      const rect = this.joystickBase.getBoundingClientRect();
-      return rect.width / 2 - 35;
-    };
-
-    const handleStart = (e) => {
-      // Only handle on touch devices
-      const isTouchDevice = window.matchMedia("(any-pointer: coarse)").matches;
-      if (!isTouchDevice) return;
-
-      // Ensure joystick elements are still valid
-      if (!this.dpadElement || !this.joystickBase || !this.joystickStick) {
-        // Recreate if missing
-        this.createDpad();
-        this.joystickBase = this.dpadElement?.querySelector(".joystick-base");
-        this.joystickStick = this.dpadElement?.querySelector(".joystick-stick");
-        if (!this.joystickBase || !this.joystickStick) return;
-      }
-
-      if (!this.isGameActive && !this.isStarting) return;
-
-      // Don't create joystick if touching interactive elements
-      if (isInteractiveElement(e.target)) return;
-
-      // Only handle one pointer at a time
-      if (this.isJoystickActive && this.activePointerId !== e.pointerId) {
-        return;
-      }
-
-      // Get touch coordinates
-      let clientX, clientY;
-      if (e instanceof TouchEvent && e.touches.length > 0) {
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
-      } else if (e instanceof PointerEvent || e instanceof MouseEvent) {
-        clientX = e.clientX;
-        clientY = e.clientY;
-      } else {
-        return;
-      }
-
-      this.joystickInitialTouch = { x: clientX, y: clientY };
-      this.joystickCenter = { x: clientX, y: clientY };
-      this.joystickRadius = getJoystickRadius();
-
-      this.dpadElement.style.left = `${clientX}px`;
-      this.dpadElement.style.top = `${clientY}px`;
-      this.dpadElement.classList.add("active");
-
-      e.preventDefault();
-      this.isJoystickActive = true;
-      this.activePointerId = e.pointerId;
-      this.joystickStick.classList.add("active");
-
-      this.handleJoystickMove(e);
-    };
-
-    const handleMove = (e) => {
-      if (!this.isJoystickActive || this.activePointerId !== e.pointerId) {
-        return;
-      }
-
-      if (!this.joystickStick || !this.joystickBase) {
-        this.dpadElement = document.getElementById("pacman-joystick");
-        if (this.dpadElement) {
-          this.joystickBase = this.dpadElement.querySelector(".joystick-base");
-          this.joystickStick =
-            this.dpadElement.querySelector(".joystick-stick");
-        }
-        if (!this.joystickStick || !this.joystickBase) {
-          handleEnd(e);
-          return;
-        }
-      }
-
-      e.preventDefault();
-      this.handleJoystickMove(e);
-    };
-
-    const handleEnd = (e) => {
-      if (!this.isJoystickActive || this.activePointerId !== e.pointerId) {
-        return;
-      }
-
-      e.preventDefault();
-      this.isJoystickActive = false;
-      this.activePointerId = null;
-      this.joystickStick.classList.remove("active");
-      this.dpadElement.classList.remove("active");
-      this.joystickInitialTouch = null;
-
-      this.joystickStick.style.transform = "translate(-50%, -50%)";
-      this.pacmanVelocity = { x: 0, y: 0 };
-    };
-
-    // Use Pointer Events API (modern approach)
-    if (window.PointerEvent) {
-      document.addEventListener("pointerdown", handleStart, {
-        passive: false,
-      });
-      document.addEventListener("pointermove", handleMove, { passive: false });
-      document.addEventListener("pointerup", handleEnd, { passive: false });
-      document.addEventListener("pointercancel", handleEnd, { passive: false });
-    } else {
-      // Fallback for older browsers
-      document.addEventListener("mousedown", handleStart);
-      document.addEventListener("mousemove", handleMove);
-      document.addEventListener("mouseup", handleEnd);
-
-      if ("ontouchstart" in window) {
-        document.addEventListener("touchstart", handleStart, {
-          passive: false,
-        });
-        document.addEventListener("touchmove", handleMove, { passive: false });
-        document.addEventListener("touchend", handleEnd, { passive: false });
-        document.addEventListener("touchcancel", handleEnd, { passive: false });
-      }
-    }
-
-    // Store handlers for cleanup
-    this.joystickHandlers = {
-      handleStart,
-      handleMove,
-      handleEnd,
-    };
-  }
-
-  /**
-   * Handle joystick movement
-   * @param {Event} e - Pointer or touch event
-   */
-  handleJoystickMove(e) {
-    if (!this.isJoystickActive || !this.joystickCenter) return;
-
-    // Ensure joystick elements are still valid
-    if (!this.joystickStick || !this.joystickBase) {
-      // Recreate if missing
-      this.createDpad();
-      this.joystickBase = this.dpadElement?.querySelector(".joystick-base");
-      this.joystickStick = this.dpadElement?.querySelector(".joystick-stick");
-      if (!this.joystickBase || !this.joystickStick) return;
-    }
-
-    let clientX, clientY;
-    if (e instanceof TouchEvent && e.touches.length > 0) {
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else if (e instanceof PointerEvent || e instanceof MouseEvent) {
-      clientX = e.clientX;
-      clientY = e.clientY;
-    } else {
-      return;
-    }
-
-    // Recalculate radius in case of resize (but center stays at initial touch)
-    this.joystickRadius = this.joystickBase
-      ? this.joystickBase.getBoundingClientRect().width / 2 - 35
-      : 55;
-
-    // Calculate offset from center (using viewport coordinates)
-    const deltaX = clientX - this.joystickCenter.x;
-    const deltaY = clientY - this.joystickCenter.y;
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-    // Clamp to joystick radius
-    const clampedDistance = Math.min(distance, this.joystickRadius);
-    const angle = Math.atan2(deltaY, deltaX);
-
-    // Calculate stick position
-    const stickX = Math.cos(angle) * clampedDistance;
-    const stickY = Math.sin(angle) * clampedDistance;
-
-    // Update stick visual position
-    this.joystickStick.style.transform = `translate(calc(-50% + ${stickX}px), calc(-50% + ${stickY}px))`;
-
-    // Calculate normalized direction (-1 to 1)
-    const normalizedX = clampedDistance > 0 ? stickX / this.joystickRadius : 0;
-    const normalizedY = clampedDistance > 0 ? stickY / this.joystickRadius : 0;
-
-    // Apply movement based on joystick position
-    this.applyJoystickMovement(normalizedX, normalizedY);
-  }
-
-  /**
-   * Apply movement based on joystick input
-   * @param {number} normalizedX - Normalized X direction (-1 to 1)
-   * @param {number} normalizedY - Normalized Y direction (-1 to 1)
-   */
-  applyJoystickMovement(normalizedX, normalizedY) {
-    // Auto-start game on first movement
-    if (
-      !this.isGameActive &&
-      !this.isStarting &&
-      (Math.abs(normalizedX) > 0.1 || Math.abs(normalizedY) > 0.1)
-    ) {
-      this.startGame();
-      // Wait a moment for game to start
-      setTimeout(() => {
-        this.applyJoystickMovement(normalizedX, normalizedY);
-      }, 100);
-      return;
-    }
-
-    // Prevent movement during intro music or death
-    if (this.isStarting || !this.isGameActive || this.isDying) {
-      return;
-    }
-
-    // Dead zone - ignore very small movements
-    const deadZone = 0.15;
-    if (Math.abs(normalizedX) < deadZone && Math.abs(normalizedY) < deadZone) {
-      this.pacmanVelocity = { x: 0, y: 0 };
-      return;
-    }
-
-    // Calculate velocity based on joystick position
-    // Use the larger component to determine primary direction
-    const absX = Math.abs(normalizedX);
-    const absY = Math.abs(normalizedY);
-
-    if (absX > absY) {
-      // Horizontal movement
-      this.pacmanVelocity = {
-        x: normalizedX * this.pacmanSpeed,
-        y: 0,
-      };
-      this.pacmanDirection = normalizedX > 0 ? "right" : "left";
-    } else {
-      // Vertical movement
-      this.pacmanVelocity = {
-        x: 0,
-        y: normalizedY * this.pacmanSpeed,
-      };
-      this.pacmanDirection = normalizedY > 0 ? "down" : "up";
-    }
-  }
-
-  /**
-   * Cleanup touch controls
-   */
-  cleanupTouchControls() {
-    // Remove event listeners
-    if (this.joystickHandlers) {
-      const { handleStart, handleMove, handleEnd } = this.joystickHandlers;
-
-      if (window.PointerEvent) {
-        document.removeEventListener("pointerdown", handleStart);
-        document.removeEventListener("pointermove", handleMove);
-        document.removeEventListener("pointerup", handleEnd);
-        document.removeEventListener("pointercancel", handleEnd);
-      } else {
-        document.removeEventListener("mousedown", handleStart);
-        document.removeEventListener("mousemove", handleMove);
-        document.removeEventListener("mouseup", handleEnd);
-
-        if ("ontouchstart" in window) {
-          document.removeEventListener("touchstart", handleStart);
-          document.removeEventListener("touchmove", handleMove);
-          document.removeEventListener("touchend", handleEnd);
-          document.removeEventListener("touchcancel", handleEnd);
-        }
-      }
-
-      this.joystickHandlers = null;
-    }
-
-    if (this.dpadElement && this.dpadElement.parentNode) {
-      this.dpadElement.parentNode.removeChild(this.dpadElement);
-    }
-    this.dpadElement = null;
-    this.joystickBase = null;
-    this.joystickStick = null;
-    this.isJoystickActive = false;
-    this.activePointerId = null;
-    this.joystickInitialTouch = null;
   }
 
   // ============================================
@@ -866,15 +433,9 @@ export default class extends Controller {
     // Remove class from body to re-enable footer interactions
     document.body.classList.remove("pacman-game-active");
 
-    // Hide joystick when game stops
-    if (this.dpadElement) {
-      this.dpadElement.classList.remove("active");
-      this.isJoystickActive = false;
-      this.activePointerId = null;
-      if (this.joystickStick) {
-        this.joystickStick.classList.remove("active");
-        this.joystickStick.style.transform = "translate(-50%, -50%)";
-      }
+    // Hide joystick when game stops (delegated to input controller)
+    if (this.hasPacmanInputOutlet) {
+      this.pacmanInputOutlet.hideJoystick();
     }
 
     // Re-enable page scrolling
@@ -1109,7 +670,7 @@ export default class extends Controller {
     this.itemManager.generateDots();
     // Reinitialize ghost AI dot counts cache after regeneration
     this.ghostAI.initializeDotCounts();
-    // Ensure joystick controls are still working after DOM changes
+    // Ensure joystick controls are still working after DOM changes (delegated to input controller)
     this.ensureTouchControls();
   }
 
@@ -1302,10 +863,9 @@ export default class extends Controller {
    * Show leaderboard after game ends (calls stopGame when closed)
    */
   async showLeaderboardFromGameEnd() {
-    const data = await this.fetchLeaderboardData();
-    this.uiManager.showLeaderboardModal(data, () => {
-      this.stopGame();
-    });
+    if (this.hasPacmanMenuOutlet) {
+      await this.pacmanMenuOutlet.showLeaderboardFromGameEnd();
+    }
   }
 
   /**
@@ -1372,109 +932,65 @@ export default class extends Controller {
   }
 
   // ============================================
-  // LEADERBOARD METHODS
+  // LEADERBOARD METHODS (delegated to menu controller)
   // ============================================
 
   /**
-   * Get player name from localStorage
+   * Get player name from localStorage (delegated to menu controller)
    */
   getPlayerName() {
-    try {
-      return localStorage.getItem("pacman_player_name");
-    } catch (e) {
-      console.error("Error reading player name from localStorage:", e);
-      return null;
+    if (this.hasPacmanMenuOutlet) {
+      return this.pacmanMenuOutlet.getPlayerName();
     }
+    return null;
   }
 
   /**
-   * Save player name to localStorage
+   * Save player name to localStorage (delegated to menu controller)
    */
   savePlayerName(name) {
-    try {
-      localStorage.setItem("pacman_player_name", name);
-    } catch (e) {
-      console.error("Error saving player name to localStorage:", e);
+    if (this.hasPacmanMenuOutlet) {
+      this.pacmanMenuOutlet.savePlayerName(name);
     }
   }
 
   /**
-   * Submit score to leaderboard API
+   * Submit score to leaderboard API (delegated to menu controller)
    */
   async submitScore(playerName, score, isWin) {
-    try {
-      const response = await fetch("/api/pacman_scores", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          pacman_score: {
-            player_name: playerName,
-            score: score,
-            is_win: isWin,
-          },
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!data.success) {
-        console.error("❌ Error submitting score:", data.errors);
-      }
-
-      return data;
-    } catch (error) {
-      console.error("❌ Error submitting score:", error);
-      return { success: false, error: error.message };
+    if (this.hasPacmanMenuOutlet) {
+      return await this.pacmanMenuOutlet.submitScore(playerName, score, isWin);
     }
+    return { success: false, error: "Menu controller not available" };
   }
 
   /**
-   * Fetch leaderboard data from API
+   * Fetch leaderboard data from API (delegated to menu controller)
    */
   async fetchLeaderboardData() {
-    try {
-      const playerName = this.getPlayerName();
+    if (this.hasPacmanMenuOutlet) {
+      return await this.pacmanMenuOutlet.fetchLeaderboardData();
+    }
+    return { global: [], player: null };
+  }
 
-      // Fetch global leaderboard
-      const globalResponse = await fetch("/api/pacman_scores/global");
-      const globalData = await globalResponse.json();
-
-      let playerData = null;
-      if (playerName) {
-        // Fetch player scores
-        const playerResponse = await fetch(
-          `/api/pacman_scores/player/${encodeURIComponent(playerName)}`
-        );
-        const playerScoreData = await playerResponse.json();
-        playerData = {
-          name: playerName,
-          scores: playerScoreData.scores || [],
-        };
-      }
-
-      return {
-        global: globalData.leaderboard || [],
-        player: playerData,
-      };
-    } catch (error) {
-      console.error("❌ Error fetching leaderboard:", error);
-      return {
-        global: [],
-        player: null,
-      };
+  /**
+   * Show leaderboard modal (delegated to menu controller)
+   */
+  async showLeaderboard() {
+    if (this.hasPacmanMenuOutlet) {
+      const data = await this.pacmanMenuOutlet.fetchLeaderboardData();
+      this.uiManager.showLeaderboardModal(data, () => {
+        // Leaderboard closed
+      });
     }
   }
 
   /**
-   * Show leaderboard modal
+   * Show leaderboard modal (with onClose callback)
    */
-  async showLeaderboard() {
-    const data = await this.fetchLeaderboardData();
-    this.uiManager.showLeaderboardModal(data, () => {
-      // Leaderboard closed
-    });
+  showLeaderboardModal(data, onClose) {
+    this.uiManager.showLeaderboardModal(data, onClose);
   }
 
   // ============================================
@@ -1490,7 +1006,7 @@ export default class extends Controller {
   }
 
   /**
-   * Toggle mute on/off
+   * Toggle mute on/off (called by input controller)
    */
   toggleMute(event) {
     if (event) event.preventDefault();
@@ -1704,10 +1220,8 @@ export default class extends Controller {
    * Show leaderboard from menu
    */
   async showLeaderboardFromMenu() {
-    const data = await this.fetchLeaderboardData();
-    this.uiManager.showLeaderboardModal(data, () => {
-      // Return to menu
-      this.showMenu();
-    });
+    if (this.hasPacmanMenuOutlet) {
+      await this.pacmanMenuOutlet.showLeaderboardFromMenu();
+    }
   }
 }
