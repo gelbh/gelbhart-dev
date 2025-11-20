@@ -13,6 +13,13 @@
 // Global base styles (body, html, card utilities)
 @import "components/base";
 
+// ---- Layout Components ----
+// Footer and scroll-to-top button styles
+@import "components/footer";
+
+// Header styles
+@import "components/header";
+
 // ---- Page Sections ----
 // Hero section with animated backgrounds and gradient text
 @import "components/hero";
