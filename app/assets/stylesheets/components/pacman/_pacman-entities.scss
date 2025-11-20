@@ -1,0 +1,299 @@
+// ============================================
+// PAC-MAN ENTITIES
+// ============================================
+// Game entities: Pac-Man character, ghosts, dots, power pellets, items, and keys
+
+// ---- Pac-Man Character ----
+
+.pacman-character {
+  position: absolute;
+  width: $pacman-size;
+  height: $pacman-size;
+  z-index: var(--z-pacman);
+  transform: translate(-50%, -50%);
+  @include pacman-glow(var(--color-pacman-glow), 10px);
+
+  .pacman-sprite {
+    @include pacman-sprite;
+    transition: transform 0.05s ease;
+  }
+
+  &.powered {
+    filter: drop-shadow(0 0 25px var(--color-pacman-yellow));
+    animation: powerPulse var(--transition-normal) var(--ease-in-out) infinite;
+  }
+
+  &.invincible {
+    animation: invincibleBlink 0.2s var(--ease-in-out) infinite;
+  }
+
+  &.speed-boost {
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.9))
+      drop-shadow(0 0 30px rgba(255, 255, 0, 0.6));
+    animation: speedTrail var(--transition-fast) var(--ease-in-out) infinite;
+  }
+
+  &.slow-down {
+    filter: drop-shadow(0 0 15px rgba(139, 69, 19, 0.7)) brightness(0.7);
+    animation: slowPulse 1s var(--ease-in-out) infinite;
+  }
+
+  &.shielded {
+    filter: drop-shadow(0 0 25px rgba(0, 206, 209, 1))
+      drop-shadow(0 0 40px rgba(0, 206, 209, 0.6));
+    animation: shieldPulse 1s var(--ease-in-out) infinite;
+
+    // Add visible shield bubble
+    &::after {
+      content: "🛡️";
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      font-size: 1.2rem;
+      animation: shieldFloat 2s var(--ease-in-out) infinite;
+      z-index: var(--z-floating);
+      filter: drop-shadow(0 0 8px rgba(0, 206, 209, 1));
+    }
+
+    // Shield circle effect
+    &::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 65px;
+      height: 65px;
+      border: 3px solid rgba(0, 206, 209, 0.6);
+      border-radius: var(--radius-full);
+      animation: shieldRing 1.5s var(--ease-in-out) infinite;
+      z-index: var(--z-grid);
+    }
+  }
+
+  &.double-points {
+    filter: drop-shadow(0 0 20px rgba(255, 105, 180, 0.9))
+      drop-shadow(0 0 35px rgba(255, 105, 180, 0.6));
+    animation: starSparkle var(--transition-slow) var(--ease-in-out) infinite;
+  }
+}
+
+// ---- Countdown Overlay ----
+
+.pacman-countdown {
+  font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  letter-spacing: 0.1em;
+  user-select: none;
+
+  [data-bs-theme="dark"] & {
+    text-shadow: 0 0 30px var(--color-pacman-yellow),
+      0 0 60px rgba(255, 215, 0, 0.8);
+  }
+}
+
+// ---- Dots & Power Pellets ----
+
+.pacman-dot {
+  position: absolute;
+  width: $dot-size;
+  height: $dot-size;
+  transform: translate(-50%, -50%);
+  z-index: var(--z-pacman);
+  @include pacman-glow(var(--color-pacman-glow), 6px);
+  opacity: 0.7;
+
+  .dot-sprite {
+    @include pacman-sprite;
+  }
+
+  &.collected {
+    display: none; // Instant removal for performance
+  }
+
+  &.fade-out {
+    animation: dotFadeOut 0.2s ease-out forwards;
+  }
+
+  [data-bs-theme="dark"] & {
+    @include pacman-glow(var(--color-pacman-glow), 8px);
+    opacity: 0.8;
+  }
+}
+
+.pacman-power-pellet {
+  width: $power-pellet-size;
+  height: $power-pellet-size;
+  animation: pelletPulse 1.2s var(--ease-in-out) infinite;
+  filter: drop-shadow(0 0 10px rgba(var(--color-primary), 0.5));
+  opacity: 0.75;
+
+  .pellet-sprite {
+    @include pacman-sprite;
+  }
+
+  [data-bs-theme="dark"] & {
+    filter: drop-shadow(0 0 12px rgba(102, 126, 234, 0.6));
+    opacity: 0.85;
+  }
+}
+
+// ---- Ghosts ----
+
+.pacman-ghost {
+  position: absolute;
+  width: $ghost-size;
+  height: $ghost-size;
+  transform: translate(-50%, -50%);
+  z-index: var(--z-ghost);
+  transition: filter var(--transition-normal) ease;
+
+  .ghost-sprite {
+    @include pacman-sprite;
+    transition: transform 0.1s ease;
+
+    &.flip-horizontal {
+      transform: scaleX(-1);
+    }
+  }
+
+  &.ghost-red {
+    filter: drop-shadow(0 0 12px rgba(var(--color-ghost-red), 0.6));
+  }
+
+  &.ghost-pink {
+    filter: drop-shadow(0 0 12px rgba(255, 184, 209, 0.6));
+  }
+
+  &.ghost-cyan {
+    filter: drop-shadow(0 0 12px rgba(var(--color-ghost-cyan), 0.6));
+  }
+
+  &.ghost-orange {
+    filter: drop-shadow(0 0 12px rgba(var(--color-ghost-orange), 0.6));
+  }
+
+  &.frightened {
+    filter: drop-shadow(0 0 15px rgba(var(--color-ghost-frightened), 0.8));
+    animation: frightenedShake var(--transition-fast) var(--ease-in-out)
+      infinite;
+  }
+
+  &.eaten {
+    filter: drop-shadow(0 0 8px rgba(200, 200, 255, 0.6));
+  }
+
+  &.frozen {
+    filter: brightness(0.7) hue-rotate(180deg)
+      drop-shadow(0 0 15px rgba(135, 206, 235, 0.9));
+    animation: frozenShake var(--transition-slow) var(--ease-in-out) infinite;
+  }
+}
+
+// ---- Items (Powerups) ----
+
+.pacman-item {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: var(--z-game);
+  text-align: center;
+  transition: all var(--transition-normal) var(--ease-smooth);
+  animation: itemFloat 2s var(--ease-in-out) infinite;
+
+  &.item-positive {
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.4));
+  }
+
+  &.item-negative {
+    filter: drop-shadow(0 0 10px rgba(139, 69, 19, 0.4));
+  }
+
+  .item-emoji {
+    font-size: 2rem;
+    line-height: 1;
+    margin-bottom: 4px;
+    text-shadow: 0 0 8px currentColor;
+  }
+
+  .item-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    white-space: nowrap;
+    text-shadow: 0 0 6px currentColor, 0 1px 2px rgba(0, 0, 0, 0.5);
+    letter-spacing: 0.5px;
+  }
+
+  &.collected {
+    animation: itemCollected var(--transition-normal) ease-out forwards;
+  }
+}
+
+// ---- Ghost Indicators ----
+
+.ghost-indicator {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: var(--z-indicator);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+  animation: indicatorPulse 1s var(--ease-in-out) infinite;
+
+  .indicator-arrow {
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 15px solid rgba(255, 255, 255, 0.9);
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+    transition: transform 0.2s ease;
+  }
+
+  .indicator-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: var(--radius-full);
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+  }
+
+  &.frightened {
+    .indicator-arrow {
+      border-bottom-color: rgba(var(--color-ghost-frightened), 0.9);
+    }
+
+    .indicator-dot {
+      background: var(--color-ghost-frightened) !important;
+      border-color: rgba(255, 255, 255, 0.9);
+      animation: frightenedIndicator var(--transition-normal) var(--ease-in-out)
+        infinite;
+    }
+  }
+}
+
+// ---- Key Sprite ----
+
+.pacman-key {
+  position: absolute;
+  width: $key-size;
+  height: $key-size;
+  transform: translate(-50%, -50%);
+  z-index: 999;
+  animation: keyFloat 2s var(--ease-in-out) infinite,
+    keySparkle 1.5s var(--ease-in-out) infinite;
+  filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+}
+
+.key-sprite {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  animation: keyRotate 3s linear infinite;
+}
+
+.pacman-key.collected {
+  animation: keyCollect var(--transition-normal) ease-out forwards;
+}
