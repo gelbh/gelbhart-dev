@@ -1,6 +1,7 @@
 # app/controllers/pages_controller.rb
 class PagesController < ApplicationController
   def home
+    @projects = Project.featured.published.ordered
   end
 
   def hevy_tracker
