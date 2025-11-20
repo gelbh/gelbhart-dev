@@ -8,29 +8,19 @@
     <div class="collapse navbar-collapse order-lg-1 d-none d-lg-flex" id="navbarNav">
       <ul class="navbar-nav">
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle d-flex align-items-center <%= 'active' if current_page?(hevy_tracker_path) || current_page?(video_captioner_path) || current_page?(nasa_exoplanet_explorer_path) %>" href="#" id="projectsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <a class="nav-link dropdown-toggle d-flex align-items-center <%= 'active' if projects_with_pages.any? { |p| current_page?(project_link_url(p)) } %>" href="#" id="projectsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="bx bx-code-alt fs-lg me-1"></i>
             Projects
           </a>
           <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="projectsDropdown">
-            <li>
-              <%= link_to hevy_tracker_path, class: "dropdown-item d-flex align-items-center #{current_page?(hevy_tracker_path) ? 'active' : ''}" do %>
-                <i class="bx bx-dumbbell fs-lg me-2"></i>
-                Hevy Tracker
-              <% end %>
-            </li>
-            <li>
-              <%= link_to video_captioner_path, class: "dropdown-item d-flex align-items-center #{current_page?(video_captioner_path) ? 'active' : ''}" do %>
-                <i class="bx bx-video fs-lg me-2"></i>
-                Video Captioner
-              <% end %>
-            </li>
-            <li>
-              <%= link_to nasa_exoplanet_explorer_path, class: "dropdown-item d-flex align-items-center #{current_page?(nasa_exoplanet_explorer_path) ? 'active' : ''}" do %>
-                <i class="bx bx-planet fs-lg me-2"></i>
-                NASA Exoplanet Explorer
-              <% end %>
-            </li>
+            <% projects_with_pages.each do |project| %>
+              <li>
+                <%= link_to project_link_url(project), class: "dropdown-item d-flex align-items-center #{current_page?(project_link_url(project)) ? 'active' : ''}" do %>
+                  <i class="bx <%= project.icon %> fs-lg me-2"></i>
+                  <%= project.title %>
+                <% end %>
+              </li>
+            <% end %>
           </ul>
         </li>
         <li class="nav-item">
@@ -64,31 +54,21 @@
         <nav class="mobile-nav">
           <ul class="mobile-nav-list">
             <li class="mobile-nav-item">
-              <a class="mobile-nav-link <%= 'active' if current_page?(hevy_tracker_path) || current_page?(video_captioner_path) || current_page?(nasa_exoplanet_explorer_path) %>" href="#" role="button" data-bs-toggle="collapse" data-bs-target="#mobileProjectsDropdown" aria-expanded="false" aria-controls="mobileProjectsDropdown" onclick="event.preventDefault();">
+              <a class="mobile-nav-link <%= 'active' if projects_with_pages.any? { |p| current_page?(project_link_url(p)) } %>" href="#" role="button" data-bs-toggle="collapse" data-bs-target="#mobileProjectsDropdown" aria-expanded="false" aria-controls="mobileProjectsDropdown" onclick="event.preventDefault();">
                 <i class="bx bx-code-alt me-2"></i>
                 <span>Projects</span>
                 <i class="bx bx-chevron-down ms-auto mobile-nav-chevron"></i>
               </a>
               <div class="collapse" id="mobileProjectsDropdown">
                 <ul class="mobile-nav-sublist">
-                  <li>
-                    <%= link_to hevy_tracker_path, class: "mobile-nav-sublink d-flex align-items-center #{current_page?(hevy_tracker_path) ? 'active' : ''}", data: { bs_dismiss: "modal" } do %>
-                      <i class="bx bx-dumbbell me-2"></i>
-                      Hevy Tracker
-                    <% end %>
-                  </li>
-                  <li>
-                    <%= link_to video_captioner_path, class: "mobile-nav-sublink d-flex align-items-center #{current_page?(video_captioner_path) ? 'active' : ''}", data: { bs_dismiss: "modal" } do %>
-                      <i class="bx bx-video me-2"></i>
-                      Video Captioner
-                    <% end %>
-                  </li>
-                  <li>
-                    <%= link_to nasa_exoplanet_explorer_path, class: "mobile-nav-sublink d-flex align-items-center #{current_page?(nasa_exoplanet_explorer_path) ? 'active' : ''}", data: { bs_dismiss: "modal" } do %>
-                      <i class="bx bx-planet me-2"></i>
-                      NASA Exoplanet Explorer
-                    <% end %>
-                  </li>
+                  <% projects_with_pages.each do |project| %>
+                    <li>
+                      <%= link_to project_link_url(project), class: "mobile-nav-sublink d-flex align-items-center #{current_page?(project_link_url(project)) ? 'active' : ''}", data: { bs_dismiss: "modal" } do %>
+                        <i class="bx <%= project.icon %> me-2"></i>
+                        <%= project.title %>
+                      <% end %>
+                    </li>
+                  <% end %>
                 </ul>
               </div>
             </li>

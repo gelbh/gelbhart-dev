@@ -9,6 +9,7 @@ class Project < ApplicationRecord
   scope :featured, -> { where(featured: true) }
   scope :published, -> { where(published: true) }
   scope :ordered, -> { order(:position) }
+  scope :with_pages, -> { published.where.not(route_name: nil).ordered }
 
   # Convert badges JSONB to array with symbol keys for easier access in views
   def normalized_badges
