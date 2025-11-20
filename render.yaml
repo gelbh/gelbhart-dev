@@ -11,6 +11,8 @@ services:
       - key: RAILS_MASTER_KEY
         sync: false
       - key: WEB_CONCURRENCY
-        value: 1
+        value: 0
       - key: RAILS_MAX_THREADS
-        value: 2
+        value: 5
+      - key: RAILS_MIN_THREADS
+        value: 5
