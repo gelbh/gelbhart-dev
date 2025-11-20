@@ -243,31 +243,44 @@
           <i class="bx bx-code-block text-primary"></i>
         </div>
         <h3 class="h5 mb-4">Web & Mobile Frameworks</h3>
-        <div class="d-flex flex-wrap gap-2 justify-content-center">
-          <%= render 'shared/tech_badge', 
-                      text: 'Bootstrap', 
-                      icon: 'bxl-bootstrap', 
-                      color: 'secondary', 
-                      url: 'https://getbootstrap.com/',
-                      badge_class: 'tech-badge' %>
-          <%= render 'shared/tech_badge', 
-                      text: 'Ruby on Rails', 
-                      icon: 'bx-server', 
-                      color: 'danger', 
-                      url: 'https://rubyonrails.org/',
-                      badge_class: 'tech-badge' %>
-          <%= render 'shared/tech_badge', 
-                      text: 'Flutter', 
-                      icon: 'bx-mobile-alt', 
-                      color: 'info', 
-                      url: 'https://flutter.dev/',
-                      badge_class: 'tech-badge' %>
-          <%= render 'shared/tech_badge', 
-                      text: 'SwiftUI', 
-                      icon: 'bxl-apple', 
-                      color: 'secondary', 
-                      url: 'https://developer.apple.com/xcode/swiftui/',
-                      badge_class: 'tech-badge' %>
+        <div class="row">
+          <div class="col-6">
+            <p class="text-muted fw-semibold mb-2 fs-sm">Frontend</p>
+            <ul class="list-unstyled mb-3">
+              <%= render 'shared/tech_badge', 
+                          text: 'Bootstrap', 
+                          icon: 'bxl-bootstrap', 
+                          color: 'purple', 
+                          url: 'https://getbootstrap.com/',
+                          style: 'list' %>
+            </ul>
+            <p class="text-muted fw-semibold mb-2 fs-sm">Backend</p>
+            <ul class="list-unstyled mb-0">
+              <%= render 'shared/tech_badge', 
+                          text: 'Ruby on Rails', 
+                          icon: 'bx-server', 
+                          color: 'danger', 
+                          url: 'https://rubyonrails.org/',
+                          style: 'list' %>
+            </ul>
+          </div>
+          <div class="col-6">
+            <p class="text-muted fw-semibold mb-2 fs-sm">Mobile</p>
+            <ul class="list-unstyled mb-0">
+              <%= render 'shared/tech_badge', 
+                          text: 'Flutter', 
+                          icon: 'bx-mobile-alt', 
+                          color: 'info', 
+                          url: 'https://flutter.dev/',
+                          style: 'list' %>
+              <%= render 'shared/tech_badge', 
+                          text: 'SwiftUI', 
+                          icon: 'bxl-apple', 
+                          color: 'secondary', 
+                          url: 'https://developer.apple.com/xcode/swiftui/',
+                          style: 'list' %>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -278,38 +291,38 @@
           <i class="bx bx-brain text-warning"></i>
         </div>
         <h3 class="h5 mb-4">Data Science & AI</h3>
-        <div class="d-flex flex-wrap gap-2 justify-content-center">
+        <ul class="list-unstyled mb-0">
           <%= render 'shared/tech_badge', 
                       text: 'TensorFlow', 
                       icon: 'bx-scatter-chart', 
                       color: 'primary', 
                       url: 'https://www.tensorflow.org/',
-                      badge_class: 'tech-badge' %>
+                      style: 'list' %>
           <%= render 'shared/tech_badge', 
                       text: 'PyTorch', 
                       icon: 'bx-brain', 
                       color: 'warning', 
                       url: 'https://pytorch.org/',
-                      badge_class: 'tech-badge' %>
+                      style: 'list' %>
           <%= render 'shared/tech_badge', 
                       text: 'Pandas', 
                       icon: 'bx-data', 
                       color: 'info', 
                       url: 'https://pandas.pydata.org/',
-                      badge_class: 'tech-badge' %>
+                      style: 'list' %>
           <%= render 'shared/tech_badge', 
                       text: 'NumPy', 
                       icon: 'bx-bar-chart', 
                       color: 'success', 
                       url: 'https://numpy.org/',
-                      badge_class: 'tech-badge' %>
+                      style: 'list' %>
           <%= render 'shared/tech_badge', 
                       text: 'Scikit-learn', 
                       icon: 'bx-line-chart', 
                       color: 'danger', 
                       url: 'https://scikit-learn.org/',
-                      badge_class: 'tech-badge' %>
-        </div>
+                      style: 'list' %>
+        </ul>
       </div>
     </div>
   </div>
@@ -321,37 +334,47 @@
           <i class="bx bx-git-branch text-success"></i>
         </div>
         <h3 class="h5 mb-4">Development Tools</h3>
-        <div class="d-flex flex-wrap gap-2 justify-content-center">
-          <%= render 'shared/tech_badge', 
-                      text: 'Git', 
-                      icon: 'bxl-git', 
-                      color: 'danger', 
-                      url: 'https://git-scm.com/',
-                      badge_class: 'tech-badge' %>
-          <%= render 'shared/tech_badge', 
-                      text: 'GitHub Actions', 
-                      icon: 'bxl-github', 
-                      color: 'secondary', 
-                      url: 'https://github.com/features/actions',
-                      badge_class: 'tech-badge' %>
-          <%= render 'shared/tech_badge', 
-                      text: 'GitLab CI/CD', 
-                      icon: 'bxl-gitlab', 
-                      color: 'warning', 
-                      url: 'https://docs.gitlab.com/ee/ci/',
-                      badge_class: 'tech-badge' %>
-          <%= render 'shared/tech_badge', 
-                      text: 'pytest', 
-                      icon: 'bx-check-circle', 
-                      color: 'success', 
-                      url: 'https://docs.pytest.org/',
-                      badge_class: 'tech-badge' %>
-          <%= render 'shared/tech_badge', 
-                      text: 'npm', 
-                      icon: 'bxl-nodejs', 
-                      color: 'success', 
-                      url: 'https://www.npmjs.com/',
-                      badge_class: 'tech-badge' %>
+        <div class="row">
+          <div class="col-6">
+            <p class="text-muted fw-semibold mb-2 fs-sm">Version Control</p>
+            <ul class="list-unstyled mb-3">
+              <%= render 'shared/tech_badge', 
+                          text: 'Git', 
+                          icon: 'bxl-git', 
+                          color: 'danger', 
+                          url: 'https://git-scm.com/',
+                          style: 'list' %>
+              <%= render 'shared/tech_badge', 
+                          text: 'GitHub Actions', 
+                          icon: 'bxl-github', 
+                          color: 'secondary', 
+                          url: 'https://github.com/features/actions',
+                          style: 'list' %>
+              <%= render 'shared/tech_badge', 
+                          text: 'GitLab CI/CD', 
+                          icon: 'bxl-gitlab', 
+                          color: 'warning', 
+                          url: 'https://docs.gitlab.com/ee/ci/',
+                          style: 'list' %>
+            </ul>
+          </div>
+          <div class="col-6">
+            <p class="text-muted fw-semibold mb-2 fs-sm">Testing & Build</p>
+            <ul class="list-unstyled mb-0">
+              <%= render 'shared/tech_badge', 
+                          text: 'pytest', 
+                          icon: 'bx-check-circle', 
+                          color: 'success', 
+                          url: 'https://docs.pytest.org/',
+                          style: 'list' %>
+              <%= render 'shared/tech_badge', 
+                          text: 'npm', 
+                          icon: 'bxl-nodejs', 
+                          color: 'success', 
+                          url: 'https://www.npmjs.com/',
+                          style: 'list' %>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -361,37 +384,47 @@
           <i class="bx bx-cloud text-info"></i>
         </div>
         <h3 class="h5 mb-4">IDEs & Cloud Platforms</h3>
-        <div class="d-flex flex-wrap gap-2 justify-content-center">
-          <%= render 'shared/tech_badge', 
-                      text: 'VS Code', 
-                      icon: 'bx-code-block', 
-                      color: 'primary', 
-                      url: 'https://code.visualstudio.com/',
-                      badge_class: 'tech-badge' %>
-          <%= render 'shared/tech_badge', 
-                      text: 'Xcode', 
-                      icon: 'bxl-apple', 
-                      color: 'secondary', 
-                      url: 'https://developer.apple.com/xcode/',
-                      badge_class: 'tech-badge' %>
-          <%= render 'shared/tech_badge', 
-                      text: 'Eclipse', 
-                      icon: 'bx-code-alt', 
-                      color: 'warning', 
-                      url: 'https://www.eclipse.org/',
-                      badge_class: 'tech-badge' %>
-          <%= render 'shared/tech_badge', 
-                      text: 'Vercel', 
-                      icon: 'bx-cloud', 
-                      color: 'primary', 
-                      url: 'https://vercel.com/',
-                      badge_class: 'tech-badge' %>
-          <%= render 'shared/tech_badge', 
-                      text: 'Heroku', 
-                      icon: 'bx-cloud', 
-                      color: 'secondary', 
-                      url: 'https://www.heroku.com/',
-                      badge_class: 'tech-badge' %>
+        <div class="row">
+          <div class="col-6">
+            <p class="text-muted fw-semibold mb-2 fs-sm">IDEs</p>
+            <ul class="list-unstyled mb-0">
+              <%= render 'shared/tech_badge', 
+                          text: 'VS Code', 
+                          icon: 'bx-code-block', 
+                          color: 'primary', 
+                          url: 'https://code.visualstudio.com/',
+                          style: 'list' %>
+              <%= render 'shared/tech_badge', 
+                          text: 'Xcode', 
+                          icon: 'bxl-apple', 
+                          color: 'secondary', 
+                          url: 'https://developer.apple.com/xcode/',
+                          style: 'list' %>
+              <%= render 'shared/tech_badge', 
+                          text: 'Eclipse', 
+                          icon: 'bx-code-alt', 
+                          color: 'warning', 
+                          url: 'https://www.eclipse.org/',
+                          style: 'list' %>
+            </ul>
+          </div>
+          <div class="col-6">
+            <p class="text-muted fw-semibold mb-2 fs-sm">Cloud</p>
+            <ul class="list-unstyled mb-0">
+              <%= render 'shared/tech_badge', 
+                          text: 'Vercel', 
+                          icon: 'bx-cloud', 
+                          color: 'primary', 
+                          url: 'https://vercel.com/',
+                          style: 'list' %>
+              <%= render 'shared/tech_badge', 
+                          text: 'Heroku', 
+                          icon: 'bx-cloud', 
+                          color: 'purple', 
+                          url: 'https://www.heroku.com/',
+                          style: 'list' %>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
