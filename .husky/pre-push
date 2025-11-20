@@ -1,10 +1,5 @@
 #!/bin/sh
-# Run fast tests before push (skip slow system tests)
+# Run tests only for changed files before push
 # System tests run in CI for faster local development
 
-echo "Running rails tests..."
-bundle exec rails test
-
-# Run JavaScript tests
-echo "Running JavaScript tests..."
-npm test -- --passWithNoTests
+./bin/test-changed

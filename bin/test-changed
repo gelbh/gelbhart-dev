@@ -1,0 +1,238 @@
+#!/bin/bash
+# Run tests only for changed files
+# Compares current branch against remote tracking branch or main/master
+# 
+# Usage:
+#   ./bin/test-changed              # Run tests for changed files
+#   ./bin/test-changed --all        # Force run all tests
+#   CI=true ./bin/test-changed      # In CI, runs all tests if no base branch
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Check if --all flag is passed
+if [ "$1" = "--all" ]; then
+  echo -e "${GREEN}Running all tests (--all flag specified)...${NC}"
+  bundle exec rails test
+  npm test -- --passWithNoTests
+  exit 0
+fi
+
+# Get the remote tracking branch, fallback to main or master
+REMOTE_BRANCH=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || echo "")
+if [ -z "$REMOTE_BRANCH" ]; then
+  # Try to find main or master branch
+  if git show-ref --verify --quiet refs/heads/main; then
+    REMOTE_BRANCH="main"
+  elif git show-ref --verify --quiet refs/heads/master; then
+    REMOTE_BRANCH="master"
+  else
+    # In CI, if no base branch found, run all tests
+    if [ "$CI" = "true" ]; then
+      echo -e "${YELLOW}CI environment detected. No base branch found. Running all tests.${NC}"
+      bundle exec rails test
+      npm test -- --passWithNoTests
+      exit 0
+    else
+      echo -e "${YELLOW}Warning: No remote tracking branch found. Running all tests.${NC}"
+      bundle exec rails test
+      npm test -- --passWithNoTests
+      exit 0
+    fi
+  fi
+fi
+
+# Get changed files
+# Try comparing against remote branch, then local branch, then use git diff with merge base
+CHANGED_FILES=""
+if git rev-parse --verify "$REMOTE_BRANCH" >/dev/null 2>&1; then
+  CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR "$REMOTE_BRANCH" HEAD 2>/dev/null || echo "")
+fi
+
+if [ -z "$CHANGED_FILES" ]; then
+  # Try origin remote
+  if git rev-parse --verify "origin/$REMOTE_BRANCH" >/dev/null 2>&1; then
+    CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR "origin/$REMOTE_BRANCH" HEAD 2>/dev/null || echo "")
+  fi
+fi
+
+if [ -z "$CHANGED_FILES" ]; then
+  # Try using merge base
+  MERGE_BASE=$(git merge-base HEAD "$REMOTE_BRANCH" 2>/dev/null || git merge-base HEAD "origin/$REMOTE_BRANCH" 2>/dev/null || echo "")
+  if [ -n "$MERGE_BASE" ]; then
+    CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR "$MERGE_BASE" HEAD 2>/dev/null || echo "")
+  fi
+fi
+
+if [ -z "$CHANGED_FILES" ]; then
+  # In CI, if we can't determine changes, run all tests
+  if [ "$CI" = "true" ]; then
+    echo -e "${YELLOW}CI environment: Cannot determine changed files. Running all tests.${NC}"
+    bundle exec rails test
+    npm test -- --passWithNoTests
+    exit 0
+  else
+    echo -e "${GREEN}No changed files detected. Skipping tests.${NC}"
+    exit 0
+  fi
+fi
+
+echo -e "${GREEN}Detected changed files:${NC}"
+echo "$CHANGED_FILES" | sed 's/^/  - /'
+
+# Files that require running all tests
+CRITICAL_FILES=(
+  "test/test_helper.rb"
+  "test/system_test_helper.rb"
+  "config/"
+  "Gemfile"
+  "Gemfile.lock"
+  "package.json"
+  "package-lock.json"
+  "jest.config.js"
+  "app/javascript/__tests__/setup.js"
+)
+
+# Check if any critical files changed
+RUN_ALL_TESTS=false
+for file in $CHANGED_FILES; do
+  for critical in "${CRITICAL_FILES[@]}"; do
+    if [[ "$file" == "$critical"* ]]; then
+      echo -e "${YELLOW}Critical file changed ($file). Running all tests.${NC}"
+      RUN_ALL_TESTS=true
+      break 2
+    fi
+  done
+done
+
+if [ "$RUN_ALL_TESTS" = true ]; then
+  echo -e "${GREEN}Running all Rails tests...${NC}"
+  bundle exec rails test
+  
+  echo -e "${GREEN}Running all JavaScript tests...${NC}"
+  npm test -- --passWithNoTests
+  exit 0
+fi
+
+# Collect test files to run
+RAILS_TEST_FILES=()
+JS_TEST_FILES=()
+HAS_CHANGES=false
+
+while IFS= read -r file; do
+  # Skip deleted files and test files themselves (they'll be run directly)
+  if [[ "$file" == *.rb ]] && [[ "$file" != test/* ]] && [[ "$file" != bin/* ]]; then
+    # Map source file to test file
+    if [[ "$file" == app/models/* ]]; then
+      model_name=$(basename "$file" .rb)
+      test_file="test/models/${model_name}_test.rb"
+      if [ -f "$test_file" ]; then
+        RAILS_TEST_FILES+=("$test_file")
+        HAS_CHANGES=true
+      fi
+    elif [[ "$file" == app/controllers/* ]]; then
+      controller_name=$(basename "$file" .rb | sed 's/_controller$//')
+      test_file="test/requests/${controller_name}_test.rb"
+      if [ -f "$test_file" ]; then
+        RAILS_TEST_FILES+=("$test_file")
+        HAS_CHANGES=true
+      fi
+      # Also check for system tests
+      system_test_file="test/system/${controller_name}_test.rb"
+      if [ -f "$system_test_file" ]; then
+        RAILS_TEST_FILES+=("$system_test_file")
+        HAS_CHANGES=true
+      fi
+    elif [[ "$file" == app/services/* ]]; then
+      service_name=$(basename "$file" .rb)
+      test_file="test/services/${service_name}_test.rb"
+      if [ -f "$test_file" ]; then
+        RAILS_TEST_FILES+=("$test_file")
+        HAS_CHANGES=true
+      fi
+    elif [[ "$file" == app/mailers/* ]]; then
+      mailer_name=$(basename "$file" .rb)
+      test_file="test/mailers/${mailer_name}_test.rb"
+      if [ -f "$test_file" ]; then
+        RAILS_TEST_FILES+=("$test_file")
+        HAS_CHANGES=true
+      fi
+    elif [[ "$file" == app/jobs/* ]]; then
+      job_name=$(basename "$file" .rb)
+      test_file="test/jobs/${job_name}_test.rb"
+      if [ -f "$test_file" ]; then
+        RAILS_TEST_FILES+=("$test_file")
+        HAS_CHANGES=true
+      fi
+    fi
+  elif [[ "$file" == test/**/*_test.rb ]] || [[ "$file" == test/**/*test.rb ]]; then
+    # Test file itself changed
+    RAILS_TEST_FILES+=("$file")
+    HAS_CHANGES=true
+  elif [[ "$file" == app/javascript/**/*.js ]] && [[ "$file" != app/javascript/__tests__/** ]]; then
+    # JavaScript source file changed - find corresponding test
+    js_file=$(echo "$file" | sed 's|app/javascript/||')
+    # Try to find test file in same directory or __tests__ directory
+    test_file="app/javascript/__tests__/${js_file%.js}.test.js"
+    if [ -f "$test_file" ]; then
+      JS_TEST_FILES+=("$test_file")
+      HAS_CHANGES=true
+    else
+      # Try finding test in parent __tests__ directory
+      dir=$(dirname "$js_file")
+      base=$(basename "$js_file" .js)
+      test_file="app/javascript/${dir}/__tests__/${base}.test.js"
+      if [ -f "$test_file" ]; then
+        JS_TEST_FILES+=("$test_file")
+        HAS_CHANGES=true
+      fi
+    fi
+  elif [[ "$file" == app/javascript/__tests__/**/*.test.js ]]; then
+    # JavaScript test file itself changed
+    JS_TEST_FILES+=("$file")
+    HAS_CHANGES=true
+  fi
+done <<< "$CHANGED_FILES"
+
+# Remove duplicates
+RAILS_TEST_FILES=($(printf "%s\n" "${RAILS_TEST_FILES[@]}" | sort -u))
+JS_TEST_FILES=($(printf "%s\n" "${JS_TEST_FILES[@]}" | sort -u))
+
+# Run Rails tests
+if [ ${#RAILS_TEST_FILES[@]} -gt 0 ]; then
+  echo -e "${GREEN}Running Rails tests for changed files:${NC}"
+  printf '%s\n' "${RAILS_TEST_FILES[@]}" | sed 's/^/  - /'
+  bundle exec rails test "${RAILS_TEST_FILES[@]}"
+else
+  echo -e "${GREEN}No Rails tests to run for changed files.${NC}"
+fi
+
+# Run JavaScript tests
+if [ ${#JS_TEST_FILES[@]} -gt 0 ]; then
+  echo -e "${GREEN}Running JavaScript tests for changed files:${NC}"
+  printf '%s\n' "${JS_TEST_FILES[@]}" | sed 's/^/  - /'
+  # Run each test file individually (more reliable than testPathPattern)
+  for test_file in "${JS_TEST_FILES[@]}"; do
+    npm test -- --passWithNoTests "$test_file"
+  done
+else
+  echo -e "${GREEN}No JavaScript tests to run for changed files.${NC}"
+fi
+
+# If no tests were found but files changed, warn user (but don't fail)
+if [ "$HAS_CHANGES" = false ] && [ ${#RAILS_TEST_FILES[@]} -eq 0 ] && [ ${#JS_TEST_FILES[@]} -eq 0 ]; then
+  echo -e "${YELLOW}Warning: Changed files detected but no corresponding tests found.${NC}"
+  echo -e "${YELLOW}Consider adding tests for:${NC}"
+  echo "$CHANGED_FILES" | grep -v "^test/" | grep -v "^app/javascript/__tests__/" | sed 's/^/  - /'
+  # Exit successfully - missing tests is a warning, not an error
+  exit 0
+fi
+
+# Exit successfully if we got here
+exit 0
+
