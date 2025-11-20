@@ -1,23 +1,38 @@
+<% style = local_assigns.fetch(:style, 'badge') %>
 <% size = local_assigns.fetch(:size, 'md') %>
 <% icon = local_assigns[:icon] %>
 <% url = local_assigns[:url] %>
 <% badge_class = local_assigns.fetch(:badge_class, 'project-badge') %>
 <% extra_classes = local_assigns[:extra_classes] || '' %>
-<% size_classes = {'sm' => 'fs-xs', 'md' => '', 'lg' => 'fs-6'} %>
-<% size_class = size_classes[size] || '' %>
-<% all_classes = "badge #{badge_class} bg-#{color} bg-opacity-10 text-#{color} #{size_class} #{extra_classes}".strip %>
-<% if url.present? %>
-  <a href="<%= url %>" target="_blank" rel="noopener noreferrer" class="<%= all_classes %> text-decoration-none">
+
+<% if style == 'list' %>
+  <li class="tech-item">
     <% if icon.present? %>
-      <i class="bx <%= icon %> me-1"></i>
+      <i class="bx <%= icon %> text-<%= color %> me-2"></i>
     <% end %>
-    <%= text %>
-  </a>
+    <% if url.present? %>
+      <a href="<%= url %>" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body"><%= text %></a>
+    <% else %>
+      <span class="text-body"><%= text %></span>
+    <% end %>
+  </li>
 <% else %>
-  <span class="<%= all_classes %>">
-    <% if icon.present? %>
-      <i class="bx <%= icon %> me-1"></i>
-    <% end %>
-    <%= text %>
-  </span>
+  <% size_classes = {'sm' => 'fs-xs', 'md' => '', 'lg' => 'fs-6'} %>
+  <% size_class = size_classes[size] || '' %>
+  <% all_classes = "badge #{badge_class} bg-#{color} bg-opacity-10 text-#{color} #{size_class} #{extra_classes}".strip %>
+  <% if url.present? %>
+    <a href="<%= url %>" target="_blank" rel="noopener noreferrer" class="<%= all_classes %> text-decoration-none">
+      <% if icon.present? %>
+        <i class="bx <%= icon %> me-1"></i>
+      <% end %>
+      <%= text %>
+    </a>
+  <% else %>
+    <span class="<%= all_classes %>">
+      <% if icon.present? %>
+        <i class="bx <%= icon %> me-1"></i>
+      <% end %>
+      <%= text %>
+    </span>
+  <% end %>
 <% end %>
