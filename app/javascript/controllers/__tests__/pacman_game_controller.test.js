@@ -1,4 +1,4 @@
-import PacmanGameController from "../pacman_controller";
+import PacmanGameController from "../pacman/game_controller";
 
 describe("PacmanGameController", () => {
   let controller;
