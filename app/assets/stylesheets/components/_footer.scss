@@ -9,12 +9,23 @@
   box-shadow: none;
 }
 
-.footer .navbar-brand:hover .logo-wrapper {
-  transform: translateY(-6px);
-  background: rgba(255, 255, 255, 0.95);
-  border-color: rgba(99, 102, 241, 0.4);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 0 15px rgba(99, 102, 241, 0.3),
-    0 0 30px rgba(99, 102, 241, 0.2), inset 0 0 20px rgba(99, 102, 241, 0.1);
+.footer .navbar-brand {
+  touch-action: manipulation;
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover .logo-wrapper {
+      transform: translateY(-6px);
+      background: rgba(255, 255, 255, 0.95);
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2),
+        0 0 15px rgba(99, 102, 241, 0.3), 0 0 30px rgba(99, 102, 241, 0.2),
+        inset 0 0 20px rgba(99, 102, 241, 0.1);
+    }
+  }
+
+  &:active .logo-wrapper {
+    transform: translateY(-3px);
+  }
 }
 
 .footer .navbar-brand span {
@@ -22,9 +33,17 @@
   opacity: 0.9;
 }
 
-.footer .navbar-brand:hover span {
-  opacity: 1;
-  text-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+.footer .navbar-brand {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover span {
+      opacity: 1;
+      text-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+    }
+  }
+
+  &:active span {
+    opacity: 0.95;
+  }
 }
 
 // Social button enhancements with brand colors
@@ -32,66 +51,139 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-}
+  touch-action: manipulation;
+  min-height: 44px;
+  min-width: 44px;
 
-.social-btn i {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  z-index: 1;
-}
+  @media (any-pointer: coarse) {
+    min-height: 48px;
+    min-width: 48px;
+  }
 
-.social-btn:hover i {
-  transform: scale(1.2) rotate(5deg);
+  i {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover i {
+      transform: scale(1.2) rotate(5deg);
+    }
+  }
+
+  &:active i {
+    transform: scale(1.1) rotate(3deg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
 }
 
 // GitHub hover - dark gray/black
-.social-github:hover {
-  background-color: #333 !important;
-  border-color: #333 !important;
-  box-shadow: 0 4px 12px rgba(51, 51, 51, 0.4);
-  transform: translateY(-3px);
+.social-github {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-color: #333 !important;
+      border-color: #333 !important;
+      box-shadow: 0 4px 12px rgba(51, 51, 51, 0.4);
+      transform: translateY(-3px);
+    }
+  }
+
+  &:active {
+    background-color: #333 !important;
+    border-color: #333 !important;
+    transform: translateY(-1px);
+  }
 }
 
 // LinkedIn hover - LinkedIn blue
-.social-linkedin:hover {
-  background-color: #0077b5 !important;
-  border-color: #0077b5 !important;
-  box-shadow: 0 4px 12px rgba(0, 119, 181, 0.4);
-  transform: translateY(-3px);
+.social-linkedin {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-color: #0077b5 !important;
+      border-color: #0077b5 !important;
+      box-shadow: 0 4px 12px rgba(0, 119, 181, 0.4);
+      transform: translateY(-3px);
+    }
+  }
+
+  &:active {
+    background-color: #0077b5 !important;
+    border-color: #0077b5 !important;
+    transform: translateY(-1px);
+  }
 }
 
 // Email hover - primary color
-.social-email:hover {
-  background-color: #6366f1 !important;
-  border-color: #6366f1 !important;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-  transform: translateY(-3px);
+.social-email {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-color: #6366f1 !important;
+      border-color: #6366f1 !important;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+      transform: translateY(-3px);
+    }
+  }
+
+  &:active {
+    background-color: #6366f1 !important;
+    border-color: #6366f1 !important;
+    transform: translateY(-1px);
+  }
 }
 
 // Footer link hover with underline animation
 .footer-link {
   position: relative;
   transition: all 0.3s ease;
-}
+  touch-action: manipulation;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
 
-.footer-link::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0;
-  height: 2px;
-  background: #6366f1;
-  transform: translateX(-50%);
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+  @media (any-pointer: coarse) {
+    min-height: 48px;
+    padding: 0.5rem 0;
+  }
 
-.footer-link:hover {
-  color: #6366f1 !important;
-}
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: #6366f1;
+    transform: translateX(-50%);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
-.footer-link:hover::after {
-  width: 80%;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      color: #6366f1 !important;
+    }
+
+    &:hover::after {
+      width: 80%;
+    }
+  }
+
+  &:active {
+    color: #6366f1 !important;
+  }
+
+  &:active::after {
+    width: 60%;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
 }
 
 // Back to Top Button
@@ -123,10 +215,26 @@
   transform: translateY(0);
 }
 
-.btn-scroll-top:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.6);
-  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+.btn-scroll-top {
+  touch-action: manipulation;
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.6);
+      background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+    }
+  }
+
+  &:active {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.5);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
 }
 
 .btn-scroll-top i {
@@ -156,5 +264,13 @@
 
   .btn-scroll-top i {
     font-size: 1.25rem;
+  }
+}
+
+// Ensure touch target sizes on mobile
+@media (any-pointer: coarse) {
+  .btn-scroll-top {
+    min-width: 48px;
+    min-height: 48px;
   }
 }

@@ -74,3 +74,63 @@ body:has(.error-page) {
   max-height: 100vh;
   overflow: hidden;
 }
+
+// ============================================
+// GLOBAL TOUCH OPTIMIZATIONS
+// ============================================
+
+// Buttons - disable double-tap zoom and ensure touch targets
+button,
+.btn,
+a[role="button"],
+input[type="button"],
+input[type="submit"] {
+  touch-action: manipulation;
+  min-height: 44px;
+  min-width: 44px;
+
+  @media (any-pointer: coarse) {
+    min-height: 48px;
+    min-width: 48px;
+  }
+}
+
+// Links - ensure adequate touch targets
+a:not(.btn):not(.nav-link):not(.dropdown-item):not(.mobile-nav-link):not(
+    .mobile-nav-sublink
+  ) {
+  @media (any-pointer: coarse) {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+// Scrollable containers - allow vertical scrolling
+body,
+.page-wrapper,
+.container {
+  touch-action: pan-y;
+}
+
+// Form inputs - prevent iOS zoom and ensure touch-friendly sizes
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  font-size: 16px; // Prevent iOS zoom
+  touch-action: manipulation;
+
+  @media (any-pointer: coarse) {
+    min-height: 48px;
+    padding: 12px 16px;
+  }
+}
+
+// Checkboxes and radio buttons - ensure touch targets
+input[type="checkbox"],
+input[type="radio"] {
+  @media (any-pointer: coarse) {
+    min-width: 48px;
+    min-height: 48px;
+  }
+}
