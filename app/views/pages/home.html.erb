@@ -97,21 +97,41 @@
         </div>
         <!-- Tech Stack Badges with Animation -->
         <div class="d-flex flex-wrap gap-2 justify-content-center pt-4 mt-2 fade-in-up delay-4">
-          <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank" rel="noopener noreferrer" class="badge bg-secondary bg-opacity-10 text-body fs-sm fw-normal px-3 py-2 badge-hover text-decoration-none">
-            <i class="bx bxl-javascript text-warning me-1"></i> JavaScript
-          </a>
-          <a href="https://www.python.org/" target="_blank" rel="noopener noreferrer" class="badge bg-secondary bg-opacity-10 text-body fs-sm fw-normal px-3 py-2 badge-hover text-decoration-none">
-            <i class="bx bxl-python text-primary me-1"></i> Python
-          </a>
-          <a href="https://rubyonrails.org/" target="_blank" rel="noopener noreferrer" class="badge bg-secondary bg-opacity-10 text-body fs-sm fw-normal px-3 py-2 badge-hover text-decoration-none">
-            <i class="bx bxs-badge-check text-danger me-1"></i> Ruby on Rails
-          </a>
-          <a href="https://www.java.com/" target="_blank" rel="noopener noreferrer" class="badge bg-secondary bg-opacity-10 text-body fs-sm fw-normal px-3 py-2 badge-hover text-decoration-none">
-            <i class="bx bxl-java text-danger me-1"></i> Java
-          </a>
-          <a href="https://www.ibm.com/topics/artificial-intelligence" target="_blank" rel="noopener noreferrer" class="badge bg-secondary bg-opacity-10 text-body fs-sm fw-normal px-3 py-2 badge-hover text-decoration-none">
-            <i class="bx bx-brain text-info me-1"></i> AI/ML
-          </a>
+          <%= render 'shared/tech_badge', 
+                      text: 'JavaScript', 
+                      icon: 'bxl-javascript', 
+                      color: 'secondary', 
+                      url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript',
+                      badge_class: 'hero-badge',
+                      extra_classes: 'text-body fs-sm fw-normal px-3 py-2 badge-hover' %>
+          <%= render 'shared/tech_badge', 
+                      text: 'Python', 
+                      icon: 'bxl-python', 
+                      color: 'secondary', 
+                      url: 'https://www.python.org/',
+                      badge_class: 'hero-badge',
+                      extra_classes: 'text-body fs-sm fw-normal px-3 py-2 badge-hover' %>
+          <%= render 'shared/tech_badge', 
+                      text: 'Ruby on Rails', 
+                      icon: 'bxs-badge-check', 
+                      color: 'secondary', 
+                      url: 'https://rubyonrails.org/',
+                      badge_class: 'hero-badge',
+                      extra_classes: 'text-body fs-sm fw-normal px-3 py-2 badge-hover' %>
+          <%= render 'shared/tech_badge', 
+                      text: 'Java', 
+                      icon: 'bxl-java', 
+                      color: 'secondary', 
+                      url: 'https://www.java.com/',
+                      badge_class: 'hero-badge',
+                      extra_classes: 'text-body fs-sm fw-normal px-3 py-2 badge-hover' %>
+          <%= render 'shared/tech_badge', 
+                      text: 'AI/ML', 
+                      icon: 'bx-brain', 
+                      color: 'secondary', 
+                      url: 'https://www.ibm.com/topics/artificial-intelligence',
+                      badge_class: 'hero-badge',
+                      extra_classes: 'text-body fs-sm fw-normal px-3 py-2 badge-hover' %>
         </div>
       </div>
     </div>
@@ -128,78 +148,30 @@
 <section id="projects" class="container py-5" data-controller="scroll-animation">
   <%= render 'shared/section_header', title: 'Featured Projects' %>
   <!-- Project cards -->
-  <div class="row g-4 justify-content-center">
-    <!-- Hevy Tracker Card -->
-    <div class="col-lg-4 col-md-6">
-      <%= render 'shared/project_card',
-                icon: 'bx-dumbbell',
-                color: 'primary',
-                title: 'Hevy Tracker',
-                subtitle: 'Google Apps Script',
-                description: 'Connect your Hevy workout data to Google Sheets™ with secure OAuth integration. Automatically sync your fitness progress.',
-                badges: [
-                    {text: 'OAuth 2.0', color: 'success', url: 'https://oauth.net/2/'},
-                    {text: 'Google Apps', color: 'info', url: 'https://workspace.google.com/'}
-                ],
-                link_text: 'Learn More',
-                link_url: hevy_tracker_path,
-                animation_delay: 'fade-in-view delay-1' %>
+  <% cache @projects do %>
+    <div class="row g-4 justify-content-center">
+      <% @projects.each_with_index do |project, index| %>
+        <% cache project do %>
+          <div class="col-lg-4 col-md-6">
+            <%= render 'shared/project_card',
+                      icon: project.icon,
+                      color: project.color,
+                      title: project.title,
+                      subtitle: project.subtitle,
+                      description: project.description,
+                      badges: project.normalized_badges,
+                      link_text: project.link_text,
+                      link_url: project_link_url(project),
+                      link_icon: project.link_icon,
+                      link_target: project.link_target,
+                      link_rel: project.link_rel,
+                      github_url: project.github_url,
+                      animation_delay: "fade-in-view delay-#{index + 1}" %>
+          </div>
+        <% end %>
+      <% end %>
     </div>
-    <!-- Video Captioner Card -->
-    <div class="col-lg-4 col-md-6">
-      <%= render 'shared/project_card',
-                icon: 'bx-video',
-                color: 'success',
-                title: 'Video Captioner',
-                subtitle: 'AI-Powered Tool',
-                description: 'Generate and translate video captions from YouTube videos or local files. Powered by AI transcription with 15+ languages.',
-                badges: [
-                    {text: 'Whisper AI', color: 'primary', url: 'https://openai.com/research/whisper'},
-                    {text: 'Python', color: 'warning', url: 'https://www.python.org/'}
-                ],
-                link_text: 'Learn More',
-                link_url: video_captioner_path,
-                animation_delay: 'fade-in-view delay-2' %>
-    </div>
-    <!-- NASA Exoplanet Explorer Card -->
-    <div class="col-lg-4 col-md-6">
-      <%= render 'shared/project_card',
-                icon: 'bx-planet',
-                color: 'info',
-                title: 'NASA Exoplanet Explorer',
-                subtitle: '3D Visualization Tool',
-                description: 'Interactive 3D visualization tool for exploring 5000+ confirmed exoplanets from NASA\'s Exoplanet Archive. Built with React, Three.js, and Express.',
-                badges: [
-                    {text: 'React', color: 'primary', url: 'https://react.dev/'},
-                    {text: 'Three.js', color: 'warning', url: 'https://threejs.org/'},
-                    {text: 'Node.js', color: 'success', url: 'https://nodejs.org/'}
-                ],
-                link_text: 'Learn More',
-                link_url: nasa_exoplanet_explorer_path,
-                github_url: 'https://github.com/gelbh/nasa-exoplanet-explorer',
-                animation_delay: 'fade-in-view delay-3' %>
-    </div>
-    <!-- Robot Motion Planning Card -->
-    <div class="col-lg-4 col-md-6">
-      <%= render 'shared/project_card',
-                icon: 'bx-brain',
-                color: 'warning',
-                title: 'Robot Motion Planning',
-                subtitle: 'MATLAB Application',
-                description: 'Genetic algorithm implementation for robot path optimization with interactive UI, dynamic parameter adjustment, and real-time visualization.',
-                badges: [
-                    {text: 'MATLAB', color: 'danger', url: 'https://www.mathworks.com/products/matlab.html'},
-                    {text: 'Genetic Algorithm', color: 'info', url: 'https://en.wikipedia.org/wiki/Genetic_algorithm'},
-                    {text: 'Path Planning', color: 'success', url: 'https://en.wikipedia.org/wiki/Motion_planning'}
-                ],
-                link_text: 'View on GitHub',
-                link_url: 'https://github.com/gelbh/robot-motion-planning',
-                link_icon: 'bxl-github',
-                link_target: '_blank',
-                link_rel: 'noopener',
-                animation_delay: 'fade-in-view delay-4' %>
-    </div>
-  </div>
+  <% end %>
 </section>
 <!-- Technologies & Skills Section -->
 <section id="technologies" class="container py-5 my-5" data-controller="scroll-animation">
@@ -215,32 +187,53 @@
         </div>
         <h3 class="h5 mb-4">Programming Languages</h3>
         <div class="d-flex flex-wrap gap-2 justify-content-center">
-          <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank" rel="noopener noreferrer" class="badge tech-badge bg-warning bg-opacity-10 text-warning text-decoration-none">
-            <i class="bx bxl-javascript me-1"></i>JavaScript
-          </a>
-          <a href="https://www.python.org/" target="_blank" rel="noopener noreferrer" class="badge tech-badge bg-primary bg-opacity-10 text-primary text-decoration-none">
-            <i class="bx bxl-python me-1"></i>Python
-          </a>
-          <a href="https://www.java.com/" target="_blank" rel="noopener noreferrer" class="badge tech-badge bg-danger bg-opacity-10 text-danger text-decoration-none">
-            <i class="bx bxl-java me-1"></i>Java
-          </a>
-          <a href="https://www.ruby-lang.org/" target="_blank" rel="noopener noreferrer" class="badge tech-badge bg-danger bg-opacity-10 text-danger text-decoration-none">
-            <i class="bx bxs-badge-check me-1"></i>Ruby
-          </a>
-          <a href="https://en.cppreference.com/w/c" target="_blank" rel="noopener noreferrer" class="badge tech-badge bg-info bg-opacity-10 text-info text-decoration-none">
-            <i class="bx bx-code-curly me-1"></i>C
-          </a>
-          <a href="https://www.w3schools.com/sql/" target="_blank" rel="noopener noreferrer" class="badge tech-badge bg-info bg-opacity-10 text-info text-decoration-none">
-            <i class="bx bx-data me-1"></i>SQL
-          </a>
-          <a href="https://developer.mozilla.org/en-US/docs/Web/HTML" target="_blank" rel="noopener noreferrer" class="badge tech-badge bg-danger bg-opacity-10 text-danger text-decoration-none">
-            <i class="bx bxl-html5 me-1"></i>HTML/CSS
-          </a>
+          <%= render 'shared/tech_badge', 
+                      text: 'JavaScript', 
+                      icon: 'bxl-javascript', 
+                      color: 'warning', 
+                      url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript',
+                      badge_class: 'tech-badge' %>
+          <%= render 'shared/tech_badge', 
+                      text: 'Python', 
+                      icon: 'bxl-python', 
+                      color: 'primary', 
+                      url: 'https://www.python.org/',
+                      badge_class: 'tech-badge' %>
+          <%= render 'shared/tech_badge', 
+                      text: 'Java', 
+                      icon: 'bxl-java', 
+                      color: 'danger', 
+                      url: 'https://www.java.com/',
+                      badge_class: 'tech-badge' %>
+          <%= render 'shared/tech_badge', 
+                      text: 'Ruby', 
+                      icon: 'bxs-badge-check', 
+                      color: 'danger', 
+                      url: 'https://www.ruby-lang.org/',
+                      badge_class: 'tech-badge' %>
+          <%= render 'shared/tech_badge', 
+                      text: 'C', 
+                      icon: 'bx-code-curly', 
+                      color: 'info', 
+                      url: 'https://en.cppreference.com/w/c',
+                      badge_class: 'tech-badge' %>
+          <%= render 'shared/tech_badge', 
+                      text: 'SQL', 
+                      icon: 'bx-data', 
+                      color: 'info', 
+                      url: 'https://www.w3schools.com/sql/',
+                      badge_class: 'tech-badge' %>
+          <%= render 'shared/tech_badge', 
+                      text: 'HTML/CSS', 
+                      icon: 'bxl-html5', 
+                      color: 'danger', 
+                      url: 'https://developer.mozilla.org/en-US/docs/Web/HTML',
+                      badge_class: 'tech-badge' %>
         </div>
       </div>
     </div>
   </div>
-  <!-- Frameworks & Libraries - Consolidated -->
+  <!-- Frameworks & Libraries  -->
   <div class="row g-4 mb-4">
     <div class="col-lg-6 fade-in-view delay-1">
       <div class="tech-card h-100">
