@@ -119,17 +119,38 @@
       <div class="card nasa-exoplanet-explorer-card border-0 shadow mb-4 fade-in-view delay-3">
         <div class="card-body p-4">
           <div class="d-flex align-items-center mb-3">
-            <div class="bg-info bg-opacity-10 rounded-circle p-3 me-3">
-              <i class="bx bx-code-alt fs-4 text-info"></i>
+            <div class="me-3">
+              <%= render 'shared/icon_circle', icon: 'bx-code-alt', color: 'info', size: 'md' %>
             </div>
             <h3 class="h4 mb-0">Powered By</h3>
           </div>
           <div class="d-flex flex-wrap gap-2">
-            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">React</span>
-            <span class="badge bg-warning bg-opacity-10 text-warning px-3 py-2">Three.js</span>
-            <span class="badge bg-success bg-opacity-10 text-success px-3 py-2">Node.js</span>
-            <span class="badge bg-info bg-opacity-10 text-info px-3 py-2">Express</span>
-            <a href="https://exoplanetarchive.ipac.caltech.edu/docs/TAP/usingTAP.html" target="_blank" rel="noopener noreferrer" class="badge bg-danger bg-opacity-10 text-danger px-3 py-2 text-decoration-none" title="NASA Exoplanet Archive TAP Protocol">NASA API</a>
+            <%= render 'shared/tech_badge', 
+                        text: 'React', 
+                        color: 'primary', 
+                        url: 'https://react.dev/',
+                        extra_classes: 'px-3 py-2' %>
+            <%= render 'shared/tech_badge', 
+                        text: 'Three.js', 
+                        color: 'warning', 
+                        url: 'https://threejs.org/',
+                        extra_classes: 'px-3 py-2' %>
+            <%= render 'shared/tech_badge', 
+                        text: 'Node.js', 
+                        color: 'success', 
+                        url: 'https://nodejs.org/',
+                        extra_classes: 'px-3 py-2' %>
+            <%= render 'shared/tech_badge', 
+                        text: 'Express', 
+                        color: 'info', 
+                        url: 'https://expressjs.com/',
+                        extra_classes: 'px-3 py-2' %>
+            <%= render 'shared/tech_badge', 
+                        text: 'NASA API', 
+                        color: 'danger', 
+                        url: 'https://exoplanetarchive.ipac.caltech.edu/docs/TAP/usingTAP.html',
+                        extra_classes: 'px-3 py-2',
+                        badge_class: 'project-badge' %>
           </div>
         </div>
       </div>
