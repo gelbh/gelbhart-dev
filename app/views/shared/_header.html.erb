@@ -72,19 +72,19 @@
               <div class="collapse" id="mobileProjectsDropdown">
                 <ul class="mobile-nav-sublist">
                   <li>
-                    <%= link_to hevy_tracker_path, class: "mobile-nav-sublink d-flex align-items-center #{current_page?(hevy_tracker_path) ? 'active' : ''}" do %>
+                    <%= link_to hevy_tracker_path, class: "mobile-nav-sublink d-flex align-items-center #{current_page?(hevy_tracker_path) ? 'active' : ''}", data: { bs_dismiss: "modal" } do %>
                       <i class="bx bx-dumbbell me-2"></i>
                       Hevy Tracker
                     <% end %>
                   </li>
                   <li>
-                    <%= link_to video_captioner_path, class: "mobile-nav-sublink d-flex align-items-center #{current_page?(video_captioner_path) ? 'active' : ''}" do %>
+                    <%= link_to video_captioner_path, class: "mobile-nav-sublink d-flex align-items-center #{current_page?(video_captioner_path) ? 'active' : ''}", data: { bs_dismiss: "modal" } do %>
                       <i class="bx bx-video me-2"></i>
                       Video Captioner
                     <% end %>
                   </li>
                   <li>
-                    <%= link_to nasa_exoplanet_explorer_path, class: "mobile-nav-sublink d-flex align-items-center #{current_page?(nasa_exoplanet_explorer_path) ? 'active' : ''}" do %>
+                    <%= link_to nasa_exoplanet_explorer_path, class: "mobile-nav-sublink d-flex align-items-center #{current_page?(nasa_exoplanet_explorer_path) ? 'active' : ''}", data: { bs_dismiss: "modal" } do %>
                       <i class="bx bx-planet me-2"></i>
                       NASA Exoplanet Explorer
                     <% end %>
@@ -93,7 +93,7 @@
               </div>
             </li>
             <li class="mobile-nav-item">
-              <%= link_to contact_path, class: "mobile-nav-link d-flex align-items-center #{current_page?(contact_path) ? 'active' : ''}" do %>
+              <%= link_to contact_path, class: "mobile-nav-link d-flex align-items-center #{current_page?(contact_path) ? 'active' : ''}", data: { bs_dismiss: "modal" } do %>
                 <i class="bx bx-envelope me-2"></i>
                 <span>Contact</span>
               <% end %>

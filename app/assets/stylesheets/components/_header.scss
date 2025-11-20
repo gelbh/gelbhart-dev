@@ -367,6 +367,23 @@
     transition: transform 0.3s ease !important;
   }
 
+  // Base state when expanded (not hovering)
+  .mobile-nav-link[aria-expanded="true"]:not(:hover) .mobile-nav-chevron {
+    transform: rotate(180deg) !important;
+  }
+
+  // Hover state for chevron - when collapsed and hovering
+  .mobile-nav-link:hover:not([aria-expanded="true"]) .mobile-nav-chevron {
+    transform: rotate(15deg) scale(1.1) !important;
+  }
+
+  // Hover state for chevron - when expanded and hovering
+  // This needs to come after the base expanded state
+  .mobile-nav-link[aria-expanded="true"]:hover .mobile-nav-chevron {
+    transform: rotate(195deg) scale(1.1) !important;
+  }
+
+  // Fallback for when aria-expanded is true but no hover (for non-hover devices)
   .mobile-nav-link[aria-expanded="true"] .mobile-nav-chevron {
     transform: rotate(180deg) !important;
   }
