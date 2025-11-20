@@ -11,11 +11,25 @@
   transition: all 0.4s var(--ease-smooth);
   text-align: center;
   box-shadow: var(--shadow-sm);
+  touch-action: manipulation;
 
-  &:hover {
-    transform: translateY(-8px);
-    border-color: rgba(var(--color-primary), 0.3);
-    box-shadow: 0 1rem 2rem rgba(var(--color-primary), 0.15);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-8px);
+      border-color: rgba(var(--color-primary), 0.3);
+      box-shadow: 0 1rem 2rem rgba(var(--color-primary), 0.15);
+    }
+  }
+
+  &:active {
+    transform: translateY(-4px);
+    border-color: rgba(var(--color-primary), 0.25);
+    box-shadow: 0 0.75rem 1.5rem rgba(var(--color-primary), 0.12);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
   }
 }
 
@@ -45,11 +59,21 @@
     transition: all 0.4s var(--ease-smooth);
   }
 
-  .tech-card:hover & {
-    transform: scale(1.1) rotate(5deg);
+  @media (hover: hover) and (pointer: fine) {
+    .tech-card:hover & {
+      transform: scale(1.1) rotate(5deg);
+
+      i {
+        transform: scale(1.1);
+      }
+    }
+  }
+
+  .tech-card:active & {
+    transform: scale(1.05) rotate(3deg);
 
     i {
-      transform: scale(1.1);
+      transform: scale(1.05);
     }
   }
 }
@@ -63,18 +87,40 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  touch-action: manipulation;
+  min-height: 44px;
+
+  @media (any-pointer: coarse) {
+    min-height: 48px;
+  }
 
   i {
     transition: transform var(--transition-normal) ease;
   }
 
-  &:hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      color: var(--color-primary);
+      transform: translateX(5px);
+
+      i {
+        transform: scale(1.2);
+      }
+    }
+  }
+
+  &:active {
     color: var(--color-primary);
-    transform: translateX(5px);
+    transform: translateX(2px);
 
     i {
-      transform: scale(1.2);
+      transform: scale(1.1);
     }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
   }
 }
 
@@ -85,10 +131,18 @@
   font-weight: 500;
   transition: all var(--transition-normal) ease;
   cursor: default;
+  touch-action: manipulation;
 
-  &:hover {
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 4px 12px rgba(var(--color-primary), 0.2);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 4px 12px rgba(var(--color-primary), 0.2);
+    }
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 2px 8px rgba(var(--color-primary), 0.15);
   }
 }
 

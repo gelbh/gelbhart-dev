@@ -152,8 +152,15 @@
 // Button pulse effect
 .btn-pulse {
   animation: pulse var(--duration-pulse) ease infinite;
+  touch-action: manipulation;
 
-  &:hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      animation: none;
+    }
+  }
+
+  &:active {
     animation: none;
   }
 }
@@ -162,10 +169,23 @@
 .badge-hover {
   transition: all var(--transition-normal) ease;
   cursor: default;
+  touch-action: manipulation;
 
-  &:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 4px 12px rgba(var(--color-primary), 0.2);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 4px 12px rgba(var(--color-primary), 0.2);
+    }
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 2px 8px rgba(var(--color-primary), 0.15);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
   }
 }
 
@@ -181,9 +201,16 @@
   text-align: center;
   z-index: var(--z-floating);
   color: inherit;
+  touch-action: manipulation;
 
-  &:hover .scroll-indicator-arrow {
-    transform: translateY(5px);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover .scroll-indicator-arrow {
+      transform: translateY(5px);
+    }
+  }
+
+  &:active .scroll-indicator-arrow {
+    transform: translateY(3px);
   }
 }
 

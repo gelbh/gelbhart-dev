@@ -82,9 +82,12 @@ function initializeMobileMenuCollapse() {
     });
   }
 
-  // Handle toggle click - ensure it works on both mouse and touch devices
+  // Handle toggle using Pointer Events API - works for mouse, touch, and pen
   // Since the HTML has onclick="event.preventDefault()", we need to manually toggle
-  projectsToggle.addEventListener("click", (e) => {
+  // Use pointerdown for better touch responsiveness
+  const handleToggle = (e) => {
+    // Prevent default to avoid double-firing with click
+    e.preventDefault();
     const isExpanded = projectsDropdown.classList.contains("show");
 
     // Toggle the collapse
@@ -99,7 +102,17 @@ function initializeMobileMenuCollapse() {
       "aria-expanded",
       !isExpanded ? "true" : "false"
     );
+  };
+
+  // Use Pointer Events API for unified input handling
+  projectsToggle.addEventListener("pointerdown", handleToggle, {
+    passive: false,
   });
+
+  // Fallback for older browsers that don't support pointer events
+  if (!window.PointerEvent) {
+    projectsToggle.addEventListener("click", handleToggle);
+  }
 
   // Update aria-expanded when collapse state changes via Bootstrap events
   // This ensures state is correct even if collapse is triggered elsewhere

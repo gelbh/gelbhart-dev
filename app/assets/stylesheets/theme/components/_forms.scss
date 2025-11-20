@@ -2,7 +2,6 @@
 // Forms
 // --------------------------------------------------
 
-
 // Remove default -webkit search input clear button
 
 /* stylelint-disable selector-no-qualifying-type */
@@ -12,7 +11,6 @@ input[type="search"]::-webkit-search-results-button,
 input[type="search"]::-webkit-search-results-decoration {
   display: none;
 }
-
 
 // Remove default -webkit time input icon
 
@@ -24,11 +22,18 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 // Select
 
 .form-select {
+  font-size: 16px; // Prevent iOS zoom
+  touch-action: manipulation;
+
+  @media (any-pointer: coarse) {
+    min-height: 48px;
+    padding: 12px 16px;
+  }
+
   &:focus {
     @include box-shadow($input-focus-box-shadow);
   }
 }
-
 
 // Disabled input
 
@@ -46,6 +51,16 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   }
 }
 
+// Form control touch optimizations
+.form-control {
+  font-size: 16px; // Prevent iOS zoom
+  touch-action: manipulation;
+
+  @media (any-pointer: coarse) {
+    min-height: 48px;
+    padding: 12px 16px;
+  }
+}
 
 // Label
 
@@ -60,7 +75,6 @@ label {
   }
 }
 
-
 // Fix checkbox / radio position inside input group addon
 
 .input-group-text .form-check-input {
@@ -71,6 +85,14 @@ label {
   box-shadow: none;
 }
 
+.form-check-input {
+  @media (any-pointer: coarse) {
+    min-width: 48px;
+    min-height: 48px;
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
 
 // Form switch
 
@@ -87,7 +109,9 @@ label {
       background-color: $form-switch-checked-bg;
       @include box-shadow($form-switch-checked-box-shadow);
     }
-    &:disabled { box-shadow: none; }
+    &:disabled {
+      box-shadow: none;
+    }
   }
 
   &.mode-switch,
@@ -96,19 +120,19 @@ label {
     padding-left: 0;
     margin-bottom: 0;
     .form-check-label {
-      transition: color .15s ease-in-out;
+      transition: color 0.15s ease-in-out;
       font: {
         size: $font-size-base;
         weight: $font-weight-medium;
       }
       &:first-of-type {
         order: 1;
-        margin-right: $spacer * .75;
+        margin-right: $spacer * 0.75;
         color: $gray-900;
       }
       &:last-of-type {
         order: 3;
-        margin-left: $spacer * .75;
+        margin-left: $spacer * 0.75;
       }
     }
     .form-check-input {
@@ -127,7 +151,9 @@ label {
     }
   }
   &.mode-switch .form-check-input:checked {
-    background-image: escape-svg(url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 21 26'><path d='M4 22.1679C7.5318 20.6248 9.99998 17.1006 9.99998 13C9.99998 8.89937 7.5318 5.37521 4 3.8321C5.22493 3.2969 6.5778 3 8.00002 3C13.5229 3 18 7.47715 18 13C18 18.5228 13.5229 23 8.00002 23C6.5778 23 5.22493 22.7031 4 22.1679Z' fill='#{$form-switch-checked-color}'/></svg>"));
+    background-image: escape-svg(
+      url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 21 26'><path d='M4 22.1679C7.5318 20.6248 9.99998 17.1006 9.99998 13C9.99998 8.89937 7.5318 5.37521 4 3.8321C5.22493 3.2969 6.5778 3 8.00002 3C13.5229 3 18 7.47715 18 13C18 18.5228 13.5229 23 8.00002 23C6.5778 23 5.22493 22.7031 4 22.1679Z' fill='#{$form-switch-checked-color}'/></svg>")
+    );
   }
 
   &.form-switch-success .form-check-input:checked {
@@ -135,7 +161,6 @@ label {
     @include box-shadow($box-shadow-success);
   }
 }
-
 
 // Password visibility toggle
 
@@ -149,8 +174,8 @@ label {
 .password-toggle-btn {
   position: absolute;
   top: 50%;
-  right: .625rem;
-  padding: $spacer * .5;
+  right: 0.625rem;
+  padding: $spacer * 0.5;
   margin-bottom: 0;
   font-size: $btn-font-size-lg;
   line-height: 1;
@@ -159,14 +184,18 @@ label {
 
   .password-toggle-indicator {
     color: $gray-600;
-    transition: color .2s ease-in-out;
+    transition: color 0.2s ease-in-out;
     font: {
       family: $icons-font-family;
       size: 1.25em;
       style: normal;
     }
-    &::before { content: "\ec0d"; }
-    &:hover { color: $gray-800; }
+    &::before {
+      content: "\ec0d";
+    }
+    &:hover {
+      color: $gray-800;
+    }
   }
 
   .password-toggle-check {
@@ -182,7 +211,6 @@ label {
     }
   }
 }
-
 
 // Form validation
 
@@ -219,14 +247,15 @@ label {
 .was-validated .password-toggle .form-control:valid,
 .was-validated .password-toggle .form-control.is-valid {
   padding-right: 4rem;
-  + .password-toggle-btn { right: 2.1rem; }
+  + .password-toggle-btn {
+    right: 2.1rem;
+  }
 }
 
 .was-validated .input-group .form-control:invalid,
 .was-validated .input-group .form-control:valid {
   z-index: 4;
 }
-
 
 // Form-check validation highlighting fix
 
@@ -248,7 +277,6 @@ label {
     color: inherit;
   }
 }
-
 
 // Range slider
 
@@ -298,32 +326,41 @@ label {
     top: 50%;
     width: var(--#{$prefix}range-slider-handle-size);
     height: var(--#{$prefix}range-slider-handle-size);
-    margin-top: calc(var(--#{$prefix}range-slider-handle-size) * -.5);
+    margin-top: calc(var(--#{$prefix}range-slider-handle-size) * -0.5);
     background-color: var(--#{$prefix}range-slider-handle-bg);
     border: 0;
     border-radius: var(--#{$prefix}range-slider-handle-border-radius);
     box-shadow: var(--#{$prefix}range-slider-handle-shadow);
     &::before,
-    &::after { display: none; }
-    &:focus { outline: none; }
+    &::after {
+      display: none;
+    }
+    &:focus {
+      outline: none;
+    }
   }
 
-  .noUi-marker-normal { display: none; }
+  .noUi-marker-normal {
+    display: none;
+  }
   .noUi-marker-horizontal {
     &.noUi-marker {
       width: var(--#{$prefix}range-slider-pips-border-width);
       background-color: var(--#{$prefix}range-slider-pips-border-color);
     }
-    &.noUi-marker-large { height: .75rem; }
+    &.noUi-marker-large {
+      height: 0.75rem;
+    }
   }
   .noUi-value {
-    padding-top: .125rem;
+    padding-top: 0.125rem;
     font-size: var(--#{$prefix}range-slider-pips-font-size);
     color: var(--#{$prefix}range-slider-pips-color);
   }
 
   .noUi-tooltip {
-    padding: var(--#{$prefix}range-slider-tooltip-padding-y) var(--#{$prefix}range-slider-tooltip-padding-x);
+    padding: var(--#{$prefix}range-slider-tooltip-padding-y)
+      var(--#{$prefix}range-slider-tooltip-padding-x);
     font-size: var(--#{$prefix}range-slider-tooltip-font-size);
     line-height: 1.2;
     color: var(--#{$prefix}range-slider-tooltip-color);
@@ -333,32 +370,30 @@ label {
   }
 }
 html:not([dir="rtl"]) .range-slider-ui.noUi-horizontal .noUi-handle {
-  right: calc(var(--#{$prefix}range-slider-handle-size) * -.5);
+  right: calc(var(--#{$prefix}range-slider-handle-size) * -0.5);
 }
 /* stylelint-enable selector-class-pattern */
-
 
 // Subscription form status
 
 .subscription-status {
   display: table;
   @include border-radius($border-radius-sm);
-  font-size: $font-size-base * .8125;
+  font-size: $font-size-base * 0.8125;
   &.status-success,
   &.status-error {
-    padding: .25rem .5rem;
-    margin-top: .5rem;
+    padding: 0.25rem 0.5rem;
+    margin-top: 0.5rem;
   }
   &.status-success {
     color: darken($success, 10%);
-    background-color: rgba($success, .1);
+    background-color: rgba($success, 0.1);
   }
   &.status-error {
     color: $danger;
-    background-color: rgba($danger, .1);
+    background-color: rgba($danger, 0.1);
   }
 }
-
 
 // Credit card interactive icon
 
@@ -393,7 +428,6 @@ html:not([dir="rtl"]) .range-slider-ui.noUi-horizontal .noUi-handle {
   }
   /* stylelint-enable declaration-no-important */
 }
-
 
 // Dark color mode
 
@@ -463,10 +497,12 @@ html:not([dir="rtl"]) .range-slider-ui.noUi-horizontal .noUi-handle {
       }
     }
     .form-range:not([data-bs-theme="light"]) {
-      &::-webkit-slider-runnable-track { // stylelint-disable-line property-no-vendor-prefix
+      &::-webkit-slider-runnable-track {
+        // stylelint-disable-line property-no-vendor-prefix
         background-color: $form-range-track-bg-dark;
       }
-      &::-moz-range-track { // stylelint-disable-line property-no-vendor-prefix
+      &::-moz-range-track {
+        // stylelint-disable-line property-no-vendor-prefix
         background-color: $form-range-track-bg-dark;
       }
     }
@@ -505,7 +541,7 @@ html:not([dir="rtl"]) .range-slider-ui.noUi-horizontal .noUi-handle {
           background-color: $form-switch-checked-bg !important; // stylelint-disable-line declaration-no-important
           &:checked {
             ~ .form-check-label:first-of-type {
-              color: rgba($white, .6);
+              color: rgba($white, 0.6);
             }
             ~ .form-check-label:last-of-type {
               color: $white;
@@ -519,10 +555,12 @@ html:not([dir="rtl"]) .range-slider-ui.noUi-horizontal .noUi-handle {
       }
     }
 
-    .form-control:not([data-bs-theme="light"]) ~ .password-toggle-btn .password-toggle-indicator {
-      color: rgba($white, .4);
+    .form-control:not([data-bs-theme="light"])
+      ~ .password-toggle-btn
+      .password-toggle-indicator {
+      color: rgba($white, 0.4);
       &:hover {
-        color: rgba($white, .85);
+        color: rgba($white, 0.85);
       }
     }
 
@@ -547,7 +585,7 @@ html:not([dir="rtl"]) .range-slider-ui.noUi-horizontal .noUi-handle {
     .range-slider {
       --#{$prefix}range-slider-bg: #{$range-slider-bg-dark};
       --#{$prefix}range-slider-handle-bg: #{$gray-200};
-      --#{$prefix}range-slider-pips-border-color: rgba(#{to-rgb($white)}, .2);
+      --#{$prefix}range-slider-pips-border-color: rgba(#{to-rgb($white)}, 0.2);
     }
 
     .was-validated :valid:not(:required):not(.btn),
