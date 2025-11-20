@@ -32,6 +32,11 @@ class PagesTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "GET /nasa-exoplanet-explorer returns nasa exoplanet explorer page" do
+    get nasa_exoplanet_explorer_path
+    assert_response :success
+  end
+
   test "GET /robots.txt returns robots.txt with correct content type and caching" do
     get "/robots.txt"
     assert_response :success

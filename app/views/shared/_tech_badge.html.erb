@@ -1,11 +1,21 @@
 <% size = local_assigns.fetch(:size, 'md') %>
 <% icon = local_assigns[:icon] %>
+<% url = local_assigns[:url] %>
 <% size_classes = {'sm' => 'fs-xs', 'md' => '', 'lg' => 'fs-6'} %>
 <% size_class = size_classes[size] || '' %>
 
+<% if url.present? %>
+<a href="<%= url %>" target="_blank" rel="noopener noreferrer" class="badge project-badge bg-<%= color %> bg-opacity-10 text-<%= color %> <%= size_class %> text-decoration-none">
+    <% if icon.present? %>
+    <i class="bx <%= icon %> me-1"></i>
+    <% end %>
+    <%= text %>
+</a>
+<% else %>
 <span class="badge project-badge bg-<%= color %> bg-opacity-10 text-<%= color %> <%= size_class %>">
     <% if icon.present? %>
     <i class="bx <%= icon %> me-1"></i>
     <% end %>
     <%= text %>
 </span>
+<% end %>

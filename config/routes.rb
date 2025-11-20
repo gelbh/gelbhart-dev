@@ -25,6 +25,9 @@ Rails.application.routes.draw do
   # Video Captioner (static page for desktop tool download)
   get "video-captioner", to: "pages#video_captioner", as: :video_captioner
 
+  # NASA Exoplanet Explorer (project page with embedded app)
+  get "nasa-exoplanet-explorer", to: "pages#nasa_exoplanet_explorer", as: :nasa_exoplanet_explorer
+
   get "/robots.txt", to: "pages#robots"
 
   # Ignore Chrome DevTools requests
