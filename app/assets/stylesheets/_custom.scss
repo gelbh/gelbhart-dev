@@ -7,6 +7,9 @@
 // CSS variables, colors, spacing, transitions, z-index layers
 @import "components/variables";
 
+// Shared SCSS mixins for reusable patterns
+@import "components/mixins";
+
 // All @keyframes animations used throughout the site
 @import "components/animations";
 

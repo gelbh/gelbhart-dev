@@ -3,16 +3,7 @@
 // ============================================
 
 .nasa-exoplanet-explorer-hero {
-  min-height: 50vh;
-  display: flex;
-  align-items: center;
-  position: relative;
-  padding-top: 6rem;
-  padding-bottom: var(--spacing-xl);
-  margin-left: calc(-50vw + 50%);
-  margin-right: calc(-50vw + 50%);
-  padding-left: calc(50vw - 50%);
-  padding-right: calc(50vw - 50%);
+  @include project-hero(50vh, 6rem, var(--spacing-xl));
 
   @media (min-width: 768px) {
     min-height: 60vh;
@@ -22,28 +13,9 @@
 }
 
 .nasa-exoplanet-explorer-gradient-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: var(--gradient-primary);
-  background-size: 200% 200%;
-  animation: gradientShift var(--duration-gradient) ease infinite;
-  opacity: 0.12;
-  z-index: var(--z-grid);
+  @include gradient-bg(var(--gradient-primary), 0.12, var(--z-grid), absolute);
 }
 
 .nasa-exoplanet-explorer-card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  transition: all var(--transition-normal) var(--ease-smooth);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 40px rgba(var(--color-primary), 0.3) !important;
-    border-color: rgba(var(--color-primary), 0.3);
-  }
+  @include glassmorphic-card(var(--color-primary));
 }
-
