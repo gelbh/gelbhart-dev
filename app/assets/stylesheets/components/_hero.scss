@@ -13,16 +13,14 @@
 
 // Animated gradient background
 .hero-gradient-bg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: var(--gradient-primary);
-  background-size: 200% 200%;
-  animation: gradientShift var(--duration-gradient) ease infinite;
-  opacity: var(--opacity-light);
-  z-index: var(--z-background);
+  @include gradient-bg(
+    var(--gradient-primary),
+    var(--opacity-light),
+    var(--z-background),
+    fixed,
+    100vw,
+    100vh
+  );
 }
 
 [data-bs-theme="dark"] .hero-gradient-bg {
@@ -36,8 +34,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-image:
-    linear-gradient(var(--grid-color) 1px, transparent 1px),
+  background-image: linear-gradient(var(--grid-color) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
   background-size: var(--grid-size) var(--grid-size);
   z-index: var(--z-grid);
@@ -46,8 +43,7 @@
 }
 
 [data-bs-theme="dark"] .tech-grid-bg {
-  background-image:
-    linear-gradient(var(--grid-color) 1px, transparent 1px),
+  background-image: linear-gradient(var(--grid-color) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
 }
 
@@ -65,7 +61,7 @@
 
 .code-snippet {
   position: absolute;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 1rem;
   font-weight: 600;
   color: var(--color-primary);
@@ -151,22 +147,6 @@
   opacity: 0;
   transform: translateY(30px);
   animation: fadeInUp var(--transition-slower) ease forwards;
-}
-
-.delay-1 {
-  animation-delay: 0.2s;
-}
-
-.delay-2 {
-  animation-delay: 0.4s;
-}
-
-.delay-3 {
-  animation-delay: 0.6s;
-}
-
-.delay-4 {
-  animation-delay: 0.8s;
 }
 
 // Button pulse effect

@@ -92,6 +92,12 @@
   --shadow-primary: 0 0.5rem 1.125rem -0.5rem rgba(99, 102, 241, 0.9);
   --shadow-glow: 0 0 20px rgba(255, 215, 0, 0.3);
 
+  // Backdrop filter blur values
+  --blur-sm: 8px;
+  --blur-md: 10px;
+  --blur-lg: 12px;
+  --blur-xl: 20px;
+
   // Opacity levels
   --opacity-light: 0.04;
   --opacity-medium: 0.08;
