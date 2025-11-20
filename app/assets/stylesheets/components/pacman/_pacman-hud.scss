@@ -1,0 +1,119 @@
+// ============================================
+// PAC-MAN HUD
+// ============================================
+// HUD display and related components
+
+.pacman-hud {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  @include pacman-glass-effect(10px, 0.5);
+  border-radius: 12px;
+  padding: 15px 20px;
+  z-index: var(--z-hud);
+  min-width: 150px;
+  opacity: 0;
+  transform: translateY(-20px) scale(0.9);
+  transition: opacity 0.4s var(--ease-smooth), transform 0.4s var(--ease-smooth);
+  pointer-events: none;
+  border: 2px solid rgba(255, 215, 0, 0.25);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+  &.active {
+    opacity: 0.85;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+
+  [data-bs-theme="dark"] & {
+    background: rgba(20, 20, 30, 0.6);
+    border-color: rgba(255, 215, 0, 0.35);
+  }
+
+  .hud-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .hud-label {
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-right: 10px;
+    }
+
+    .hud-value {
+      color: var(--color-pacman-yellow);
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    // Progress item specific styling
+    &.hud-progress {
+      border-top: 1px solid rgba(255, 215, 0, 0.2);
+      padding-top: 8px;
+      margin-top: 8px;
+
+      .hud-label {
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .hud-value {
+        font-size: 0.95rem;
+      }
+    }
+  }
+
+  // HUD Muted Indicator
+  .hud-muted-indicator {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    background: rgba(255, 100, 100, 0.15);
+    border: 1px solid rgba(255, 100, 100, 0.3);
+    border-radius: var(--radius-sm);
+    margin-top: 8px;
+
+    i {
+      color: #ff6464;
+      font-size: 1.3rem;
+      animation: muteIconPulse 2s ease-in-out infinite;
+    }
+  }
+
+  // HUD Settings Hint
+  .hud-settings-hint {
+    border-top: 1px solid rgba(255, 215, 0, 0.2);
+    padding-top: 10px;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+
+    .hud-key {
+      background: rgba(255, 215, 0, 0.15);
+      color: var(--color-pacman-yellow);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: var(--radius-sm);
+      padding: 3px 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: "Courier New", monospace;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .hud-hint-label {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+  }
+}

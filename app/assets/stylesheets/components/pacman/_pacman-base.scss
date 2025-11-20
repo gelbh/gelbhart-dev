@@ -1,0 +1,66 @@
+// ============================================
+// PAC-MAN BASE STYLES
+// ============================================
+// Core game container, page tint, and body states
+
+// Page tint overlay when game is active
+.pacman-page-tint {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  z-index: var(--z-overlay);
+  opacity: 0;
+  transition: opacity var(--transition-slow) ease;
+  pointer-events: none;
+
+  &.active {
+    opacity: 1;
+  }
+}
+
+[data-bs-theme="dark"] .pacman-page-tint {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+// Game container - overlays the entire page
+.pacman-game-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: var(--z-game);
+  opacity: 0;
+  transition: opacity var(--transition-normal) ease;
+  touch-action: none; // Prevent scrolling during gameplay
+
+  &.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+// Disable footer interactions when game is active
+// This prevents footer links from blocking joystick touches
+body.pacman-game-active {
+  footer {
+    pointer-events: none !important;
+    user-select: none;
+  }
+
+  .btn-scroll-top {
+    pointer-events: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  // Also disable header interactions during gameplay
+  .header {
+    pointer-events: none !important;
+  }
+}
