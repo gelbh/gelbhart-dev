@@ -40,7 +40,11 @@ class SitemapGenerator
   end
 
   def write_xml(content)
-    File.write(Rails.public_path.join("sitemap.xml"), content)
+    sitemap_path = Rails.public_path.join("sitemap.xml")
+    # Ensure the public directory exists
+    Rails.public_path.mkpath unless Rails.public_path.exist?
+    
+    File.write(sitemap_path.to_s, content)
   rescue Errno::EACCES => e
     Rails.logger.error "Sitemap generation failed: Permission denied - #{e.message}"
     raise
@@ -53,8 +57,16 @@ class SitemapGenerator
   end
 
   def compress_xml
-    Zlib::GzipWriter.open(Rails.public_path.join("sitemap.xml.gz")) do |gz|
-      gz.write File.read(Rails.public_path.join("sitemap.xml"))
+    sitemap_path = Rails.public_path.join("sitemap.xml")
+    sitemap_gz_path = Rails.public_path.join("sitemap.xml.gz")
+    
+    # Ensure the XML file exists before compressing
+    unless sitemap_path.exist?
+      raise Errno::ENOENT, "sitemap.xml not found at #{sitemap_path}"
+    end
+    
+    Zlib::GzipWriter.open(sitemap_gz_path.to_s) do |gz|
+      gz.write File.read(sitemap_path.to_s)
     end
   rescue Errno::EACCES => e
     Rails.logger.error "Sitemap compression failed: Permission denied - #{e.message}"
