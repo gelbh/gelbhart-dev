@@ -22,4 +22,8 @@ module ApplicationHelper
       project.link_url
     end
   end
+
+  def projects_with_pages
+    @projects_with_pages ||= Project.with_pages.to_a
+  end
 end
