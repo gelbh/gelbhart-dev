@@ -8,6 +8,9 @@ bundle install
 # Install Node dependencies
 npm install
 
+# Run database migrations
+bundle exec rails db:migrate RAILS_ENV=production
+
 # Clean old assets before recompiling
 bundle exec rake assets:clobber
 
