@@ -21,6 +21,9 @@ class PagesController < ApplicationController
   def video_captioner
   end
 
+  def nasa_exoplanet_explorer
+  end
+
   def robots
     respond_to :text
     expires_in 6.hours, public: true

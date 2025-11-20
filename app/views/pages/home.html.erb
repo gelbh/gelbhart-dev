@@ -1,220 +1,196 @@
 <% content_for :title, page_title("") %>
 <% meta_description "Tomer Gelbhart's developer portfolio showcasing full-stack web development projects, Ruby on Rails expertise, and professional software engineering work." %>
-
 <!-- Hero Section with Pac-Man Game -->
 <section class="position-relative overflow-hidden hero-section" data-controller="pacman-game" data-pacman-game-asset-manifest-value="<%= pacman_asset_manifest.to_json %>">
-
-    <!-- Animated Gradient Background -->
-    <div class="hero-gradient-bg"></div>
-
-    <!-- Tech Grid Background -->
-    <div class="tech-grid-bg"></div>
-
-    <!-- Floating Code Snippets -->
-    <div class="floating-code">
-        <div class="code-snippet code-1">&lt;div&gt;</div>
-        <div class="code-snippet code-2">{ }</div>
-        <div class="code-snippet code-3">function()</div>
-        <div class="code-snippet code-4">=&gt;</div>
-        <div class="code-snippet code-5">class</div>
-        <div class="code-snippet code-6">import</div>
-        <div class="code-snippet code-7">const</div>
-        <div class="code-snippet code-8">&lt;/&gt;</div>
+  <!-- Animated Gradient Background -->
+  <div class="hero-gradient-bg"></div>
+  <!-- Tech Grid Background -->
+  <div class="tech-grid-bg"></div>
+  <!-- Floating Code Snippets -->
+  <div class="floating-code">
+    <div class="code-snippet code-1">&lt;div&gt;</div>
+    <div class="code-snippet code-2">{ }</div>
+    <div class="code-snippet code-3">function()</div>
+    <div class="code-snippet code-4">=&gt;</div>
+    <div class="code-snippet code-5">class</div>
+    <div class="code-snippet code-6">import</div>
+    <div class="code-snippet code-7">const</div>
+    <div class="code-snippet code-8">&lt;/&gt;</div>
+  </div>
+  <!-- Pac-Man Page Tint -->
+  <div class="pacman-page-tint d-none d-lg-block" data-pacman-game-target="pageTint"></div>
+  <!-- Pac-Man Game Overlay -->
+  <div class="pacman-game-container d-none d-lg-block" data-pacman-game-target="gameContainer">
+    <!-- Pac-Man character -->
+    <div class="pacman-character" data-pacman-game-target="pacman">
+      <%= image_tag 'pacman-game/pacman/pacman_open_more.png', alt: 'Pac-Man', class: 'pacman-sprite' %>
     </div>
-
-    <!-- Pac-Man Page Tint -->
-    <div class="pacman-page-tint d-none d-lg-block" data-pacman-game-target="pageTint"></div>
-
-    <!-- Pac-Man Game Overlay -->
-    <div class="pacman-game-container d-none d-lg-block" data-pacman-game-target="gameContainer">
-        <!-- Pac-Man character -->
-        <div class="pacman-character" data-pacman-game-target="pacman">
-            <%= image_tag 'pacman-game/pacman/pacman_open_more.png', alt: 'Pac-Man', class: 'pacman-sprite' %>
-        </div>
-
-        <!-- Game HUD -->
-        <div class="pacman-hud" data-pacman-game-target="hud">
-            <div class="hud-item">
-                <span class="hud-label">Score:</span>
-                <span class="hud-value" data-pacman-game-target="score">0</span>
-            </div>
-            <div class="hud-item">
-                <span class="hud-label">Lives:</span>
-                <span class="hud-value" data-pacman-game-target="lives">❤️❤️❤️</span>
-            </div>
-            <div class="hud-item hud-progress" data-pacman-game-target="progressItem">
-                <span class="hud-label" data-pacman-game-target="progressLabel">Next:</span>
-                <span class="hud-value" data-pacman-game-target="progressValue">300</span>
-            </div>
-            <div class="hud-muted-indicator" data-pacman-game-target="mutedIndicator" style="display: none;">
-                <i class="bx bx-volume-mute"></i>
-            </div>
-            <div class="hud-settings-hint">
-                <kbd class="hud-key">Esc</kbd>
-                <span class="hud-hint-label">Menu</span>
-            </div>
-        </div>
+    <!-- Game HUD -->
+    <div class="pacman-hud" data-pacman-game-target="hud">
+      <div class="hud-item">
+        <span class="hud-label">Score:</span>
+        <span class="hud-value" data-pacman-game-target="score">0</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Lives:</span>
+        <span class="hud-value" data-pacman-game-target="lives">❤️❤️❤️</span>
+      </div>
+      <div class="hud-item hud-progress" data-pacman-game-target="progressItem">
+        <span class="hud-label" data-pacman-game-target="progressLabel">Next:</span>
+        <span class="hud-value" data-pacman-game-target="progressValue">300</span>
+      </div>
+      <div class="hud-muted-indicator" data-pacman-game-target="mutedIndicator" style="display: none;">
+        <i class="bx bx-volume-mute"></i>
+      </div>
+      <div class="hud-settings-hint">
+        <kbd class="hud-key">Esc</kbd>
+        <span class="hud-hint-label">Menu</span>
+      </div>
     </div>
-
-    <div class="container position-relative zindex-5 pb-lg-5 mb-5">
-        <div class="row pt-5 pt-lg-3 pb-3 py-lg-4">
-            <div class="col-lg-10 col-xl-9 mx-auto text-center">
-
-                <!-- Pac-Man Game Start Hint -->
-                <div class="pacman-idle-hint mb-3 d-none d-lg-inline-block" data-pacman-game-target="startHint" data-controller="pacman-preview" data-pacman-preview-asset-manifest-value="<%= pacman_asset_manifest.to_json %>">
-                    <div class="d-flex align-items-center justify-content-center gap-3 flex-wrap">
-                        <div class="pacman-preview">
-                            <%= image_tag 'pacman-game/pacman/pacman_open_more.png', alt: 'Pac-Man', class: 'pacman-preview-sprite', data: { pacman_preview_target: 'sprite' } %>
-                        </div>
-                        <div class="hint-text">
-                            <span class="hint-label">Use</span>
-                            <kbd class="kbd-key">W</kbd>
-                            <kbd class="kbd-key">A</kbd>
-                            <kbd class="kbd-key">S</kbd>
-                            <kbd class="kbd-key">D</kbd>
-                            <span class="hint-label">or</span>
-                            <kbd class="kbd-key">←</kbd>
-                            <kbd class="kbd-key">↑</kbd>
-                            <kbd class="kbd-key">↓</kbd>
-                            <kbd class="kbd-key">→</kbd>
-                            <span class="hint-label">to play</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Main Heading with Animation -->
-                <h1 class="display-2 mb-4 hero-heading">
-                    <span class="fade-in-up">Full-Stack Developer</span>
-                    <br>
-                    <span class="text-gradient d-inline-block fade-in-up delay-1">Building Modern Web Solutions</span>
-                </h1>
-
-                <!-- Subheading with Animation -->
-                <p class="fs-lg text-muted mb-4 pb-2 fade-in-up delay-2">
-                    MSc Computer Science student with expertise in front-end development and API integration.
-                    <br>
-                    Exploring AI, Machine Learning, Cloud Computing, Quantum Computing, and Full-Stack Engineering at UCD.
-                </p>
-
-                <!-- CTA Buttons with Animation -->
-                <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center pb-3 fade-in-up delay-3">
-                    <a href="#projects" class="btn btn-lg btn-primary shadow-primary btn-pulse">
-                        <i class="bx bx-code-alt fs-5 lh-1 me-2"></i>
-                        View Projects
-                    </a>
-                    <a href="/contact" class="btn btn-lg btn-outline-secondary">
-                        <i class="bx bx-envelope fs-5 lh-1 me-2"></i>
-                        Get in Touch
-                    </a>
-                </div>
-
-                <!-- Tech Stack Badges with Animation -->
-                <div class="d-flex flex-wrap gap-2 justify-content-center pt-4 mt-2 fade-in-up delay-4">
-                    <span class="badge bg-secondary bg-opacity-10 text-body fs-sm fw-normal px-3 py-2 badge-hover">
-                        <i class="bx bxl-javascript text-warning me-1"></i> JavaScript
-                    </span>
-                    <span class="badge bg-secondary bg-opacity-10 text-body fs-sm fw-normal px-3 py-2 badge-hover">
-                        <i class="bx bxl-python text-primary me-1"></i> Python
-                    </span>
-                    <span class="badge bg-secondary bg-opacity-10 text-body fs-sm fw-normal px-3 py-2 badge-hover">
-                        <i class="bx bxs-badge-check text-danger me-1"></i> Ruby on Rails
-                    </span>
-                    <span class="badge bg-secondary bg-opacity-10 text-body fs-sm fw-normal px-3 py-2 badge-hover">
-                        <i class="bx bxl-java text-danger me-1"></i> Java
-                    </span>
-                    <span class="badge bg-secondary bg-opacity-10 text-body fs-sm fw-normal px-3 py-2 badge-hover">
-                        <i class="bx bx-brain text-info me-1"></i> AI/ML
-                    </span>
-                </div>
-
+  </div>
+  <div class="container position-relative zindex-5 pb-lg-5 mb-5">
+    <div class="row pt-5 pt-lg-3 pb-3 py-lg-4">
+      <div class="col-lg-10 col-xl-9 mx-auto text-center">
+        <!-- Pac-Man Game Start Hint -->
+        <div class="pacman-idle-hint mb-3 d-none d-lg-inline-block" data-pacman-game-target="startHint" data-controller="pacman-preview" data-pacman-preview-asset-manifest-value="<%= pacman_asset_manifest.to_json %>">
+          <div class="d-flex align-items-center justify-content-center gap-3 flex-wrap">
+            <div class="pacman-preview">
+              <%= image_tag 'pacman-game/pacman/pacman_open_more.png', alt: 'Pac-Man', class: 'pacman-preview-sprite', data: { pacman_preview_target: 'sprite' } %>
             </div>
+            <div class="hint-text">
+              <span class="hint-label">Use</span>
+              <kbd class="kbd-key">W</kbd>
+              <kbd class="kbd-key">A</kbd>
+              <kbd class="kbd-key">S</kbd>
+              <kbd class="kbd-key">D</kbd>
+              <span class="hint-label">or</span>
+              <kbd class="kbd-key">←</kbd>
+              <kbd class="kbd-key">↑</kbd>
+              <kbd class="kbd-key">↓</kbd>
+              <kbd class="kbd-key">→</kbd>
+              <span class="hint-label">to play</span>
+            </div>
+          </div>
         </div>
+        <!-- Main Heading with Animation -->
+        <h1 class="display-2 mb-4 hero-heading">
+          <span class="fade-in-up">Full-Stack Developer</span>
+          <br>
+          <span class="text-gradient d-inline-block fade-in-up delay-1">Building Modern Web Solutions</span>
+        </h1>
+        <!-- Subheading with Animation -->
+        <p class="fs-lg text-muted mb-4 pb-2 fade-in-up delay-2">
+          MSc Computer Science student with expertise in front-end development and API integration.
+          <br>
+          Exploring AI, Machine Learning, Cloud Computing, Quantum Computing, and Full-Stack Engineering at UCD.
+        </p>
+        <!-- CTA Buttons with Animation -->
+        <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center pb-3 fade-in-up delay-3">
+          <a href="#projects" class="btn btn-lg btn-primary shadow-primary btn-pulse">
+            <i class="bx bx-code-alt fs-5 lh-1 me-2"></i>
+            View Projects
+          </a>
+          <a href="/contact" class="btn btn-lg btn-outline-secondary">
+            <i class="bx bx-envelope fs-5 lh-1 me-2"></i>
+            Get in Touch
+          </a>
+        </div>
+        <!-- Tech Stack Badges with Animation -->
+        <div class="d-flex flex-wrap gap-2 justify-content-center pt-4 mt-2 fade-in-up delay-4">
+          <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank" rel="noopener noreferrer" class="badge bg-secondary bg-opacity-10 text-body fs-sm fw-normal px-3 py-2 badge-hover text-decoration-none">
+            <i class="bx bxl-javascript text-warning me-1"></i> JavaScript
+          </a>
+          <a href="https://www.python.org/" target="_blank" rel="noopener noreferrer" class="badge bg-secondary bg-opacity-10 text-body fs-sm fw-normal px-3 py-2 badge-hover text-decoration-none">
+            <i class="bx bxl-python text-primary me-1"></i> Python
+          </a>
+          <a href="https://rubyonrails.org/" target="_blank" rel="noopener noreferrer" class="badge bg-secondary bg-opacity-10 text-body fs-sm fw-normal px-3 py-2 badge-hover text-decoration-none">
+            <i class="bx bxs-badge-check text-danger me-1"></i> Ruby on Rails
+          </a>
+          <a href="https://www.java.com/" target="_blank" rel="noopener noreferrer" class="badge bg-secondary bg-opacity-10 text-body fs-sm fw-normal px-3 py-2 badge-hover text-decoration-none">
+            <i class="bx bxl-java text-danger me-1"></i> Java
+          </a>
+          <a href="https://www.ibm.com/topics/artificial-intelligence" target="_blank" rel="noopener noreferrer" class="badge bg-secondary bg-opacity-10 text-body fs-sm fw-normal px-3 py-2 badge-hover text-decoration-none">
+            <i class="bx bx-brain text-info me-1"></i> AI/ML
+          </a>
+        </div>
+      </div>
     </div>
-
-    <!-- Scroll Indicator -->
-    <a href="#projects" class="scroll-indicator text-decoration-none fade-in-up delay-4">
-        <div class="scroll-indicator-arrow">
-            <i class="bx bx-chevron-down"></i>
-        </div>
-        <span class="d-block mt-2 fs-sm text-muted">Scroll to explore</span>
-    </a>
+  </div>
+  <!-- Scroll Indicator -->
+  <a href="#projects" class="scroll-indicator text-decoration-none fade-in-up delay-4">
+    <div class="scroll-indicator-arrow">
+      <i class="bx bx-chevron-down"></i>
+    </div>
+    <span class="d-block mt-2 fs-sm text-muted">Scroll to explore</span>
+  </a>
 </section>
-
 <!-- Projects Section -->
 <section id="projects" class="container py-5" data-controller="scroll-animation">
-    <%= render 'shared/section_header', title: 'Featured Projects' %>
-
-    <!-- Project cards -->
-    <div class="row g-4 justify-content-center">
-
-        <!-- Hevy Tracker Card -->
-        <div class="col-lg-4 col-md-6">
-            <%= render 'shared/project_card',
+  <%= render 'shared/section_header', title: 'Featured Projects' %>
+  <!-- Project cards -->
+  <div class="row g-4 justify-content-center">
+    <!-- Hevy Tracker Card -->
+    <div class="col-lg-4 col-md-6">
+      <%= render 'shared/project_card',
                 icon: 'bx-dumbbell',
                 color: 'primary',
                 title: 'Hevy Tracker',
                 subtitle: 'Google Apps Script',
                 description: 'Connect your Hevy workout data to Google Sheets™ with secure OAuth integration. Automatically sync your fitness progress.',
                 badges: [
-                    {text: 'OAuth 2.0', color: 'success'},
-                    {text: 'Google Apps', color: 'info'}
+                    {text: 'OAuth 2.0', color: 'success', url: 'https://oauth.net/2/'},
+                    {text: 'Google Apps', color: 'info', url: 'https://workspace.google.com/'}
                 ],
                 link_text: 'Learn More',
                 link_url: hevy_tracker_path,
                 animation_delay: 'fade-in-view delay-1' %>
-        </div>
-
-        <!-- Video Captioner Card -->
-        <div class="col-lg-4 col-md-6">
-            <%= render 'shared/project_card',
+    </div>
+    <!-- Video Captioner Card -->
+    <div class="col-lg-4 col-md-6">
+      <%= render 'shared/project_card',
                 icon: 'bx-video',
                 color: 'success',
                 title: 'Video Captioner',
                 subtitle: 'AI-Powered Tool',
                 description: 'Generate and translate video captions from YouTube videos or local files. Powered by AI transcription with 15+ languages.',
                 badges: [
-                    {text: 'Whisper AI', color: 'primary'},
-                    {text: 'Python', color: 'warning'}
+                    {text: 'Whisper AI', color: 'primary', url: 'https://openai.com/research/whisper'},
+                    {text: 'Python', color: 'warning', url: 'https://www.python.org/'}
                 ],
                 link_text: 'Learn More',
                 link_url: video_captioner_path,
                 animation_delay: 'fade-in-view delay-2' %>
-        </div>
-
-        <!-- NASA Exoplanet Explorer Card -->
-        <div class="col-lg-4 col-md-6">
-            <%= render 'shared/project_card',
+    </div>
+    <!-- NASA Exoplanet Explorer Card -->
+    <div class="col-lg-4 col-md-6">
+      <%= render 'shared/project_card',
                 icon: 'bx-planet',
                 color: 'info',
                 title: 'NASA Exoplanet Explorer',
                 subtitle: '3D Visualization Tool',
                 description: 'Interactive 3D visualization tool for exploring 5000+ confirmed exoplanets from NASA\'s Exoplanet Archive. Built with React, Three.js, and Express.',
                 badges: [
-                    {text: 'React', color: 'primary'},
-                    {text: 'Three.js', color: 'warning'},
-                    {text: 'Node.js', color: 'success'}
+                    {text: 'React', color: 'primary', url: 'https://react.dev/'},
+                    {text: 'Three.js', color: 'warning', url: 'https://threejs.org/'},
+                    {text: 'Node.js', color: 'success', url: 'https://nodejs.org/'}
                 ],
-                link_text: 'View Live Demo',
-                link_url: 'https://nasa-exoplanet-explorer.vercel.app',
-                link_icon: 'bx-right-arrow-alt',
-                link_target: '_blank',
-                link_rel: 'noopener noreferrer',
+                link_text: 'Learn More',
+                link_url: nasa_exoplanet_explorer_path,
                 github_url: 'https://github.com/gelbh/nasa-exoplanet-explorer',
                 animation_delay: 'fade-in-view delay-3' %>
-        </div>
-
-        <!-- Robot Motion Planning Card -->
-        <div class="col-lg-4 col-md-6">
-            <%= render 'shared/project_card',
+    </div>
+    <!-- Robot Motion Planning Card -->
+    <div class="col-lg-4 col-md-6">
+      <%= render 'shared/project_card',
                 icon: 'bx-brain',
                 color: 'warning',
                 title: 'Robot Motion Planning',
                 subtitle: 'MATLAB Application',
                 description: 'Genetic algorithm implementation for robot path optimization with interactive UI, dynamic parameter adjustment, and real-time visualization.',
                 badges: [
-                    {text: 'MATLAB', color: 'danger'},
-                    {text: 'Genetic Algorithm', color: 'info'},
-                    {text: 'Path Planning', color: 'success'}
+                    {text: 'MATLAB', color: 'danger', url: 'https://www.mathworks.com/products/matlab.html'},
+                    {text: 'Genetic Algorithm', color: 'info', url: 'https://en.wikipedia.org/wiki/Genetic_algorithm'},
+                    {text: 'Path Planning', color: 'success', url: 'https://en.wikipedia.org/wiki/Motion_planning'}
                 ],
                 link_text: 'View on GitHub',
                 link_url: 'https://github.com/gelbh/robot-motion-planning',
@@ -222,220 +198,211 @@
                 link_target: '_blank',
                 link_rel: 'noopener',
                 animation_delay: 'fade-in-view delay-4' %>
-        </div>
-
     </div>
+  </div>
 </section>
-
 <!-- Technologies & Skills Section -->
 <section id="technologies" class="container py-5 my-5" data-controller="scroll-animation">
-    <%= render 'shared/section_header',
+  <%= render 'shared/section_header',
         title: 'Technologies & Skills',
         subtitle: 'Programming languages, frameworks, and tools I work with' %>
-
-    <!-- Programming Languages -->
-    <div class="row g-4 mb-4">
-        <div class="col-12 fade-in-view delay-1">
-            <div class="tech-card">
-                <div class="tech-card-icon bg-primary bg-opacity-10">
-                    <i class="bx bx-code-alt text-primary"></i>
-                </div>
-                <h3 class="h5 mb-4">Programming Languages</h3>
-                <div class="d-flex flex-wrap gap-2 justify-content-center">
-                    <span class="badge tech-badge bg-warning bg-opacity-10 text-warning">
-                        <i class="bx bxl-javascript me-1"></i>JavaScript
-                    </span>
-                    <span class="badge tech-badge bg-primary bg-opacity-10 text-primary">
-                        <i class="bx bxl-python me-1"></i>Python
-                    </span>
-                    <span class="badge tech-badge bg-danger bg-opacity-10 text-danger">
-                        <i class="bx bxl-java me-1"></i>Java
-                    </span>
-                    <span class="badge tech-badge bg-danger bg-opacity-10 text-danger">
-                        <i class="bx bxs-badge-check me-1"></i>Ruby
-                    </span>
-                    <span class="badge tech-badge bg-info bg-opacity-10 text-info">
-                        <i class="bx bx-code-curly me-1"></i>C
-                    </span>
-                    <span class="badge tech-badge bg-info bg-opacity-10 text-info">
-                        <i class="bx bx-data me-1"></i>SQL
-                    </span>
-                    <span class="badge tech-badge bg-danger bg-opacity-10 text-danger">
-                        <i class="bx bxl-html5 me-1"></i>HTML/CSS
-                    </span>
-                </div>
-            </div>
+  <!-- Programming Languages -->
+  <div class="row g-4 mb-4">
+    <div class="col-12 fade-in-view delay-1">
+      <div class="tech-card">
+        <div class="tech-card-icon bg-primary bg-opacity-10">
+          <i class="bx bx-code-alt text-primary"></i>
         </div>
+        <h3 class="h5 mb-4">Programming Languages</h3>
+        <div class="d-flex flex-wrap gap-2 justify-content-center">
+          <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank" rel="noopener noreferrer" class="badge tech-badge bg-warning bg-opacity-10 text-warning text-decoration-none">
+            <i class="bx bxl-javascript me-1"></i>JavaScript
+          </a>
+          <a href="https://www.python.org/" target="_blank" rel="noopener noreferrer" class="badge tech-badge bg-primary bg-opacity-10 text-primary text-decoration-none">
+            <i class="bx bxl-python me-1"></i>Python
+          </a>
+          <a href="https://www.java.com/" target="_blank" rel="noopener noreferrer" class="badge tech-badge bg-danger bg-opacity-10 text-danger text-decoration-none">
+            <i class="bx bxl-java me-1"></i>Java
+          </a>
+          <a href="https://www.ruby-lang.org/" target="_blank" rel="noopener noreferrer" class="badge tech-badge bg-danger bg-opacity-10 text-danger text-decoration-none">
+            <i class="bx bxs-badge-check me-1"></i>Ruby
+          </a>
+          <a href="https://en.cppreference.com/w/c" target="_blank" rel="noopener noreferrer" class="badge tech-badge bg-info bg-opacity-10 text-info text-decoration-none">
+            <i class="bx bx-code-curly me-1"></i>C
+          </a>
+          <a href="https://www.w3schools.com/sql/" target="_blank" rel="noopener noreferrer" class="badge tech-badge bg-info bg-opacity-10 text-info text-decoration-none">
+            <i class="bx bx-data me-1"></i>SQL
+          </a>
+          <a href="https://developer.mozilla.org/en-US/docs/Web/HTML" target="_blank" rel="noopener noreferrer" class="badge tech-badge bg-danger bg-opacity-10 text-danger text-decoration-none">
+            <i class="bx bxl-html5 me-1"></i>HTML/CSS
+          </a>
+        </div>
+      </div>
     </div>
-
-    <!-- Frameworks & Libraries - Consolidated -->
-    <div class="row g-4 mb-4">
-        <div class="col-lg-6 fade-in-view delay-1">
-            <div class="tech-card h-100">
-                <div class="tech-card-icon bg-primary bg-opacity-10">
-                    <i class="bx bx-code-block text-primary"></i>
-                </div>
-                <h3 class="h5 mb-4">Web & Mobile Frameworks</h3>
-                <div class="row">
-                    <div class="col-6">
-                        <p class="text-muted fw-semibold mb-2 fs-sm">Frontend</p>
-                        <ul class="list-unstyled mb-3">
-                            <li class="tech-item"><i class="bx bxl-bootstrap text-purple me-2"></i>Bootstrap</li>
-                        </ul>
-                        <p class="text-muted fw-semibold mb-2 fs-sm">Backend</p>
-                        <ul class="list-unstyled mb-0">
-                            <li class="tech-item"><i class="bx bx-server text-danger me-2"></i>Ruby on Rails</li>
-                        </ul>
-                    </div>
-                    <div class="col-6">
-                        <p class="text-muted fw-semibold mb-2 fs-sm">Mobile</p>
-                        <ul class="list-unstyled mb-0">
-                            <li class="tech-item"><i class="bx bx-mobile-alt text-info me-2"></i>Flutter</li>
-                            <li class="tech-item"><i class="bx bxl-apple text-secondary me-2"></i>SwiftUI</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+  </div>
+  <!-- Frameworks & Libraries - Consolidated -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-6 fade-in-view delay-1">
+      <div class="tech-card h-100">
+        <div class="tech-card-icon bg-primary bg-opacity-10">
+          <i class="bx bx-code-block text-primary"></i>
         </div>
-
-        <!-- Data/AI -->
-        <div class="col-lg-6 fade-in-view delay-2">
-            <div class="tech-card h-100">
-                <div class="tech-card-icon bg-warning bg-opacity-10">
-                    <i class="bx bx-brain text-warning"></i>
-                </div>
-                <h3 class="h5 mb-4">Data Science & AI</h3>
-                <ul class="list-unstyled mb-0">
-                    <li class="tech-item"><i class="bx bx-scatter-chart text-primary me-2"></i>TensorFlow</li>
-                    <li class="tech-item"><i class="bx bx-brain text-warning me-2"></i>PyTorch</li>
-                    <li class="tech-item"><i class="bx bx-data text-info me-2"></i>Pandas</li>
-                    <li class="tech-item"><i class="bx bx-bar-chart text-success me-2"></i>NumPy</li>
-                    <li class="tech-item"><i class="bx bx-line-chart text-danger me-2"></i>Scikit-learn</li>
-                </ul>
-            </div>
+        <h3 class="h5 mb-4">Web & Mobile Frameworks</h3>
+        <div class="row">
+          <div class="col-6">
+            <p class="text-muted fw-semibold mb-2 fs-sm">Frontend</p>
+            <ul class="list-unstyled mb-3">
+              <li class="tech-item"><i class="bx bxl-bootstrap text-purple me-2"></i><a href="https://getbootstrap.com/" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body">Bootstrap</a></li>
+            </ul>
+            <p class="text-muted fw-semibold mb-2 fs-sm">Backend</p>
+            <ul class="list-unstyled mb-0">
+              <li class="tech-item"><i class="bx bx-server text-danger me-2"></i><a href="https://rubyonrails.org/" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body">Ruby on Rails</a></li>
+            </ul>
+          </div>
+          <div class="col-6">
+            <p class="text-muted fw-semibold mb-2 fs-sm">Mobile</p>
+            <ul class="list-unstyled mb-0">
+              <li class="tech-item"><i class="bx bx-mobile-alt text-info me-2"></i><a href="https://flutter.dev/" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body">Flutter</a></li>
+              <li class="tech-item"><i class="bx bxl-apple text-secondary me-2"></i><a href="https://developer.apple.com/xcode/swiftui/" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body">SwiftUI</a></li>
+            </ul>
+          </div>
         </div>
+      </div>
     </div>
-
-    <!-- Development Tools - Consolidated -->
-    <div class="row g-4">
-        <div class="col-lg-6 fade-in-view delay-1">
-            <div class="tech-card h-100">
-                <div class="tech-card-icon bg-success bg-opacity-10">
-                    <i class="bx bx-git-branch text-success"></i>
-                </div>
-                <h3 class="h5 mb-4">Development Tools</h3>
-                <div class="row">
-                    <div class="col-6">
-                        <p class="text-muted fw-semibold mb-2 fs-sm">Version Control</p>
-                        <ul class="list-unstyled mb-3">
-                            <li class="tech-item"><i class="bx bxl-git text-danger me-2"></i>Git</li>
-                            <li class="tech-item"><i class="bx bxl-github text-secondary me-2"></i>GitHub Actions</li>
-                            <li class="tech-item"><i class="bx bxl-gitlab text-warning me-2"></i>GitLab CI/CD</li>
-                        </ul>
-                    </div>
-                    <div class="col-6">
-                        <p class="text-muted fw-semibold mb-2 fs-sm">Testing & Build</p>
-                        <ul class="list-unstyled mb-0">
-                            <li class="tech-item"><i class="bx bx-check-circle text-success me-2"></i>pytest</li>
-                            <li class="tech-item"><i class="bx bxl-nodejs text-success me-2"></i>npm</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+    <!-- Data/AI -->
+    <div class="col-lg-6 fade-in-view delay-2">
+      <div class="tech-card h-100">
+        <div class="tech-card-icon bg-warning bg-opacity-10">
+          <i class="bx bx-brain text-warning"></i>
         </div>
-
-        <div class="col-lg-6 fade-in-view delay-2">
-            <div class="tech-card h-100">
-                <div class="tech-card-icon bg-info bg-opacity-10">
-                    <i class="bx bx-cloud text-info"></i>
-                </div>
-                <h3 class="h5 mb-4">IDEs & Cloud Platforms</h3>
-                <div class="row">
-                    <div class="col-6">
-                        <p class="text-muted fw-semibold mb-2 fs-sm">IDEs</p>
-                        <ul class="list-unstyled mb-0">
-                            <li class="tech-item"><i class="bx bx-code-block text-primary me-2"></i>VS Code</li>
-                            <li class="tech-item"><i class="bx bxl-apple text-secondary me-2"></i>Xcode</li>
-                            <li class="tech-item"><i class="bx bx-code-alt text-warning me-2"></i>Eclipse</li>
-                        </ul>
-                    </div>
-                    <div class="col-6">
-                        <p class="text-muted fw-semibold mb-2 fs-sm">Cloud</p>
-                        <ul class="list-unstyled mb-0">
-                            <li class="tech-item"><i class="bx bx-cloud text-primary me-2"></i>Vercel</li>
-                            <li class="tech-item"><i class="bx bx-cloud text-purple me-2"></i>Heroku</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <h3 class="h5 mb-4">Data Science & AI</h3>
+        <ul class="list-unstyled mb-0">
+          <li class="tech-item"><i class="bx bx-scatter-chart text-primary me-2"></i><a href="https://www.tensorflow.org/" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body">TensorFlow</a></li>
+          <li class="tech-item"><i class="bx bx-brain text-warning me-2"></i><a href="https://pytorch.org/" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body">PyTorch</a></li>
+          <li class="tech-item"><i class="bx bx-data text-info me-2"></i><a href="https://pandas.pydata.org/" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body">Pandas</a></li>
+          <li class="tech-item"><i class="bx bx-bar-chart text-success me-2"></i><a href="https://numpy.org/" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body">NumPy</a></li>
+          <li class="tech-item"><i class="bx bx-line-chart text-danger me-2"></i><a href="https://scikit-learn.org/" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body">Scikit-learn</a></li>
+        </ul>
+      </div>
     </div>
+  </div>
+  <!-- Development Tools - Consolidated -->
+  <div class="row g-4">
+    <div class="col-lg-6 fade-in-view delay-1">
+      <div class="tech-card h-100">
+        <div class="tech-card-icon bg-success bg-opacity-10">
+          <i class="bx bx-git-branch text-success"></i>
+        </div>
+        <h3 class="h5 mb-4">Development Tools</h3>
+        <div class="row">
+          <div class="col-6">
+            <p class="text-muted fw-semibold mb-2 fs-sm">Version Control</p>
+            <ul class="list-unstyled mb-3">
+              <li class="tech-item"><i class="bx bxl-git text-danger me-2"></i><a href="https://git-scm.com/" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body">Git</a></li>
+              <li class="tech-item"><i class="bx bxl-github text-secondary me-2"></i><a href="https://github.com/features/actions" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body">GitHub Actions</a></li>
+              <li class="tech-item"><i class="bx bxl-gitlab text-warning me-2"></i><a href="https://docs.gitlab.com/ee/ci/" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body">GitLab CI/CD</a></li>
+            </ul>
+          </div>
+          <div class="col-6">
+            <p class="text-muted fw-semibold mb-2 fs-sm">Testing & Build</p>
+            <ul class="list-unstyled mb-0">
+              <li class="tech-item"><i class="bx bx-check-circle text-success me-2"></i><a href="https://docs.pytest.org/" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body">pytest</a></li>
+              <li class="tech-item"><i class="bx bxl-nodejs text-success me-2"></i><a href="https://www.npmjs.com/" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body">npm</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6 fade-in-view delay-2">
+      <div class="tech-card h-100">
+        <div class="tech-card-icon bg-info bg-opacity-10">
+          <i class="bx bx-cloud text-info"></i>
+        </div>
+        <h3 class="h5 mb-4">IDEs & Cloud Platforms</h3>
+        <div class="row">
+          <div class="col-6">
+            <p class="text-muted fw-semibold mb-2 fs-sm">IDEs</p>
+            <ul class="list-unstyled mb-0">
+              <li class="tech-item"><i class="bx bx-code-block text-primary me-2"></i><a href="https://code.visualstudio.com/" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body">VS Code</a></li>
+              <li class="tech-item"><i class="bx bxl-apple text-secondary me-2"></i><a href="https://developer.apple.com/xcode/" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body">Xcode</a></li>
+              <li class="tech-item"><i class="bx bx-code-alt text-warning me-2"></i><a href="https://www.eclipse.org/" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body">Eclipse</a></li>
+            </ul>
+          </div>
+          <div class="col-6">
+            <p class="text-muted fw-semibold mb-2 fs-sm">Cloud</p>
+            <ul class="list-unstyled mb-0">
+              <li class="tech-item"><i class="bx bx-cloud text-primary me-2"></i><a href="https://vercel.com/" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body">Vercel</a></li>
+              <li class="tech-item"><i class="bx bx-cloud text-purple me-2"></i><a href="https://www.heroku.com/" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body">Heroku</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
-
 <!-- Call-to-Action Section -->
 <section id="cta" class="position-relative py-5 my-5" data-controller="scroll-animation">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="cta-card fade-in-view">
-                    <div class="row align-items-center g-4">
-                        <div class="col-lg-8">
-                            <div class="cta-icon-wrapper mb-3">
-                                <i class="bx bx-briefcase cta-icon"></i>
-                            </div>
-                            <h2 class="h2 mb-3">Ready to Work Together?</h2>
-                            <p class="fs-lg mb-0 text-muted">
-                                I'm actively seeking internship opportunities starting May 2026.
-                                Looking to strengthen my back-end development skills and contribute to innovative projects.
-                            </p>
-                        </div>
-                        <div class="col-lg-4 text-lg-end">
-                            <div class="d-flex flex-column gap-3">
-                                <%= link_to contact_path, class: "btn btn-lg btn-primary shadow-primary" do %>
-                                <i class="bx bx-envelope fs-5 me-2"></i>
-                                Get in Touch
-                                <% end %>
-                                <a href="mailto:tomer@gelbhart.dev" class="btn btn-lg btn-outline-primary">
-                                    <i class="bx bx-send fs-5 me-2"></i>
-                                    Email Me
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Quick Stats/Info -->
-                    <div class="row mt-4 pt-4 border-top">
-                        <div class="col-6 col-md-3 text-center">
-                            <div class="cta-stat">
-                                <i class="bx bx-code-alt text-primary mb-2"></i>
-                                <div class="fw-bold">Full-Stack</div>
-                                <div class="fs-sm text-muted">Development</div>
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-3 text-center">
-                            <div class="cta-stat">
-                                <i class="bx bx-calendar text-success mb-2"></i>
-                                <div class="fw-bold">May 2026</div>
-                                <div class="fs-sm text-muted">Available From</div>
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-3 text-center">
-                            <div class="cta-stat">
-                                <i class="bx bx-map text-danger mb-2"></i>
-                                <div class="fw-bold">Dublin, IE</div>
-                                <div class="fs-sm text-muted">Location</div>
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-3 text-center">
-                            <div class="cta-stat">
-                                <i class="bx bx-user text-info mb-2"></i>
-                                <div class="fw-bold">MSc Student</div>
-                                <div class="fs-sm text-muted">UCD</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="cta-card fade-in-view">
+          <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+              <div class="cta-icon-wrapper mb-3">
+                <i class="bx bx-briefcase cta-icon"></i>
+              </div>
+              <h2 class="h2 mb-3">Ready to Work Together?</h2>
+              <p class="fs-lg mb-0 text-muted">
+                I'm actively seeking internship opportunities starting May 2026.
+                Looking to strengthen my back-end development skills and contribute to innovative projects.
+              </p>
             </div>
+            <div class="col-lg-4 text-lg-end">
+              <div class="d-flex flex-column gap-3">
+                <%= link_to contact_path, class: "btn btn-lg btn-primary shadow-primary" do %>
+                  <i class="bx bx-envelope fs-5 me-2"></i>
+                  Get in Touch
+                <% end %>
+                <a href="mailto:tomer@gelbhart.dev" class="btn btn-lg btn-outline-primary">
+                  <i class="bx bx-send fs-5 me-2"></i>
+                  Email Me
+                </a>
+              </div>
+            </div>
+          </div>
+          <!-- Quick Stats/Info -->
+          <div class="row mt-4 pt-4 border-top">
+            <div class="col-6 col-md-3 text-center">
+              <div class="cta-stat">
+                <i class="bx bx-code-alt text-primary mb-2"></i>
+                <div class="fw-bold">Full-Stack</div>
+                <div class="fs-sm text-muted">Development</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3 text-center">
+              <div class="cta-stat">
+                <i class="bx bx-calendar text-success mb-2"></i>
+                <div class="fw-bold">May 2026</div>
+                <div class="fs-sm text-muted">Available From</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3 text-center">
+              <div class="cta-stat">
+                <i class="bx bx-map text-danger mb-2"></i>
+                <div class="fw-bold">Dublin, IE</div>
+                <div class="fs-sm text-muted">Location</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3 text-center">
+              <div class="cta-stat">
+                <i class="bx bx-user text-info mb-2"></i>
+                <div class="fw-bold">MSc Student</div>
+                <div class="fs-sm text-muted">UCD</div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </section>
