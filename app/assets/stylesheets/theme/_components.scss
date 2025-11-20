@@ -1,32 +1,59 @@
 //
 // Theme Components
 // --------------------------------------------------
+//
+// Components are organized by category following atomic design principles:
+//
+//   base/        - Foundation/base styles (typography, code, tables)
+//   forms/       - Form-related components (forms, buttons, social buttons)
+//   navigation/  - Navigation components (nav, navbar, breadcrumb, pagination)
+//   layout/      - Container/layout components (card, list-group, accordion)
+//   feedback/    - User feedback components (alert, toasts, modal, popover, offcanvas)
+//   media/       - Media-related components (carousel, gallery, audio, parallax, comparison)
+//   ui/          - UI elements (badge, progress, steps, placeholders, dropdown)
+//
+// Import order is maintained to preserve CSS cascade and dependencies.
 
-@import "components/type";
-@import "components/code";
-@import "components/tables";
-@import "components/forms";
-@import "components/buttons";
-@import "components/social-buttons";
-@import "components/dropdown";
-@import "components/nav";
-@import "components/navbar";
-@import "components/card";
-@import "components/accordion";
-@import "components/breadcrumb";
-@import "components/pagination";
-@import "components/badge";
-@import "components/alert";
-@import "components/progress";
-@import "components/list-group";
-@import "components/toasts";
-@import "components/modal";
-@import "components/popover";
-@import "components/offcanvas";
-@import "components/carousel";
-@import "components/gallery";
-@import "components/placeholders";
-@import "components/steps";
-@import "components/parallax";
-@import "components/comparison-slider";
-@import "components/audio-player";
+// Base - Foundation styles
+@import "components/base/type";
+@import "components/base/code";
+@import "components/base/tables";
+
+// Forms - Form-related components
+@import "components/forms/forms";
+@import "components/forms/buttons";
+@import "components/forms/social-buttons";
+
+// UI - UI elements (dropdown imported early as it may be used by navigation)
+@import "components/ui/dropdown";
+
+// Navigation - Navigation components
+@import "components/navigation/nav";
+@import "components/navigation/navbar";
+@import "components/navigation/breadcrumb";
+@import "components/navigation/pagination";
+
+// Layout - Container/layout components
+@import "components/layout/card";
+@import "components/layout/accordion";
+@import "components/layout/list-group";
+
+// UI - Additional UI elements
+@import "components/ui/badge";
+@import "components/ui/progress";
+@import "components/ui/steps";
+@import "components/ui/placeholders";
+
+// Feedback - User feedback components
+@import "components/feedback/alert";
+@import "components/feedback/toasts";
+@import "components/feedback/modal";
+@import "components/feedback/popover";
+@import "components/feedback/offcanvas";
+
+// Media - Media-related components
+@import "components/media/carousel";
+@import "components/media/gallery";
+@import "components/media/parallax";
+@import "components/media/comparison-slider";
+@import "components/media/audio-player";
