@@ -55,10 +55,7 @@ class ActiveSupport::TestCase
     parallelize(workers: :number_of_processors)
   end
 
-  # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
-  # Exclude Action Text fixtures if Action Text is not being used
-  fixtures :all unless defined?(ActionText)
-
+  # FactoryBot is used for test data instead of fixtures
   # Include FactoryBot syntax methods
   include FactoryBot::Syntax::Methods
 
