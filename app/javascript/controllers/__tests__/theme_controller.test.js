@@ -1,13 +1,46 @@
 import ThemeController from "../ui/theme_controller";
 
+// Mock localforage
+const mockStorage = new Map();
+jest.mock("localforage", () => {
+  return {
+    __esModule: true,
+    default: {
+      getItem: jest.fn((key) => Promise.resolve(mockStorage.get(key) || null)),
+      setItem: jest.fn((key, value) => {
+        mockStorage.set(key, value);
+        return Promise.resolve(value);
+      }),
+      removeItem: jest.fn((key) => {
+        mockStorage.delete(key);
+        return Promise.resolve();
+      }),
+      clear: jest.fn(() => {
+        mockStorage.clear();
+        return Promise.resolve();
+      }),
+    },
+  };
+});
+
 describe("ThemeController", () => {
   let controller;
   let element;
   let checkbox;
   let lightLabel;
   let darkLabel;
+  let localforage;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    // Clear mock storage
+    mockStorage.clear();
+
+    // Get the mocked localforage
+    const localforageModule = await import("localforage");
+    localforage = localforageModule.default;
+    localforage.getItem.mockClear();
+    localforage.setItem.mockClear();
+
     // Mock matchMedia before controller connects
     global.window.matchMedia = jest.fn(() => ({
       matches: false,
@@ -30,20 +63,28 @@ describe("ThemeController", () => {
     element.appendChild(darkLabel);
     document.documentElement.setAttribute("data-bs-theme", "light");
 
-    global.localStorage.clear();
     controller = global.setupController("theme", ThemeController, element);
+
+    // Wait for async initialization to complete
+    await new Promise((resolve) => setTimeout(resolve, 0));
   });
 
   afterEach(() => {
     global.cleanupController(element, controller);
-    global.localStorage.clear();
+    mockStorage.clear();
   });
 
-  test("connect initializes theme from localStorage", () => {
-    global.localStorage.setItem("theme", "dark");
-    // Re-initialize controller with new localStorage value
+  test("connect initializes theme from localforage", async () => {
+    mockStorage.set("theme", "dark");
+    localforage.getItem.mockResolvedValueOnce("dark");
+
+    // Re-initialize controller with new localforage value
     global.cleanupController(element, controller);
     controller = global.setupController("theme", ThemeController, element);
+
+    // Wait for async initialization
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
     expect(document.documentElement.getAttribute("data-bs-theme")).toBe("dark");
   });
 
@@ -52,26 +93,28 @@ describe("ThemeController", () => {
     expect(document.documentElement.getAttribute("data-bs-theme")).toBe("dark");
   });
 
-  test("toggleTheme switches between light and dark", () => {
+  test("toggleTheme switches between light and dark", async () => {
     document.documentElement.setAttribute("data-bs-theme", "light");
-    controller.toggleTheme();
+    await controller.toggleTheme();
     expect(document.documentElement.getAttribute("data-bs-theme")).toBe("dark");
 
-    controller.toggleTheme();
+    await controller.toggleTheme();
     expect(document.documentElement.getAttribute("data-bs-theme")).toBe(
       "light"
     );
   });
 
-  test("handleThemeChange updates localStorage", () => {
-    controller.handleThemeChange("dark");
-    expect(global.localStorage.getItem("theme")).toBe("dark");
+  test("handleThemeChange updates localforage", async () => {
+    await controller.handleThemeChange("dark");
+    expect(mockStorage.get("theme")).toBe("dark");
+    expect(localforage.setItem).toHaveBeenCalledWith("theme", "dark");
 
-    controller.handleThemeChange("light");
-    expect(global.localStorage.getItem("theme")).toBe("light");
+    await controller.handleThemeChange("light");
+    expect(mockStorage.get("theme")).toBe("light");
+    expect(localforage.setItem).toHaveBeenCalledWith("theme", "light");
   });
 
-  test("handleThemeChange updates checkbox state", () => {
+  test("handleThemeChange updates checkbox state", async () => {
     // Ensure checkboxTarget is accessible
     if (!controller.checkboxTarget) {
       Object.defineProperty(controller, "checkboxTarget", {
@@ -87,10 +130,10 @@ describe("ThemeController", () => {
     // Reset checkbox state
     checkbox.checked = false;
 
-    controller.handleThemeChange("dark");
+    await controller.handleThemeChange("dark");
     expect(checkbox.checked).toBe(true);
 
-    controller.handleThemeChange("light");
+    await controller.handleThemeChange("light");
     expect(checkbox.checked).toBe(false);
   });
 });

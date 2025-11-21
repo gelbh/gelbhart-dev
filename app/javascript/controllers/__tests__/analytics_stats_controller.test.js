@@ -1,27 +1,67 @@
 import AnalyticsStatsController from "../analytics/stats_controller";
 
+// Mock api_client module
+jest.mock("../../lib/api_client.js", () => {
+  const mockApi = {
+    get: jest.fn(() =>
+      Promise.resolve({
+        active_users: 750,
+        page_views: 1880,
+        install_count: 294,
+        engagement_rate: 62,
+        countries: { list: [], total: 0 },
+      })
+    ),
+  };
+  return { __esModule: true, default: mockApi };
+});
+
+// Mock localforage
+jest.mock("localforage", () => {
+  const storage = new Map();
+  return {
+    __esModule: true,
+    default: {
+      getItem: jest.fn((key) => Promise.resolve(storage.get(key) || null)),
+      setItem: jest.fn((key, value) => {
+        storage.set(key, value);
+        return Promise.resolve(value);
+      }),
+      removeItem: jest.fn((key) => {
+        storage.delete(key);
+        return Promise.resolve();
+      }),
+      clear: jest.fn(() => {
+        storage.clear();
+        return Promise.resolve();
+      }),
+    },
+  };
+});
+
 describe("AnalyticsStatsController", () => {
   let controller;
   let element;
+  let mockApi;
 
-  beforeEach(() => {
-    // Mock fetch before controller connects (since connect calls fetchStats)
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            active_users: 750,
-            page_views: 1880,
-            install_count: 294,
-            engagement_rate: 62,
-            countries: { list: [], total: 0 },
-          }),
-      })
-    );
+  beforeEach(async () => {
+    // Get the mocked api client
+    const apiModule = await import("../../lib/api_client.js");
+    mockApi = apiModule.default;
+    mockApi.get.mockClear();
+
+    // Mock localforage to return empty cache
+    const localforage = (await import("localforage")).default;
+    localforage.getItem.mockResolvedValue(null);
+    localforage.setItem.mockClear();
 
     element = document.createElement("div");
     element.setAttribute("data-controller", "analytics-stats");
+    // Set apiUrlValue to ensure it's initialized
+    element.setAttribute(
+      "data-analytics-stats-api-url-value",
+      "/api/analytics/hevy-tracker"
+    );
     element.innerHTML = `
       <div data-analytics-stats-target="activeUsers"></div>
       <div data-analytics-stats-target="pageViews"></div>
@@ -36,6 +76,9 @@ describe("AnalyticsStatsController", () => {
       AnalyticsStatsController,
       element
     );
+
+    // Wait for async operations in connect to complete
+    await new Promise((resolve) => setTimeout(resolve, 0));
   });
 
   afterEach(() => {
@@ -54,24 +97,25 @@ describe("AnalyticsStatsController", () => {
     // Wait for async fetch operation to complete
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    // Verify fetch was called during connect
-    expect(global.fetch).toHaveBeenCalledWith("/api/analytics/hevy-tracker");
+    // Verify api.get was called with the correct path (apiUrlValue without /api prefix)
+    expect(mockApi.get).toHaveBeenCalledWith("/analytics/hevy-tracker");
   });
 
   test("fetchStats handles errors gracefully", async () => {
-    // Create a new controller with error-throwing fetch
-    const errorFetch = jest.fn(() =>
-      Promise.reject(new Error("Network error"))
-    );
-    global.fetch = errorFetch;
-
     const consoleErrorSpy = jest
       .spyOn(console, "error")
       .mockImplementation(() => {});
 
+    // Make api.get reject with an error for this test
+    mockApi.get.mockRejectedValueOnce(new Error("Network error"));
+
     // Create new element and controller to test error handling
     const newElement = document.createElement("div");
     newElement.setAttribute("data-controller", "analytics-stats");
+    newElement.setAttribute(
+      "data-analytics-stats-api-url-value",
+      "/api/analytics/hevy-tracker"
+    );
     newElement.innerHTML = `
       <div data-analytics-stats-target="activeUsers"></div>
       <div data-analytics-stats-target="pageViews"></div>
@@ -90,8 +134,8 @@ describe("AnalyticsStatsController", () => {
     // Wait for async fetch operation
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    // Verify fetch was called and error was logged
-    expect(errorFetch).toHaveBeenCalled();
+    // Verify api.get was called and error was logged
+    expect(mockApi.get).toHaveBeenCalled();
     expect(consoleErrorSpy).toHaveBeenCalled();
 
     global.cleanupController(newElement, newController);
