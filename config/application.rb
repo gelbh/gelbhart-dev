@@ -38,5 +38,8 @@ module GelbhartDev
       "X-XSS-Protection" => "1; mode=block",
       "Referrer-Policy" => "strict-origin-when-cross-origin"
     )
+
+    # Add Rack::Attack middleware
+    config.middleware.use Rack::Attack
   end
 end
