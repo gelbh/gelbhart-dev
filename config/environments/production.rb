@@ -90,7 +90,7 @@ Rails.application.configure do
   # Disable runtime compilation - all assets should be precompiled during build
   # This reduces memory usage by preventing on-demand asset compilation
   config.assets.compile = false
-  config.assets.css_compressor = :sass
+  # Note: dartsass-rails handles CSS compilation separately, no css_compressor needed
 
   # Configure Terser to support modern ES6+ syntax
   config.assets.js_compressor = Terser.new(

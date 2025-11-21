@@ -1,5 +1,4 @@
 //= link application.js
-//= link application.scss
 //= link controllers/application.js
 
 //= link_tree ../images
@@ -12,6 +11,4 @@
 
 //= link_tree ../../../vendor/javascript .js
 
-//= link_directory ../stylesheets .css
-//= link_directory ../stylesheets .scss
-//= link_directory ../stylesheets/theme .scss
+//= link_tree ../builds
