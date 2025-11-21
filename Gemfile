@@ -19,6 +19,7 @@ gem "image_processing", "~> 1.2"
 gem "sitemap_generator", "~> 6.1"
 
 gem "mini_racer"
+gem "rexml"
 
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 gem "bootsnap", require: false
