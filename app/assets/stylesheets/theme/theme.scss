@@ -4,13 +4,10 @@
  * Theme styles
 */
 
-// User variables
-@import "user-variables";
-
+// Note: Variables are loaded in application.scss before this file is imported
+// So we don't need to load them here to avoid conflicts
 // Configuration & utilities
-@import "variables";
-@import "variables-dark";
-@import "utilities";
+@use "utilities" as *;
 
 // Bootstrap
 @import "bootstrap/scss/functions";
@@ -52,6 +49,7 @@
 @import "bootstrap/scss/utilities/api";
 
 // Layout & components
+// Note: These come after Bootstrap @import, so we use @import here
 @import "root";
 @import "reboot";
 @import "components";

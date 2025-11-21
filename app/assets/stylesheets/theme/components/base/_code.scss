@@ -2,6 +2,8 @@
 // Code
 // --------------------------------------------------
 
+@use "sass:color";
+
 /* stylelint-disable selector-no-qualifying-type */
 :not(pre) > code[class*="language-"],
 pre[class*="language-"],
@@ -14,7 +16,7 @@ pre {
   --#{$prefix}pre-line-numbers-border-color: #{$pre-line-numbers-border-color};
   --#{$prefix}pre-line-numbers-color: #{$pre-line-numbers-color};
   --#{$prefix}pre-tag-color: #4e54c8;
-  --#{$prefix}pre-comment-color: #{darken($gray-500, 6%)};
+  --#{$prefix}pre-comment-color: #{color.adjust($gray-500, $lightness: -6%)};
   --#{$prefix}pre-attr-name-color: #4091e3;
   --#{$prefix}pre-attr-value-color: #e3116c;
   --#{$prefix}pre-class-name-color: #36acaa;
@@ -24,7 +26,8 @@ pre {
   margin: 0;
   font-size: var(--#{$prefix}pre-font-size);
   background-color: var(--#{$prefix}pre-bg);
-  border: var(--#{$prefix}pre-border-width) solid var(--#{$prefix}pre-border-color);
+  border: var(--#{$prefix}pre-border-width) solid
+    var(--#{$prefix}pre-border-color);
   @include border-radius($pre-border-radius);
   @include box-shadow($pre-box-shadow);
 }
@@ -46,12 +49,12 @@ pre {
 // Line numbers
 
 .line-numbers .line-numbers-rows {
-  border-right: var(--#{$prefix}pre-line-numbers-border-width) solid var(--#{$prefix}pre-line-numbers-border-color);
+  border-right: var(--#{$prefix}pre-line-numbers-border-width) solid
+    var(--#{$prefix}pre-line-numbers-border-color);
   > span::before {
     color: var(--#{$prefix}pre-line-numbers-color);
   }
 }
-
 
 // Toolbar (Copy button)
 
@@ -61,15 +64,15 @@ div.code-toolbar > .toolbar {
   > .toolbar-item > button,
   .toolbar-item > span {
     display: inline-block;
-    padding: .25rem .75rem;
-    margin: .375rem .5rem;
+    padding: 0.25rem 0.75rem;
+    margin: 0.375rem 0.5rem;
     font: {
       size: $font-size-xs;
       weight: $font-weight-medium;
     }
     color: $primary !important; // stylelint-disable-line declaration-no-important
     background-color: transparent;
-    border: $border-width solid rgba($primary, .35);
+    border: $border-width solid rgba($primary, 0.35);
     border-radius: $border-radius-sm;
     box-shadow: none;
     transition: $btn-transition;
@@ -83,7 +86,6 @@ div.code-toolbar > .toolbar {
     }
   }
 }
-
 
 // Code highlighting colors overrides (prism.js)
 
@@ -126,7 +128,6 @@ div.code-toolbar > .toolbar {
   background: none;
 }
 
-
 // Dark color mode
 
 @if $enable-dark-mode {
@@ -138,7 +139,7 @@ div.code-toolbar > .toolbar {
       --#{$prefix}pre-line-numbers-border-color: #{$pre-line-numbers-border-color-dark};
       --#{$prefix}pre-line-numbers-color: #{$pre-line-numbers-color-dark};
       --#{$prefix}pre-tag-color: #5960f3;
-      --#{$prefix}pre-comment-color: rgba(#{to-rgb($white)}, .5);
+      --#{$prefix}pre-comment-color: rgba(#{to-rgb($white)}, 0.5);
       --#{$prefix}pre-attr-name-color: #4da2f7;
       --#{$prefix}pre-attr-value-color: #f33185;
       --#{$prefix}pre-class-name-color: #4ddcda;

@@ -15,45 +15,45 @@
 // Import order is maintained to preserve CSS cascade and dependencies.
 
 // Base - Foundation styles
-@import "components/base/type";
-@import "components/base/code";
-@import "components/base/tables";
+@use "components/base/type" as *;
+@use "components/base/code" as *;
+@use "components/base/tables" as *;
 
 // Forms - Form-related components
-@import "components/forms/forms";
-@import "components/forms/buttons";
-@import "components/forms/social-buttons";
+@use "components/forms/forms" as *;
+@use "components/forms/buttons" as *;
+@use "components/forms/social-buttons" as *;
 
 // UI - UI elements (dropdown imported early as it may be used by navigation)
-@import "components/ui/dropdown";
+@use "components/ui/dropdown" as *;
 
 // Navigation - Navigation components
-@import "components/navigation/nav";
-@import "components/navigation/navbar";
-@import "components/navigation/breadcrumb";
-@import "components/navigation/pagination";
+@use "components/navigation/nav" as *;
+@use "components/navigation/navbar" as *;
+@use "components/navigation/breadcrumb" as *;
+@use "components/navigation/pagination" as *;
 
 // Layout - Container/layout components
-@import "components/layout/card";
-@import "components/layout/accordion";
-@import "components/layout/list-group";
+@use "components/layout/card" as *;
+@use "components/layout/accordion" as *;
+@use "components/layout/list-group" as *;
 
 // UI - Additional UI elements
-@import "components/ui/badge";
-@import "components/ui/progress";
-@import "components/ui/steps";
-@import "components/ui/placeholders";
+@use "components/ui/badge" as *;
+@use "components/ui/progress" as *;
+@use "components/ui/steps" as *;
+@use "components/ui/placeholders" as *;
 
 // Feedback - User feedback components
-@import "components/feedback/alert";
-@import "components/feedback/toasts";
-@import "components/feedback/modal";
-@import "components/feedback/popover";
-@import "components/feedback/offcanvas";
+@use "components/feedback/alert" as *;
+@use "components/feedback/toasts" as *;
+@use "components/feedback/modal" as *;
+@use "components/feedback/popover" as *;
+@use "components/feedback/offcanvas" as *;
 
 // Media - Media-related components
-@import "components/media/carousel";
-@import "components/media/gallery";
-@import "components/media/parallax";
-@import "components/media/comparison-slider";
-@import "components/media/audio-player";
+@use "components/media/carousel" as *;
+@use "components/media/gallery" as *;
+@use "components/media/parallax" as *;
+@use "components/media/comparison-slider" as *;
+@use "components/media/audio-player" as *;

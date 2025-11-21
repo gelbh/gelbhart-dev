@@ -13,11 +13,11 @@
 // 7. Modals (game over, menu, settings, leaderboard)
 // 8. Responsive styles (media queries - must be last)
 
-@import "pacman/pacman-base";
-@import "pacman/pacman-animations";
-@import "pacman/pacman-entities";
-@import "pacman/pacman-hud";
-@import "pacman/pacman-ui";
-@import "pacman/pacman-interactions";
-@import "pacman/pacman-modals";
-@import "pacman/pacman-responsive";
+@use "pacman/pacman-base" as *;
+@use "pacman/pacman-animations" as *;
+@use "pacman/pacman-entities" as *;
+@use "pacman/pacman-hud" as *;
+@use "pacman/pacman-ui" as *;
+@use "pacman/pacman-interactions" as *;
+@use "pacman/pacman-modals" as *;
+@use "pacman/pacman-responsive" as *;

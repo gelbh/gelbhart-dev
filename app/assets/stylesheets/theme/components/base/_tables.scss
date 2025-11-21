@@ -2,6 +2,8 @@
 // Tables
 // --------------------------------------------------
 
+@use "sass:color";
+
 .table {
   --#{$prefix}table-th-color: #{$table-th-color};
   --#{$prefix}table-dark-color: #{$body-color-dark};
@@ -16,10 +18,10 @@
   }
 }
 .table > :not(:last-child) > :last-child > * {
-  border-bottom-color: darken($border-color, 12%);
+  border-bottom-color: color.adjust($border-color, $lightness: -12%);
 }
 .table.table-dark > :not(:last-child) > :last-child > * {
-  border-bottom-color: rgba($white, .3);
+  border-bottom-color: rgba($white, 0.3);
 }
 
 // Remove highlight border color between thead, tbody and tfoot.
@@ -27,17 +29,22 @@
   border-top: 0;
 }
 
-
 // Dark color mode
 
 @if $enable-dark-mode {
   @include color-mode(dark) {
     .table:not([data-bs-theme="light"]) {
-      --#{$prefix}table-striped-bg: rgba(#{to-rgb($white)}, #{$table-striped-bg-factor});
-      --#{$prefix}table-hover-bg: rgba(#{to-rgb($white)}, #{$table-hover-bg-factor});
+      --#{$prefix}table-striped-bg: rgba(
+        #{to-rgb($white)},
+        #{$table-striped-bg-factor}
+      );
+      --#{$prefix}table-hover-bg: rgba(
+        #{to-rgb($white)},
+        #{$table-hover-bg-factor}
+      );
       --#{$prefix}table-hover-color: #{$table-hover-color};
       > :not(:last-child) > :last-child > * {
-        border-bottom-color: rgba($white, .3);
+        border-bottom-color: rgba($white, 0.3);
       }
     }
   }

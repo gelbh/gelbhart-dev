@@ -2,6 +2,8 @@
 // Forms
 // --------------------------------------------------
 
+@use "sass:color";
+
 // Remove default -webkit search input clear button
 
 /* stylelint-disable selector-no-qualifying-type */
@@ -291,7 +293,10 @@ label {
   --#{$prefix}range-slider-pips-color: var(--#{$prefix}body-color);
   --#{$prefix}range-slider-pips-font-size: #{$range-slider-pips-font-size};
   --#{$prefix}range-slider-pips-border-width: var(--#{$prefix}border-width);
-  --#{$prefix}range-slider-pips-border-color: #{darken($border-color, 6%)};
+  --#{$prefix}range-slider-pips-border-color: #{color.adjust(
+      $border-color,
+      $lightness: -6%
+    )};
   --#{$prefix}range-slider-tooltip-padding-y: #{$tooltip-padding-y};
   --#{$prefix}range-slider-tooltip-padding-x: #{$tooltip-padding-x};
   --#{$prefix}range-slider-tooltip-bg: #{$range-slider-tooltip-bg};
@@ -386,7 +391,7 @@ html:not([dir="rtl"]) .range-slider-ui.noUi-horizontal .noUi-handle {
     margin-top: 0.5rem;
   }
   &.status-success {
-    color: darken($success, 10%);
+    color: color.adjust($success, $lightness: -10%);
     background-color: rgba($success, 0.1);
   }
   &.status-error {

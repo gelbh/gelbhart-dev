@@ -5,49 +5,49 @@
 
 // ---- Foundation ----
 // CSS variables, colors, spacing, transitions, z-index layers
-@import "components/variables";
+@use "components/variables" as *;
 
 // Shared SCSS mixins for reusable patterns
-@import "components/mixins";
+@use "components/mixins" as *;
 
 // All @keyframes animations used throughout the site
-@import "components/animations";
+@use "components/animations" as *;
 
 // Global base styles (body, html, card utilities)
-@import "components/base";
+@use "components/base" as *;
 
 // ---- Layout Components ----
 // Footer and scroll-to-top button styles
-@import "components/footer";
+@use "components/footer" as *;
 
 // Header styles
-@import "components/header";
+@use "components/header" as *;
 
 // ---- Page Sections ----
 // Hero section with animated backgrounds and gradient text
-@import "components/hero";
+@use "components/hero" as *;
 
 // Technologies & skills section with tech cards
-@import "components/tech-skills";
+@use "components/tech-skills" as *;
 
 // Contact page with glassmorphic cards and typing code background
-@import "components/contact";
+@use "components/contact" as *;
 
 // Project cards with hover effects and animations
-@import "components/projects";
+@use "components/projects" as *;
 
 // Pac-Man game styles:
-@import "components/pacman";
+@use "components/pacman" as *;
 
 // ---- Project Pages ----
 // Video Captioner page with hero and card styles
-@import "components/video-captioner";
+@use "components/video-captioner" as *;
 
 // Hevy Tracker page with hero, cards, gallery, and steps
-@import "components/hevy-tracker";
+@use "components/hevy-tracker" as *;
 
 // NASA Exoplanet Explorer page with hero and card styles
-@import "components/nasa-exoplanet-explorer";
+@use "components/nasa-exoplanet-explorer" as *;
 
 // Error page styles
 // Ensure error page buttons use solid indigo color matching logo (not pink gradient)
