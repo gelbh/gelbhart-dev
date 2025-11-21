@@ -1,6 +1,5 @@
 class ContactsController < ApplicationController
-  # Rate limiting: max 3 submissions per IP per hour
-  before_action :check_rate_limit, only: :create
+  # Rate limiting handled by Rack::Attack middleware (3 submissions per IP per hour)
 
   def create
     @name = params[:name]
@@ -51,7 +50,9 @@ class ContactsController < ApplicationController
   end
 
   def valid_email?(email)
-    email.match?(/\A[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\z/)
+    EmailAddress.new(email).valid?
+  rescue EmailAddress::Error
+    false
   end
 
   def spam_detected?
@@ -63,7 +64,7 @@ class ContactsController < ApplicationController
       timestamp = params[:form_timestamp].to_i
       form_time = Time.at(timestamp)
       elapsed_time = Time.now - form_time
-      
+
       # Validate timestamp is within reasonable range (0-3600 seconds ago)
       # Reject if: future timestamp, too old (>1 hour), or too fast (<3s)
       return true if elapsed_time < 3.seconds      # Too fast (bot)
@@ -76,11 +77,11 @@ class ContactsController < ApplicationController
 
     # 3. Spam keyword detection
     spam_keywords = [
-      'seo', 'backlinks', 'ranking', 'promotion', 'seobests',
-      'upgrade your website', 'increase your search', 'click here',
-      'buy now', 'limited offer', 'act now', 'make money',
-      'work from home', 'weight loss', 'cryptocurrency', 'bitcoin',
-      'casino', 'viagra', 'cialis', 'pharmacy'
+      "seo", "backlinks", "ranking", "promotion", "seobests",
+      "upgrade your website", "increase your search", "click here",
+      "buy now", "limited offer", "act now", "make money",
+      "work from home", "weight loss", "cryptocurrency", "bitcoin",
+      "casino", "viagra", "cialis", "pharmacy"
     ]
 
     message_lower = @message.to_s.downcase
@@ -91,21 +92,5 @@ class ContactsController < ApplicationController
     return true if url_count > 1
 
     false
-  end
-
-  def check_rate_limit
-    # Use dedicated rate limit cache with size limits to prevent unbounded growth
-    cache_key = "contact_form_#{request.remote_ip}"
-    submission_count = Rails.cache.rate_limit.read(cache_key) || 0
-
-    if submission_count >= 3
-      respond_to do |format|
-        format.html { redirect_to contact_path, alert: "Too many submissions. Please try again later." }
-        format.json { render json: { success: false, message: "Rate limit exceeded" }, status: :too_many_requests }
-      end
-      return false  # Halt the before_action chain
-    else
-      Rails.cache.rate_limit.write(cache_key, submission_count + 1, expires_in: 1.hour)
-    end
   end
 end
