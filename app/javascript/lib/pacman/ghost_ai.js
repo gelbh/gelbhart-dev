@@ -133,6 +133,162 @@ export class GhostAI {
   }
 
   /**
+   * Check if a position would cross a boundary
+   * @param {number} x - X position
+   * @param {number} y - Y position
+   * @param {function} checkSectionBoundary - Callback to check section boundaries
+   * @returns {Object|null} - Boundary info {type: 'section'|'header'|'footer', y: boundaryY} or null
+   */
+  checkBoundary(x, y, checkSectionBoundary) {
+    // Check section boundary
+    if (checkSectionBoundary) {
+      const sectionBoundary = checkSectionBoundary(x, y);
+      if (sectionBoundary !== null && sectionBoundary !== undefined) {
+        return { type: "section", y: sectionBoundary };
+      }
+    }
+
+    // Check header/footer boundaries
+    const header = document.querySelector(".header");
+    const footer = document.querySelector(".footer");
+    const margin = 30;
+
+    let minY = margin;
+    let maxY = document.documentElement.scrollHeight - margin;
+
+    if (header) {
+      const headerRect = header.getBoundingClientRect();
+      minY = Math.max(
+        minY,
+        headerRect.top + window.scrollY + headerRect.height + margin
+      );
+    }
+
+    if (footer) {
+      const footerRect = footer.getBoundingClientRect();
+      maxY = Math.min(maxY, footerRect.top + window.scrollY - margin);
+    }
+
+    if (y <= minY) {
+      return { type: "header", y: minY };
+    } else if (y >= maxY) {
+      return { type: "footer", y: maxY };
+    }
+
+    return null;
+  }
+
+  /**
+   * Find alternative target for frightened ghost when blocked by boundary
+   * Prefers horizontal escape routes
+   * @param {Object} ghost - Ghost object
+   * @param {Object} boundary - Boundary info {type, y}
+   * @param {function} checkSectionBoundary - Callback to check section boundaries
+   * @returns {Object} - Alternative target {x, y}
+   */
+  findFrightenedAlternativeTarget(
+    ghost,
+    boundary,
+    checkSectionBoundary = null
+  ) {
+    const fleeDistance = 200;
+    const horizontalDistance = 300; // Prefer horizontal movement
+
+    // Try horizontal escape first (left or right)
+    const horizontalOptions = [
+      { x: ghost.x - horizontalDistance, y: ghost.y }, // Left
+      { x: ghost.x + horizontalDistance, y: ghost.y }, // Right
+    ];
+
+    // Try opposite vertical direction if blocked
+    let verticalOption = null;
+    if (boundary.type === "section" || boundary.type === "header") {
+      // Blocked from above, try going down
+      verticalOption = { x: ghost.x, y: ghost.y + fleeDistance };
+    } else if (boundary.type === "footer") {
+      // Blocked from below, try going up
+      verticalOption = { x: ghost.x, y: ghost.y - fleeDistance };
+    }
+
+    // Combine options and pick one that doesn't cross boundary
+    const options = [...horizontalOptions];
+    if (verticalOption) {
+      options.push(verticalOption);
+    }
+
+    // Add some randomness to escape direction
+    const randomAngle = Math.random() * Math.PI * 2;
+    options.push({
+      x: ghost.x + Math.cos(randomAngle) * fleeDistance,
+      y: ghost.y + Math.sin(randomAngle) * fleeDistance,
+    });
+
+    // Find first option that doesn't cross a boundary
+    for (const option of options) {
+      const testBoundary = this.checkBoundary(
+        option.x,
+        option.y,
+        checkSectionBoundary
+      );
+      if (!testBoundary || testBoundary.y !== boundary.y) {
+        return option;
+      }
+    }
+
+    // Fallback: just move horizontally away from Pac-Man
+    const dx = ghost.x - this.pacmanPosition.x;
+    return {
+      x: ghost.x + (dx > 0 ? horizontalDistance : -horizontalDistance),
+      y: ghost.y,
+    };
+  }
+
+  /**
+   * Adjust target to avoid boundary for non-frightened ghosts
+   * @param {Object} ghost - Ghost object
+   * @param {number} targetX - Original target X
+   * @param {number} targetY - Original target Y
+   * @param {Object} boundary - Boundary info {type, y}
+   * @param {function} checkSectionBoundary - Callback to check section boundaries
+   * @returns {Object} - Adjusted target {x, y}
+   */
+  adjustTargetForBoundary(
+    ghost,
+    targetX,
+    targetY,
+    boundary,
+    checkSectionBoundary
+  ) {
+    // If target would cross boundary, adjust it
+    const targetBoundary = this.checkBoundary(
+      targetX,
+      targetY,
+      checkSectionBoundary
+    );
+
+    if (targetBoundary && targetBoundary.y === boundary.y) {
+      // Target crosses the same boundary, adjust it
+      if (boundary.type === "section" || boundary.type === "header") {
+        // Blocked from above, keep target below boundary
+        targetY = Math.max(targetY, boundary.y + 50);
+      } else if (boundary.type === "footer") {
+        // Blocked from below, keep target above boundary
+        targetY = Math.min(targetY, boundary.y - 50);
+      }
+
+      // Also try to move horizontally around the boundary
+      const horizontalOffset = 200;
+      if (Math.abs(targetX - ghost.x) < horizontalOffset) {
+        // If target is close horizontally, add horizontal component
+        const dx = targetX - ghost.x;
+        targetX = ghost.x + (dx > 0 ? horizontalOffset : -horizontalOffset);
+      }
+    }
+
+    return { x: targetX, y: targetY };
+  }
+
+  /**
    * Update all ghosts with advanced AI behavior
    * Implements scatter/chase modes and unique personalities
    * Scatter: 5 seconds (17% of time)
@@ -160,6 +316,17 @@ export class GhostAI {
       // Get target position based on ghost personality and mode
       let targetX, targetY;
 
+      // Check if ghost is currently at a boundary (stuck state)
+      const currentBoundary = this.checkBoundary(
+        ghost.x,
+        ghost.y,
+        checkSectionBoundary
+      );
+      const wasAtBoundary =
+        ghost.lastBoundaryHit &&
+        ghost.lastBoundaryHit.y === currentBoundary?.y &&
+        Math.abs(ghost.y - currentBoundary.y) < 5; // Within 5px of boundary
+
       if (ghost.frightened) {
         // Run away from Pac-Man with more erratic movement
         const fleeAngle = Math.atan2(
@@ -169,6 +336,38 @@ export class GhostAI {
         const fleeDistance = 200;
         targetX = ghost.x + Math.cos(fleeAngle) * fleeDistance;
         targetY = ghost.y + Math.sin(fleeAngle) * fleeDistance;
+
+        // If ghost is stuck at boundary or target would cross boundary, find alternative
+        if (currentBoundary || wasAtBoundary) {
+          const alternative = this.findFrightenedAlternativeTarget(
+            ghost,
+            currentBoundary || ghost.lastBoundaryHit,
+            checkSectionBoundary
+          );
+          targetX = alternative.x;
+          targetY = alternative.y;
+          // Track that we're avoiding a boundary
+          ghost.lastBoundaryHit = currentBoundary || ghost.lastBoundaryHit;
+        } else {
+          // Check if target would cross a boundary
+          const targetBoundary = this.checkBoundary(
+            targetX,
+            targetY,
+            checkSectionBoundary
+          );
+          if (targetBoundary) {
+            const alternative = this.findFrightenedAlternativeTarget(
+              ghost,
+              targetBoundary,
+              checkSectionBoundary
+            );
+            targetX = alternative.x;
+            targetY = alternative.y;
+            ghost.lastBoundaryHit = targetBoundary;
+          } else {
+            ghost.lastBoundaryHit = null; // Clear boundary tracking if not blocked
+          }
+        }
       } else if (ghost.eaten) {
         // Return to center fast
         targetX = window.innerWidth / 2;
@@ -335,6 +534,41 @@ export class GhostAI {
             targetX = this.pacmanPosition.x;
             targetY = this.pacmanPosition.y;
         }
+
+        // For non-frightened ghosts, adjust target if it would cross a boundary
+        if (currentBoundary || wasAtBoundary) {
+          const adjusted = this.adjustTargetForBoundary(
+            ghost,
+            targetX,
+            targetY,
+            currentBoundary || ghost.lastBoundaryHit,
+            checkSectionBoundary
+          );
+          targetX = adjusted.x;
+          targetY = adjusted.y;
+          ghost.lastBoundaryHit = currentBoundary || ghost.lastBoundaryHit;
+        } else {
+          // Check if target would cross a boundary
+          const targetBoundary = this.checkBoundary(
+            targetX,
+            targetY,
+            checkSectionBoundary
+          );
+          if (targetBoundary) {
+            const adjusted = this.adjustTargetForBoundary(
+              ghost,
+              targetX,
+              targetY,
+              targetBoundary,
+              checkSectionBoundary
+            );
+            targetX = adjusted.x;
+            targetY = adjusted.y;
+            ghost.lastBoundaryHit = targetBoundary;
+          } else {
+            ghost.lastBoundaryHit = null; // Clear boundary tracking if not blocked
+          }
+        }
       }
 
       // Calculate direction to target with wraparound consideration
@@ -394,18 +628,49 @@ export class GhostAI {
         const nextX = ghost.x + ghost.velocityX * deltaTime;
         const nextY = ghost.y + ghost.velocityY * deltaTime;
 
-        // Check if next position would enter a locked section
-        const ghostBoundary = checkSectionBoundary
-          ? checkSectionBoundary(nextX, nextY)
-          : null;
+        // Check if next position would hit any boundary (section, header, or footer)
+        const nextBoundary = this.checkBoundary(
+          nextX,
+          nextY,
+          checkSectionBoundary
+        );
 
-        if (ghostBoundary) {
-          // Stop at boundary - ghosts bounce back slightly
-          ghost.y = ghostBoundary;
-          ghost.velocityY = -ghost.velocityY * 0.5; // Reverse and reduce velocity
+        if (nextBoundary) {
+          // Hit a boundary - clamp position and reset velocity more aggressively
+          ghost.y = nextBoundary.y;
+
+          // Track boundary hit for target recalculation
+          ghost.lastBoundaryHit = nextBoundary;
+
+          // Reset velocity more aggressively to break out of stuck state
+          // For frightened ghosts, prefer horizontal escape
+          if (ghost.frightened) {
+            // Strong horizontal push away from boundary
+            const horizontalPush = (Math.random() - 0.5) * speed * 0.8;
+            ghost.velocityX = horizontalPush;
+            ghost.velocityY = 0; // Clear vertical velocity
+          } else {
+            // Reverse and significantly reduce velocity
+            ghost.velocityY = -ghost.velocityY * 0.3; // More aggressive reduction
+            ghost.velocityX = ghost.velocityX * 0.7; // Also reduce horizontal to allow new direction
+          }
         } else {
           ghost.x = nextX;
           ghost.y = nextY;
+          // Clear boundary tracking if we're no longer at a boundary
+          if (ghost.lastBoundaryHit) {
+            const currentBoundary = this.checkBoundary(
+              ghost.x,
+              ghost.y,
+              checkSectionBoundary
+            );
+            if (
+              !currentBoundary ||
+              currentBoundary.y !== ghost.lastBoundaryHit.y
+            ) {
+              ghost.lastBoundaryHit = null;
+            }
+          }
         }
 
         // Determine direction based on velocity (for sprite)
@@ -446,8 +711,32 @@ export class GhostAI {
           maxY = Math.min(maxY, footerRect.top + window.scrollY - margin);
         }
 
-        // Clamp ghost position to playable area
+        // Clamp ghost position to playable area and track boundary hits
+        const oldY = ghost.y;
         ghost.y = Math.max(minY, Math.min(maxY, ghost.y));
+
+        // If position was clamped, we hit a header/footer boundary
+        if (ghost.y !== oldY) {
+          if (ghost.y <= minY) {
+            ghost.lastBoundaryHit = { type: "header", y: minY };
+            // Reset velocity to prevent getting stuck
+            if (ghost.frightened) {
+              ghost.velocityY = 0;
+              ghost.velocityX = (Math.random() - 0.5) * speed * 0.8;
+            } else {
+              ghost.velocityY = 0;
+            }
+          } else if (ghost.y >= maxY) {
+            ghost.lastBoundaryHit = { type: "footer", y: maxY };
+            // Reset velocity to prevent getting stuck
+            if (ghost.frightened) {
+              ghost.velocityY = 0;
+              ghost.velocityX = (Math.random() - 0.5) * speed * 0.8;
+            } else {
+              ghost.velocityY = 0;
+            }
+          }
+        }
 
         ghost.element.style.left = `${ghost.x}px`;
         ghost.element.style.top = `${ghost.y}px`;
