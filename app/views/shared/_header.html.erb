@@ -54,7 +54,7 @@
         <nav class="mobile-nav">
           <ul class="mobile-nav-list">
             <li class="mobile-nav-item">
-              <a class="mobile-nav-link <%= 'active' if projects_with_pages.any? { |p| current_page?(project_link_url(p)) } %>" href="#" role="button" data-bs-toggle="collapse" data-bs-target="#mobileProjectsDropdown" aria-expanded="false" aria-controls="mobileProjectsDropdown" onclick="event.preventDefault();">
+              <a class="mobile-nav-link <%= 'active' if projects_with_pages.any? { |p| current_page?(project_link_url(p)) } %>" href="#" role="button" data-bs-toggle="collapse" data-bs-target="#mobileProjectsDropdown" aria-expanded="false" aria-controls="mobileProjectsDropdown">
                 <i class="bx bx-code-alt me-2"></i>
                 <span>Projects</span>
                 <i class="bx bx-chevron-down ms-auto mobile-nav-chevron"></i>
