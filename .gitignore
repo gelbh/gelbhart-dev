@@ -28,7 +28,6 @@
 
 # Ignore environment files
 .env
-.env.*
 
 # Ignore Google Analytics credentials
 /config/google-oauth-credentials.json
