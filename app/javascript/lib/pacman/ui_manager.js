@@ -9,38 +9,78 @@
  * - Item notifications
  * - Effect cooldown displays
  */
+const EXTRA_LIFE_THRESHOLD = 10000;
+const HUD_OFFSET_TOP = 20;
+
 export class UIManager {
   constructor(targets, assetPaths = {}) {
-    // Store target references
-    this.hudTarget = targets.hud
-    this.scoreTarget = targets.score
-    this.livesTarget = targets.lives
-    this.progressItemTarget = targets.progressItem
-    this.progressLabelTarget = targets.progressLabel
-    this.progressValueTarget = targets.progressValue
+    this.hudTarget = targets.hud;
+    this.scoreTarget = targets.score;
+    this.livesTarget = targets.lives;
+    this.progressItemTarget = targets.progressItem;
+    this.progressLabelTarget = targets.progressLabel;
+    this.progressValueTarget = targets.progressValue;
+    this.assetPaths = assetPaths;
 
-    // Asset paths for production
-    this.assetPaths = assetPaths
-
-    // Item types configuration (for notifications and cooldowns)
     this.itemTypes = {
-      speedBoost: { emoji: '⚡', name: 'Speed Boost', color: '#FFD700', points: 100, duration: 5000, positive: true },
-      slowDown: { emoji: '🐌', name: 'Slow Down', color: '#8B4513', points: -50, duration: 4000, positive: false },
-      shield: { emoji: '🛡️', name: 'Shield', color: '#00CED1', points: 150, duration: 6000, positive: true },
-      freeze: { emoji: '❄️', name: 'Ghost Freeze', color: '#87CEEB', points: 200, duration: 3000, positive: true },
-      doublePoints: { emoji: '⭐', name: 'Double Points', color: '#FF69B4', points: 100, duration: 10000, positive: true },
-      extraLife: { emoji: '❤️', name: 'Extra Life', color: '#FF0000', points: 500, duration: 0, positive: true }
-    }
+      speedBoost: {
+        emoji: "⚡",
+        name: "Speed Boost",
+        color: "#FFD700",
+        points: 100,
+        duration: 5000,
+        positive: true,
+      },
+      slowDown: {
+        emoji: "🐌",
+        name: "Slow Down",
+        color: "#8B4513",
+        points: -50,
+        duration: 4000,
+        positive: false,
+      },
+      shield: {
+        emoji: "🛡️",
+        name: "Shield",
+        color: "#00CED1",
+        points: 150,
+        duration: 6000,
+        positive: true,
+      },
+      freeze: {
+        emoji: "❄️",
+        name: "Ghost Freeze",
+        color: "#87CEEB",
+        points: 200,
+        duration: 3000,
+        positive: true,
+      },
+      doublePoints: {
+        emoji: "⭐",
+        name: "Double Points",
+        color: "#FF69B4",
+        points: 100,
+        duration: 10000,
+        positive: true,
+      },
+      extraLife: {
+        emoji: "❤️",
+        name: "Extra Life",
+        color: "#FF0000",
+        points: 500,
+        duration: 0,
+        positive: true,
+      },
+    };
   }
 
   /**
    * Update HUD position to stay in viewport
-   * Positions HUD in top-right, moving with scroll position
    */
   updateHUDPosition() {
     if (this.hudTarget) {
-      const viewportTop = window.scrollY
-      this.hudTarget.style.top = `${viewportTop + 20}px` // Always 20px from top of viewport
+      const viewportTop = window.scrollY;
+      this.hudTarget.style.top = `${viewportTop + HUD_OFFSET_TOP}px`;
     }
   }
 
@@ -50,57 +90,211 @@ export class UIManager {
    * @param {Object} callbacks - Callback functions { onExtraLife }
    */
   updateHUD(gameState, callbacks = {}) {
-    const { score, lives, dotsScore, sections, currentSection, extraLifeAwarded } = gameState
-    const { onExtraLife } = callbacks
+    const {
+      score,
+      lives,
+      dotsScore,
+      sections,
+      currentSection,
+      extraLifeAwarded,
+    } = gameState;
+    const { onExtraLife } = callbacks;
 
-    // Update score
     if (this.scoreTarget) {
-      this.scoreTarget.textContent = score
+      this.scoreTarget.textContent = score;
     }
 
-    // Award extra life at 10,000 points (classic Pac-Man)
-    if (!extraLifeAwarded && score >= 10000 && onExtraLife) {
-      onExtraLife()
+    if (!extraLifeAwarded && score >= EXTRA_LIFE_THRESHOLD && onExtraLife) {
+      onExtraLife();
     }
 
-    // Update lives display
     if (this.livesTarget) {
-      // Prevent negative lives display
-      const livesCount = Math.max(0, lives)
-      this.livesTarget.textContent = '❤️'.repeat(livesCount)
+      const livesCount = Math.max(0, lives);
+      this.livesTarget.textContent = "❤️".repeat(livesCount);
     }
 
-    // Update progress to next section
-    if (this.progressItemTarget && this.progressLabelTarget && this.progressValueTarget) {
+    if (
+      this.progressItemTarget &&
+      this.progressLabelTarget &&
+      this.progressValueTarget
+    ) {
       if (currentSection >= sections.length) {
-        // All sections unlocked - show completion message
-        this.progressItemTarget.style.display = 'flex'
-        this.progressLabelTarget.textContent = 'Goal:'
-        this.progressValueTarget.textContent = 'Clear All Dots!'
-        this.progressValueTarget.style.color = '#00ff00'
-        this.progressValueTarget.style.textShadow = '0 0 10px rgba(0, 255, 0, 0.8)'
+        this.progressItemTarget.style.display = "flex";
+        this.progressLabelTarget.textContent = "Goal:";
+        this.progressValueTarget.textContent = "Clear All Dots!";
+        this.progressValueTarget.style.color = "#00ff00";
+        this.progressValueTarget.style.textShadow =
+          "0 0 10px rgba(0, 255, 0, 0.8)";
       } else {
-        this.progressItemTarget.style.display = 'flex'
-        const nextSection = sections[currentSection]
-        const pointsNeeded = Math.max(0, nextSection.threshold - dotsScore)
+        this.progressItemTarget.style.display = "flex";
+        const nextSection = sections[currentSection];
+        const pointsNeeded = Math.max(0, nextSection.threshold - dotsScore);
 
         if (pointsNeeded === 0) {
-          // Key available
-          this.progressLabelTarget.textContent = 'Unlock:'
-          this.progressValueTarget.textContent = '🔑 Get Key!'
-          this.progressValueTarget.style.color = '#ffd700'
-          this.progressValueTarget.style.textShadow = '0 0 10px rgba(255, 215, 0, 0.8)'
+          this.progressLabelTarget.textContent = "Unlock:";
+          this.progressValueTarget.textContent = "🔑 Get Key!";
+          this.progressValueTarget.style.color = "#ffd700";
+          this.progressValueTarget.style.textShadow =
+            "0 0 10px rgba(255, 215, 0, 0.8)";
         } else {
-          // Show points needed (dots only)
-          this.progressLabelTarget.textContent = 'Need:'
-          this.progressValueTarget.textContent = `${pointsNeeded} pts`
-          this.progressValueTarget.style.color = ''
-          this.progressValueTarget.style.textShadow = ''
+          this.progressLabelTarget.textContent = "Need:";
+          this.progressValueTarget.textContent = `${pointsNeeded} pts`;
+          this.progressValueTarget.style.color = "";
+          this.progressValueTarget.style.textShadow = "";
         }
       }
     }
   }
 
+  /**
+   * Create and show a modal with common structure
+   * @private
+   * @param {string} className - Additional CSS class for the modal
+   * @param {string} html - HTML content for the modal
+   * @returns {HTMLElement} The created modal element
+   */
+  _createModal(className, html) {
+    const modal = document.createElement("div");
+    modal.className = `pacman-game-over-modal ${className}`.trim();
+    modal.innerHTML = html;
+
+    document.body.appendChild(modal);
+
+    requestAnimationFrame(() => {
+      modal.classList.add("show");
+    });
+
+    return modal;
+  }
+
+  /**
+   * Setup modal close handler with cleanup
+   * @private
+   * @param {HTMLElement} modal - Modal element
+   * @param {Function} onClose - Callback when modal closes
+   * @param {Function} keyboardHandler - Optional keyboard handler to remove
+   * @returns {Function} The close handler function
+   */
+  _setupModalCloseHandler(modal, onClose, keyboardHandler = null) {
+    return () => {
+      modal.remove();
+      onClose?.();
+      if (keyboardHandler) {
+        document.removeEventListener("keydown", keyboardHandler);
+      }
+    };
+  }
+
+  /**
+   * Setup keyboard handler for modal
+   * @private
+   * @param {Object} handlers - Object mapping keys to handler functions
+   * @param {Function} onClose - Optional close handler to call on Escape
+   * @returns {Function} The keyboard handler function
+   */
+  _setupKeyboardHandler(handlers = {}, onClose = null) {
+    const keydownHandler = (e) => {
+      const handler = handlers[e.key] || handlers[e.key.toLowerCase()];
+      if (handler) {
+        e.preventDefault();
+        handler(e);
+      } else if (e.key === "Escape" && onClose) {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    document.addEventListener("keydown", keydownHandler);
+    return keydownHandler;
+  }
+
+  /**
+   * Bind action buttons in modal
+   * @private
+   * @param {HTMLElement} modal - Modal element
+   * @param {Object} actions - Object mapping data-action values to callbacks
+   */
+  _bindModalActions(modal, actions) {
+    Object.entries(actions).forEach(([action, callback]) => {
+      const button = modal.querySelector(`[data-action="${action}"]`);
+      if (button && callback) {
+        button.addEventListener("click", callback);
+      }
+    });
+  }
+
+  /**
+   * Check if a modal with given class already exists
+   * @private
+   * @param {string} className - CSS class to check
+   * @returns {boolean} True if modal exists
+   */
+  _modalExists(className) {
+    return !!document.querySelector(`.${className}`);
+  }
+
+  /**
+   * Create modal button HTML
+   * @private
+   * @param {string} action - Data action attribute value
+   * @param {string} label - Button label text
+   * @param {string} icon - Boxicons class (e.g., 'bx-refresh')
+   * @param {string} variant - Button variant ('primary' or 'secondary')
+   * @returns {string} Button HTML
+   */
+  _createModalButton(action, label, icon, variant = "primary") {
+    return `
+      <button class="modal-btn modal-btn-${variant}" data-action="${action}">
+        <i class="bx ${icon}"></i>
+        ${label}
+      </button>
+    `;
+  }
+
+  /**
+   * Create modal buttons container
+   * @private
+   * @param {string} buttonsHtml - HTML for buttons
+   * @returns {string} Buttons container HTML
+   */
+  _createModalButtons(buttonsHtml) {
+    return `<div class="modal-buttons">${buttonsHtml}</div>`;
+  }
+
+  /**
+   * Create modal header (emoji and title)
+   * @private
+   * @param {string} emoji - Emoji character
+   * @param {string} title - Modal title
+   * @returns {string} Header HTML
+   */
+  _createModalHeader(emoji, title) {
+    return `
+      <div class="modal-emoji">${emoji}</div>
+      <h2 class="modal-title">${title}</h2>
+    `;
+  }
+
+  /**
+   * Create modal message
+   * @private
+   * @param {string} message - Message text (will be escaped)
+   * @returns {string} Message HTML
+   */
+  _createModalMessage(message) {
+    return `<p class="modal-message">${this.escapeHtml(message)}</p>`;
+  }
+
+  /**
+   * Create modal content wrapper
+   * @private
+   * @param {string} content - Inner HTML content
+   * @param {string} additionalClass - Additional CSS class for content div
+   * @returns {string} Modal content HTML
+   */
+  _createModalContent(content, additionalClass = "") {
+    const classAttr = additionalClass ? ` ${additionalClass}` : "";
+    return `<div class="modal-content${classAttr}">${content}</div>`;
+  }
 
   /**
    * Show game over modal
@@ -109,75 +303,55 @@ export class UIManager {
    * @param {Object} callbacks - Callback functions { onRestart, onQuit, onViewLeaderboard }
    */
   showGameOverModal(isWin, finalScore, callbacks = {}) {
-    const { onRestart, onQuit, onViewLeaderboard } = callbacks
+    const { onRestart, onQuit, onViewLeaderboard } = callbacks;
 
-    // Create modal overlay
-    const modal = document.createElement('div')
-    modal.className = 'pacman-game-over-modal'
+    const title = isWin ? "🎉 Victory!" : "💀 Game Over";
+    const message = isWin
+      ? "Congratulations! You unlocked all sections!"
+      : "Better luck next time!";
+    const emoji = isWin ? "🏆" : "👾";
 
-    const title = isWin ? '🎉 Victory!' : '💀 Game Over'
-    const message = isWin ? 'Congratulations! You unlocked all sections!' : 'Better luck next time!'
-    const emoji = isWin ? '🏆' : '👾'
+    const buttons = [
+      this._createModalButton("restart", "Play Again", "bx-refresh", "primary"),
+      onViewLeaderboard
+        ? this._createModalButton(
+            "leaderboard",
+            "Leaderboard",
+            "bx-trophy",
+            "secondary"
+          )
+        : "",
+      this._createModalButton("quit", "Quit", "bx-x", "secondary"),
+    ]
+      .filter(Boolean)
+      .join("");
 
-    modal.innerHTML = `
-      <div class="modal-content">
-        <div class="modal-emoji">${emoji}</div>
-        <h2 class="modal-title">${title}</h2>
-        <p class="modal-message">${message}</p>
-        <div class="modal-score">
-          <span class="score-label">Final Score</span>
-          <span class="score-value">${finalScore}</span>
-        </div>
-        <div class="modal-buttons">
-          <button class="modal-btn modal-btn-primary" data-action="restart">
-            <i class="bx bx-refresh"></i>
-            Play Again
-          </button>
-          ${onViewLeaderboard ? `
-            <button class="modal-btn modal-btn-secondary" data-action="leaderboard">
-              <i class="bx bx-trophy"></i>
-              Leaderboard
-            </button>
-          ` : ''}
-          <button class="modal-btn modal-btn-secondary" data-action="quit">
-            <i class="bx bx-x"></i>
-            Quit
-          </button>
-        </div>
-      </div>
-    `
+    const content = [
+      this._createModalHeader(emoji, title),
+      this._createModalMessage(message),
+      `<div class="modal-score">
+        <span class="score-label">Final Score</span>
+        <span class="score-value">${finalScore}</span>
+      </div>`,
+      this._createModalButtons(buttons),
+    ].join("");
 
-    document.body.appendChild(modal)
+    const modal = this._createModal("", this._createModalContent(content));
 
-    // Animate in
-    requestAnimationFrame(() => {
-      modal.classList.add('show')
-    })
-
-    // Add event listeners
-    if (onRestart) {
-      modal.querySelector('[data-action="restart"]').addEventListener('click', () => {
-        modal.remove()
-        onRestart()
-      })
-    }
-
-    if (onViewLeaderboard) {
-      const leaderboardBtn = modal.querySelector('[data-action="leaderboard"]')
-      if (leaderboardBtn) {
-        leaderboardBtn.addEventListener('click', () => {
-          modal.remove()
-          onViewLeaderboard()
-        })
-      }
-    }
-
-    if (onQuit) {
-      modal.querySelector('[data-action="quit"]').addEventListener('click', () => {
-        modal.remove()
-        onQuit()
-      })
-    }
+    this._bindModalActions(modal, {
+      restart: () => {
+        modal.remove();
+        onRestart?.();
+      },
+      leaderboard: () => {
+        modal.remove();
+        onViewLeaderboard?.();
+      },
+      quit: () => {
+        modal.remove();
+        onQuit?.();
+      },
+    });
   }
 
   /**
@@ -186,9 +360,8 @@ export class UIManager {
    */
   showCountdown() {
     return new Promise((resolve) => {
-      // Create countdown overlay - position it in center of VIEWPORT (not page)
-      const countdown = document.createElement('div')
-      countdown.className = 'pacman-countdown'
+      const countdown = document.createElement("div");
+      countdown.className = "pacman-countdown";
       countdown.style.cssText = `
         position: fixed;
         top: 50%;
@@ -201,49 +374,47 @@ export class UIManager {
         z-index: 10003;
         animation: countdownPulse 1s ease-in-out;
         pointer-events: none;
-      `
+      `;
 
-      document.body.appendChild(countdown)
+      document.body.appendChild(countdown);
 
-      let count = 3
-      let countdownTimer1 = null
-      let countdownTimer2 = null
-      let cancelled = false
+      let count = 3;
+      let countdownTimer1 = null;
+      let countdownTimer2 = null;
+      let cancelled = false;
 
-      // Store timers on element for external cancellation
       countdown._cancel = () => {
-        cancelled = true
-        if (countdownTimer1) clearTimeout(countdownTimer1)
-        if (countdownTimer2) clearTimeout(countdownTimer2)
-        countdown.remove()
-        resolve()
-      }
+        cancelled = true;
+        if (countdownTimer1) clearTimeout(countdownTimer1);
+        if (countdownTimer2) clearTimeout(countdownTimer2);
+        countdown.remove();
+        resolve();
+      };
 
       const updateCountdown = () => {
-        if (cancelled) return
+        if (cancelled) return;
 
         if (count > 0) {
-          countdown.textContent = count
-          countdown.style.animation = 'none'
-          // Trigger reflow to restart animation
-          countdown.offsetHeight
-          countdown.style.animation = 'countdownPulse 1s ease-in-out'
-          count--
-          countdownTimer1 = setTimeout(updateCountdown, 1000)
+          countdown.textContent = count;
+          countdown.style.animation = "none";
+          countdown.offsetHeight;
+          countdown.style.animation = "countdownPulse 1s ease-in-out";
+          count--;
+          countdownTimer1 = setTimeout(updateCountdown, 1000);
         } else {
-          countdown.textContent = 'GO!'
-          countdown.style.animation = 'countdownGo 0.8s ease-out'
+          countdown.textContent = "GO!";
+          countdown.style.animation = "countdownGo 0.8s ease-out";
           countdownTimer2 = setTimeout(() => {
             if (!cancelled) {
-              countdown.remove()
-              resolve()
+              countdown.remove();
+              resolve();
             }
-          }, 800)
+          }, 800);
         }
-      }
+      };
 
-      updateCountdown()
-    })
+      updateCountdown();
+    });
   }
 
   /**
@@ -251,8 +422,8 @@ export class UIManager {
    * @param {Object} item - Item object with config property
    */
   showItemNotification(item) {
-    const notification = document.createElement('div')
-    notification.className = 'item-notification'
+    const notification = document.createElement("div");
+    notification.className = "item-notification";
     notification.style.cssText = `
       position: fixed;
       top: 50%;
@@ -265,14 +436,14 @@ export class UIManager {
       z-index: 10005;
       animation: itemNotification 1.5s ease-out forwards;
       pointer-events: none;
-    `
-    notification.textContent = `${item.config.emoji} ${item.config.name}`
+    `;
+    notification.textContent = `${item.config.emoji} ${item.config.name}`;
 
-    document.body.appendChild(notification)
+    document.body.appendChild(notification);
 
     setTimeout(() => {
-      notification.remove()
-    }, 1500)
+      notification.remove();
+    }, 1500);
   }
 
   /**
@@ -282,13 +453,12 @@ export class UIManager {
    * @param {HTMLElement} pacmanElement - The Pac-Man element to attach cooldown to
    */
   showEffectCooldown(effectName, duration, pacmanElement) {
-    // Remove existing cooldown bar if any
-    this.removeEffectCooldown(effectName, pacmanElement)
+    this.removeEffectCooldown(effectName, pacmanElement);
 
-    const config = this.itemTypes[effectName]
-    const cooldownBar = document.createElement('div')
-    cooldownBar.className = 'pacman-effect-cooldown'
-    cooldownBar.dataset.effect = effectName
+    const config = this.itemTypes[effectName];
+    const cooldownBar = document.createElement("div");
+    cooldownBar.className = "pacman-effect-cooldown";
+    cooldownBar.dataset.effect = effectName;
     cooldownBar.style.cssText = `
       position: absolute;
       bottom: -15px;
@@ -300,10 +470,10 @@ export class UIManager {
       border-radius: 3px;
       overflow: hidden;
       z-index: 10;
-    `
+    `;
 
-    const fill = document.createElement('div')
-    fill.className = 'effect-cooldown-fill'
+    const fill = document.createElement("div");
+    fill.className = "effect-cooldown-fill";
     fill.style.cssText = `
       width: 100%;
       height: 100%;
@@ -311,15 +481,14 @@ export class UIManager {
       box-shadow: 0 0 8px ${config.color};
       border-radius: 3px;
       transition: width ${duration}ms linear;
-    `
+    `;
 
-    cooldownBar.appendChild(fill)
-    pacmanElement.appendChild(cooldownBar)
+    cooldownBar.appendChild(fill);
+    pacmanElement.appendChild(cooldownBar);
 
-    // Animate fill to 0
     requestAnimationFrame(() => {
-      fill.style.width = '0%'
-    })
+      fill.style.width = "0%";
+    });
   }
 
   /**
@@ -328,9 +497,11 @@ export class UIManager {
    * @param {HTMLElement} pacmanElement - The Pac-Man element to remove cooldown from
    */
   removeEffectCooldown(effectName, pacmanElement) {
-    const existingBar = pacmanElement.querySelector(`[data-effect="${effectName}"]`)
+    const existingBar = pacmanElement.querySelector(
+      `[data-effect="${effectName}"]`
+    );
     if (existingBar) {
-      existingBar.remove()
+      existingBar.remove();
     }
   }
 
@@ -340,67 +511,52 @@ export class UIManager {
    */
   showPlayerNamePrompt() {
     return new Promise((resolve) => {
-      const modal = document.createElement('div')
-      modal.className = 'pacman-game-over-modal'
+      const buttons = this._createModalButtons(
+        this._createModalButton("submit", "Continue", "bx-check", "primary")
+      );
 
-      modal.innerHTML = `
-        <div class="modal-content">
-          <div class="modal-emoji">🎮</div>
-          <h2 class="modal-title">Welcome!</h2>
-          <p class="modal-message">Enter your name to save your scores to the leaderboard</p>
-          <div class="modal-input-group">
-            <input
-              type="text"
-              id="playerNameInput"
-              class="modal-input"
-              placeholder="Your Name"
-              maxlength="50"
-              autocomplete="off"
-            />
-          </div>
-          <div class="modal-buttons">
-            <button class="modal-btn modal-btn-primary" data-action="submit">
-              <i class="bx bx-check"></i>
-              Continue
-            </button>
-          </div>
-        </div>
-      `
+      const content = [
+        this._createModalHeader("🎮", "Welcome!"),
+        this._createModalMessage(
+          "Enter your name to save your scores to the leaderboard"
+        ),
+        `<div class="modal-input-group">
+          <input
+            type="text"
+            id="playerNameInput"
+            class="modal-input"
+            placeholder="Your Name"
+            maxlength="50"
+            autocomplete="off"
+          />
+        </div>`,
+        buttons,
+      ].join("");
 
-      document.body.appendChild(modal)
+      const modal = this._createModal("", this._createModalContent(content));
+      const input = modal.querySelector("#playerNameInput");
+      const submitBtn = modal.querySelector('[data-action="submit"]');
 
-      // Animate in
-      requestAnimationFrame(() => {
-        modal.classList.add('show')
-      })
-
-      const input = modal.querySelector('#playerNameInput')
-      const submitBtn = modal.querySelector('[data-action="submit"]')
-
-      // Focus input
-      setTimeout(() => input.focus(), 300)
+      setTimeout(() => input.focus(), 300);
 
       const handleSubmit = () => {
-        const name = input.value.trim()
+        const name = input.value.trim();
         if (name.length > 0) {
-          modal.remove()
-          resolve(name)
+          modal.remove();
+          resolve(name);
         } else {
-          input.classList.add('error')
-          setTimeout(() => input.classList.remove('error'), 500)
+          input.classList.add("error");
+          setTimeout(() => input.classList.remove("error"), 500);
         }
-      }
+      };
 
-      // Handle submit button click
-      submitBtn.addEventListener('click', handleSubmit)
-
-      // Handle enter key
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          handleSubmit()
+      submitBtn.addEventListener("click", handleSubmit);
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          handleSubmit();
         }
-      })
-    })
+      });
+    });
   }
 
   /**
@@ -409,154 +565,166 @@ export class UIManager {
    * @param {Function} onClose - Callback when modal is closed
    */
   async showLeaderboardModal(leaderboardData, onClose) {
-    // Prevent duplicate leaderboard modals
-    if (document.querySelector('.leaderboard-modal')) {
-      return
+    if (this._modalExists("leaderboard-modal")) {
+      return;
     }
 
-    const modal = document.createElement('div')
-    modal.className = 'pacman-game-over-modal leaderboard-modal'
+    if (!leaderboardData) {
+      return;
+    }
 
-    const { global, player } = leaderboardData
+    const { global = [], player = null } = leaderboardData;
 
-    // Create global leaderboard HTML
-    const globalHTML = global.length > 0 ? global.map((entry, index) => `
-      <div class="leaderboard-row ${player && entry.player_name === player.name ? 'highlighted' : ''}">
+    const globalHTML =
+      global && global.length > 0
+        ? global
+            .map(
+              (entry, index) => `
+      <div class="leaderboard-row ${
+        player && entry.player_name === player.name ? "highlighted" : ""
+      }">
         <span class="rank">#${index + 1}</span>
         <span class="player-name">${this.escapeHtml(entry.player_name)}</span>
-        <span class="win-badge">${entry.is_win ? '🏆' : ''}</span>
+        <span class="win-badge">${entry.is_win ? "🏆" : ""}</span>
         <span class="score">${entry.score}</span>
       </div>
-    `).join('') : '<div class="no-scores">No scores yet. Be the first!</div>'
+    `
+            )
+            .join("")
+        : '<div class="no-scores">No scores yet. Be the first!</div>';
 
-    // Create player leaderboard HTML
-    const playerHTML = player && player.scores.length > 0 ? player.scores.map((entry, index) => `
+    const playerHTML =
+      player && player.scores && player.scores.length > 0
+        ? player.scores
+            .map(
+              (entry, index) => `
       <div class="leaderboard-row">
         <span class="rank">#${index + 1}</span>
         <span class="score">${entry.score}</span>
-        <span class="win-badge">${entry.is_win ? '🏆' : ''}</span>
+        <span class="win-badge">${entry.is_win ? "🏆" : ""}</span>
         <span class="date">${this.formatDate(entry.played_at)}</span>
       </div>
-    `).join('') : '<div class="no-scores">Play to see your scores here!</div>'
-
-    modal.innerHTML = `
-      <div class="modal-content leaderboard-content">
-        <div class="modal-emoji">🏆</div>
-        <h2 class="modal-title">Leaderboard</h2>
-
-        <div class="leaderboard-tabs">
-          <button class="leaderboard-tab active" data-tab="global">Top Players</button>
-          ${player ? `<button class="leaderboard-tab" data-tab="player">My Scores</button>` : ''}
-        </div>
-
-        <div class="leaderboard-container">
-          <div class="leaderboard-panel active" data-panel="global">
-            <div class="leaderboard-header">
-              <span>Rank</span>
-              <span>Player</span>
-              <span></span>
-              <span>Score</span>
-            </div>
-            <div class="leaderboard-list">
-              ${globalHTML}
-            </div>
-          </div>
-
-          ${player ? `
-            <div class="leaderboard-panel" data-panel="player">
-              <div class="leaderboard-header player-header">
-                <span>Rank</span>
-                <span>Score</span>
-                <span></span>
-                <span>Date</span>
-              </div>
-              <div class="leaderboard-list">
-                ${playerHTML}
-              </div>
-            </div>
-          ` : ''}
-        </div>
-
-        <div class="modal-buttons">
-          <button class="modal-btn modal-btn-secondary" data-action="close">
-            <i class="bx bx-x"></i>
-            Close
-          </button>
-        </div>
-      </div>
     `
+            )
+            .join("")
+        : '<div class="no-scores">Play to see your scores here!</div>';
 
-    document.body.appendChild(modal)
+    const tabsHtml = [
+      '<button class="leaderboard-tab active" data-tab="global">Top Players</button>',
+      player
+        ? '<button class="leaderboard-tab" data-tab="player">My Scores</button>'
+        : "",
+    ]
+      .filter(Boolean)
+      .join("");
 
-    // Animate in
-    requestAnimationFrame(() => {
-      modal.classList.add('show')
-    })
+    const leaderboardContent = `
+      <div class="leaderboard-tabs">${tabsHtml}</div>
 
-    // Tab switching
-    const tabs = modal.querySelectorAll('.leaderboard-tab')
-    const panels = modal.querySelectorAll('.leaderboard-panel')
+      <div class="leaderboard-container">
+        <div class="leaderboard-panel active" data-panel="global">
+          <div class="leaderboard-header">
+            <span>Rank</span>
+            <span>Player</span>
+            <span></span>
+            <span>Score</span>
+          </div>
+          <div class="leaderboard-list">${globalHTML}</div>
+        </div>
 
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        const targetTab = tab.dataset.tab
+        ${
+          player
+            ? `
+          <div class="leaderboard-panel" data-panel="player">
+            <div class="leaderboard-header player-header">
+              <span>Rank</span>
+              <span>Score</span>
+              <span></span>
+              <span>Date</span>
+            </div>
+            <div class="leaderboard-list">${playerHTML}</div>
+          </div>
+        `
+            : ""
+        }
+      </div>
+    `;
 
-        tabs.forEach(t => t.classList.remove('active'))
-        panels.forEach(p => p.classList.remove('active'))
+    const buttons = this._createModalButtons(
+      this._createModalButton("close", "Close", "bx-x", "secondary")
+    );
 
-        tab.classList.add('active')
-        modal.querySelector(`[data-panel="${targetTab}"]`).classList.add('active')
-      })
-    })
+    const content = [
+      this._createModalHeader("🏆", "Leaderboard"),
+      leaderboardContent,
+      buttons,
+    ].join("");
 
-    // Close button
+    const html = this._createModalContent(content, "leaderboard-content");
+    const modal = this._createModal("leaderboard-modal", html);
+
+    const tabs = modal.querySelectorAll(".leaderboard-tab");
+    const panels = modal.querySelectorAll(".leaderboard-panel");
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const targetTab = tab.dataset.tab;
+
+        tabs.forEach((t) => t.classList.remove("active"));
+        panels.forEach((p) => p.classList.remove("active"));
+
+        tab.classList.add("active");
+        modal
+          .querySelector(`[data-panel="${targetTab}"]`)
+          .classList.add("active");
+      });
+    });
+
     const closeHandler = () => {
-      modal.remove()
-      if (onClose) onClose()
-      // Remove keyboard listener
-      document.removeEventListener('keydown', keydownHandler)
-    }
+      modal.remove();
+      onClose?.();
+    };
 
-    modal.querySelector('[data-action="close"]').addEventListener('click', closeHandler)
-
-    // Allow L key to close leaderboard
     const keydownHandler = (e) => {
-      if (e.key === 'l' || e.key === 'L') {
-        e.preventDefault()
-        e.stopImmediatePropagation() // Prevent other listeners from firing
-        closeHandler()
+      const key = e.key.toLowerCase();
+      if (key === "l") {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        closeHandler();
+        document.removeEventListener("keydown", keydownHandler);
       }
-    }
-    document.addEventListener('keydown', keydownHandler)
+    };
+    document.addEventListener("keydown", keydownHandler);
+
+    this._bindModalActions(modal, {
+      close: () => {
+        closeHandler();
+        document.removeEventListener("keydown", keydownHandler);
+      },
+    });
   }
 
   /**
    * Escape HTML to prevent XSS
    */
   escapeHtml(text) {
-    const div = document.createElement('div')
-    div.textContent = text
-    return div.innerHTML
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   /**
    * Format date for display
    */
   formatDate(dateString) {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffMs = now - date
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) {
-      return 'Today'
-    } else if (diffDays === 1) {
-      return 'Yesterday'
-    } else if (diffDays < 7) {
-      return `${diffDays}d ago`
-    } else {
-      return date.toLocaleDateString()
-    }
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
   }
 
   /**
@@ -567,59 +735,50 @@ export class UIManager {
    * @param {Function} onCancel - Callback when user cancels
    */
   showConfirmationModal(title, message, onConfirm, onCancel) {
-    // Prevent duplicate confirmation modals
-    if (document.querySelector('.confirmation-modal')) {
-      return
+    if (this._modalExists("confirmation-modal")) {
+      return;
     }
 
-    const modal = document.createElement('div')
-    modal.className = 'pacman-game-over-modal confirmation-modal'
+    const buttons = this._createModalButtons(
+      [
+        this._createModalButton("confirm", "Yes, Quit", "bx-check", "primary"),
+        this._createModalButton("cancel", "Cancel", "bx-x", "secondary"),
+      ].join("")
+    );
 
-    modal.innerHTML = `
-      <div class="modal-content">
-        <div class="modal-emoji">⚠️</div>
-        <h2 class="modal-title">${this.escapeHtml(title)}</h2>
-        <p class="modal-message">${this.escapeHtml(message)}</p>
-        <div class="modal-buttons">
-          <button class="modal-btn modal-btn-primary" data-action="confirm">
-            <i class="bx bx-check"></i>
-            Yes, Quit
-          </button>
-          <button class="modal-btn modal-btn-secondary" data-action="cancel">
-            <i class="bx bx-x"></i>
-            Cancel
-          </button>
-        </div>
-      </div>
-    `
+    const content = [
+      this._createModalHeader("⚠️", this.escapeHtml(title)),
+      this._createModalMessage(message),
+      buttons,
+    ].join("");
 
-    document.body.appendChild(modal)
+    const modal = this._createModal(
+      "confirmation-modal",
+      this._createModalContent(content)
+    );
 
-    // Animate in
-    requestAnimationFrame(() => {
-      modal.classList.add('show')
-    })
+    const handleCancel = () => {
+      modal.remove();
+      onCancel?.();
+    };
 
-    // Add event listeners
-    modal.querySelector('[data-action="confirm"]').addEventListener('click', () => {
-      modal.remove()
-      if (onConfirm) onConfirm()
-    })
-
-    modal.querySelector('[data-action="cancel"]').addEventListener('click', () => {
-      modal.remove()
-      if (onCancel) onCancel()
-    })
-
-    // Allow Escape key to cancel
-    const escapeHandler = (e) => {
-      if (e.key === 'Escape') {
-        modal.remove()
-        if (onCancel) onCancel()
-        document.removeEventListener('keydown', escapeHandler)
+    const keydownHandler = (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        handleCancel();
+        document.removeEventListener("keydown", keydownHandler);
       }
-    }
-    document.addEventListener('keydown', escapeHandler)
+    };
+    document.addEventListener("keydown", keydownHandler);
+
+    this._bindModalActions(modal, {
+      confirm: () => {
+        modal.remove();
+        onConfirm?.();
+        document.removeEventListener("keydown", keydownHandler);
+      },
+      cancel: handleCancel,
+    });
   }
 
   /**
@@ -627,109 +786,118 @@ export class UIManager {
    * @param {Object} callbacks - { onSettings, onControls, onLeaderboard, onResume, onQuit }
    */
   showMenuModal(callbacks = {}) {
-    // Prevent duplicate menu modals
-    if (document.querySelector('.pacman-menu-modal')) {
-      return
+    if (this._modalExists("pacman-menu-modal")) {
+      return;
     }
 
-    const { onSettings, onControls, onLeaderboard, onResume, onQuit } = callbacks
+    const { onSettings, onControls, onLeaderboard, onResume, onQuit } =
+      callbacks;
 
-    const modal = document.createElement('div')
-    modal.className = 'pacman-game-over-modal pacman-menu-modal'
-
-    modal.innerHTML = `
-      <div class="modal-content">
-        <div class="modal-emoji">🎮</div>
-        <h2 class="modal-title">Menu</h2>
-
-        <div class="menu-buttons">
-          <button class="menu-item-btn" data-action="settings">
+    const menuItems = [
+      onSettings
+        ? `<button class="menu-item-btn" data-action="settings">
             <i class="bx bx-slider"></i>
             <span>Audio Settings</span>
-          </button>
-          <button class="menu-item-btn" data-action="controls">
+          </button>`
+        : "",
+      onControls
+        ? `<button class="menu-item-btn" data-action="controls">
             <i class="bx bx-joystick"></i>
             <span>Controls</span>
-          </button>
-          <button class="menu-item-btn" data-action="leaderboard">
+          </button>`
+        : "",
+      onLeaderboard
+        ? `<button class="menu-item-btn" data-action="leaderboard">
             <i class="bx bx-trophy"></i>
             <span>Leaderboard</span>
-          </button>
-        </div>
+          </button>`
+        : "",
+    ]
+      .filter(Boolean)
+      .join("");
 
-        <div class="modal-buttons">
-          <button class="modal-btn modal-btn-primary" data-action="resume">
-            <i class="bx bx-play"></i>
-            Resume Game
-          </button>
-          <button class="modal-btn modal-btn-secondary" data-action="quit">
-            <i class="bx bx-exit"></i>
-            Quit Game
-          </button>
-        </div>
-      </div>
-    `
+    const buttons = this._createModalButtons(
+      [
+        onResume
+          ? this._createModalButton(
+              "resume",
+              "Resume Game",
+              "bx-play",
+              "primary"
+            )
+          : "",
+        onQuit
+          ? this._createModalButton("quit", "Quit Game", "bx-exit", "secondary")
+          : "",
+      ]
+        .filter(Boolean)
+        .join("")
+    );
 
-    document.body.appendChild(modal)
+    const content = [
+      this._createModalHeader("🎮", "Menu"),
+      `<div class="menu-buttons">${menuItems}</div>`,
+      buttons,
+    ].join("");
 
-    // Animate in
-    requestAnimationFrame(() => {
-      modal.classList.add('show')
-    })
+    const modal = this._createModal(
+      "pacman-menu-modal",
+      this._createModalContent(content)
+    );
 
-    // Close handler
     const closeHandler = () => {
-      modal.remove()
-      document.removeEventListener('keydown', keydownHandler)
-    }
+      modal.remove();
+    };
 
-    // Button handlers
-    if (onSettings) {
-      modal.querySelector('[data-action="settings"]').addEventListener('click', () => {
-        closeHandler()
-        onSettings()
-      })
-    }
-
-    if (onControls) {
-      modal.querySelector('[data-action="controls"]').addEventListener('click', () => {
-        closeHandler()
-        onControls()
-      })
-    }
-
-    if (onLeaderboard) {
-      modal.querySelector('[data-action="leaderboard"]').addEventListener('click', () => {
-        closeHandler()
-        onLeaderboard()
-      })
-    }
-
-    if (onResume) {
-      modal.querySelector('[data-action="resume"]').addEventListener('click', () => {
-        closeHandler()
-        onResume()
-      })
-    }
-
-    if (onQuit) {
-      modal.querySelector('[data-action="quit"]').addEventListener('click', () => {
-        closeHandler()
-        onQuit()
-      })
-    }
-
-    // Keyboard shortcuts
     const keydownHandler = (e) => {
-      if (e.key === 'Escape') {
-        e.preventDefault()
+      if (e.key === "Escape") {
+        e.preventDefault();
         if (onResume) {
-          closeHandler()
-          onResume()
+          closeHandler();
+          onResume();
         }
       }
+    };
+    document.addEventListener("keydown", keydownHandler);
+
+    const actions = {};
+    if (onSettings) {
+      actions.settings = () => {
+        closeHandler();
+        document.removeEventListener("keydown", keydownHandler);
+        onSettings();
+      };
     }
-    document.addEventListener('keydown', keydownHandler)
+    if (onControls) {
+      actions.controls = () => {
+        closeHandler();
+        document.removeEventListener("keydown", keydownHandler);
+        onControls();
+      };
+    }
+    if (onLeaderboard) {
+      actions.leaderboard = () => {
+        closeHandler();
+        document.removeEventListener("keydown", keydownHandler);
+        onLeaderboard();
+      };
+    }
+    if (onResume) {
+      actions.resume = () => {
+        closeHandler();
+        document.removeEventListener("keydown", keydownHandler);
+        onResume();
+      };
+    }
+    if (onQuit) {
+      actions.quit = () => {
+        closeHandler();
+        document.removeEventListener("keydown", keydownHandler);
+        onQuit();
+      };
+    }
+
+    this._bindModalActions(modal, actions);
   }
 
   /**
@@ -740,128 +908,126 @@ export class UIManager {
    * @param {Object} callbacks - { onMusicVolumeChange, onSFXVolumeChange, onMuteToggle, onClose }
    */
   showSettingsModal(musicVolume, sfxVolume, isMuted, callbacks = {}) {
-    // Prevent duplicate settings modals
-    if (document.querySelector('.pacman-settings-modal')) {
-      return
+    if (this._modalExists("pacman-settings-modal")) {
+      return;
     }
 
-    const { onMusicVolumeChange, onSFXVolumeChange, onMuteToggle, onClose } = callbacks
+    const { onMusicVolumeChange, onSFXVolumeChange, onMuteToggle, onClose } =
+      callbacks;
 
-    const modal = document.createElement('div')
-    modal.className = 'pacman-game-over-modal pacman-settings-modal'
-
-    modal.innerHTML = `
-      <div class="modal-content">
-        <div class="modal-emoji">🔊</div>
-        <h2 class="modal-title">Audio Settings</h2>
-
-        <div class="settings-section">
-          <div class="settings-control">
-            <div class="settings-control-header">
-              <label class="settings-label">
-                <i class="bx bx-music"></i>
-                <span>Music Volume</span>
-              </label>
-              <button class="settings-mute-btn ${isMuted ? 'muted' : ''}" data-action="mute" title="Toggle Mute (M)">
-                <i class="bx ${isMuted ? 'bx-volume-mute' : 'bx-volume-full'}"></i>
-              </button>
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value="${Math.round(musicVolume * 100)}"
-              class="settings-volume-slider"
-              data-action="music-volume"
-            >
-          </div>
-
-          <div class="settings-control">
+    const settingsSection = `
+      <div class="settings-section">
+        <div class="settings-control">
+          <div class="settings-control-header">
             <label class="settings-label">
-              <i class="bx bxs-volume"></i>
-              <span>SFX Volume</span>
+              <i class="bx bx-music"></i>
+              <span>Music Volume</span>
             </label>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value="${Math.round(sfxVolume * 100)}"
-              class="settings-volume-slider"
-              data-action="sfx-volume"
-            >
+            <button class="settings-mute-btn ${
+              isMuted ? "muted" : ""
+            }" data-action="mute" title="Toggle Mute (M)">
+              <i class="bx ${
+                isMuted ? "bx-volume-mute" : "bx-volume-full"
+              }"></i>
+            </button>
           </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value="${Math.round(musicVolume * 100)}"
+            class="settings-volume-slider"
+            data-action="music-volume"
+          >
         </div>
 
-        <div class="modal-buttons">
-          <button class="modal-btn modal-btn-primary" data-action="back">
-            <i class="bx bx-arrow-back"></i>
-            Back to Menu
-          </button>
+        <div class="settings-control">
+          <label class="settings-label">
+            <i class="bx bxs-volume"></i>
+            <span>SFX Volume</span>
+          </label>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value="${Math.round(sfxVolume * 100)}"
+            class="settings-volume-slider"
+            data-action="sfx-volume"
+          >
         </div>
       </div>
-    `
+    `;
 
-    document.body.appendChild(modal)
+    const buttons = this._createModalButtons(
+      this._createModalButton(
+        "back",
+        "Back to Menu",
+        "bx-arrow-back",
+        "primary"
+      )
+    );
 
-    // Animate in
-    requestAnimationFrame(() => {
-      modal.classList.add('show')
-    })
+    const content = [
+      this._createModalHeader("🔊", "Audio Settings"),
+      settingsSection,
+      buttons,
+    ].join("");
 
-    // Get elements
-    const musicSlider = modal.querySelector('[data-action="music-volume"]')
-    const sfxSlider = modal.querySelector('[data-action="sfx-volume"]')
-    const muteBtn = modal.querySelector('[data-action="mute"]')
-    const backBtn = modal.querySelector('[data-action="back"]')
+    const modal = this._createModal(
+      "pacman-settings-modal",
+      this._createModalContent(content)
+    );
 
-    // Music volume change
+    const musicSlider = modal.querySelector('[data-action="music-volume"]');
+    const sfxSlider = modal.querySelector('[data-action="sfx-volume"]');
+    const muteBtn = modal.querySelector('[data-action="mute"]');
+
     if (onMusicVolumeChange) {
-      musicSlider.addEventListener('input', (e) => {
-        onMusicVolumeChange(parseInt(e.target.value) / 100)
-      })
+      musicSlider.addEventListener("input", (e) => {
+        onMusicVolumeChange(parseInt(e.target.value) / 100);
+      });
     }
 
-    // SFX volume change
     if (onSFXVolumeChange) {
-      sfxSlider.addEventListener('input', (e) => {
-        onSFXVolumeChange(parseInt(e.target.value) / 100)
-      })
+      sfxSlider.addEventListener("input", (e) => {
+        onSFXVolumeChange(parseInt(e.target.value) / 100);
+      });
     }
 
-    // Mute toggle
     if (onMuteToggle) {
-      muteBtn.addEventListener('click', () => {
-        onMuteToggle()
-        // Update button state
-        const isNowMuted = muteBtn.classList.toggle('muted')
-        muteBtn.querySelector('i').className = `bx ${isNowMuted ? 'bx-volume-mute' : 'bx-volume-full'}`
-      })
+      muteBtn.addEventListener("click", () => {
+        onMuteToggle();
+        const isNowMuted = muteBtn.classList.toggle("muted");
+        muteBtn.querySelector("i").className = `bx ${
+          isNowMuted ? "bx-volume-mute" : "bx-volume-full"
+        }`;
+      });
     }
 
-    // Close handler
     const closeHandler = () => {
-      modal.remove()
-      if (onClose) onClose()
-      document.removeEventListener('keydown', keydownHandler)
-    }
+      modal.remove();
+      onClose?.();
+    };
 
-    // Back button
-    backBtn.addEventListener('click', closeHandler)
-
-    // Keyboard shortcuts
     const keydownHandler = (e) => {
-      // M for mute
-      if ((e.key === 'm' || e.key === 'M') && onMuteToggle) {
-        e.preventDefault()
-        muteBtn.click()
+      const key = e.key.toLowerCase();
+      if (key === "m" && onMuteToggle) {
+        e.preventDefault();
+        muteBtn.click();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        closeHandler();
+        document.removeEventListener("keydown", keydownHandler);
       }
-      // Escape to go back
-      else if (e.key === 'Escape') {
-        e.preventDefault()
-        closeHandler()
-      }
-    }
-    document.addEventListener('keydown', keydownHandler)
+    };
+    document.addEventListener("keydown", keydownHandler);
+
+    this._bindModalActions(modal, {
+      back: () => {
+        closeHandler();
+        document.removeEventListener("keydown", keydownHandler);
+      },
+    });
   }
 
   /**
@@ -869,83 +1035,82 @@ export class UIManager {
    * @param {Function} onClose - Callback when modal is closed
    */
   showControlsModal(onClose) {
-    // Prevent duplicate controls modals
-    if (document.querySelector('.pacman-controls-modal')) {
-      return
+    if (this._modalExists("pacman-controls-modal")) {
+      return;
     }
 
-    const modal = document.createElement('div')
-    modal.className = 'pacman-game-over-modal pacman-controls-modal'
-
-    modal.innerHTML = `
-      <div class="modal-content">
-        <div class="modal-emoji">🎮</div>
-        <h2 class="modal-title">Controls</h2>
-
-        <div class="controls-section">
-          <div class="controls-grid">
-            <div class="control-item">
-              <div class="control-keys">
-                <kbd class="control-key">W</kbd>
-                <kbd class="control-key">A</kbd>
-                <kbd class="control-key">S</kbd>
-                <kbd class="control-key">D</kbd>
-              </div>
-              <span class="control-desc">Move</span>
+    const controlsSection = `
+      <div class="controls-section">
+        <div class="controls-grid">
+          <div class="control-item">
+            <div class="control-keys">
+              <kbd class="control-key">W</kbd>
+              <kbd class="control-key">A</kbd>
+              <kbd class="control-key">S</kbd>
+              <kbd class="control-key">D</kbd>
             </div>
-            <div class="control-item">
-              <div class="control-keys">
-                <kbd class="control-key">←</kbd>
-                <kbd class="control-key">↑</kbd>
-                <kbd class="control-key">↓</kbd>
-                <kbd class="control-key">→</kbd>
-              </div>
-              <span class="control-desc">Move</span>
+            <span class="control-desc">Move</span>
+          </div>
+          <div class="control-item">
+            <div class="control-keys">
+              <kbd class="control-key">←</kbd>
+              <kbd class="control-key">↑</kbd>
+              <kbd class="control-key">↓</kbd>
+              <kbd class="control-key">→</kbd>
             </div>
-            <div class="control-item">
-              <kbd class="control-key">M</kbd>
-              <span class="control-desc">Mute/Unmute</span>
-            </div>
-            <div class="control-item">
-              <kbd class="control-key">Esc</kbd>
-              <span class="control-desc">Menu</span>
-            </div>
+            <span class="control-desc">Move</span>
+          </div>
+          <div class="control-item">
+            <kbd class="control-key">M</kbd>
+            <span class="control-desc">Mute/Unmute</span>
+          </div>
+          <div class="control-item">
+            <kbd class="control-key">Esc</kbd>
+            <span class="control-desc">Menu</span>
           </div>
         </div>
-
-        <div class="modal-buttons">
-          <button class="modal-btn modal-btn-primary" data-action="back">
-            <i class="bx bx-arrow-back"></i>
-            Back to Menu
-          </button>
-        </div>
       </div>
-    `
+    `;
 
-    document.body.appendChild(modal)
+    const buttons = this._createModalButtons(
+      this._createModalButton(
+        "back",
+        "Back to Menu",
+        "bx-arrow-back",
+        "primary"
+      )
+    );
 
-    // Animate in
-    requestAnimationFrame(() => {
-      modal.classList.add('show')
-    })
+    const content = [
+      this._createModalHeader("🎮", "Controls"),
+      controlsSection,
+      buttons,
+    ].join("");
 
-    // Close handler
+    const modal = this._createModal(
+      "pacman-controls-modal",
+      this._createModalContent(content)
+    );
+
     const closeHandler = () => {
-      modal.remove()
-      if (onClose) onClose()
-      document.removeEventListener('keydown', keydownHandler)
-    }
+      modal.remove();
+      onClose?.();
+    };
 
-    // Back button
-    modal.querySelector('[data-action="back"]').addEventListener('click', closeHandler)
-
-    // Keyboard shortcuts
     const keydownHandler = (e) => {
-      if (e.key === 'Escape') {
-        e.preventDefault()
-        closeHandler()
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeHandler();
+        document.removeEventListener("keydown", keydownHandler);
       }
-    }
-    document.addEventListener('keydown', keydownHandler)
+    };
+    document.addEventListener("keydown", keydownHandler);
+
+    this._bindModalActions(modal, {
+      back: () => {
+        closeHandler();
+        document.removeEventListener("keydown", keydownHandler);
+      },
+    });
   }
 }

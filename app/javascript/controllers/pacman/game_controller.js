@@ -990,6 +990,9 @@ export default class extends Controller {
    * Show leaderboard modal (with onClose callback)
    */
   showLeaderboardModal(data, onClose) {
+    if (!this.uiManager) {
+      return;
+    }
     this.uiManager.showLeaderboardModal(data, onClose);
   }
 
@@ -1222,6 +1225,12 @@ export default class extends Controller {
   async showLeaderboardFromMenu() {
     if (this.hasPacmanMenuOutlet) {
       await this.pacmanMenuOutlet.showLeaderboardFromMenu();
+    } else {
+      // Fallback: fetch data and show modal directly
+      const data = await this.fetchLeaderboardData();
+      this.uiManager.showLeaderboardModal(data, () => {
+        this.showMenu();
+      });
     }
   }
 }
