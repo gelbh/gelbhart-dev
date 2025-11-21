@@ -1,4 +1,4 @@
-import CounterController from "../counter_controller";
+import CounterController from "../ui/counter_controller";
 
 describe("CounterController", () => {
   let controller;
