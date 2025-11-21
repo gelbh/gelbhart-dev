@@ -1,9 +1,14 @@
+// All @use rules must come before @import rules
 // Set Bootstrap variables first
-@import "theme/user-variables";
-@import "theme/variables";
-@import "theme/variables-dark";
+// Use 'as *' to make variables globally available for Bootstrap compatibility
+@use "theme/user-variables" as *;
+// Load variables-dark which imports variables internally
+// This makes both variables and variables-dark available globally
+@use "theme/variables-dark" as *;
 
 // Import Bootstrap from node_modules
+// Note: Bootstrap still uses @import internally, so we keep @import here
+// These must come after @use rules
 @import "bootstrap/scss/functions";
 @import "bootstrap/scss/variables";
 @import "bootstrap/scss/variables-dark";
@@ -13,6 +18,8 @@
 @import "bootstrap/scss/reboot";
 
 // Import theme components
+// Note: Since @use must come before @import, and Bootstrap uses @import,
+// we use @import here for theme files that depend on Bootstrap
 @import "theme/theme";
 @import "theme/utilities";
 @import "theme/components";
