@@ -9,6 +9,8 @@
 
 set -e
 
+export RAILS_ENV=test
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -18,7 +20,7 @@ NC='\033[0m' # No Color
 # Check if --all flag is passed
 if [ "$1" = "--all" ]; then
   echo -e "${GREEN}Running all tests (--all flag specified)...${NC}"
-  RAILS_ENV=test bundle exec rails test
+  env -u DATABASE_URL RAILS_ENV=test bundle exec rails test
   npm test -- --passWithNoTests
   exit 0
 fi
@@ -35,12 +37,12 @@ if [ -z "$REMOTE_BRANCH" ]; then
     # In CI, if no base branch found, run all tests
     if [ "$CI" = "true" ]; then
       echo -e "${YELLOW}CI environment detected. No base branch found. Running all tests.${NC}"
-      RAILS_ENV=test bundle exec rails test
+      env -u DATABASE_URL RAILS_ENV=test bundle exec rails test
       npm test -- --passWithNoTests
       exit 0
     else
       echo -e "${YELLOW}Warning: No remote tracking branch found. Running all tests.${NC}"
-      RAILS_ENV=test bundle exec rails test
+      env -u DATABASE_URL RAILS_ENV=test bundle exec rails test
       npm test -- --passWithNoTests
       exit 0
     fi
@@ -73,7 +75,7 @@ if [ -z "$CHANGED_FILES" ]; then
   # In CI, if we can't determine changes, run all tests
   if [ "$CI" = "true" ]; then
     echo -e "${YELLOW}CI environment: Cannot determine changed files. Running all tests.${NC}"
-    RAILS_ENV=test bundle exec rails test
+    env -u DATABASE_URL RAILS_ENV=test bundle exec rails test
     npm test -- --passWithNoTests
     exit 0
   else
@@ -112,7 +114,7 @@ done
 
 if [ "$RUN_ALL_TESTS" = true ]; then
   echo -e "${GREEN}Running all Rails tests...${NC}"
-  RAILS_ENV=test bundle exec rails test
+  env -u DATABASE_URL RAILS_ENV=test bundle exec rails test
   
   echo -e "${GREEN}Running all JavaScript tests...${NC}"
   npm test -- --passWithNoTests
@@ -207,7 +209,7 @@ JS_TEST_FILES=($(printf "%s\n" "${JS_TEST_FILES[@]}" | sort -u))
 if [ ${#RAILS_TEST_FILES[@]} -gt 0 ]; then
   echo -e "${GREEN}Running Rails tests for changed files:${NC}"
   printf '%s\n' "${RAILS_TEST_FILES[@]}" | sed 's/^/  - /'
-  RAILS_ENV=test bundle exec rails test "${RAILS_TEST_FILES[@]}"
+  env -u DATABASE_URL RAILS_ENV=test bundle exec rails test "${RAILS_TEST_FILES[@]}"
 else
   echo -e "${GREEN}No Rails tests to run for changed files.${NC}"
 fi

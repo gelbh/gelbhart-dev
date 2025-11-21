@@ -28,6 +28,7 @@ if ENV["COVERAGE"] == "true"
 end
 
 ENV["RAILS_ENV"] ||= "test"
+ENV.delete("DATABASE_URL") if ENV["DATABASE_URL"].present?
 require_relative "../config/environment"
 require "rails/test_help"
 require "webmock/minitest"
