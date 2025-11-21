@@ -38,55 +38,43 @@ module.exports = {
   defaultExtractor: (content) =>
     content.match(/[A-Za-z0-9-_/:]*[A-Za-z0-9-_/]+/g) || [],
   safelist: [
-    // Bootstrap classes that might be dynamically added
-    /^btn-/,
-    /^alert-/,
-    /^badge-/,
-    /^bg-/,
-    /^text-/,
-    /^border-/,
-    /^shadow-/,
-    /^rounded-/,
-    /^d-/,
-    /^flex-/,
-    /^justify-content-/,
-    /^align-items-/,
-    /^gap-/,
-    /^m[tyblr]?-/,
-    /^p[tyblr]?-/,
-    /^w-/,
-    /^h-/,
-    /^position-/,
-    /^top-/,
-    /^start-/,
-    /^end-/,
-    /^bottom-/,
-    /^translate-/,
-    /^zindex-/,
-    /^opacity-/,
-    /^fs-/,
-    /^lh-/,
-    /^fw-/,
-    // Turbo/Stimulus attributes
-    /^data-/,
-    /^aria-/,
-    // Custom classes that might be dynamically generated
-    /^fade-in-view/,
-    /^delay-/,
-    /^nasa-exoplanet-explorer-/,
-    /^hevy-tracker-/,
-    /^video-captioner-/,
-    /^pacman-/,
-    /^btn-scroll-top/,
-    // Icon classes
-    /^bx-/,
-    /^bi-/,
-    // Flag icons
-    /^fi-/,
-    // Theme classes
-    /^theme-/,
-    /^dark-/,
-    /^light-/,
+    // Classes dynamically added via JavaScript that can't be detected in static files
+    "visible", // Added by scroll_controller.js
+    "show", // Added by scroll-top-button.js
+    "active", // Toggled by game_controller.js, ui_manager.js
+    "navbar-stuck", // Added by sticky-navbar.js
+    "error", // Added by ui_manager.js
+    "muted", // Toggled by ui_manager.js
+    // Bootstrap utility classes that are toggled dynamically
+    "d-none", // Toggled by theme_controller.js, lazy_iframe_controller.js
+    // Icon classes (dynamically inserted)
+    /^bx-/, // Boxicons
+    /^bi-/, // Bootstrap Icons
+    /^fi-/, // Flag icons
+    // Custom project classes that are dynamically generated
+    /^fade-in-view/, // Animation classes
+    /^delay-/, // Animation delay classes
+    /^nasa-exoplanet-explorer-/, // Project-specific classes
+    /^hevy-tracker-/, // Project-specific classes
+    /^video-captioner-/, // Project-specific classes
+    /^pacman-/, // Pacman game classes (many dynamically added)
+    /^btn-scroll-top/, // Scroll to top button
+    // Pacman game state classes (dynamically added)
+    "flip-horizontal",
+    "frightened",
+    "eaten",
+    "collected",
+    "fade-out",
+    "unlocking",
+    "powered",
+    "speed-boost",
+    "slow-down",
+    "shielded",
+    "frozen",
+    "double-points",
+    "pacman-game-active",
+    "pacman-hover",
+    "boundary-flash",
   ],
   blocklist: [
     // Exclude development-only classes
