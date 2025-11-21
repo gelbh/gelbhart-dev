@@ -33,11 +33,12 @@ export default class extends Controller {
    * Show leaderboard from menu
    */
   async showLeaderboardFromMenu() {
-    if (!this.hasPacmanGameOutlet) return;
+    if (!this.hasPacmanGameOutlet) {
+      return;
+    }
 
     const data = await this.leaderboardManager.fetchLeaderboardData();
     this.pacmanGameOutlet.showLeaderboardModal(data, () => {
-      // Return to menu (delegated to game controller)
       this.pacmanGameOutlet.showMenu();
     });
   }
