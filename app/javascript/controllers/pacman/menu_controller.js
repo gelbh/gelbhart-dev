@@ -56,19 +56,19 @@ export default class extends Controller {
   }
 
   /**
-   * Get player name from localStorage
-   * @returns {string|null} Player name or null if not set
+   * Get player name from localforage
+   * @returns {Promise<string|null>} Player name or null if not set
    */
-  getPlayerName() {
-    return this.leaderboardManager.getPlayerName();
+  async getPlayerName() {
+    return await this.leaderboardManager.getPlayerName();
   }
 
   /**
-   * Save player name to localStorage
+   * Save player name to localforage
    * @param {string} name - Player name to save
    */
-  savePlayerName(name) {
-    this.leaderboardManager.savePlayerName(name);
+  async savePlayerName(name) {
+    await this.leaderboardManager.savePlayerName(name);
   }
 
   /**

@@ -9,6 +9,9 @@
  * - Item notifications
  * - Effect cooldown displays
  */
+import he from "he";
+import { formatDistanceToNow, format, differenceInDays } from "date-fns";
+
 const EXTRA_LIFE_THRESHOLD = 10000;
 const HUD_OFFSET_TOP = 20;
 
@@ -281,7 +284,7 @@ export class UIManager {
    * @returns {string} Message HTML
    */
   _createModalMessage(message) {
-    return `<p class="modal-message">${this.escapeHtml(message)}</p>`;
+    return `<p class="modal-message">${he.encode(message)}</p>`;
   }
 
   /**
@@ -584,7 +587,7 @@ export class UIManager {
         player && entry.player_name === player.name ? "highlighted" : ""
       }">
         <span class="rank">#${index + 1}</span>
-        <span class="player-name">${this.escapeHtml(entry.player_name)}</span>
+        <span class="player-name">${he.encode(entry.player_name)}</span>
         <span class="win-badge">${entry.is_win ? "🏆" : ""}</span>
         <span class="score">${entry.score}</span>
       </div>
@@ -705,26 +708,17 @@ export class UIManager {
   }
 
   /**
-   * Escape HTML to prevent XSS
-   */
-  escapeHtml(text) {
-    const div = document.createElement("div");
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
-  /**
    * Format date for display
    */
   formatDate(dateString) {
     const date = new Date(dateString);
     const now = new Date();
-    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+    const daysDiff = differenceInDays(now, date);
 
-    if (diffDays === 0) return "Today";
-    if (diffDays === 1) return "Yesterday";
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
+    if (daysDiff === 0) return "Today";
+    if (daysDiff === 1) return "Yesterday";
+    if (daysDiff < 7) return formatDistanceToNow(date, { addSuffix: true });
+    return format(date, "MMM d, yyyy");
   }
 
   /**
@@ -747,7 +741,7 @@ export class UIManager {
     );
 
     const content = [
-      this._createModalHeader("⚠️", this.escapeHtml(title)),
+      this._createModalHeader("⚠️", he.encode(title)),
       this._createModalMessage(message),
       buttons,
     ].join("");

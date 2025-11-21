@@ -117,7 +117,9 @@ export default class extends Controller {
 
     // Initialize managers
     this.audioManager = new AudioManager(this.assetPaths);
-    this.audioManager.initialize();
+    this.audioManager.initialize().catch((error) => {
+      console.warn("Audio initialization failed:", error);
+    });
 
     // Initialize audio controls UI with saved preferences
     this.initializeAudioControls();
@@ -840,12 +842,12 @@ export default class extends Controller {
     }
 
     // Check if player name exists
-    let playerName = this.getPlayerName();
+    let playerName = await this.getPlayerName();
 
     // If no player name, prompt for it
     if (!playerName) {
       playerName = await this.uiManager.showPlayerNamePrompt();
-      this.savePlayerName(playerName);
+      await this.savePlayerName(playerName);
     }
 
     // Submit score to leaderboard
@@ -936,21 +938,21 @@ export default class extends Controller {
   // ============================================
 
   /**
-   * Get player name from localStorage (delegated to menu controller)
+   * Get player name from localforage (delegated to menu controller)
    */
-  getPlayerName() {
+  async getPlayerName() {
     if (this.hasPacmanMenuOutlet) {
-      return this.pacmanMenuOutlet.getPlayerName();
+      return await this.pacmanMenuOutlet.getPlayerName();
     }
     return null;
   }
 
   /**
-   * Save player name to localStorage (delegated to menu controller)
+   * Save player name to localforage (delegated to menu controller)
    */
-  savePlayerName(name) {
+  async savePlayerName(name) {
     if (this.hasPacmanMenuOutlet) {
-      this.pacmanMenuOutlet.savePlayerName(name);
+      await this.pacmanMenuOutlet.savePlayerName(name);
     }
   }
 

@@ -4,35 +4,38 @@
  * Manages:
  * - Score submission to API
  * - Fetching leaderboard data (global and player-specific)
- * - Player name storage in localStorage
+ * - Player name storage in localforage
  */
+import api from "../api_client.js";
+import localforage from "localforage";
+
 export class LeaderboardManager {
   constructor() {
     this.storageKey = "pacman_player_name";
   }
 
   /**
-   * Get player name from localStorage
-   * @returns {string|null} Player name or null if not set
+   * Get player name from localforage
+   * @returns {Promise<string|null>} Player name or null if not set
    */
-  getPlayerName() {
+  async getPlayerName() {
     try {
-      return localStorage.getItem(this.storageKey);
+      return await localforage.getItem(this.storageKey);
     } catch (e) {
-      console.error("Error reading player name from localStorage:", e);
+      console.error("Error reading player name from localforage:", e);
       return null;
     }
   }
 
   /**
-   * Save player name to localStorage
+   * Save player name to localforage
    * @param {string} name - Player name to save
    */
-  savePlayerName(name) {
+  async savePlayerName(name) {
     try {
-      localStorage.setItem(this.storageKey, name);
+      await localforage.setItem(this.storageKey, name);
     } catch (e) {
-      console.error("Error saving player name to localStorage:", e);
+      console.error("Error saving player name to localforage:", e);
     }
   }
 
@@ -45,21 +48,13 @@ export class LeaderboardManager {
    */
   async submitScore(playerName, score, isWin) {
     try {
-      const response = await fetch("/api/pacman_scores", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const data = await api.post("/pacman_scores", {
+        pacman_score: {
+          player_name: playerName,
+          score: score,
+          is_win: isWin,
         },
-        body: JSON.stringify({
-          pacman_score: {
-            player_name: playerName,
-            score: score,
-            is_win: isWin,
-          },
-        }),
       });
-
-      const data = await response.json();
 
       if (!data.success) {
         console.error("❌ Error submitting score:", data.errors);
@@ -78,19 +73,17 @@ export class LeaderboardManager {
    */
   async fetchLeaderboardData() {
     try {
-      const playerName = this.getPlayerName();
+      const playerName = await this.getPlayerName();
 
       // Fetch global leaderboard
-      const globalResponse = await fetch("/api/pacman_scores/global");
-      const globalData = await globalResponse.json();
+      const globalData = await api.get("/pacman_scores/global");
 
       let playerData = null;
       if (playerName) {
         // Fetch player scores
-        const playerResponse = await fetch(
-          `/api/pacman_scores/player/${encodeURIComponent(playerName)}`
+        const playerScoreData = await api.get(
+          `/pacman_scores/player/${encodeURIComponent(playerName)}`
         );
-        const playerScoreData = await playerResponse.json();
         playerData = {
           name: playerName,
           scores: playerScoreData.scores || [],
