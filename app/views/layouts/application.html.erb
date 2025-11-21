@@ -1,85 +1,88 @@
+<%
+  # Extract repeated values for DRY principle
+  default_meta_description = 'Personal portfolio and development projects by Tomer Gelbhart. Full-stack developer specializing in Ruby on Rails and modern web applications.'
+  page_title_value = content_for?(:title) ? yield(:title) : page_title("")
+  page_meta_description = content_for?(:meta_description) ? yield(:meta_description) : default_meta_description
+  page_url = request.original_url
+  social_image_url = asset_url('logos/source/logo_social.svg')
+%>
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
   <head>
-    <!-- Google tag (gtag.js) - Deferred Loading -->
-    <!-- Initialize dataLayer and gtag function immediately for event queuing -->
+    <%# Google Analytics - Deferred Loading %>
     <script>
+      // Initialize dataLayer and gtag function immediately for event queuing
       window.dataLayer = window.dataLayer || [];
-
       function gtag() {
-          dataLayer.push(arguments);
+        dataLayer.push(arguments);
       }
       gtag('js', new Date());
       gtag('config', 'G-VZ8VBVE21B');
 
-      // Defer loading the actual GTM script until after page interactive
+      // Defer loading the actual GTM script until after page becomes interactive
       // This reduces main thread blocking while maintaining tracking functionality
       (function() {
         function injectGTMScript() {
-          // Check if script already loaded
+          // Prevent duplicate script injection
           if (document.querySelector('script[src*="googletagmanager.com/gtag/js"]')) {
             return;
           }
 
-          var script = document.createElement('script');
+          const script = document.createElement('script');
           script.async = true;
           script.src = 'https://www.googletagmanager.com/gtag/js?id=G-VZ8VBVE21B';
           document.head.appendChild(script);
         }
 
-        // Load GTM after page becomes interactive
+        function loadGTMWhenIdle() {
+          if ('requestIdleCallback' in window) {
+            requestIdleCallback(injectGTMScript, { timeout: 2000 });
+          } else {
+            // Fallback for browsers without requestIdleCallback
+            const delay = document.readyState === 'complete' ? 100 : 500;
+            setTimeout(injectGTMScript, delay);
+          }
+        }
+
+        // Load GTM script based on page load state
         if (document.readyState === 'complete') {
-          // Page already fully loaded, use requestIdleCallback or small delay
-          if ('requestIdleCallback' in window) {
-            requestIdleCallback(injectGTMScript, { timeout: 2000 });
-          } else {
-            setTimeout(injectGTMScript, 100);
-          }
+          // Page already fully loaded
+          loadGTMWhenIdle();
         } else if (document.readyState === 'interactive') {
-          // DOM ready, wait for idle or use timeout
-          if ('requestIdleCallback' in window) {
-            requestIdleCallback(injectGTMScript, { timeout: 2000 });
-          } else {
-            setTimeout(injectGTMScript, 500);
-          }
+          // DOM ready
+          loadGTMWhenIdle();
         } else {
-          // Wait for DOMContentLoaded, then defer
-          document.addEventListener('DOMContentLoaded', function() {
-            if ('requestIdleCallback' in window) {
-              requestIdleCallback(injectGTMScript, { timeout: 2000 });
-            } else {
-              setTimeout(injectGTMScript, 500);
-            }
-          });
+          // Wait for DOMContentLoaded
+          document.addEventListener('DOMContentLoaded', loadGTMWhenIdle);
         }
       })();
     </script>
-    <%# Basic Meta Tags %>
+    <%# Document Metadata %>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
-    <title><%= content_for?(:title) ? yield(:title) : page_title("") %></title>
+    <title><%= page_title_value %></title>
     <%# SEO Meta Tags %>
-    <meta name="description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : 'Personal portfolio and development projects by Tomer Gelbhart. Full-stack developer specializing in Ruby on Rails and modern web applications.' %>">
+    <meta name="description" content="<%= page_meta_description %>">
     <meta name="author" content="Tomer Gelbhart">
     <meta name="language" content="English">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="<%= request.original_url %>">
+    <link rel="canonical" href="<%= page_url %>">
     <%# Open Graph Meta Tags %>
     <meta property="og:type" content="website">
-    <meta property="og:url" content="<%= request.original_url %>">
-    <meta property="og:title" content="<%= content_for?(:title) ? yield(:title) : page_title("") %>">
-    <meta property="og:description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : 'Personal portfolio and development projects by Tomer Gelbhart. Full-stack developer specializing in Ruby on Rails and modern web applications.' %>">
-    <meta property="og:image" content="<%= asset_url('logos/source/logo_social.svg') %>">
+    <meta property="og:url" content="<%= page_url %>">
+    <meta property="og:title" content="<%= page_title_value %>">
+    <meta property="og:description" content="<%= page_meta_description %>">
+    <meta property="og:image" content="<%= social_image_url %>">
     <%# Twitter Card Meta Tags %>
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="<%= request.original_url %>">
-    <meta name="twitter:title" content="<%= content_for?(:title) ? yield(:title) : page_title("") %>">
-    <meta name="twitter:description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : 'Personal portfolio and development projects by Tomer Gelbhart. Full-stack developer specializing in Ruby on Rails and modern web applications.' %>">
-    <meta name="twitter:image" content="<%= asset_url('logos/source/logo_social.svg') %>">
+    <meta name="twitter:url" content="<%= page_url %>">
+    <meta name="twitter:title" content="<%= page_title_value %>">
+    <meta name="twitter:description" content="<%= page_meta_description %>">
+    <meta name="twitter:image" content="<%= social_image_url %>">
     <%# Security Tags %>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-    <%# Favicon Links %>
+    <%# Favicon and App Icons %>
     <%= favicon_link_tag '/favicon.ico' %>
     <%= favicon_link_tag '/icons/favicons/favicon.svg', rel: 'icon', type: 'image/svg+xml' %>
     <%= favicon_link_tag '/icons/favicons/favicon-16x16.png', rel: 'icon', sizes: '16x16', type: 'image/png' %>
@@ -90,34 +93,31 @@
     <%= tag :link, rel: 'manifest', href: asset_path('/site.webmanifest') %>
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="msapplication-config" content="/browserconfig.xml">
-    <%# Preconnect to external domains %>
+    <%# Resource Hints - Critical External Domains %>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://www.googletagmanager.com">
     <link rel="dns-prefetch" href="https://www.google-analytics.com">
-    <%# CDN resource hints for faster DNS resolution %>
+    <%# Resource Hints - CDN Domains %>
     <link rel="dns-prefetch" href="https://unpkg.com">
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link rel="dns-prefetch" href="https://ga.jspm.io">
     <link rel="dns-prefetch" href="https://esm.sh">
-    <%# NASA Exoplanet Explorer resource hints (only on NASA page) %>
+    <%# Resource Hints - Page-Specific (NASA Exoplanet Explorer) %>
     <% if request.path == '/nasa-exoplanet-explorer' %>
       <link rel="preconnect" href="https://nasa-exoplanet-explorer.vercel.app">
       <link rel="dns-prefetch" href="https://nasa-exoplanet-explorer.onrender.com">
     <% end %>
-    <%# Critical CSS and fonts %>
-    <%# Async font loading to prevent render blocking %>
+    <%# Fonts - Async Loading to Prevent Render Blocking %>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript>
       <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     </noscript>
-    <%# Boxicons %>
+    <%# Icon Fonts %>
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <%# Flag Icons %>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css">
-    <%# Application CSS %>
+    <%# Application Stylesheets and Scripts %>
     <%= stylesheet_link_tag "application", media: "all" %>
-    <%# JavaScript %>
     <%= javascript_importmap_tags %>
   </head>
   <body>
