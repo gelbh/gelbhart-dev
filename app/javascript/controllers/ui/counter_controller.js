@@ -1,63 +1,96 @@
-import { Controller } from "@hotwired/stimulus"
+import { Controller } from "@hotwired/stimulus";
+import eases from "eases";
 
-// Connects to data-controller="counter"
 export default class extends Controller {
   static values = {
     target: Number,
     duration: { type: Number, default: 2000 },
-    suffix: { type: String, default: "" }
-  }
+    suffix: { type: String, default: "" },
+  };
 
   connect() {
-    // Set initial value to 0
-    this.element.textContent = "0" + this.suffixValue
-    
-    // Wait for the parent card to fade in before starting animation
-    const card = this.element.closest('.fade-in-view')
+    this.formatter = new Intl.NumberFormat("en-US");
+    this.animationFrameId = null;
+
+    this.ensureTargetValue();
+    this.element.textContent = this.formatter.format(0) + this.suffixValue;
+
+    const card = this.element.closest(".fade-in-view");
     if (card) {
-      // Start animation as soon as element is visible
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            // Start immediately when visible - no delay
-            this.animateCounter()
-            observer.disconnect()
-          }
-        })
-      }, { threshold: 0.2 }) // Start earlier (when 20% visible)
-      
-      observer.observe(card)
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              this.animateCounter();
+              observer.disconnect();
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+      observer.observe(card);
     } else {
-      // Fallback if no fade-in-view parent
-      this.animateCounter()
+      this.animateCounter();
     }
   }
 
   animateCounter() {
-    const target = this.targetValue
-    const duration = this.durationValue
-    const element = this.element
-    const suffix = this.suffixValue
-    const startTime = performance.now()
-    const startValue = 0
-
-    const updateCounter = (currentTime) => {
-      const elapsed = currentTime - startTime
-      const progress = Math.min(elapsed / duration, 1)
-      
-      // Easing function for smooth animation
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4)
-      const currentValue = Math.floor(startValue + (target - startValue) * easeOutQuart)
-      
-      element.textContent = currentValue.toLocaleString() + suffix
-      
-      if (progress < 1) {
-        requestAnimationFrame(updateCounter)
-      } else {
-        element.textContent = target.toLocaleString() + suffix
-      }
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
     }
 
-    requestAnimationFrame(updateCounter)
+    this.ensureTargetValue();
+
+    const target = this.isValidValue(this.targetValue) ? this.targetValue : 0;
+    const startTime = performance.now();
+    const startValue = 0;
+
+    const updateCounter = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / this.durationValue, 1);
+      const eased = eases.quartOut(progress);
+      const currentValue = Math.floor(
+        startValue + (target - startValue) * eased
+      );
+
+      this.element.textContent =
+        this.formatter.format(currentValue) + this.suffixValue;
+
+      if (progress < 1) {
+        this.animationFrameId = requestAnimationFrame(updateCounter);
+      } else {
+        this.element.textContent =
+          this.formatter.format(target) + this.suffixValue;
+        this.animationFrameId = null;
+      }
+    };
+
+    this.animationFrameId = requestAnimationFrame(updateCounter);
+  }
+
+  disconnect() {
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+  }
+
+  ensureTargetValue() {
+    if (this.isValidValue(this.targetValue)) return;
+
+    const attributeValue = this.element.getAttribute(
+      "data-counter-target-value"
+    );
+    if (attributeValue !== null) {
+      const parsed = parseFloat(attributeValue);
+      if (!isNaN(parsed)) {
+        this.targetValue = parsed;
+      }
+    }
+  }
+
+  isValidValue(value) {
+    return value !== undefined && value !== null && !isNaN(value);
   }
 }
