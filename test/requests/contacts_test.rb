@@ -4,7 +4,8 @@ class ContactsTest < ActionDispatch::IntegrationTest
   include ApiHelpers
   setup do
     # Clear rate limit cache before each test
-    Rails.cache.rate_limit.clear
+    # Rack::Attack uses its own cache store in test environment
+    Rack::Attack.cache.store.clear if Rack::Attack.cache.store.respond_to?(:clear)
   end
 
   test "POST /contact with valid parameters redirects and enqueues email" do
@@ -219,7 +220,7 @@ class ContactsTest < ActionDispatch::IntegrationTest
 
     # 4th submission should be rate limited
     post contact_path, params: params
-    assert_redirected_to contact_path
+    follow_redirect!
     assert_equal "Too many submissions. Please try again later.", flash[:alert]
   end
 
@@ -238,7 +239,7 @@ class ContactsTest < ActionDispatch::IntegrationTest
     # 4th submission should return 429
     post contact_path, params: params, as: :json
     json = assert_json_error(429)
-    assert_equal "Rate limit exceeded", json["message"]
+    assert_equal "Rate limit exceeded. Please try again later.", json["message"]
   end
 
   test "POST /contact handles mailer errors gracefully" do
@@ -253,7 +254,7 @@ class ContactsTest < ActionDispatch::IntegrationTest
     )
     mailer_instance.stubs(:deliver_later).raises(StandardError.new("Mail error"))
     ContactMailer.stubs(:contact_message).returns(mailer_instance)
-    
+
     post contact_path, params: {
       name: "Test User",
       email: "test@example.com",
@@ -283,4 +284,3 @@ class ContactsTest < ActionDispatch::IntegrationTest
     assert_equal "Thank you! Your message has been sent successfully.", flash[:notice]
   end
 end
-

@@ -17,6 +17,10 @@ class PagesController < ApplicationController
   end
 
   def contact
+    # Check if redirected here due to rate limiting
+    if params[:rate_limited] == "true"
+      flash[:alert] = "Too many submissions. Please try again later."
+    end
   end
 
   def video_captioner
