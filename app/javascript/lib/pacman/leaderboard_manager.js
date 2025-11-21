@@ -6,7 +6,7 @@
  * - Fetching leaderboard data (global and player-specific)
  * - Player name storage in localforage
  */
-import api from "../api_client.js";
+import api from "lib/api_client.js";
 import localforage from "localforage";
 
 export class LeaderboardManager {

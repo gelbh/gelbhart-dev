@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus";
-import api from "../../lib/api_client.js";
+import api from "lib/api_client.js";
 import countries from "i18n-iso-countries";
 import localforage from "localforage";
 
