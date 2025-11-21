@@ -10,7 +10,9 @@
  * - Effect cooldown displays
  */
 import he from "he";
-import { formatDistanceToNow, format, differenceInDays } from "date-fns";
+import formatDistanceToNow from "date-fns/formatDistanceToNow";
+import format from "date-fns/format";
+import differenceInDays from "date-fns/differenceInDays";
 
 const EXTRA_LIFE_THRESHOLD = 10000;
 const HUD_OFFSET_TOP = 20;
