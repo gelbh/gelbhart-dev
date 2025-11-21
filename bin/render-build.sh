@@ -8,6 +8,9 @@ bundle install
 # Install Node dependencies
 npm install
 
+# Build Dart Sass stylesheets
+bundle exec rails dartsass:build
+
 # Run database migrations
 bundle exec rails db:migrate RAILS_ENV=production
 

@@ -68,3 +68,6 @@ yarn-debug.log*
 # Ignore generated captions and sitemaps
 /public/captions/
 /public/sitemaps/
+
+/app/assets/builds/*
+!/app/assets/builds/.keep
