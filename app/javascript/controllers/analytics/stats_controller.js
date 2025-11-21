@@ -1,6 +1,18 @@
 import { Controller } from "@hotwired/stimulus";
+import api from "../../lib/api_client.js";
+import countries from "i18n-iso-countries";
+import localforage from "localforage";
 
-// Connects to data-controller="analytics-stats"
+// Register English locale for country name lookups
+(async () => {
+  try {
+    const enLocale = await import("i18n-iso-countries/langs/en.json");
+    countries.registerLocale(enLocale.default || enLocale);
+  } catch (error) {
+    console.warn("Could not register i18n-iso-countries locale:", error);
+  }
+})();
+
 export default class extends Controller {
   static targets = [
     "activeUsers",
@@ -16,10 +28,31 @@ export default class extends Controller {
     apiUrl: { type: String, default: "/api/analytics/hevy-tracker" },
   };
 
-  connect() {
+  CACHE_DURATION = 5 * 60 * 1000;
+  CACHE_KEY = "hevy_tracker_analytics_cache";
+  DEFAULTS_KEY = "hevy_tracker_analytics_defaults";
+
+  // Metric configuration for counter targets
+  METRICS = [
+    { key: "active_users", target: "activeUsers" },
+    { key: "page_views", target: "pageViews" },
+    { key: "install_count", target: "installCount" },
+    {
+      key: "countries_total",
+      target: "countries",
+      getValue: (data) => data.countries?.total || 0,
+    },
+    { key: "engagement_rate", target: "engagementRate" },
+  ];
+
+  async connect() {
     this.expanded = false;
     this.allCountries = [];
     this.totalUsers = 0;
+
+    const defaults = await this.loadDefaultValues();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    this.updateCounterControllersFromDefaults(defaults);
     this.fetchStats();
   }
 
@@ -33,88 +66,217 @@ export default class extends Controller {
         : '<i class="bx bx-chevron-down me-1"></i>Show All Countries';
     }
 
-    // Scroll to top of countries section when collapsing
     if (!this.expanded) {
       const countriesSection = this.element.querySelector(".border-top.pt-4");
-      if (countriesSection) {
-        countriesSection.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
+      countriesSection?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }
 
   async fetchStats() {
     try {
-      const response = await fetch(this.apiUrlValue);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch analytics data");
+      const cached = await this.getCachedStats();
+      if (cached) {
+        this.updateStats(cached.data);
+        this.fetchFreshStats();
+        return;
       }
 
-      const data = await response.json();
-      this.updateStats(data);
+      await this.fetchFreshStats();
     } catch (error) {
       console.error("Analytics fetch error:", error);
-      // Stats will show default values from the view
+      const cached = await this.getCachedStats(true);
+      if (cached) {
+        this.updateStats(cached.data);
+      }
     }
   }
 
+  async getCachedStats(allowExpired = false) {
+    try {
+      const cached = await localforage.getItem(this.CACHE_KEY);
+      if (!cached) return null;
+
+      const age = Date.now() - cached.timestamp;
+      if (!allowExpired && age > this.CACHE_DURATION) return null;
+
+      return cached;
+    } catch (error) {
+      console.warn("Error reading analytics cache:", error);
+      return null;
+    }
+  }
+
+  async setCachedStats(data) {
+    try {
+      await localforage.setItem(this.CACHE_KEY, {
+        data,
+        timestamp: Date.now(),
+      });
+    } catch (error) {
+      console.warn("Error saving analytics cache:", error);
+    }
+  }
+
+  async fetchFreshStats() {
+    const path = this.apiUrlValue.replace(/^\/api/, "");
+    const data = await api.get(path);
+
+    await this.setCachedStats(data);
+    this.updateDefaultValues(data);
+    this.updateStats(data);
+  }
+
+  updateDefaultValues(data) {
+    this.METRICS.forEach((metric) => {
+      const hasTarget =
+        this[
+          `has${
+            metric.target.charAt(0).toUpperCase() + metric.target.slice(1)
+          }Target`
+        ];
+      if (!hasTarget) return;
+
+      const target = this[`${metric.target}Target`];
+      if (!target) return;
+
+      const value = metric.getValue ? metric.getValue(data) : data[metric.key];
+      target.setAttribute("data-counter-target-value", value);
+    });
+
+    this.saveDefaultValues(data);
+  }
+
+  async saveDefaultValues(data) {
+    try {
+      const engagementRate = data.engagement_rate ?? 0;
+      await localforage.setItem(this.DEFAULTS_KEY, {
+        active_users: data.active_users,
+        page_views: data.page_views,
+        install_count: data.install_count,
+        countries_total: data.countries?.total || 0,
+        countries_list: data.countries?.list || [],
+        engagement_rate: engagementRate,
+        timestamp: Date.now(),
+      });
+    } catch (error) {
+      console.warn("Error saving default values:", error);
+    }
+  }
+
+  async loadDefaultValues() {
+    try {
+      const defaults = await localforage.getItem(this.DEFAULTS_KEY);
+      if (!defaults) return null;
+
+      this.METRICS.forEach((metric) => {
+        const hasTarget =
+          this[
+            `has${
+              metric.target.charAt(0).toUpperCase() + metric.target.slice(1)
+            }Target`
+          ];
+        if (!hasTarget) return;
+
+        const target = this[`${metric.target}Target`];
+        if (!target) return;
+
+        const value = defaults[metric.key];
+        target.setAttribute("data-counter-target-value", value);
+      });
+
+      if (defaults.countries_list?.length > 0) {
+        this.allCountries = defaults.countries_list;
+        this.totalUsers = defaults.active_users || 0;
+        this.renderCountries();
+      }
+
+      return defaults;
+    } catch (error) {
+      console.warn("Error loading default values:", error);
+      return null;
+    }
+  }
+
+  updateCounterControllersFromDefaults(defaults = null) {
+    this.METRICS.forEach((metric) => {
+      const hasTarget =
+        this[
+          `has${
+            metric.target.charAt(0).toUpperCase() + metric.target.slice(1)
+          }Target`
+        ];
+      if (!hasTarget) return;
+
+      const target = this[`${metric.target}Target`];
+      if (!target) return;
+
+      const value =
+        defaults?.[metric.key] ??
+        parseFloat(target.getAttribute("data-counter-target-value"));
+      this.updateCounter(target, value);
+    });
+  }
+
+  updateCounter(target, defaultValue = null) {
+    if (!target) return;
+
+    const attributeValue = target.getAttribute("data-counter-target-value");
+    if (
+      attributeValue === null &&
+      defaultValue != null &&
+      !isNaN(defaultValue)
+    ) {
+      target.setAttribute("data-counter-target-value", defaultValue.toString());
+    }
+
+    const counterController =
+      this.application.getControllerForElementAndIdentifier(target, "counter");
+    if (!counterController) return;
+
+    const value = this.extractCounterValue(defaultValue, attributeValue);
+    if (value != null && !isNaN(value)) {
+      counterController.targetValue = value;
+      counterController.animateCounter?.();
+    }
+  }
+
+  extractCounterValue(defaultValue, attributeValue) {
+    if (defaultValue != null && !isNaN(defaultValue)) {
+      return defaultValue;
+    }
+    if (attributeValue != null) {
+      const parsed = parseFloat(attributeValue);
+      return !isNaN(parsed) ? parsed : null;
+    }
+    return null;
+  }
+
   updateStats(data) {
-    // Update counter targets for animated numbers
-    if (this.hasActiveUsersTarget) {
+    this.METRICS.forEach((metric) => {
+      const hasTarget =
+        this[
+          `has${
+            metric.target.charAt(0).toUpperCase() + metric.target.slice(1)
+          }Target`
+        ];
+      if (!hasTarget) return;
+
+      const target = this[`${metric.target}Target`];
+      if (!target) return;
+
       const counterController =
         this.application.getControllerForElementAndIdentifier(
-          this.activeUsersTarget,
+          target,
           "counter"
         );
-      if (counterController) {
-        counterController.targetValue = data.active_users;
-        counterController.animateCounter();
-      }
-    }
+      if (!counterController) return;
 
-    if (this.hasPageViewsTarget) {
-      const counterController =
-        this.application.getControllerForElementAndIdentifier(
-          this.pageViewsTarget,
-          "counter"
-        );
-      if (counterController) {
-        counterController.targetValue = data.page_views;
-        counterController.animateCounter();
-      }
-    }
+      const value = metric.getValue ? metric.getValue(data) : data[metric.key];
+      counterController.targetValue = value;
+      counterController.animateCounter();
+    });
 
-    if (this.hasInstallCountTarget) {
-      const counterController =
-        this.application.getControllerForElementAndIdentifier(
-          this.installCountTarget,
-          "counter"
-        );
-      if (counterController) {
-        counterController.targetValue = data.install_count;
-        counterController.animateCounter();
-      }
-    }
-
-    if (this.hasCountriesTarget) {
-      const counterController =
-        this.application.getControllerForElementAndIdentifier(
-          this.countriesTarget,
-          "counter"
-        );
-      if (counterController) {
-        counterController.targetValue = data.countries.total;
-        counterController.animateCounter();
-      }
-    }
-
-    // Update engagement rate (no animation, just value)
-    if (this.hasEngagementRateTarget) {
-      this.engagementRateTarget.textContent = `${data.engagement_rate}%`;
-    }
-
-    // Store countries data and update list
-    if (this.hasCountriesListTarget && data.countries.list) {
+    if (this.hasCountriesListTarget && data.countries?.list) {
       this.allCountries = data.countries.list;
       this.totalUsers = data.active_users;
       this.renderCountries();
@@ -153,262 +315,43 @@ export default class extends Controller {
       "secondary",
     ];
 
-    let html = "";
-    countries.forEach((country, index) => {
-      const countryInfo = countryMap[country.name] || {
-        code: this.getCountryCode(country.name),
-        color: colors[index % colors.length],
-      };
-      const percentage =
-        totalUsers > 0
-          ? ((country.users / totalUsers) * 100).toFixed(1)
-          : "0.0";
+    const html = countries
+      .map((country, index) => {
+        const countryInfo = countryMap[country.name] || {
+          code: this.getCountryCode(country.name),
+          color: colors[index % colors.length],
+        };
+        const percentage =
+          totalUsers > 0
+            ? ((country.users / totalUsers) * 100).toFixed(1)
+            : "0.0";
 
-      html += `
-        <div class="col-md-6">
-          <div class="d-flex align-items-center justify-content-between mb-2">
-            <div class="d-flex align-items-center">
-              <span class="fi fi-${countryInfo.code} rounded me-2" style="font-size: 1.25rem;"></span>
-              <span class="fw-semibold">${country.name}</span>
+        return `
+          <div class="col-md-6">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="d-flex align-items-center">
+                <span class="fi fi-${countryInfo.code} rounded me-2" style="font-size: 1.25rem;"></span>
+                <span class="fw-semibold">${country.name}</span>
+              </div>
+              <span class="text-${countryInfo.color} fw-semibold">${country.users}</span>
             </div>
-            <span class="text-${countryInfo.color} fw-semibold">${country.users}</span>
+            <div class="progress" style="height: 6px;">
+              <div class="progress-bar bg-${countryInfo.color}" role="progressbar"
+                   style="width: ${percentage}%"
+                   aria-valuenow="${country.users}"
+                   aria-valuemin="0"
+                   aria-valuemax="${totalUsers}"></div>
+            </div>
           </div>
-          <div class="progress" style="height: 6px;">
-            <div class="progress-bar bg-${countryInfo.color}" role="progressbar"
-                 style="width: ${percentage}%"
-                 aria-valuenow="${country.users}"
-                 aria-valuemin="0"
-                 aria-valuemax="${totalUsers}"></div>
-          </div>
-        </div>
-      `;
-    });
+        `;
+      })
+      .join("");
 
     this.countriesListTarget.innerHTML = html;
   }
 
   getCountryCode(countryName) {
-    // Comprehensive map of country names to ISO 3166-1 alpha-2 codes
-    const codes = {
-      // North America
-      "United States": "us",
-      Canada: "ca",
-      Mexico: "mx",
-      Guatemala: "gt",
-      Honduras: "hn",
-      "El Salvador": "sv",
-      Nicaragua: "ni",
-      "Costa Rica": "cr",
-      Panama: "pa",
-      Bahamas: "bs",
-      Cuba: "cu",
-      Jamaica: "jm",
-      Haiti: "ht",
-      "Dominican Republic": "do",
-      "Puerto Rico": "pr",
-      "Trinidad and Tobago": "tt",
-      Barbados: "bb",
-      Grenada: "gd",
-      Dominica: "dm",
-      "Saint Lucia": "lc",
-      "Antigua and Barbuda": "ag",
-      Belize: "bz",
-      Bermuda: "bm",
-
-      // South America
-      Brazil: "br",
-      Argentina: "ar",
-      Chile: "cl",
-      Colombia: "co",
-      Peru: "pe",
-      Venezuela: "ve",
-      Ecuador: "ec",
-      Bolivia: "bo",
-      Paraguay: "py",
-      Uruguay: "uy",
-      Guyana: "gy",
-      Suriname: "sr",
-      "French Guiana": "gf",
-
-      // Europe
-      "United Kingdom": "gb",
-      Germany: "de",
-      France: "fr",
-      Italy: "it",
-      Spain: "es",
-      Portugal: "pt",
-      Netherlands: "nl",
-      Belgium: "be",
-      Switzerland: "ch",
-      Austria: "at",
-      Sweden: "se",
-      Norway: "no",
-      Denmark: "dk",
-      Finland: "fi",
-      Iceland: "is",
-      Ireland: "ie",
-      Poland: "pl",
-      "Czech Republic": "cz",
-      Czechia: "cz",
-      Slovakia: "sk",
-      Hungary: "hu",
-      Romania: "ro",
-      Bulgaria: "bg",
-      Greece: "gr",
-      Croatia: "hr",
-      Serbia: "rs",
-      Slovenia: "si",
-      "Bosnia and Herzegovina": "ba",
-      Montenegro: "me",
-      "North Macedonia": "mk",
-      Albania: "al",
-      Kosovo: "xk",
-      Estonia: "ee",
-      Latvia: "lv",
-      Lithuania: "lt",
-      Belarus: "by",
-      Ukraine: "ua",
-      Moldova: "md",
-      Luxembourg: "lu",
-      Monaco: "mc",
-      Liechtenstein: "li",
-      Malta: "mt",
-      Cyprus: "cy",
-      Andorra: "ad",
-      "San Marino": "sm",
-      "Vatican City": "va",
-
-      // Asia
-      China: "cn",
-      Japan: "jp",
-      "South Korea": "kr",
-      "North Korea": "kp",
-      India: "in",
-      Pakistan: "pk",
-      Bangladesh: "bd",
-      "Sri Lanka": "lk",
-      Nepal: "np",
-      Bhutan: "bt",
-      Maldives: "mv",
-      Afghanistan: "af",
-      Iran: "ir",
-      Iraq: "iq",
-      Syria: "sy",
-      Lebanon: "lb",
-      Jordan: "jo",
-      Israel: "il",
-      Palestine: "ps",
-      "Saudi Arabia": "sa",
-      Yemen: "ye",
-      Oman: "om",
-      "United Arab Emirates": "ae",
-      Qatar: "qa",
-      Bahrain: "bh",
-      Kuwait: "kw",
-      Turkey: "tr",
-      Armenia: "am",
-      Azerbaijan: "az",
-      Georgia: "ge",
-      Kazakhstan: "kz",
-      Uzbekistan: "uz",
-      Turkmenistan: "tm",
-      Kyrgyzstan: "kg",
-      Tajikistan: "tj",
-      Mongolia: "mn",
-      Thailand: "th",
-      Vietnam: "vn",
-      Laos: "la",
-      Cambodia: "kh",
-      Myanmar: "mm",
-      Malaysia: "my",
-      Singapore: "sg",
-      Indonesia: "id",
-      Philippines: "ph",
-      Brunei: "bn",
-      "Timor-Leste": "tl",
-      "Hong Kong": "hk",
-      Macau: "mo",
-      Taiwan: "tw",
-
-      // Africa
-      "South Africa": "za",
-      Egypt: "eg",
-      Nigeria: "ng",
-      Kenya: "ke",
-      Ethiopia: "et",
-      Ghana: "gh",
-      Tanzania: "tz",
-      Uganda: "ug",
-      Algeria: "dz",
-      Morocco: "ma",
-      Tunisia: "tn",
-      Libya: "ly",
-      Sudan: "sd",
-      "South Sudan": "ss",
-      Somalia: "so",
-      Eritrea: "er",
-      Djibouti: "dj",
-      Senegal: "sn",
-      Mali: "ml",
-      Mauritania: "mr",
-      Niger: "ne",
-      Chad: "td",
-      "Burkina Faso": "bf",
-      "Ivory Coast": "ci",
-      "Côte d'Ivoire": "ci",
-      Cameroon: "cm",
-      "Central African Republic": "cf",
-      Congo: "cg",
-      "Democratic Republic of the Congo": "cd",
-      Gabon: "ga",
-      "Equatorial Guinea": "gq",
-      Zambia: "zm",
-      Zimbabwe: "zw",
-      Botswana: "bw",
-      Namibia: "na",
-      Angola: "ao",
-      Mozambique: "mz",
-      Madagascar: "mg",
-      Malawi: "mw",
-      Rwanda: "rw",
-      Burundi: "bi",
-      Mauritius: "mu",
-      Seychelles: "sc",
-      Comoros: "km",
-      "Cape Verde": "cv",
-      "São Tomé and Príncipe": "st",
-      Benin: "bj",
-      Togo: "tg",
-      "Sierra Leone": "sl",
-      Liberia: "lr",
-      Guinea: "gn",
-      "Guinea-Bissau": "gw",
-      Gambia: "gm",
-      Lesotho: "ls",
-      Eswatini: "sz",
-      Swaziland: "sz",
-
-      // Oceania
-      Australia: "au",
-      "New Zealand": "nz",
-      "Papua New Guinea": "pg",
-      Fiji: "fj",
-      "Solomon Islands": "sb",
-      Vanuatu: "vu",
-      Samoa: "ws",
-      Kiribati: "ki",
-      Tonga: "to",
-      Micronesia: "fm",
-      Palau: "pw",
-      "Marshall Islands": "mh",
-      Nauru: "nr",
-      Tuvalu: "tv",
-
-      // Russia & Former Soviet
-      Russia: "ru",
-      "Russian Federation": "ru",
-    };
-
-    return codes[countryName] || codes[countryName.toLowerCase()] || "xx";
+    const code = countries.getAlpha2Code(countryName, "en");
+    return code ? code.toLowerCase() : "xx";
   }
 }
