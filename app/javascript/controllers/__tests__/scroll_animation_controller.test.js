@@ -1,4 +1,4 @@
-import ScrollAnimationController from "../scroll_animation_controller";
+import ScrollAnimationController from "../animation/scroll_controller";
 
 describe("ScrollAnimationController", () => {
   let controller;

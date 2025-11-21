@@ -1,4 +1,4 @@
-import CodeTyperController from "../code_typer_controller";
+import CodeTyperController from "../ui/code_typer_controller";
 
 describe("CodeTyperController", () => {
   let controller;

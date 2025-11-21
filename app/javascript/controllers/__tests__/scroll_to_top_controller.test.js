@@ -1,4 +1,4 @@
-import ScrollToTopController from "../scroll_to_top_controller";
+import ScrollToTopController from "../animation/scroll_to_top_controller";
 
 describe("ScrollToTopController", () => {
   let controller;

@@ -1,4 +1,4 @@
-import ThemeController from "../theme_controller";
+import ThemeController from "../ui/theme_controller";
 
 describe("ThemeController", () => {
   let controller;

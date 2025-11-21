@@ -1,4 +1,4 @@
-import AnalyticsStatsController from "../analytics_stats_controller";
+import AnalyticsStatsController from "../analytics/stats_controller";
 
 describe("AnalyticsStatsController", () => {
   let controller;
