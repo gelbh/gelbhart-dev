@@ -13,6 +13,7 @@ development:
 test:
   <<: *default
   database: gelbhart_dev_test
+  prepared_statements: false
 
 production:
   <<: *default
