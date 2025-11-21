@@ -10,6 +10,8 @@
 //= link_tree ../../javascript/controllers .js
 //= link_tree ../../javascript/lib .js
 
+//= link_tree ../../../vendor/javascript .js
+
 //= link_directory ../stylesheets .css
 //= link_directory ../stylesheets .scss
 //= link_directory ../stylesheets/theme .scss
