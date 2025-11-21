@@ -16,6 +16,7 @@ gem "google-analytics-data"
 gem "googleauth"
 gem "webrick"
 gem "image_processing", "~> 1.2"
+gem "sitemap_generator", "~> 6.1"
 
 gem "mini_racer"
 
@@ -46,3 +47,7 @@ group :test do
   gem "webmock"
   gem "mocha"
 end
+
+gem "email_address", "~> 0.2"
+
+gem "rack-attack", "~> 6.6"

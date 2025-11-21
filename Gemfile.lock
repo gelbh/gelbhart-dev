@@ -116,6 +116,9 @@ GEM
       dotenv (= 3.1.8)
       railties (>= 6.1)
     drb (2.2.3)
+    email_address (0.2.7)
+      base64
+      simpleidn
     erb (6.0.0)
     error_highlight (0.7.0)
     erubi (1.13.1)
@@ -355,6 +358,8 @@ GEM
       nio4r (~> 2.0)
     racc (1.8.1)
     rack (3.2.4)
+    rack-attack (6.8.0)
+      rack (>= 1.0, < 4)
     rack-cors (3.0.0)
       logger
       rack (>= 3.0.14)
@@ -471,6 +476,9 @@ GEM
       simplecov_json_formatter (~> 0.1)
     simplecov-html (0.13.2)
     simplecov_json_formatter (0.1.4)
+    simpleidn (0.2.3)
+    sitemap_generator (6.3.0)
+      builder (~> 3.0)
     solargraph (0.57.0)
       backport (~> 1.2)
       benchmark (~> 0.4)
@@ -566,6 +574,7 @@ DEPENDENCIES
   capybara
   debug
   dotenv-rails
+  email_address (~> 0.2)
   error_highlight (>= 0.4.0)
   factory_bot_rails
   faker
@@ -579,6 +588,7 @@ DEPENDENCIES
   mocha
   pg
   puma (>= 5.0)
+  rack-attack (~> 6.6)
   rack-cors
   rails (~> 8.1.0)
   rubocop-rails-omakase
@@ -586,6 +596,7 @@ DEPENDENCIES
   selenium-webdriver
   shoulda-matchers
   simplecov
+  sitemap_generator (~> 6.1)
   solargraph
   sprockets-rails
   stimulus-rails
