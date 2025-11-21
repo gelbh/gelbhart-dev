@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus";
+import localforage from "localforage";
 
 export default class extends Controller {
   static targets = ["checkbox", "lightLabel", "darkLabel"];
@@ -11,11 +12,17 @@ export default class extends Controller {
     });
   }
 
-  initializeTheme() {
-    const storedTheme = localStorage.getItem("theme");
-    // Default to dark mode if no stored preference
-    const theme = storedTheme || "dark";
-    this.handleThemeChange(theme);
+  async initializeTheme() {
+    try {
+      const storedTheme = await localforage.getItem("theme");
+      // Default to dark mode if no stored preference
+      const theme = storedTheme || "dark";
+      this.handleThemeChange(theme);
+    } catch (error) {
+      console.warn("Could not load theme preference:", error);
+      // Default to dark mode on error
+      this.handleThemeChange("dark");
+    }
   }
 
   toggleTheme() {
@@ -24,9 +31,13 @@ export default class extends Controller {
     this.handleThemeChange(newTheme);
   }
 
-  handleThemeChange(theme) {
+  async handleThemeChange(theme) {
     document.documentElement.setAttribute("data-bs-theme", theme);
-    localStorage.setItem("theme", theme);
+    try {
+      await localforage.setItem("theme", theme);
+    } catch (error) {
+      console.warn("Could not save theme preference:", error);
+    }
 
     if (this.hasCheckboxTarget) {
       this.checkboxTarget.checked = theme === "dark";
