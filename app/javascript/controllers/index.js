@@ -17,6 +17,7 @@ import AnalyticsStatsController from "controllers/analytics/stats_controller";
 import CodeTyperController from "controllers/ui/code_typer_controller";
 import CounterController from "controllers/ui/counter_controller";
 import ThemeController from "controllers/ui/theme_controller";
+import LazyIframeController from "controllers/ui/lazy_iframe_controller";
 
 // Animation controllers
 import ScrollAnimationController from "controllers/animation/scroll_controller";
@@ -31,6 +32,7 @@ application.register("pacman-preview", PacmanPreviewController);
 application.register("analytics-stats", AnalyticsStatsController);
 application.register("code-typer", CodeTyperController);
 application.register("counter", CounterController);
+application.register("lazy-iframe", LazyIframeController);
 application.register("scroll-animation", ScrollAnimationController);
 application.register("scroll-to-top", ScrollToTopController);
 application.register("theme", ThemeController);

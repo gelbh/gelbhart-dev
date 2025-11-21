@@ -60,23 +60,35 @@
             </div>
           </div>
           <!-- Desktop Iframe Container (hidden on mobile) -->
-          <div class="d-none d-md-block position-relative" style="padding-bottom: 75%; height: 0; overflow: hidden; border-radius: 0.5rem; background: #000;">
+          <div class="d-none d-md-block position-relative nasa-iframe-container" 
+               style="padding-bottom: 75%; height: 0; overflow: hidden; border-radius: 0.5rem; background: #000; min-height: 400px;"
+               data-controller="lazy-iframe">
+            <!-- Placeholder (shown before iframe loads) -->
+            <div data-lazy-iframe-target="placeholder" class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: #000; border-radius: 0.5rem;">
+              <div class="text-center text-light">
+                <div class="spinner-border text-info mb-3" role="status" style="width: 3rem; height: 3rem;">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mb-0">Loading 3D Explorer...</p>
+              </div>
+            </div>
+            <!-- Loading overlay (shown during iframe load) -->
+            <div data-lazy-iframe-target="loading" class="position-absolute top-50 start-50 translate-middle d-none" style="z-index: 10;">
+              <div class="spinner-border text-info" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+            <!-- Iframe (loaded via Intersection Observer) -->
             <iframe
-              src="https://nasa-exoplanet-explorer.vercel.app"
+              data-lazy-iframe-target="iframe"
+              data-src="https://nasa-exoplanet-explorer.vercel.app"
               width="100%"
               height="100%"
               style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
-              loading="lazy"
               title="NASA Exoplanet Explorer - 3D Visualization Tool"
               allow="fullscreen"
               allowfullscreen>
             </iframe>
-            <!-- Loading overlay -->
-            <div class="position-absolute top-50 start-50 translate-middle" style="z-index: -1;">
-              <div class="spinner-border text-info" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
