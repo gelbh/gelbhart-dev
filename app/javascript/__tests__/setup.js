@@ -197,3 +197,12 @@ global.fetch =
       text: () => Promise.resolve(""),
     })
   );
+
+// Ensure all async operations complete after all tests
+// This helps prevent Jest from hanging due to unresolved promises
+afterAll(() => {
+  // Flush any pending microtasks
+  return new Promise((resolve) => {
+    setTimeout(resolve, 0);
+  });
+});

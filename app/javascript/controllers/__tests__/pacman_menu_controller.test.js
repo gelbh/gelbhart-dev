@@ -101,17 +101,17 @@ describe("PacmanMenuController", () => {
     expect(controller.leaderboardManager).toBe(mockLeaderboardManager);
   });
 
-  test("getPlayerName returns player name from LeaderboardManager", () => {
-    mockLeaderboardManager.getPlayerName.mockReturnValue("TestPlayer");
-    const playerName = controller.getPlayerName();
+  test("getPlayerName returns player name from LeaderboardManager", async () => {
+    mockLeaderboardManager.getPlayerName.mockResolvedValue("TestPlayer");
+    const playerName = await controller.getPlayerName();
 
     expect(mockLeaderboardManager.getPlayerName).toHaveBeenCalled();
     expect(playerName).toBe("TestPlayer");
   });
 
-  test("getPlayerName returns null when no player name set", () => {
-    mockLeaderboardManager.getPlayerName.mockReturnValue(null);
-    const playerName = controller.getPlayerName();
+  test("getPlayerName returns null when no player name set", async () => {
+    mockLeaderboardManager.getPlayerName.mockResolvedValue(null);
+    const playerName = await controller.getPlayerName();
 
     expect(playerName).toBeNull();
   });
