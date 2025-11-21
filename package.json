@@ -4,7 +4,15 @@
   "packageManager": "npm@10.8.2",
   "dependencies": {
     "@popperjs/core": "^2.11.8",
-    "bootstrap": "^5.3.3"
+    "axios": "^1.13.2",
+    "bootstrap": "^5.3.3",
+    "date-fns": "^4.1.0",
+    "eases": "^1.0.8",
+    "he": "^1.2.0",
+    "i18n-iso-countries": "^7.14.0",
+    "localforage": "^1.10.0",
+    "lodash.debounce": "^4.0.8",
+    "lodash.throttle": "^4.1.1"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.23.0",
