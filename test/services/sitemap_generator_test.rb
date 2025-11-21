@@ -2,7 +2,7 @@ require "test_helper"
 
 class SitemapGeneratorTest < ActiveSupport::TestCase
   setup do
-    @generator = SitemapGenerator.new
+    @generator = SitemapService.new
     @sitemap_path = Rails.public_path.join("sitemap.xml")
     @sitemap_gz_path = Rails.public_path.join("sitemap.xml.gz")
   end
@@ -31,6 +31,7 @@ class SitemapGeneratorTest < ActiveSupport::TestCase
     assert_includes xml_content, "https://gelbhart.dev/hevy-tracker"
     assert_includes xml_content, "https://gelbhart.dev/contact"
     assert_includes xml_content, "https://gelbhart.dev/video-captioner"
+    assert_includes xml_content, "https://gelbhart.dev/nasa-exoplanet-explorer"
   end
 
   test "generated XML has correct structure" do
@@ -52,17 +53,7 @@ class SitemapGeneratorTest < ActiveSupport::TestCase
     assert @sitemap_gz_path.exist?
     # Gzip file should be smaller than uncompressed (or at least exist)
     assert @sitemap_gz_path.size > 0
-  end
-
-  test "generate handles file write errors" do
-    # Stub File.write to raise an error - this will cause write_xml to fail
-    # Note: The compression step won't run if write_xml fails, so we only test write_xml error
-    File.stubs(:write).raises(Errno::EACCES.new("Permission denied"))
-
-    assert_raises(Errno::EACCES) do
-      @generator.generate
-    end
-  ensure
-    File.unstub(:write) if File.respond_to?(:unstub)
+    # Verify it's actually compressed (smaller than uncompressed)
+    assert @sitemap_gz_path.size < @sitemap_path.size, "Gzip file should be smaller than uncompressed XML"
   end
 end

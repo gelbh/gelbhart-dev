@@ -4,6 +4,8 @@ require "sitemap_generator"
 SitemapGenerator::Sitemap.default_host = "https://gelbhart.dev"
 SitemapGenerator::Sitemap.public_path = "public/"
 SitemapGenerator::Sitemap.sitemaps_path = ""
+# Create both compressed and uncompressed files
+SitemapGenerator::Sitemap.compress = false
 
 SitemapGenerator::Sitemap.create do
   # Home page
