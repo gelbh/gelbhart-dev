@@ -14,6 +14,9 @@ test:
   <<: *default
   database: gelbhart_dev_test
   prepared_statements: false
+  # Ensure connections are properly managed during test database setup
+  checkout_timeout: 5
+  reaping_frequency: 10
 
 production:
   <<: *default
