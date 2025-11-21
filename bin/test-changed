@@ -192,8 +192,8 @@ while IFS= read -r file; do
         HAS_CHANGES=true
       fi
     fi
-  elif [[ "$file" == app/javascript/__tests__/**/*.test.js ]]; then
-    # JavaScript test file itself changed
+  elif [[ "$file" == app/javascript/* ]] && [[ "$file" == *__tests__* ]] && [[ "$file" == *.test.js ]]; then
+    # JavaScript test file itself changed (in any __tests__ directory)
     JS_TEST_FILES+=("$file")
     HAS_CHANGES=true
   fi
