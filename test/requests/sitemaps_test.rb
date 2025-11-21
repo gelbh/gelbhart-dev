@@ -6,7 +6,14 @@ class SitemapsTest < ActionDispatch::IntegrationTest
     sitemap_path = Rails.public_path.join("sitemap.xml.gz")
     unless sitemap_path.exist?
       # Create a minimal sitemap for testing
-      SitemapGenerator.new.generate
+      # Retry in case of race conditions in parallel tests
+      begin
+        SitemapService.new.generate
+      rescue RuntimeError => e
+        # If generation fails, wait a bit and try once more
+        sleep(0.1)
+        SitemapService.new.generate
+      end
     end
   end
 
@@ -20,12 +27,12 @@ class SitemapsTest < ActionDispatch::IntegrationTest
     get "/sitemap.xml", headers: { "Accept" => "*/*" }
     # Rails redirect might use 301 or 302, or might be handled by route redirect
     if response.redirect?
-      assert_includes [301, 302], response.status
+      assert_includes [ 301, 302 ], response.status
       assert_match(/sitemap\.xml\.gz/, response.location)
     else
       # If not a redirect, it might be handled differently in test mode
       # Just verify we get a response (either redirect or the actual file)
-      assert_includes [200, 301, 302], response.status
+      assert_includes [ 200, 301, 302 ], response.status
     end
   end
 
@@ -36,4 +43,3 @@ class SitemapsTest < ActionDispatch::IntegrationTest
     assert response.body.length > 0
   end
 end
-
