@@ -11,6 +11,9 @@ npm install
 # Run database migrations
 bundle exec rails db:migrate RAILS_ENV=production
 
+# Run database seeds (idempotent - safe to run on every deploy)
+bundle exec rails db:seed RAILS_ENV=production
+
 # Clean old assets before recompiling
 bundle exec rake assets:clobber
 
