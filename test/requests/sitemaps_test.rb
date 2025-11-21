@@ -1,17 +1,15 @@
 require "test_helper"
 
 class SitemapsTest < ActionDispatch::IntegrationTest
+  include SitemapTestSynchronization
+
   setup do
-    # Ensure sitemap file exists
-    sitemap_path = Rails.public_path.join("sitemap.xml.gz")
-    unless sitemap_path.exist?
-      # Create a minimal sitemap for testing
-      # Retry in case of race conditions in parallel tests
-      begin
-        SitemapService.new.generate
-      rescue RuntimeError => e
-        # If generation fails, wait a bit and try once more
-        sleep(0.1)
+    # Ensure sitemap file exists with mutex protection
+    # Prevents conflicts with SitemapGeneratorTest running in parallel
+    SitemapTestSynchronization::SITEMAP_MUTEX.synchronize do
+      sitemap_path = Rails.public_path.join("sitemap.xml.gz")
+      unless sitemap_path.exist?
+        # Create a minimal sitemap for testing
         SitemapService.new.generate
       end
     end
