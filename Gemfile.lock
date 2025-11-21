@@ -591,6 +591,7 @@ DEPENDENCIES
   rack-attack (~> 6.6)
   rack-cors
   rails (~> 8.1.0)
+  rexml
   rubocop-rails-omakase
   sassc-rails
   selenium-webdriver
