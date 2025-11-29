@@ -1,0 +1,19 @@
+//
+// Bootstrap Module Forwarder
+// Forwards Bootstrap core modules using @forward for modern Sass module system
+//
+
+// Forward Bootstrap core modules in proper order
+// Functions must come first as they're needed by variables
+@forward "bootstrap/scss/functions";
+
+// Variables come next as they're needed by mixins
+@forward "bootstrap/scss/variables";
+@forward "bootstrap/scss/variables-dark";
+@forward "bootstrap/scss/maps";
+
+// Mixins come after variables
+@forward "bootstrap/scss/mixins";
+
+// Utilities come after mixins
+@forward "bootstrap/scss/utilities";

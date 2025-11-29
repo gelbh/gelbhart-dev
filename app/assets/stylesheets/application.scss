@@ -1,28 +1,29 @@
-// All @use rules must come before @import rules
-// Set Bootstrap variables first
-// Use 'as *' to make variables globally available for Bootstrap compatibility
-@use "theme/user-variables" as *;
-// Load variables-dark which imports variables internally
-// This makes both variables and variables-dark available globally
-@use "theme/variables-dark" as *;
+// Modern Sass module system migration
+// Strategy: Use @import for variables (shared global namespace with Bootstrap)
+// Use @use for component files that use module system internally
+// Note: All @use rules must come before @import rules (none here, so @import is fine)
 
-// Import Bootstrap from node_modules
-// Note: Bootstrap still uses @import internally, so we keep @import here
-// These must come after @use rules
+// Load theme variables first - these override Bootstrap defaults via !default
+// Using @import for theme variables to share global namespace with Bootstrap
+@import "theme/user-variables";
+@import "theme/variables";
+@import "theme/variables-dark";
+
+// Load Bootstrap using @import (Bootstrap 5.3.3 uses @import internally)
+// Bootstrap's variables use !default values, so our theme variables (loaded above) override them
+// Bootstrap's variables file internally imports variables-dark, so we don't import it separately
+// Load order: functions, mixins (needed by variables), variables (internally imports variables-dark), maps, then components
 @import "bootstrap/scss/functions";
-@import "bootstrap/scss/variables";
-@import "bootstrap/scss/variables-dark";
-@import "bootstrap/scss/maps";
 @import "bootstrap/scss/mixins";
+@import "bootstrap/scss/variables"; // Internally imports variables-dark
+@import "bootstrap/scss/maps";
 @import "bootstrap/scss/root";
 @import "bootstrap/scss/reboot";
 
-// Import theme components
-// Note: Since @use must come before @import, and Bootstrap uses @import,
-// we use @import here for theme files that depend on Bootstrap
+// Load theme components - these files internally use @use for their component dependencies
 @import "theme/theme";
 @import "theme/utilities";
 @import "theme/components";
 
-// Import custom styles
+// Load custom styles - uses @use internally for component files
 @import "custom";

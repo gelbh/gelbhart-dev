@@ -3,12 +3,11 @@
 // --------------------------------------------------
 
 // Use Sass color module for modern color functions
-// @use must come before @import
 @use "sass:color";
 
-// Import Bootstrap functions to use inside variables values
-// Note: Bootstrap still uses @import internally
-@import "bootstrap/scss/functions";
+// Note: Bootstrap functions are loaded in application.scss before this file
+// This file expects Bootstrap functions to be available globally via @import in application.scss
+// No need to import Bootstrap functions here as they're already loaded globally
 
 // Prefix for :root CSS variables
 

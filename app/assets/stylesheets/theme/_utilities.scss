@@ -1,6 +1,9 @@
 // Utilities
 // Extend / update default Bootstrap's utility classes
 
+// Use Bootstrap via @import for compatibility
+// Bootstrap core modules are loaded in application.scss via @import before this file
+// This file uses @import to maintain compatibility with Bootstrap's internal structure
 @import "bootstrap/scss/functions";
 @import "bootstrap/scss/variables";
 @import "bootstrap/scss/variables-dark";
