@@ -4,12 +4,12 @@
  * Theme styles
 */
 
-// Note: Variables are loaded in application.scss before this file is imported
-// So we don't need to load them here to avoid conflicts
 // Configuration & utilities
-@use "utilities" as *;
+// Utilities module extends Bootstrap utilities - uses @use for our code, @import for Bootstrap
+@import "utilities";
 
-// Bootstrap
+// Bootstrap core modules
+// Using @import for Bootstrap since Bootstrap 5.3.3 uses @import internally
 @import "bootstrap/scss/functions";
 @import "bootstrap/scss/variables";
 @import "bootstrap/scss/variables-dark";
@@ -49,7 +49,7 @@
 @import "bootstrap/scss/utilities/api";
 
 // Layout & components
-// Note: These come after Bootstrap @import, so we use @import here
+// Use @import for consistency since this file is imported via @import
 @import "root";
 @import "reboot";
 @import "components";
