@@ -12,6 +12,7 @@ module Api
       render json: stats
     rescue StandardError => e
       Rails.logger.error "Analytics API Error: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n") if Rails.env.development?
       render json: { error: 'Failed to fetch analytics data' }, status: :internal_server_error
     end
 
