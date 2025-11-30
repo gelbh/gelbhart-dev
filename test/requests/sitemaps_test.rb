@@ -1,17 +1,16 @@
 require "test_helper"
 
 class SitemapsTest < ActionDispatch::IntegrationTest
-  include SitemapTestSynchronization
+  # Disable parallelization for sitemap tests to avoid file system race conditions
+  # These tests read files from the public directory which can conflict across processes
+  parallelize(workers: 1)
 
   setup do
-    # Ensure sitemap file exists with mutex protection
-    # Prevents conflicts with SitemapGeneratorTest running in parallel
-    SitemapTestSynchronization::SITEMAP_MUTEX.synchronize do
-      sitemap_path = Rails.public_path.join("sitemap.xml.gz")
-      unless sitemap_path.exist?
-        # Create a minimal sitemap for testing
-        SitemapService.new.generate
-      end
+    # Ensure sitemap file exists
+    sitemap_path = Rails.public_path.join("sitemap.xml.gz")
+    unless sitemap_path.exist?
+      # Create a minimal sitemap for testing
+      SitemapService.new.generate
     end
   end
 
