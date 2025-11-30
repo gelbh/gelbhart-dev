@@ -2,6 +2,8 @@
 // Modal
 // --------------------------------------------------
 
+@use "theme/variables" as *;
+@use "theme/variables-dark" as *;
 
 .modal-content {
   padding: {
@@ -25,11 +27,10 @@
   }
 }
 
-
 // Dark color mode
 
 @if $enable-dark-mode {
-  @include color-mode(dark) {
+  [data-bs-theme="dark"] {
     .modal:not([data-bs-theme="light"]) {
       --#{$prefix}modal-bg: #{$modal-content-bg-dark};
       --#{$prefix}modal-border-width: #{$modal-content-border-width-dark};

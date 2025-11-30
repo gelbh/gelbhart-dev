@@ -2,10 +2,13 @@
 // Poppover
 // --------------------------------------------------
 
+@use "theme/variables" as *;
+@use "theme/variables-dark" as *;
+
 // Dark color mode
 
 @if $enable-dark-mode {
-  @include color-mode(dark) {
+  [data-bs-theme="dark"] {
     .popover {
       --#{$prefix}popover-bg: #{$popover-bg-dark};
     }

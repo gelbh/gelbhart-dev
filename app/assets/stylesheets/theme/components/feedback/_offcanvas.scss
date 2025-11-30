@@ -2,13 +2,15 @@
 // Offcanvas
 // --------------------------------------------------
 
+@use "theme/variables" as *;
+@use "theme/variables-dark" as *;
 
 // Header
 
 .offcanvas-header {
-  padding: calc(var(--#{$prefix}offcanvas-padding-y) * .75) var(--#{$prefix}offcanvas-padding-x);
+  padding: calc(var(--#{$prefix}offcanvas-padding-y) * 0.75)
+    var(--#{$prefix}offcanvas-padding-x);
 }
-
 
 // Body
 
@@ -16,11 +18,10 @@
   display: block !important; // stylelint-disable-line declaration-no-important
 }
 
-
 // Dark color mode
 
 @if $enable-dark-mode {
-  @include color-mode(dark) {
+  [data-bs-theme="dark"] {
     .offcanvas,
     .offcanvas-sm,
     .offcanvas-md,

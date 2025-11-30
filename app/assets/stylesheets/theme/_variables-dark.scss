@@ -2,8 +2,9 @@
 //
 // Custom variables for the `[data-bs-theme="dark"]` theme.
 
-// Use Sass color module for modern color functions (must come first - @use before @forward)
+// Use Sass modules for modern functions (must come first - @use before @forward)
 @use "sass:color";
+@use "sass:map";
 
 // Use variables module to access base variables
 // Use namespace to access variables within this file
@@ -139,7 +140,7 @@ $nav-link-disabled-color-dark: rgba(vars.$white, 0.4) !default;
 
 $nav-tabs-link-bg-dark: rgba(vars.$white, 0.05) !default;
 $nav-tabs-link-color-dark: rgba(vars.$white, 0.85) !default;
-$nav-tabs-link-hover-bg-dark: map-get(
+$nav-tabs-link-hover-bg-dark: map.get(
   vars.$theme-faded-colors,
   "primary"
 ) !default;

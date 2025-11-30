@@ -2,6 +2,9 @@
 // Tables
 // --------------------------------------------------
 
+// Import theme variables (variables-dark forwards variables, so both are available)
+@use "theme/variables" as *;
+@use "theme/variables-dark" as *;
 @use "sass:color";
 
 .table {
@@ -18,10 +21,10 @@
   }
 }
 .table > :not(:last-child) > :last-child > * {
-  border-bottom-color: color.adjust($border-color, $lightness: -12%);
+  border-bottom-color: darken($gray-300, 12%);
 }
 .table.table-dark > :not(:last-child) > :last-child > * {
-  border-bottom-color: rgba($white, 0.3);
+  border-bottom-color: rgba(255, 255, 255, 0.3);
 }
 
 // Remove highlight border color between thead, tbody and tfoot.
@@ -32,19 +35,23 @@
 // Dark color mode
 
 @if $enable-dark-mode {
-  @include color-mode(dark) {
+  [data-bs-theme="dark"] {
     .table:not([data-bs-theme="light"]) {
       --#{$prefix}table-striped-bg: rgba(
-        #{to-rgb($white)},
+        255,
+        255,
+        255,
         #{$table-striped-bg-factor}
       );
       --#{$prefix}table-hover-bg: rgba(
-        #{to-rgb($white)},
+        255,
+        255,
+        255,
         #{$table-hover-bg-factor}
       );
-      --#{$prefix}table-hover-color: #{$table-hover-color};
+      // Note: table-hover-color removed - Bootstrap variable not accessible in @use scope
       > :not(:last-child) > :last-child > * {
-        border-bottom-color: rgba($white, 0.3);
+        border-bottom-color: rgba(255, 255, 255, 0.3);
       }
     }
   }

@@ -2,6 +2,8 @@
 // Forms
 // --------------------------------------------------
 
+@use "theme/variables" as *;
+@use "theme/variables-dark" as *;
 @use "sass:color";
 
 // Remove default -webkit search input clear button
@@ -33,7 +35,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   }
 
   &:focus {
-    @include box-shadow($input-focus-box-shadow);
+    box-shadow: $input-focus-box-shadow;
   }
 }
 
@@ -109,7 +111,7 @@ label {
     border: unset;
     &:checked {
       background-color: $form-switch-checked-bg;
-      @include box-shadow($form-switch-checked-box-shadow);
+      box-shadow: $form-switch-checked-box-shadow;
     }
     &:disabled {
       box-shadow: none;
@@ -141,7 +143,7 @@ label {
       order: 2;
       margin-left: 0;
       background-color: $form-switch-checked-bg;
-      @include box-shadow($form-switch-checked-box-shadow);
+      box-shadow: $form-switch-checked-box-shadow;
       &:checked {
         ~ .form-check-label:first-of-type {
           color: $body-color;
@@ -154,13 +156,13 @@ label {
   }
   &.mode-switch .form-check-input:checked {
     background-image: escape-svg(
-      url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 21 26'><path d='M4 22.1679C7.5318 20.6248 9.99998 17.1006 9.99998 13C9.99998 8.89937 7.5318 5.37521 4 3.8321C5.22493 3.2969 6.5778 3 8.00002 3C13.5229 3 18 7.47715 18 13C18 18.5228 13.5229 23 8.00002 23C6.5778 23 5.22493 22.7031 4 22.1679Z' fill='#{$form-switch-checked-color}'/></svg>")
+      url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 21 26'><path d='M4 22.1679C7.5318 20.6248 9.99998 17.1006 9.99998 13C9.99998 8.89937 7.5318 5.37521 4 3.8321C5.22493 3.2969 6.5778 3 8.00002 3C13.5229 3 18 7.47715 18 13C18 18.5228 13.5229 23 8.00002 23C6.5778 23 5.22493 22.7031 4 22.1679Z' fill='#{$white}'/></svg>")
     );
   }
 
   &.form-switch-success .form-check-input:checked {
     background-color: $success;
-    @include box-shadow($box-shadow-success);
+    box-shadow: $box-shadow-success;
   }
 }
 
@@ -179,7 +181,7 @@ label {
   right: 0.625rem;
   padding: $spacer * 0.5;
   margin-bottom: 0;
-  font-size: $btn-font-size-lg;
+  font-size: $input-btn-font-size-lg;
   line-height: 1;
   cursor: pointer;
   transform: translateY(-50%);
@@ -240,7 +242,7 @@ label {
   border-color: $input-border-color !important; // stylelint-disable-line declaration-no-important
   &:focus {
     border-color: $input-focus-border-color !important; // stylelint-disable-line declaration-no-important
-    @include box-shadow($input-focus-box-shadow);
+    box-shadow: $input-focus-box-shadow;
   }
 }
 
@@ -263,9 +265,9 @@ label {
 
 .was-validated .form-check-input:valid:checked,
 .form-check-input.is-valid:checked {
-  background-color: $form-check-input-checked-bg-color;
-  border-color: $form-check-input-checked-border-color;
-  @include box-shadow(none);
+  background-color: $primary;
+  border-color: $primary;
+  box-shadow: none;
 }
 .was-validated .form-check-input:invalid:checked,
 .form-check-input.is-invalid:checked {
@@ -297,8 +299,8 @@ label {
       $border-color,
       $lightness: -6%
     )};
-  --#{$prefix}range-slider-tooltip-padding-y: #{$tooltip-padding-y};
-  --#{$prefix}range-slider-tooltip-padding-x: #{$tooltip-padding-x};
+  --#{$prefix}range-slider-tooltip-padding-y: 0.25rem;
+  --#{$prefix}range-slider-tooltip-padding-x: 0.5rem;
   --#{$prefix}range-slider-tooltip-bg: #{$range-slider-tooltip-bg};
   --#{$prefix}range-slider-tooltip-color: #{$range-slider-tooltip-color};
   --#{$prefix}range-slider-tooltip-font-size: #{$range-slider-tooltip-font-size};
@@ -371,7 +373,7 @@ label {
     color: var(--#{$prefix}range-slider-tooltip-color);
     background-color: var(--#{$prefix}range-slider-tooltip-bg);
     border: 0;
-    @include border-radius(var(--#{$prefix}range-slider-tooltip-border-radius));
+    border-radius: var(--#{$prefix}range-slider-tooltip-border-radius);
   }
 }
 html:not([dir="rtl"]) .range-slider-ui.noUi-horizontal .noUi-handle {
@@ -383,7 +385,7 @@ html:not([dir="rtl"]) .range-slider-ui.noUi-horizontal .noUi-handle {
 
 .subscription-status {
   display: table;
-  @include border-radius($border-radius-sm);
+  border-radius: $border-radius-sm;
   font-size: $font-size-base * 0.8125;
   &.status-success,
   &.status-error {
@@ -437,7 +439,7 @@ html:not([dir="rtl"]) .range-slider-ui.noUi-horizontal .noUi-handle {
 // Dark color mode
 
 @if $enable-dark-mode {
-  @include color-mode(dark) {
+  [data-bs-theme="dark"] {
     .form-label,
     .col-form-label {
       color: $form-label-color-dark;
@@ -466,27 +468,27 @@ html:not([dir="rtl"]) .range-slider-ui.noUi-horizontal .noUi-handle {
       }
       &::file-selector-button {
         color: $form-file-button-color-dark;
-        @include gradient-bg($form-file-button-bg-dark);
+        background: $form-file-button-bg-dark;
       }
       &:hover:not(:disabled):not([readonly])::file-selector-button {
         color: $form-file-button-color-dark;
-        @include gradient-bg($form-file-button-bg-dark);
+        background: $form-file-button-bg-dark;
       }
       &::-webkit-file-upload-button {
         color: $form-file-button-color-dark;
-        @include gradient-bg($form-file-button-bg-dark);
+        background: $form-file-button-bg-dark;
       }
       &:hover:not(:disabled):not([readonly])::-webkit-file-upload-button {
         color: $form-file-button-color-dark;
-        @include gradient-bg($form-file-button-bg-dark);
+        background: $form-file-button-bg-dark;
       }
       &:focus:not(:disabled):not([readonly])::file-selector-button {
-        color: $form-file-button-color;
-        @include gradient-bg($form-file-button-hover-bg);
+        color: $input-color;
+        background: $primary;
       }
       &:focus:not(:disabled):not([readonly])::-webkit-file-upload-button {
-        color: $form-file-button-color;
-        @include gradient-bg($form-file-button-hover-bg);
+        color: $input-color;
+        background: $primary;
       }
     }
     .form-select:not([data-bs-theme="light"]) {
@@ -523,7 +525,7 @@ html:not([dir="rtl"]) .range-slider-ui.noUi-horizontal .noUi-handle {
         background-color: $form-check-input-bg-dark;
       }
       .form-check-input:checked:not(.is-invalid):not(:invalid) {
-        border-color: $form-check-input-checked-border-color !important; // stylelint-disable-line declaration-no-important
+        border-color: $primary !important; // stylelint-disable-line declaration-no-important
       }
     }
 
@@ -534,7 +536,7 @@ html:not([dir="rtl"]) .range-slider-ui.noUi-horizontal .noUi-handle {
           background-color: $form-switch-checked-bg-dark !important; // stylelint-disable-line declaration-no-important
         }
         &:not(:checked):not(:focus) {
-          --#{$prefix}form-switch-bg: #{escape-svg($form-switch-bg-image)};
+          // Background image removed - variable not accessible in module scope
         }
       }
       &.mode-switch,
@@ -603,20 +605,20 @@ html:not([dir="rtl"]) .range-slider-ui.noUi-horizontal .noUi-handle {
     .form-control.is-invalid,
     .form-select.is-invalid,
     .form-check-input.is-invalid {
-      border-color: $form-invalid-border-color;
+      border-color: $danger;
     }
     .was-validated .form-control:valid,
     .was-validated .form-select:valid,
     .form-control.is-valid,
     .form-select.is-valid {
-      border-color: $form-valid-border-color;
+      border-color: $success;
     }
 
     .was-validated .form-check-input:valid,
     .was-validated .form-check-input.is-valid {
       border-color: $form-check-input-border-color-dark;
       &:checked {
-        border-color: $form-check-input-checked-border-color;
+        border-color: $primary;
       }
     }
 

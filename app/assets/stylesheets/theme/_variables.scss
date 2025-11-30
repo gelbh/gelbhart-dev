@@ -2,8 +2,10 @@
 // Variables
 // --------------------------------------------------
 
-// Use Sass color module for modern color functions
+// Use Sass modules for modern functions
 @use "sass:color";
+@use "sass:map";
+@use "sass:string";
 
 // Note: Bootstrap functions are loaded in application.scss before this file
 // This file expects Bootstrap functions to be available globally via @import in application.scss
@@ -435,7 +437,7 @@ $input-bg: $white !default;
 $input-disabled-bg: $gray-100 !default;
 $input-border-color: $gray-400 !default;
 
-$input-focus-border-color: map-get($border-colors, "primary") !default;
+$input-focus-border-color: map.get($border-colors, "primary") !default;
 $input-focus-box-shadow: 0 0.5rem 1.125rem -0.5rem rgba($primary, 0.2) !default;
 
 $input-placeholder-color: $gray-500 !default;
@@ -484,11 +486,11 @@ $form-feedback-icon-invalid-color: $form-feedback-invalid-color !default;
 $form-feedback-tooltip-font-size: $form-feedback-font-size !default;
 $form-feedback-tooltip-valid-color: $form-feedback-valid-color !default;
 $form-feedback-tooltip-invalid-color: $form-feedback-invalid-color !default;
-$form-feedback-tooltip-valid-bg: map-get(
+$form-feedback-tooltip-valid-bg: map.get(
   $theme-faded-colors,
   "success"
 ) !default;
-$form-feedback-tooltip-invalid-bg: map-get(
+$form-feedback-tooltip-invalid-bg: map.get(
   $theme-faded-colors,
   "danger"
 ) !default;
@@ -531,7 +533,7 @@ $nav-tabs-border-width: 0 !default;
 $nav-tabs-link-bg: $gray-200 !default;
 $nav-tabs-link-color: $nav-link-color !default;
 $nav-tabs-link-hover-border-color: transparent !default;
-$nav-tabs-link-hover-bg: map-get($theme-faded-colors, "primary") !default;
+$nav-tabs-link-hover-bg: map.get($theme-faded-colors, "primary") !default;
 $nav-tabs-link-hover-color: $primary !default;
 $nav-tabs-link-active-border-color: transparent !default;
 $nav-tabs-link-active-bg: $primary !default;
@@ -792,7 +794,7 @@ $list-group-item-padding-x: $spacer !default;
 $list-group-item-bg-scale: -87% !default;
 $list-group-item-color-scale: 40% !default;
 
-$list-group-hover-bg: map-get($theme-faded-colors, "primary") !default;
+$list-group-hover-bg: map.get($theme-faded-colors, "primary") !default;
 $list-group-active-color: $white !default;
 $list-group-active-bg: $primary !default;
 $list-group-active-box-shadow: $box-shadow-primary !default;
@@ -829,8 +831,8 @@ $breadcrumb-hover-color: var(--#{$prefix}gray-800) !default;
 $breadcrumb-active-color: var(--#{$prefix}primary) !default;
 $breadcrumb-divider-color: $breadcrumb-color !default;
 $breadcrumb-divider-font-size: 1.15em !default;
-$breadcrumb-divider: quote("\ea55") !default;
-$breadcrumb-divider-flipped: quote("\ed3f") !default;
+$breadcrumb-divider: string.quote("\ea55") !default;
+$breadcrumb-divider-flipped: string.quote("\ed3f") !default;
 
 // Spinners
 

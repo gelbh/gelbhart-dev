@@ -1,7 +1,8 @@
-// Modern Sass module system migration
-// Strategy: Use @import for variables (shared global namespace with Bootstrap)
-// Use @use for component files that use module system internally
-// Note: All @use rules must come before @import rules (none here, so @import is fine)
+// Modern Sass module system - Hybrid approach
+// Strategy:
+//   - Use @import for Bootstrap (Bootstrap 5.3.x uses @import internally, not compatible with @use/@forward)
+//   - Use @use for theme and custom components (modern module system for our code)
+//   - Bootstrap mixins/functions are available globally via @import, accessible from @use modules
 
 // Load theme variables first - these override Bootstrap defaults via !default
 // Using @import for theme variables to share global namespace with Bootstrap
@@ -15,7 +16,7 @@
 // Load order: functions, mixins (needed by variables), variables (internally imports variables-dark), maps, then components
 @import "bootstrap/scss/functions";
 @import "bootstrap/scss/mixins";
-@import "bootstrap/scss/variables"; // Internally imports variables-dark
+@import "bootstrap/scss/variables";
 @import "bootstrap/scss/maps";
 @import "bootstrap/scss/root";
 @import "bootstrap/scss/reboot";

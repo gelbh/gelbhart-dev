@@ -2,7 +2,13 @@
 // Code
 // --------------------------------------------------
 
-@use "sass:color";
+// Import theme variables via @use (creates module scope)
+@use "theme/variables" as *;
+@use "theme/variables-dark" as *;
+
+// Note: Bootstrap mixins (border-radius, box-shadow, color-mode) are replaced
+// with direct CSS since they're not accessible within @use module scope.
+// We use darken() instead of color.adjust() to avoid needing sass:color module.
 
 /* stylelint-disable selector-no-qualifying-type */
 :not(pre) > code[class*="language-"],
@@ -11,12 +17,12 @@ pre {
   --#{$prefix}pre-border-width: #{$pre-border-width};
   --#{$prefix}pre-border-color: #{$pre-border-color};
   --#{$prefix}pre-bg: #{$pre-bg};
-  --#{$prefix}pre-font-size: #{$code-font-size};
+  --#{$prefix}pre-font-size: #{$font-size-base};
   --#{$prefix}pre-line-numbers-border-width: #{$pre-line-numbers-border-width};
   --#{$prefix}pre-line-numbers-border-color: #{$pre-line-numbers-border-color};
   --#{$prefix}pre-line-numbers-color: #{$pre-line-numbers-color};
   --#{$prefix}pre-tag-color: #4e54c8;
-  --#{$prefix}pre-comment-color: #{color.adjust($gray-500, $lightness: -6%)};
+  --#{$prefix}pre-comment-color: #{darken($gray-500, 6%)};
   --#{$prefix}pre-attr-name-color: #4091e3;
   --#{$prefix}pre-attr-value-color: #e3116c;
   --#{$prefix}pre-class-name-color: #36acaa;
@@ -28,8 +34,8 @@ pre {
   background-color: var(--#{$prefix}pre-bg);
   border: var(--#{$prefix}pre-border-width) solid
     var(--#{$prefix}pre-border-color);
-  @include border-radius($pre-border-radius);
-  @include box-shadow($pre-box-shadow);
+  border-radius: $pre-border-radius;
+  box-shadow: $pre-box-shadow;
 }
 .code-toolbar {
   :not(pre) > code[class*="language-"],
@@ -131,7 +137,7 @@ div.code-toolbar > .toolbar {
 // Dark color mode
 
 @if $enable-dark-mode {
-  @include color-mode(dark) {
+  [data-bs-theme="dark"] {
     :not(pre) > code[class*="language-"],
     pre[class*="language-"],
     pre {
@@ -139,7 +145,7 @@ div.code-toolbar > .toolbar {
       --#{$prefix}pre-line-numbers-border-color: #{$pre-line-numbers-border-color-dark};
       --#{$prefix}pre-line-numbers-color: #{$pre-line-numbers-color-dark};
       --#{$prefix}pre-tag-color: #5960f3;
-      --#{$prefix}pre-comment-color: rgba(#{to-rgb($white)}, 0.5);
+      --#{$prefix}pre-comment-color: rgba(255, 255, 255, 0.5);
       --#{$prefix}pre-attr-name-color: #4da2f7;
       --#{$prefix}pre-attr-value-color: #f33185;
       --#{$prefix}pre-class-name-color: #4ddcda;

@@ -2,10 +2,13 @@
 // Placeholders
 // --------------------------------------------------
 
+@use "theme/variables" as *;
+@use "theme/variables-dark" as *;
+
 // Dark color mode
 
 @if $enable-dark-mode {
-  @include color-mode(dark) {
+  [data-bs-theme="dark"] {
     .placeholder:not([data-bs-theme="light"]) {
       opacity: $placeholder-opacity-max-dark;
     }
@@ -15,7 +18,12 @@
       }
     }
     .placeholder-wave:not([data-bs-theme="light"]) {
-      mask-image: linear-gradient(130deg, $black 55%, rgba(0, 0, 0, (1 - $placeholder-opacity-min-dark)) 75%, $black 95%);
+      mask-image: linear-gradient(
+        130deg,
+        $black 55%,
+        rgba(0, 0, 0, (1 - $placeholder-opacity-min-dark)) 75%,
+        $black 95%
+      );
     }
   }
 }

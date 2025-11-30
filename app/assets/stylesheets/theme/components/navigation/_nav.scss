@@ -2,10 +2,14 @@
 // Nav (Navigation components)
 // --------------------------------------------------
 
+@use "theme/variables" as *;
+@use "theme/variables-dark" as *;
 
 // Base styles
 
-.nav-item { margin-bottom: 0; }
+.nav-item {
+  margin-bottom: 0;
+}
 
 .nav {
   --#{$prefix}nav-link-active-color: #{$nav-link-active-color};
@@ -23,7 +27,6 @@
   }
 }
 
-
 // Nav tabs
 
 .nav-tabs {
@@ -34,16 +37,16 @@
   --#{$prefix}nav-tabs-link-hover-color: #{$nav-tabs-link-hover-color};
   --#{$prefix}nav-tabs-link-disabled-color: #{$nav-tabs-link-disabled-color};
 
-  margin-bottom: $spacer * .75;
+  margin-bottom: $spacer * 0.75;
 
   .nav-item {
-    margin-bottom: $spacer * .75;
+    margin-bottom: $spacer * 0.75;
   }
 
   .nav-link {
     color: var(--#{$prefix}nav-tabs-link-color);
     background-color: var(--#{$prefix}nav-tabs-link-bg);
-    @include border-radius(var(--#{$prefix}nav-tabs-border-radius));
+    border-radius: var(--#{$prefix}nav-tabs-border-radius);
 
     &:hover:not(.active),
     &.show:not(.active) {
@@ -58,10 +61,10 @@
   }
 
   .dropdown-menu {
-    @include border-top-radius(var(--#{$prefix}dropdown-border-radius));
+    border-top-left-radius: var(--#{$prefix}dropdown-border-radius);
+    border-top-right-radius: var(--#{$prefix}dropdown-border-radius);
   }
 }
-
 
 // Alternative tabs
 
@@ -73,52 +76,58 @@
   --#{$prefix}nav-tabs-alt-link-active-border-color: #{$nav-link-active-color};
 
   margin-bottom: $spacer * 1.5;
-  border-bottom: var(--#{$prefix}nav-tabs-alt-border-width) solid var(--#{$prefix}nav-tabs-alt-border-color);
+  border-bottom: var(--#{$prefix}nav-tabs-alt-border-width) solid
+    var(--#{$prefix}nav-tabs-alt-border-color);
   .nav-item {
     margin-bottom: calc(var(--#{$prefix}nav-tabs-alt-border-width) * -1);
   }
   .nav-link {
-    padding: var(--#{$prefix}nav-tabs-alt-link-padding-y) var(--#{$prefix}nav-tabs-alt-link-padding-x);
+    padding: var(--#{$prefix}nav-tabs-alt-link-padding-y)
+      var(--#{$prefix}nav-tabs-alt-link-padding-x);
     border-bottom: $border-width solid transparent;
     &.active {
-      border-bottom-color: var(--#{$prefix}nav-tabs-alt-link-active-border-color);
+      border-bottom-color: var(
+        --#{$prefix}nav-tabs-alt-link-active-border-color
+      );
     }
   }
 }
-
 
 // Spacing
 
 .nav-tabs,
 .nav-pills {
   .nav-item {
-    margin-right: ($spacer * .75);
-    &:last-child { margin-right: 0; }
+    margin-right: ($spacer * 0.75);
+    &:last-child {
+      margin-right: 0;
+    }
   }
   &.justify-content-center .nav-item {
     margin: {
-      right: ($spacer * .375);
-      left: ($spacer * .375);
+      right: ($spacer * 0.375);
+      left: ($spacer * 0.375);
     }
   }
   &.justify-content-end .nav-item {
     margin: {
       right: 0;
-      left: ($spacer * .75);
+      left: ($spacer * 0.75);
     }
   }
   &.flex-column {
     .nav-item {
       margin: {
         right: 0;
-        bottom: ($spacer * .75);
+        bottom: ($spacer * 0.75);
         left: 0;
       }
-      &:last-child { margin-bottom: 0; }
+      &:last-child {
+        margin-bottom: 0;
+      }
     }
   }
 }
-
 
 // Sidebar navigation
 
@@ -132,7 +141,8 @@
   --#{$prefix}side-nav-link-font-size: #{$side-nav-link-font-size};
   --#{$prefix}side-nav-link-active-border-color: #{$nav-link-active-color};
 
-  padding: var(--#{$prefix}side-nav-padding-y) var(--#{$prefix}side-nav-padding-x);
+  padding: var(--#{$prefix}side-nav-padding-y)
+    var(--#{$prefix}side-nav-padding-x);
 
   .nav {
     flex-direction: column;
@@ -142,20 +152,23 @@
     }
   }
   .nav-link {
-    padding: var(--#{$prefix}side-nav-link-padding-y) var(--#{$prefix}side-nav-link-padding-x);
+    padding: var(--#{$prefix}side-nav-link-padding-y)
+      var(--#{$prefix}side-nav-link-padding-x);
     font-size: var(--#{$prefix}side-nav-link-font-size);
     transition: $side-nav-link-trnasition;
   }
 
   &.side-nav-start {
-    border-right: var(--#{$prefix}side-nav-border-width) solid var(--#{$prefix}side-nav-border-color);
+    border-right: var(--#{$prefix}side-nav-border-width) solid
+      var(--#{$prefix}side-nav-border-color);
     .nav-link {
       margin-right: calc(var(--#{$prefix}side-nav-border-width) * -1);
       border-right: var(--#{$prefix}side-nav-border-width) solid transparent;
     }
   }
   &.side-nav-end {
-    border-left: var(--#{$prefix}side-nav-border-width) solid var(--#{$prefix}side-nav-border-color);
+    border-left: var(--#{$prefix}side-nav-border-width) solid
+      var(--#{$prefix}side-nav-border-color);
     .nav-link {
       margin-left: calc(var(--#{$prefix}side-nav-border-width) * -1);
       border-left: var(--#{$prefix}side-nav-border-width) solid transparent;
@@ -168,21 +181,22 @@
   }
 }
 
-
 // Faded primary background on hover
 
 .bg-faded-primary-hover {
-  transition: background-color .2s ease-in-out;
+  transition: background-color 0.2s ease-in-out;
   &:hover {
-    background-color: map-get($theme-faded-colors, "primary") !important; // stylelint-disable-line declaration-no-important
+    background-color: map-get(
+      $theme-faded-colors,
+      "primary"
+    ) !important; // stylelint-disable-line declaration-no-important
   }
 }
-
 
 // Dark color mode
 
 @if $enable-dark-mode {
-  @include color-mode(dark) {
+  [data-bs-theme="dark"] {
     .nav:not([data-bs-theme="light"]) {
       --#{$prefix}nav-link-color: #{$nav-link-color-dark};
       --#{$prefix}nav-link-hover-color: #{$nav-link-hover-color-dark};
