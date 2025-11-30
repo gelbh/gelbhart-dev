@@ -3,11 +3,25 @@
 // ============================================
 // All modal components: game over, menu, settings, controls, leaderboard
 
+@use "../_mixins" as *;
+
 // ---- Game Over Modal ----
 
 .pacman-game-over-modal {
-  @include pacman-modal-base;
+  // Replaced pacman-modal-base mixin with direct CSS
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
   display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+  opacity: 0;
+  transition: opacity var(--transition-normal) ease;
 
   &.show {
     opacity: 1;
@@ -19,7 +33,19 @@
   }
 
   .modal-content {
-    @include pacman-modal-content;
+    // Replaced pacman-modal-content mixin with direct CSS
+    background: linear-gradient(
+      135deg,
+      rgba(20, 20, 30, 0.98) 0%,
+      rgba(30, 30, 50, 0.98) 100%
+    );
+    border: 3px solid rgba(255, 215, 0, 0.5);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 215, 0, 0.2);
     transform: scale(0.8) translateY(20px);
     opacity: 0;
     transition: all 0.4s var(--ease-bounce);

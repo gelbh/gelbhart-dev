@@ -14,14 +14,17 @@
 
 // Contact page gradient background
 .contact-gradient-bg {
-  @include gradient-bg(
-    var(--gradient-dark),
-    0.95,
-    var(--z-background),
-    fixed,
-    100vw,
-    100vh
-  );
+  // Replaced gradient-bg mixin with direct CSS
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--gradient-dark);
+  background-size: 200% 200%;
+  animation: gradientShift var(--duration-gradient) ease infinite;
+  opacity: 0.95;
+  z-index: var(--z-background);
 }
 
 [data-bs-theme="dark"] .contact-gradient-bg {
@@ -83,7 +86,11 @@
 
 // Glassmorphic Contact Cards
 .contact-glass-card {
-  @include glassmorphic-card(var(--color-primary));
+  // Replaced glassmorphic-card mixin with direct CSS
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  transition: all var(--transition-normal) var(--ease-smooth);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-lg);

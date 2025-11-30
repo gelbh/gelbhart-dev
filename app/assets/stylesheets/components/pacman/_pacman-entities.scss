@@ -3,6 +3,9 @@
 // ============================================
 // Game entities: Pac-Man character, ghosts, dots, power pellets, items, and keys
 
+@use "../_variables" as *;
+@use "../_mixins" as *;
+
 // ---- Pac-Man Character ----
 
 .pacman-character {

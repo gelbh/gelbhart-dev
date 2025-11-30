@@ -3,7 +3,11 @@
 // ============================================
 // Media queries and responsive adjustments
 
-@media (max-width: $mobile-breakpoint) {
+@use "../_variables" as *;
+
+@media (max-width: 767.98px) {
+  // Mobile breakpoint (md - 1px)
+  // Mobile breakpoint (md - 1px)
   .pacman-hud {
     top: 15px;
     right: 10px;
