@@ -1,104 +1,92 @@
 <% content_for :title, page_title("Contact") %>
 <% meta_description "Get in touch with Tomer Gelbhart for internship opportunities, web development projects, or collaboration. MSc Computer Science student specializing in full-stack development." %>
-
+<% content_for :structured_data do %>
+  <%= render_structured_data(contact_page_structured_data) %>
+<% end %>
 <!-- Hero Section -->
 <section class="position-relative py-3 contact-hero-section" data-controller="scroll-animation code-typer">
-    <!-- Animated Gradient Background -->
-    <div class="contact-gradient-bg"></div>
-
-    <!-- Active C Code Typing Animation -->
-    <div class="contact-code-bg">
-        <pre class="typing-code" data-code-typer-target="output"></pre>
+  <!-- Animated Gradient Background -->
+  <div class="contact-gradient-bg"></div>
+  <!-- Active C Code Typing Animation -->
+  <div class="contact-code-bg">
+    <pre class="typing-code" data-code-typer-target="output"></pre>
+  </div>
+  <div class="container py-3 position-relative zindex-5 mt-5">
+    <div class="row justify-content-center text-center mb-3">
+      <div class="col-lg-8 fade-in-view">
+        <%= render 'shared/icon_circle', icon: 'bx-envelope', color: 'primary', size: 'md' %>
+        <h1 class="h2 mb-2 mt-3">Let's Work Together</h1>
+      </div>
     </div>
-
-    <div class="container py-3 position-relative zindex-5 mt-5">
-        <div class="row justify-content-center text-center mb-3">
-            <div class="col-lg-8 fade-in-view">
-                <%= render 'shared/icon_circle', icon: 'bx-envelope', color: 'primary', size: 'md' %>
-                <h1 class="h2 mb-2 mt-3">Let's Work Together</h1>
-            </div>
+    <!-- Contact methods - Glassmorphic Style -->
+    <div class="row justify-content-center mb-5">
+      <div class="col-xxl-8 col-xl-9 col-lg-10">
+        <div class="fade-in-view delay-1 text-center">
+          <!-- Email Button -->
+          <a href="mailto:tomer@gelbhart.dev" class="btn btn-lg btn-primary px-5">
+            tomer@gelbhart.dev
+          </a>
         </div>
-
-        <!-- Contact methods - Glassmorphic Style -->
-        <div class="row justify-content-center mb-5">
-            <div class="col-xxl-8 col-xl-9 col-lg-10">
-                <div class="fade-in-view delay-1 text-center">
-                    <!-- Email Button -->
-                    <a href="mailto:tomer@gelbhart.dev" class="btn btn-lg btn-primary px-5">
-                        tomer@gelbhart.dev
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Contact Form - Glassmorphic Style -->
-        <div class="row justify-content-center mb-5 fade-in-view delay-2">
-            <div class="col-xxl-8 col-xl-9 col-lg-10">
-                <div class="contact-glass-card p-4 p-md-5">
-                    <h5 class="mb-4 text-light text-center">Or Send a Message</h5>
-
-                    <% if flash[:notice] %>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <%= flash[:notice] %>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    <% end %>
-
-                    <% if flash[:alert] %>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <%= flash[:alert] %>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    <% end %>
-
-                    <%= form_with url: contact_path, method: :post, local: true, class: "contact-form" do |f| %>
-                    <!-- Honeypot field - hidden from users, bots will fill it -->
-                    <div style="position: absolute; left: -5000px;" aria-hidden="true">
-                        <%= f.text_field :website, tabindex: "-1", autocomplete: "off" %>
-                    </div>
-
-                    <!-- Timestamp for time-based validation -->
-                    <%= f.hidden_field :form_timestamp, value: Time.now.to_i %>
-
-                    <div class="mb-3">
-                        <%= f.label :name, "Name", class: "form-label text-light" %>
-                        <%= f.text_field :name, class: "form-control bg-dark bg-opacity-50 text-light border-secondary", placeholder: "Your name", required: true %>
-                    </div>
-
-                    <div class="mb-3">
-                        <%= f.label :email, "Email", class: "form-label text-light" %>
-                        <%= f.email_field :email, class: "form-control bg-dark bg-opacity-50 text-light border-secondary", placeholder: "your.email@example.com", required: true %>
-                    </div>
-
-                    <div class="mb-4">
-                        <%= f.label :message, "Message", class: "form-label text-light" %>
-                        <%= f.text_area :message, rows: 5, class: "form-control bg-dark bg-opacity-50 text-light border-secondary", placeholder: "Your message here...", required: true %>
-                    </div>
-
-                    <div class="text-center">
-                        <%= f.submit "Send Message", class: "btn btn-primary px-5" %>
-                    </div>
-                    <% end %>
-                </div>
-            </div>
-        </div>
-
-        <!-- Social links - Glassmorphic Style -->
-        <div class="row justify-content-center fade-in-view delay-3 mb-3">
-            <div class="col-xxl-5 col-xl-6 col-lg-7 col-md-8">
-                <div class="contact-glass-card text-center p-4">
-                    <h5 class="mb-4 text-light">Connect with Me</h5>
-                    <div class="d-flex justify-content-center gap-3">
-                        <a href="https://www.linkedin.com/in/tomer-gelbhart/" target="_blank" rel="noopener" class="contact-social-btn" aria-label="LinkedIn">
-                            <i class="bx bxl-linkedin"></i>
-                        </a>
-
-                        <a href="https://github.com/gelbh" target="_blank" rel="noopener" class="contact-social-btn" aria-label="GitHub">
-                            <i class="bx bxl-github"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+    <!-- Contact Form - Glassmorphic Style -->
+    <div class="row justify-content-center mb-5 fade-in-view delay-2">
+      <div class="col-xxl-8 col-xl-9 col-lg-10">
+        <div class="contact-glass-card p-4 p-md-5">
+          <h5 class="mb-4 text-light text-center">Or Send a Message</h5>
+          <% if flash[:notice] %>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+              <%= flash[:notice] %>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          <% end %>
+          <% if flash[:alert] %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              <%= flash[:alert] %>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          <% end %>
+          <%= form_with url: contact_path, method: :post, local: true, class: "contact-form" do |f| %>
+            <!-- Honeypot field - hidden from users, bots will fill it -->
+            <div style="position: absolute; left: -5000px;" aria-hidden="true">
+              <%= f.text_field :website, tabindex: "-1", autocomplete: "off" %>
+            </div>
+            <!-- Timestamp for time-based validation -->
+            <%= f.hidden_field :form_timestamp, value: Time.now.to_i %>
+            <div class="mb-3">
+              <%= f.label :name, "Name", class: "form-label text-light" %>
+              <%= f.text_field :name, class: "form-control bg-dark bg-opacity-50 text-light border-secondary", placeholder: "Your name", required: true %>
+            </div>
+            <div class="mb-3">
+              <%= f.label :email, "Email", class: "form-label text-light" %>
+              <%= f.email_field :email, class: "form-control bg-dark bg-opacity-50 text-light border-secondary", placeholder: "your.email@example.com", required: true %>
+            </div>
+            <div class="mb-4">
+              <%= f.label :message, "Message", class: "form-label text-light" %>
+              <%= f.text_area :message, rows: 5, class: "form-control bg-dark bg-opacity-50 text-light border-secondary", placeholder: "Your message here...", required: true %>
+            </div>
+            <div class="text-center">
+              <%= f.submit "Send Message", class: "btn btn-primary px-5" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <!-- Social links - Glassmorphic Style -->
+    <div class="row justify-content-center fade-in-view delay-3 mb-3">
+      <div class="col-xxl-5 col-xl-6 col-lg-7 col-md-8">
+        <div class="contact-glass-card text-center p-4">
+          <h5 class="mb-4 text-light">Connect with Me</h5>
+          <div class="d-flex justify-content-center gap-3">
+            <a href="https://www.linkedin.com/in/tomer-gelbhart/" target="_blank" rel="noopener" class="contact-social-btn" aria-label="LinkedIn">
+              <i class="bx bxl-linkedin"></i>
+            </a>
+            <a href="https://github.com/gelbh" target="_blank" rel="noopener" class="contact-social-btn" aria-label="GitHub">
+              <i class="bx bxl-github"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>

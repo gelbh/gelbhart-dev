@@ -1,5 +1,36 @@
 <% content_for :title, page_title("NASA Exoplanet Explorer") %>
 <% meta_description "Interactive 3D visualization tool for exploring 5000+ confirmed exoplanets from NASA's Exoplanet Archive. Built with React, Three.js, and Express." %>
+<% content_for :structured_data do %>
+  <%= render_structured_data(software_application_structured_data(
+    name: "NASA Exoplanet Explorer",
+    description: "Interactive 3D visualization tool for exploring 5000+ confirmed exoplanets from NASA's Exoplanet Archive. Built with React, Three.js, and Express. Features interactive search, filtering, and 3D rendering of exoplanetary systems.",
+    url: "https://nasa-exoplanet-explorer.vercel.app",
+    application_category: "WebApplication",
+    operating_system: "Web",
+    offers: {
+      "price" => "0",
+      "priceCurrency" => "USD"
+    }
+  )) %>
+  <%= render_structured_data(faq_structured_data([
+    {
+      question: "What is NASA Exoplanet Explorer?",
+      answer: "NASA Exoplanet Explorer is an interactive 3D visualization tool that allows you to explore 5000+ confirmed exoplanets from NASA's Exoplanet Archive. It provides a 3D view of exoplanetary systems using Three.js for rendering."
+    },
+    {
+      question: "What data does NASA Exoplanet Explorer use?",
+      answer: "All exoplanet data is sourced directly from NASA's official Exoplanet Archive TAP API, ensuring accuracy and up-to-date information about confirmed exoplanets."
+    },
+    {
+      question: "What technologies is NASA Exoplanet Explorer built with?",
+      answer: "The application is built with React for the frontend, Three.js for 3D graphics rendering, and Express for the backend API server. It provides an interactive, immersive experience for exploring exoplanetary data."
+    },
+    {
+      question: "Is NASA Exoplanet Explorer free to use?",
+      answer: "Yes, NASA Exoplanet Explorer is completely free to use. You can access it online and explore all 5000+ confirmed exoplanets from NASA's database."
+    }
+  ])) %>
+<% end %>
 <!-- Hero Section with Gradient Background -->
 <section class="position-relative nasa-exoplanet-explorer-hero" data-controller="scroll-animation">
   <!-- Animated Gradient Background -->

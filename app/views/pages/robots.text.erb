@@ -1,7 +1,10 @@
+# robots.txt for gelbhart.dev
+# See https://www.robotstxt.org/robotstxt.html for documentation
+# Allow all search engines to crawl the site
 User-agent: *
 Allow: /
-Sitemap: https://gelbhart.dev/sitemap.xml.gz
-
-# Disallow admin and api routes
+# Disallow admin and API routes (not for public indexing)
 Disallow: /admin
 Disallow: /api
+# Sitemap location - helps search engines discover all pages
+Sitemap: https://gelbhart.dev/sitemap.xml.gz

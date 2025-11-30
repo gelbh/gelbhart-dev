@@ -63,22 +63,28 @@
     <title><%= page_title_value %></title>
     <%# SEO Meta Tags %>
     <meta name="description" content="<%= page_meta_description %>">
-    <meta name="author" content="Tomer Gelbhart">
+    <meta name="author" content="Tomer Gelbhart - Full-Stack Developer, MSc Computer Science Student at UCD">
     <meta name="language" content="English">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="<%= page_url %>">
     <%# Open Graph Meta Tags %>
     <meta property="og:type" content="website">
+    <meta property="og:locale" content="en_IE">
+    <meta property="og:site_name" content="gelbhart.dev">
     <meta property="og:url" content="<%= page_url %>">
     <meta property="og:title" content="<%= page_title_value %>">
     <meta property="og:description" content="<%= page_meta_description %>">
     <meta property="og:image" content="<%= social_image_url %>">
+    <meta property="og:image:alt" content="Tomer Gelbhart - Full-Stack Developer Portfolio">
     <%# Twitter Card Meta Tags %>
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="<%= page_url %>">
     <meta name="twitter:title" content="<%= page_title_value %>">
     <meta name="twitter:description" content="<%= page_meta_description %>">
     <meta name="twitter:image" content="<%= social_image_url %>">
+    <%# Additional Meta Tags %>
+    <meta name="theme-color" content="#0d6efd">
+    <meta name="format-detection" content="telephone=no">
     <%# Security Tags %>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -116,6 +122,14 @@
     <%# Icon Fonts %>
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css">
+    <%# Structured Data (JSON-LD) for SEO and AI-driven search optimization %>
+    <%= render_structured_data(person_structured_data) %>
+    <%= render_structured_data(website_structured_data) %>
+    <%= render_structured_data(organization_structured_data) %>
+    <%# Page-specific structured data can be added via content_for :structured_data %>
+    <% if content_for?(:structured_data) %>
+      <%= yield(:structured_data) %>
+    <% end %>
     <%# Application Stylesheets and Scripts %>
     <%= stylesheet_link_tag "application", media: "all" %>
     <%= javascript_importmap_tags %>
