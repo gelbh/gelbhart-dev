@@ -10,40 +10,85 @@ class GoogleAnalyticsService
   SCOPE = "https://www.googleapis.com/auth/analytics.readonly"
 
   def initialize
-    @credentials = get_credentials
+    @initialization_error = nil
+    @credentials = nil
+    @client = nil
 
-    if @credentials
-      # Create client with OAuth credentials
-      @client = Google::Analytics::Data.analytics_data do |config|
-        # Create a signet auth client from our OAuth credentials
-        auth_client = Signet::OAuth2::Client.new(
-          token_credential_uri: "https://oauth2.googleapis.com/token",
-          client_id: @credentials.client_id,
-          client_secret: @credentials.client_secret,
-          refresh_token: @credentials.refresh_token,
-          scope: SCOPE
-        )
+    begin
+      @credentials = get_credentials
 
-        # Set universe domain to fix compatibility
-        auth_client.instance_variable_set(:@universe_domain, "googleapis.com")
+      if @credentials
+        # Create client with OAuth credentials
+        @client = Google::Analytics::Data.analytics_data do |config|
+          # Create a signet auth client from our OAuth credentials
+          auth_client = Signet::OAuth2::Client.new(
+            token_credential_uri: "https://oauth2.googleapis.com/token",
+            client_id: @credentials.client_id,
+            client_secret: @credentials.client_secret,
+            refresh_token: @credentials.refresh_token,
+            scope: SCOPE
+          )
 
-        # Fetch access token with error handling
-        begin
-          auth_client.fetch_access_token!
-        rescue Signet::AuthorizationError => e
-          Rails.logger.error "Authorization failed. #{e.message}"
-          raise StandardError.new("Authorization failed. Please run: rails analytics:authorize")
+          # Set universe domain to fix compatibility
+          auth_client.instance_variable_set(:@universe_domain, "googleapis.com")
+
+          # Fetch access token with error handling
+          begin
+            auth_client.fetch_access_token!
+          rescue Signet::AuthorizationError => e
+            Rails.logger.error "Authorization failed. #{e.message}"
+            raise StandardError.new("Authorization failed. Please run: rails analytics:authorize")
+          end
+
+          config.credentials = auth_client
         end
-
-        config.credentials = auth_client
       end
-    else
+    rescue StandardError => e
+      @initialization_error = e
+      Rails.logger.error "GoogleAnalyticsService initialization failed: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n") if Rails.env.development?
       @client = nil
     end
   end
 
   def fetch_hevy_tracker_stats
-    return mock_stats if Rails.env.development? && !credentials_present?
+    # In development, fall back to mock data if credentials are missing or initialization failed
+    if Rails.env.development?
+      return mock_stats if !credentials_present? || @initialization_error
+    end
+
+    # If initialization failed, return mock data in development, otherwise log error
+    if @initialization_error
+      if Rails.env.development?
+        Rails.logger.warn "Using mock data due to initialization error: #{@initialization_error.message}"
+        return mock_stats
+      else
+        Rails.logger.error "Initialization error in production: #{@initialization_error.message}"
+        raise @initialization_error
+      end
+    end
+
+    # Check if client is nil (credentials appeared present but client initialization failed silently)
+    if @client.nil?
+      if Rails.env.development?
+        Rails.logger.warn "Using mock data: client is nil despite credentials appearing present"
+        return mock_stats
+      else
+        Rails.logger.error "Client is nil in production - cannot fetch analytics data"
+        raise StandardError.new("Google Analytics client not initialized")
+      end
+    end
+
+    # Check if PROPERTY_ID is missing (defensive check)
+    unless PROPERTY_ID.present?
+      if Rails.env.development?
+        Rails.logger.warn "Using mock data: PROPERTY_ID is not set"
+        return mock_stats
+      else
+        Rails.logger.error "PROPERTY_ID is missing in production"
+        raise StandardError.new("GA4_PROPERTY_ID environment variable is not set")
+      end
+    end
 
     {
       active_users: fetch_active_users,
@@ -54,7 +99,14 @@ class GoogleAnalyticsService
     }
   rescue StandardError => e
     Rails.logger.error "Google Analytics API Error: #{e.message}"
-    mock_stats
+    Rails.logger.error e.backtrace.join("\n") if Rails.env.development?
+    # In development, always fall back to mock data on errors
+    if Rails.env.development?
+      Rails.logger.warn "Falling back to mock data due to error: #{e.message}"
+      return mock_stats
+    end
+    # In production, re-raise the error
+    raise
   end
 
   private
