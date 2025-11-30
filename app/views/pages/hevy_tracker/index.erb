@@ -1,5 +1,36 @@
 <% content_for :title, page_title("Hevy Tracker") %>
 <% meta_description "Connect your Hevy workout data to Google Sheets™ with our secure OAuth integration. Easy setup guide for syncing fitness tracking between platforms." %>
+<% content_for :structured_data do %>
+  <%= render_structured_data(software_application_structured_data(
+    name: "Hevy Tracker",
+    description: "Google Workspace add-on that connects your Hevy workout data to Google Sheets™ with secure OAuth integration. Sync your fitness tracking data automatically.",
+    url: "https://gelbhart.dev/hevy-tracker",
+    application_category: "WebApplication",
+    operating_system: "Web",
+    offers: {
+      "price" => "0",
+      "priceCurrency" => "USD"
+    }
+  )) %>
+  <%= render_structured_data(faq_structured_data([
+    {
+      question: "What is Hevy Tracker?",
+      answer: "Hevy Tracker is a Google Workspace add-on that securely connects your Hevy workout data to Google Sheets™ using OAuth 2.0 authentication. It automatically syncs your fitness tracking data so you can analyze it in spreadsheets."
+    },
+    {
+      question: "How do I set up Hevy Tracker?",
+      answer: "Setup takes about 2 minutes: 1) Copy the spreadsheet template to your Google Drive, 2) Install the add-on from the Google Workspace Marketplace, 3) Get your API key from Hevy Settings, and 4) Grant OAuth consent to connect and sync."
+    },
+    {
+      question: "Do I need a Hevy Pro subscription?",
+      answer: "Yes, Hevy Tracker requires a Hevy Pro subscription and an API key from Hevy's Developer Settings to access your workout data."
+    },
+    {
+      question: "Is my data secure?",
+      answer: "Yes, Hevy Tracker uses industry-standard OAuth 2.0 authentication. Your data is only used to sync between Hevy and your personal Google Sheets™. We don't store or share your information with any third parties."
+    }
+  ])) %>
+<% end %>
 <!-- Hero Section with Gradient Background -->
 <section class="position-relative hevy-tracker-hero" data-controller="scroll-animation">
   <!-- Animated Gradient Background -->

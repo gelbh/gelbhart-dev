@@ -1,5 +1,36 @@
 <% content_for :title, page_title("Video Captioner") %>
 <% meta_description "Generate and translate video captions from YouTube videos or local files. Powered by AI transcription with support for multiple languages." %>
+<% content_for :structured_data do %>
+  <%= render_structured_data(software_application_structured_data(
+    name: "Video Captioner",
+    description: "AI-powered desktop tool for generating and translating video captions from YouTube videos or local files. Features automatic speech recognition and support for 15+ languages. All processing happens locally - no uploads, no file size limits, 100% private.",
+    url: "https://gelbhart.dev/video-captioner",
+    application_category: "DesktopApplication",
+    operating_system: "Desktop",
+    offers: {
+      "price" => "0",
+      "priceCurrency" => "USD"
+    }
+  )) %>
+  <%= render_structured_data(faq_structured_data([
+    {
+      question: "What is Video Captioner?",
+      answer: "Video Captioner is an AI-powered desktop tool that generates and translates video captions from YouTube videos or local video files. It uses automatic speech recognition to create subtitles and can translate them to 15+ languages."
+    },
+    {
+      question: "How does Video Captioner work?",
+      answer: "Video Captioner processes videos locally on your computer using AI transcription. You can input a YouTube URL or upload a local video file. The tool generates captions and allows you to translate them to multiple languages. All processing happens on your machine - no data is uploaded to external servers."
+    },
+    {
+      question: "Is Video Captioner free?",
+      answer: "Yes, Video Captioner is a free desktop application. There are no file size limits and all processing happens locally on your computer, ensuring 100% privacy."
+    },
+    {
+      question: "What languages are supported?",
+      answer: "Video Captioner supports translation to 15+ languages, making it easy to create multilingual captions for your videos."
+    }
+  ])) %>
+<% end %>
 <!-- Hero Section with Gradient Background -->
 <section class="position-relative video-captioner-hero" data-controller="scroll-animation">
   <!-- Animated Gradient Background -->
