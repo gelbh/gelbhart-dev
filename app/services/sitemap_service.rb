@@ -6,10 +6,6 @@
 require "stringio"
 
 class SitemapService
-  # Wait constants for file creation (handles race conditions in parallel tests)
-  MAX_WAIT_ATTEMPTS = 30
-  WAIT_INTERVAL_SECONDS = 0.1
-
   # File paths
   SITEMAP_XML = "sitemap.xml"
   SITEMAP_GZ = "sitemap.xml.gz"
@@ -21,7 +17,6 @@ class SitemapService
   def generate
     ensure_public_directory_exists
     generate_uncompressed_sitemap
-    wait_for_file_creation
     verify_sitemap_created
     create_compressed_version
   end
@@ -33,12 +28,12 @@ class SitemapService
   end
 
   def generate_uncompressed_sitemap
-    # Ensure compress is false to generate uncompressed XML file
-    # This must be set before loading config in case config is loaded multiple times
+    # Configure sitemap generator before loading config
+    SitemapGenerator::Sitemap.public_path = Rails.public_path.to_s
+    SitemapGenerator::Sitemap.sitemaps_path = ""
     SitemapGenerator::Sitemap.compress = false
 
-    # Load config which will generate the sitemap
-    # The config file also sets compress: false, ensuring we get uncompressed XML
+    # Load config which will generate the sitemap via SitemapGenerator::Sitemap.create
     # Silence gem output in test environment to keep test output clean
     if Rails.env.test?
       original_stdout = $stdout
@@ -52,43 +47,43 @@ class SitemapService
       load Rails.root.join("config", "sitemap.rb")
     end
 
-    # Ensure compress is still false after loading (defensive check)
+    # Ensure settings are still correct after config loads
     SitemapGenerator::Sitemap.compress = false
-  end
-
-  def wait_for_file_creation
-    # Wait for file to be created (handles race conditions, especially in parallel tests)
-    max_wait = MAX_WAIT_ATTEMPTS
-    wait_count = 0
-
-    while wait_count < max_wait && !sitemap_path.exist?
-      sleep(WAIT_INTERVAL_SECONDS)
-      wait_count += 1
-    end
+    SitemapGenerator::Sitemap.public_path = Rails.public_path.to_s
+    SitemapGenerator::Sitemap.sitemaps_path = ""
   end
 
   def verify_sitemap_created
     return if sitemap_path.exist?
 
     existing_files = Dir.glob(Rails.public_path.join("sitemap*"))
-    error_message = build_error_message(existing_files)
+    error_message = "Failed to generate sitemap.xml at #{sitemap_path}."
+    error_message += " Found files: #{existing_files.inspect}" if existing_files.any?
+    error_message += " Public path exists: #{Rails.public_path.exist?}"
+    error_message += " Public path writable: #{File.writable?(Rails.public_path)}" if Rails.public_path.exist?
+    error_message += " Compress setting: #{SitemapGenerator::Sitemap.compress}"
     raise error_message
-  end
-
-  def build_error_message(existing_files)
-    message = "Failed to generate sitemap.xml at #{sitemap_path}."
-    message += " Found files: #{existing_files.inspect}" if existing_files.any?
-    message += " Public path exists: #{Rails.public_path.exist?}"
-    message += " Public path writable: #{File.writable?(Rails.public_path)}" if Rails.public_path.exist?
-    message += " Compress setting: #{SitemapGenerator::Sitemap.compress}"
-    message
   end
 
   def create_compressed_version
     require "zlib"
 
+    unless sitemap_path.exist?
+      existing_files = Dir.glob(Rails.public_path.join("sitemap*"))
+      error_message = "Cannot create compressed sitemap: sitemap.xml not found at #{sitemap_path}."
+      error_message += " Found files: #{existing_files.inspect}" if existing_files.any?
+      error_message += " Public path exists: #{Rails.public_path.exist?}"
+      raise error_message
+    end
+
+    sitemap_content = File.read(sitemap_path)
+
+    if sitemap_content.empty?
+      raise "Cannot create compressed sitemap: sitemap.xml exists but is empty at #{sitemap_path}"
+    end
+
     Zlib::GzipWriter.open(gz_path) do |gz|
-      gz.write(File.read(sitemap_path))
+      gz.write(sitemap_content)
     end
   end
 
