@@ -30,6 +30,7 @@ class GoogleAnalyticsServiceTest < ActiveSupport::TestCase
   end
 
   test "fetch_hevy_tracker_stats returns complete stats hash" do
+    Rails.env.stubs(:development?).returns(true)
     # Stub the credentials check to return false, so service uses mock stats
     GoogleAnalyticsService.any_instance.stubs(:oauth_credentials_present?).returns(false)
 
@@ -45,6 +46,7 @@ class GoogleAnalyticsServiceTest < ActiveSupport::TestCase
     assert stats.key?(:engagement_rate)
     assert stats.key?(:install_count)
   ensure
+    Rails.env.unstub(:development?) if Rails.env.respond_to?(:unstub)
     GoogleAnalyticsService.unstub(:any_instance) if GoogleAnalyticsService.respond_to?(:unstub)
   end
 
