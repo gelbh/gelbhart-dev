@@ -2,6 +2,8 @@
 // Social buttons
 // --------------------------------------------------
 
+@use "theme/variables" as *;
+
 @each $brand, $value in $social-buttons {
   .btn-#{$brand} {
     &:hover,
@@ -10,7 +12,13 @@
       color: $white !important; // stylelint-disable-line declaration-no-important
       background-color: $value !important; // stylelint-disable-line declaration-no-important
       border-color: $value !important; // stylelint-disable-line declaration-no-important
-      box-shadow: 0 .375rem 1.125rem -.375rem rgba($value, .8) !important; // stylelint-disable-line declaration-no-important
+      box-shadow: 0
+        0.375rem
+        1.125rem -0.375rem
+        rgba(
+          $value,
+          0.8
+        ) !important; // stylelint-disable-line declaration-no-important
     }
   }
 }

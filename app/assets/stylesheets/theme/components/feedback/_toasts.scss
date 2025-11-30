@@ -2,6 +2,8 @@
 // Toasts
 // --------------------------------------------------
 
+@use "theme/variables" as *;
+@use "theme/variables-dark" as *;
 
 .toast-header {
   position: relative;
@@ -27,11 +29,10 @@
   }
 }
 
-
 // Dark color mode
 
 @if $enable-dark-mode {
-  @include color-mode(dark) {
+  [data-bs-theme="dark"] {
     .toast:not([data-bs-theme="light"]) {
       --#{$prefix}toast-bg: #{$toast-background-color-dark};
       --#{$prefix}toast-border-color: #{$toast-border-color-dark};

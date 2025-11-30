@@ -2,6 +2,8 @@
 // Buttons
 // --------------------------------------------------
 
+@use "theme/variables" as *;
+@use "theme/variables-dark" as *;
 @use "sass:color";
 
 // Global styles
@@ -145,10 +147,10 @@
   background-color: var(--#{$prefix}btn-video-bg);
   border: 0;
   border-radius: $btn-video-border-radius;
-  @include box-shadow(var(--#{$prefix}btn-video-shadow));
+  box-shadow: var(--#{$prefix}btn-video-shadow);
 
   &:focus {
-    @include box-shadow(var(--#{$prefix}btn-video-shadow));
+    box-shadow: var(--#{$prefix}btn-video-shadow);
   }
 
   &.bg-white {
@@ -164,9 +166,9 @@
     background-color: var(
       --#{$prefix}btn-video-hover-bg
     ) !important; // stylelint-disable-line declaration-no-important
-    @include box-shadow(
-      var(--#{$prefix}btn-video-hover-shadow) !important
-    ); // stylelint-disable-line declaration-no-important
+    box-shadow: var(
+      --#{$prefix}btn-video-hover-shadow
+    ) !important; // stylelint-disable-line declaration-no-important
   }
 }
 
@@ -225,7 +227,7 @@
   position: fixed;
   right: $spacer * 1.25;
   bottom: -($btn-scroll-top-size * 1.5);
-  z-index: $zindex-fixed;
+  z-index: 1030; // Bootstrap $zindex-fixed default
   display: flex;
   align-items: center;
   justify-content: center;
@@ -234,7 +236,7 @@
   color: var(--#{$prefix}btn-scroll-top-color);
   text-decoration: none;
   background-color: var(--#{$prefix}btn-scroll-top-bg);
-  @include border-radius(var(--#{$prefix}btn-scroll-top-border-radius));
+  border-radius: var(--#{$prefix}btn-scroll-top-border-radius);
   opacity: 0;
   transition: $btn-scroll-top-transition;
   > .btn-scroll-top-icon {
@@ -268,7 +270,8 @@
     opacity: 1;
   }
 
-  @include media-breakpoint-down(sm) {
+  @media (max-width: 499.98px) {
+    // Bootstrap sm breakpoint - 1px
     right: $spacer;
     width: calc(var(--#{$prefix}btn-scroll-top-size) * 0.8);
     height: calc(var(--#{$prefix}btn-scroll-top-size) * 0.8);
@@ -281,7 +284,7 @@
 // Dark color mode
 
 @if $enable-dark-mode {
-  @include color-mode(dark) {
+  [data-bs-theme="dark"] {
     .btn-outline-secondary {
       --#{$prefix}btn-color: rgba(#{to-rgb($light)}, 0.85);
       --#{$prefix}btn-hover-color: #{$gray-800};

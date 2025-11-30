@@ -2,6 +2,9 @@
 // List group
 // --------------------------------------------------
 
+@use "theme/variables" as *;
+@use "theme/variables-dark" as *;
+
 // Base class
 //
 // Easily usable on <ul>, <ol>, or <div>.
@@ -11,7 +14,7 @@
   --#{$prefix}list-group-color: #{$list-group-color};
   --#{$prefix}list-group-bg: #{$list-group-bg};
   --#{$prefix}list-group-border-color: #{$list-group-border-color};
-  --#{$prefix}list-group-border-width: #{$list-group-border-width};
+  --#{$prefix}list-group-border-width: #{$border-width};
   --#{$prefix}list-group-border-radius: #{$list-group-border-radius};
   --#{$prefix}list-group-item-padding-x: #{$list-group-item-padding-x};
   --#{$prefix}list-group-item-padding-y: #{$list-group-item-padding-y};
@@ -20,11 +23,11 @@
   --#{$prefix}list-group-action-hover-bg: #{$list-group-hover-bg};
   --#{$prefix}list-group-action-active-color: #{$list-group-action-active-color};
   --#{$prefix}list-group-action-active-bg: #{$list-group-action-active-bg};
-  --#{$prefix}list-group-disabled-color: #{$list-group-disabled-color};
-  --#{$prefix}list-group-disabled-bg: #{$list-group-disabled-bg};
+  --#{$prefix}list-group-disabled-color: #{$text-muted};
+  --#{$prefix}list-group-disabled-bg: transparent;
   --#{$prefix}list-group-active-color: #{$list-group-active-color};
   --#{$prefix}list-group-active-bg: #{$list-group-active-bg};
-  --#{$prefix}list-group-active-border-color: #{$list-group-active-border-color};
+  --#{$prefix}list-group-active-border-color: #{$primary};
   --#{$prefix}list-group-active-box-shadow: #{$list-group-active-box-shadow};
   // scss-docs-end list-group-css-vars
 
@@ -34,7 +37,7 @@
   // No need to set list-style: none; since .list-group-item is block level
   padding-left: 0; // reset padding because ul and ol
   margin-bottom: 0;
-  @include border-radius(var(--#{$prefix}list-group-border-radius));
+  border-radius: var(--#{$prefix}list-group-border-radius);
 }
 
 .list-group-numbered {
@@ -55,18 +58,22 @@
 .list-group-item {
   position: relative;
   display: block;
-  padding: var(--#{$prefix}list-group-item-padding-y) var(--#{$prefix}list-group-item-padding-x);
+  padding: var(--#{$prefix}list-group-item-padding-y)
+    var(--#{$prefix}list-group-item-padding-x);
   color: var(--#{$prefix}list-group-color);
   text-decoration: if($link-decoration == none, null, none);
   background-color: var(--#{$prefix}list-group-bg);
-  border: var(--#{$prefix}list-group-border-width) solid var(--#{$prefix}list-group-border-color);
+  border: var(--#{$prefix}list-group-border-width) solid
+    var(--#{$prefix}list-group-border-color);
 
   &:first-child {
-    @include border-top-radius(inherit);
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
   }
 
   &:last-child {
-    @include border-bottom-radius(inherit);
+    border-bottom-left-radius: inherit;
+    border-bottom-right-radius: inherit;
   }
 
   &.disabled,
@@ -82,14 +89,16 @@
     color: var(--#{$prefix}list-group-active-color);
     background-color: var(--#{$prefix}list-group-active-bg);
     border-color: var(--#{$prefix}list-group-active-border-color);
-    @include box-shadow(var(--#{$prefix}list-group-active-box-shadow));
+    box-shadow: var(--#{$prefix}list-group-active-box-shadow);
   }
 
   & + & {
     border-top-width: 0;
 
     &.active {
-      margin-top: calc(var(--#{$prefix}list-group-border-width) * -1); // stylelint-disable-line function-disallowed-list
+      margin-top: calc(
+        var(--#{$prefix}list-group-border-width) * -1
+      ); // stylelint-disable-line function-disallowed-list
       border-top-width: var(--#{$prefix}list-group-border-width);
     }
   }
@@ -126,35 +135,53 @@
 //
 // Change the layout of list group items from vertical (default) to horizontal.
 
-@each $breakpoint in map-keys($grid-breakpoints) {
-  @include media-breakpoint-up($breakpoint) {
-    $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
+@each $breakpoint, $value in $grid-breakpoints {
+  @if $breakpoint != "xs" {
+    $infix: if(
+      $breakpoint == "sm",
+      "-sm",
+      if(
+        $breakpoint == "md",
+        "-md",
+        if(
+          $breakpoint == "lg",
+          "-lg",
+          if($breakpoint == "xl", "-xl", if($breakpoint == "xxl", "-xxl", ""))
+        )
+      )
+    );
 
-    .list-group-horizontal#{$infix} {
-      flex-direction: row;
+    @media (min-width: #{$value}) {
+      .list-group-horizontal#{$infix} {
+        flex-direction: row;
 
-      > .list-group-item {
-        &:first-child {
-          @include border-bottom-start-radius(var(--#{$prefix}list-group-border-radius));
-          @include border-top-end-radius(0);
-        }
+        > .list-group-item {
+          &:first-child {
+            border-bottom-left-radius: var(
+              --#{$prefix}list-group-border-radius
+            );
+            border-top-right-radius: 0;
+          }
 
-        &:last-child {
-          @include border-top-end-radius(var(--#{$prefix}list-group-border-radius));
-          @include border-bottom-start-radius(0);
-        }
-
-        &.active {
-          margin-top: 0;
-        }
-
-        + .list-group-item {
-          border-top-width: var(--#{$prefix}list-group-border-width);
-          border-left-width: 0;
+          &:last-child {
+            border-top-right-radius: var(--#{$prefix}list-group-border-radius);
+            border-bottom-left-radius: 0;
+          }
 
           &.active {
-            margin-left: calc(var(--#{$prefix}list-group-border-width) * -1); // stylelint-disable-line function-disallowed-list
-            border-left-width: var(--#{$prefix}list-group-border-width);
+            margin-top: 0;
+          }
+
+          + .list-group-item {
+            border-top-width: var(--#{$prefix}list-group-border-width);
+            border-left-width: 0;
+
+            &.active {
+              margin-left: calc(
+                var(--#{$prefix}list-group-border-width) * -1
+              ); // stylelint-disable-line function-disallowed-list
+              border-left-width: var(--#{$prefix}list-group-border-width);
+            }
           }
         }
       }
@@ -168,7 +195,7 @@
 // useful within other components (e.g., cards).
 
 .list-group-flush {
-  @include border-radius(0);
+  border-radius: 0;
 
   > .list-group-item {
     border-width: 0 0 var(--#{$prefix}list-group-border-width);
@@ -179,16 +206,17 @@
   }
 
   .list-group-item-action {
-    margin-bottom: .125rem;
+    margin-bottom: 0.125rem;
     border: 0;
-    @include border-radius(var(--#{$prefix}list-group-border-radius));
+    border-radius: var(--#{$prefix}list-group-border-radius);
   }
 }
 
 .card .list-group-flush .list-group-item-action {
   margin-bottom: 0;
-  border-bottom: var(--#{$prefix}list-group-border-width) solid var(--#{$prefix}list-group-border-color);
-  @include border-radius(0);
+  border-bottom: var(--#{$prefix}list-group-border-width) solid
+    var(--#{$prefix}list-group-border-color);
+  border-radius: 0;
   &:last-child {
     border-bottom: 0;
   }
@@ -198,15 +226,14 @@
 }
 
 .offcanvas-body .list-group-flush .list-group-item-action {
-  margin-bottom: .0625rem;
-  @include border-radius(0);
+  margin-bottom: 0.0625rem;
+  border-radius: 0;
 }
-
 
 // Dark color mode
 
 @if $enable-dark-mode {
-  @include color-mode(dark) {
+  [data-bs-theme="dark"] {
     .list-group:not([data-bs-theme="light"]) {
       --#{$prefix}list-group-disabled-color: #{$list-group-disabled-color-dark};
       --#{$prefix}list-group-action-color: #{$list-group-action-color-dark};

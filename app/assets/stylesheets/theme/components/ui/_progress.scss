@@ -2,19 +2,33 @@
 // Progress
 // --------------------------------------------------
 
+@use "theme/variables" as *;
+@use "theme/variables-dark" as *;
+
 // Dark color mode
 
 @if $enable-dark-mode {
-  @include color-mode(dark) {
+  [data-bs-theme="dark"] {
     .progress:not([data-bs-theme="light"]) {
       --#{$prefix}progress-bg: #{$progress-bg-dark};
     }
     .progress-bar.bg-dark:not([data-bs-theme="light"]) {
       --#{$prefix}progress-bar-bg: #{$light};
       --#{$prefix}progress-bar-color: #{$gray-900};
-      background-color: var(--#{$prefix}progress-bar-bg) !important; // stylelint-disable-line declaration-no-important
+      background-color: var(
+        --#{$prefix}progress-bar-bg
+      ) !important; // stylelint-disable-line declaration-no-important
       &.progress-bar-striped {
-        background-image: linear-gradient(45deg, rgba($dark, .15) 25%, transparent 25%, transparent 50%, rgba($dark, .15) 50%, rgba($dark, .15) 75%, transparent 75%, transparent);
+        background-image: linear-gradient(
+          45deg,
+          rgba($dark, 0.15) 25%,
+          transparent 25%,
+          transparent 50%,
+          rgba($dark, 0.15) 50%,
+          rgba($dark, 0.15) 75%,
+          transparent 75%,
+          transparent
+        );
       }
     }
   }

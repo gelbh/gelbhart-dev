@@ -2,6 +2,8 @@
 // Pagination
 // --------------------------------------------------
 
+@use "theme/variables" as *;
+@use "theme/variables-dark" as *;
 
 .pagination {
   --#{$prefix}pagination-font-weight: #{$pagination-font-weight};
@@ -14,10 +16,10 @@
   display: flex;
   align-items: center;
   height: 100%;
-  @include border-radius(var(--#{$prefix}pagination-border-radius));
+  border-radius: var(--#{$prefix}pagination-border-radius);
   font-weight: var(--#{$prefix}pagination-font-weight);
   > i {
-    margin-top: .0625rem;
+    margin-top: 0.0625rem;
     font-size: 1.425em;
   }
   &:focus {
@@ -27,28 +29,31 @@
 
 .page-item {
   margin: 0 $pagination-margin;
-  &:first-child { margin-left: 0; }
-  &:last-child { margin-right: 0; }
+  &:first-child {
+    margin-left: 0;
+  }
+  &:last-child {
+    margin-right: 0;
+  }
   &.active .page-link {
     box-shadow: var(--#{$prefix}pagination-active-box-shadow);
   }
 }
 
 .pagination-sm {
-  --#{$prefix}pagination-border-radius: #{$pagination-border-radius-sm};
+  --#{$prefix}pagination-border-radius: #{$border-radius-sm};
   --#{$prefix}pagination-font-size: #{$pagination-font-size-sm};
 }
 
 .pagination-lg {
-  --#{$prefix}pagination-border-radius: #{$pagination-border-radius-lg};
+  --#{$prefix}pagination-border-radius: #{$border-radius-lg};
   --#{$prefix}pagination-font-size: #{$pagination-font-size-lg};
 }
-
 
 // Dark color mode
 
 @if $enable-dark-mode {
-  @include color-mode(dark) {
+  [data-bs-theme="dark"] {
     .pagination:not([data-bs-theme="light"]) {
       --#{$prefix}pagination-color: #{$pagination-color-dark};
       --#{$prefix}pagination-hover-color: #{$pagination-hover-color-dark};

@@ -2,6 +2,8 @@
 // Alert
 // --------------------------------------------------
 
+@use "theme/variables" as *;
+@use "theme/variables-dark" as *;
 @use "sass:color";
 
 .alert {
@@ -55,7 +57,7 @@
 // Dark color mode
 
 @if $enable-dark-mode {
-  @include color-mode(dark) {
+  [data-bs-theme="dark"] {
     @each $color, $value in $theme-colors {
       .alert-#{$color}:not([data-bs-theme="light"]) {
         --#{$prefix}alert-bg: rgba(#{to-rgb($value)}, 0.05);
