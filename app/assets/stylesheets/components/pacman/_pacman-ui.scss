@@ -1,6 +1,8 @@
 // ============================================
 // PAC-MAN UI COMPONENTS
 // ============================================
+
+@use "../_mixins" as *;
 // Section locking, hover effects, hints, and indicators
 
 // ---- Idle Hint ----
@@ -8,7 +10,9 @@
 .pacman-idle-hint {
   display: inline-block;
   background: rgba(255, 215, 0, 0.08);
-  @include pacman-glass-effect(10px);
+  // Replaced pacman-glass-effect mixin with direct CSS
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
   border: 2px solid rgba(255, 215, 0, 0.3);
   border-radius: 50px;
   padding: 8px 20px;
@@ -127,7 +131,9 @@
   left: 50%;
   transform: translateX(-50%);
   background: rgba(255, 215, 0, 0.15);
-  @include pacman-glass-effect(10px);
+  // Replaced pacman-glass-effect mixin with direct CSS
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
   border: 2px solid rgba(255, 215, 0, 0.4);
   border-radius: 15px;
   padding: 15px 30px;

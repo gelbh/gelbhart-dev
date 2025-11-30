@@ -13,14 +13,17 @@
 
 // Animated gradient background
 .hero-gradient-bg {
-  @include gradient-bg(
-    var(--gradient-primary),
-    var(--opacity-light),
-    var(--z-background),
-    fixed,
-    100vw,
-    100vh
-  );
+  // Replaced gradient-bg mixin with direct CSS
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--gradient-primary);
+  background-size: 200% 200%;
+  animation: gradientShift var(--duration-gradient) ease infinite;
+  opacity: var(--opacity-light);
+  z-index: var(--z-background);
 }
 
 [data-bs-theme="dark"] .hero-gradient-bg {
@@ -229,7 +232,8 @@
 }
 
 // Responsive adjustments
-@media (max-width: $mobile-breakpoint) {
+@media (max-width: 767.98px) {
+  // Mobile breakpoint (md - 1px)
   .hero-section {
     min-height: auto;
     padding: 3rem 0;
