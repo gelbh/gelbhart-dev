@@ -1,7 +1,16 @@
 # Sitemap configuration using sitemap_generator gem
 require "sitemap_generator"
 
-SitemapGenerator::Sitemap.default_host = "https://gelbhart.dev"
+# Use environment-aware domain with fallback
+base_host = ENV.fetch("SITEMAP_HOST", nil) ||
+            Rails.application.config.action_mailer.default_url_options[:host] ||
+            "gelbhart.dev"
+
+# Remove protocol if present and add https
+base_host = base_host.gsub(/^https?:\/\//, "")
+default_host = "https://#{base_host}"
+
+SitemapGenerator::Sitemap.default_host = default_host
 SitemapGenerator::Sitemap.public_path = "public/"
 SitemapGenerator::Sitemap.sitemaps_path = ""
 # Create both compressed and uncompressed files
@@ -26,26 +35,26 @@ end
 SitemapGenerator::Sitemap.create do
   # Home page
   home_lastmod = get_multiple_views_lastmod("pages/home.html.erb", "layouts/application.html.erb")
-  add "/", changefreq: "weekly", priority: 1.0, lastmod: home_lastmod
+  add "/", lastmod: home_lastmod
 
   # Hevy Tracker pages
   hevy_lastmod = get_view_lastmod("pages/hevy_tracker/index.erb")
-  add "/projects/hevy-tracker", changefreq: "monthly", priority: 0.8, lastmod: hevy_lastmod
+  add "/projects/hevy-tracker", lastmod: hevy_lastmod
 
   hevy_privacy_lastmod = get_view_lastmod("pages/hevy_tracker/privacy.html.erb")
-  add "/projects/hevy-tracker/privacy", changefreq: "yearly", priority: 0.5, lastmod: hevy_privacy_lastmod
+  add "/projects/hevy-tracker/privacy", lastmod: hevy_privacy_lastmod
 
   hevy_terms_lastmod = get_view_lastmod("pages/hevy_tracker/terms.html.erb")
-  add "/projects/hevy-tracker/terms", changefreq: "yearly", priority: 0.5, lastmod: hevy_terms_lastmod
+  add "/projects/hevy-tracker/terms", lastmod: hevy_terms_lastmod
 
   # Contact page
   contact_lastmod = get_view_lastmod("pages/contact.html.erb")
-  add "/contact", changefreq: "monthly", priority: 0.8, lastmod: contact_lastmod
+  add "/contact", lastmod: contact_lastmod
 
   # Other project pages
   video_captioner_lastmod = get_view_lastmod("pages/video_captioner.html.erb")
-  add "/projects/video-captioner", changefreq: "monthly", priority: 0.7, lastmod: video_captioner_lastmod
+  add "/projects/video-captioner", lastmod: video_captioner_lastmod
 
   nasa_lastmod = get_view_lastmod("pages/nasa_exoplanet_explorer.html.erb")
-  add "/projects/nasa-exoplanet-explorer", changefreq: "monthly", priority: 0.7, lastmod: nasa_lastmod
+  add "/projects/nasa-exoplanet-explorer", lastmod: nasa_lastmod
 end
