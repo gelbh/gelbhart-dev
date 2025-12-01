@@ -8,7 +8,7 @@ project.assign_attributes(
   icon: 'bx-dumbbell',
   color: 'primary',
   link_text: 'Learn More',
-  link_url: '/hevy-tracker',
+  link_url: '/projects/hevy-tracker',
   route_name: 'hevy_tracker',
   github_url: 'https://github.com/gelbh/hevy-tracker',
   badges: [
@@ -28,7 +28,7 @@ project.assign_attributes(
   icon: 'bx-video',
   color: 'success',
   link_text: 'Learn More',
-  link_url: '/video-captioner',
+  link_url: '/projects/video-captioner',
   route_name: 'video_captioner',
   badges: [
     { text: 'Whisper AI', color: 'primary', url: 'https://openai.com/research/whisper' },
@@ -47,7 +47,7 @@ project.assign_attributes(
   icon: 'bx-planet',
   color: 'info',
   link_text: 'Learn More',
-  link_url: '/nasa-exoplanet-explorer',
+  link_url: '/projects/nasa-exoplanet-explorer',
   route_name: 'nasa_exoplanet_explorer',
   github_url: 'https://github.com/gelbh/nasa-exoplanet-explorer',
   badges: [

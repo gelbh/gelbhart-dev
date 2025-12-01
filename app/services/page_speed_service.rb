@@ -86,12 +86,12 @@ class PageSpeedService
     # These match the sitemap configuration
     [
       "#{DEFAULT_HOST}/",
-      "#{DEFAULT_HOST}/hevy-tracker",
-      "#{DEFAULT_HOST}/hevy-tracker/privacy",
-      "#{DEFAULT_HOST}/hevy-tracker/terms",
+      "#{DEFAULT_HOST}/projects/hevy-tracker",
+      "#{DEFAULT_HOST}/projects/hevy-tracker/privacy",
+      "#{DEFAULT_HOST}/projects/hevy-tracker/terms",
       "#{DEFAULT_HOST}/contact",
-      "#{DEFAULT_HOST}/video-captioner",
-      "#{DEFAULT_HOST}/nasa-exoplanet-explorer"
+      "#{DEFAULT_HOST}/projects/video-captioner",
+      "#{DEFAULT_HOST}/projects/nasa-exoplanet-explorer"
     ]
   end
 
