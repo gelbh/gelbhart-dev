@@ -1,0 +1,22 @@
+<%# Breadcrumb Navigation Partial with Structured Data %>
+<% items = local_assigns.fetch(:items, []) %>
+<% return if items.empty? %>
+<nav aria-label="breadcrumb" class="mb-3 position-relative" style="z-index: 10;">
+  <ol class="breadcrumb mb-0">
+    <% items.each_with_index do |item, index| %>
+      <% is_last = index == items.length - 1 %>
+      <% li_class = "breadcrumb-item#{' active' if is_last}" %>
+      <li class="<%= li_class %>"<% if is_last %> aria-current="page"<% end %>>
+        <% if is_last || item[:url].nil? %>
+          <%= item[:name] %>
+        <% else %>
+          <%= link_to item[:name], item[:url], class: 'text-decoration-none' %>
+        <% end %>
+      </li>
+    <% end %>
+  </ol>
+</nav>
+<%# Breadcrumb Structured Data for SEO %>
+<% if items.length > 1 %>
+  <%= render_structured_data(breadcrumb_structured_data(items)) %>
+<% end %>

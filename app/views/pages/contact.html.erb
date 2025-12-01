@@ -12,6 +12,13 @@
     <pre class="typing-code" data-code-typer-target="output"></pre>
   </div>
   <div class="container py-3 position-relative zindex-5 mt-5">
+    <!-- Breadcrumb Navigation -->
+    <div class="container pt-4">
+      <%= render 'shared/breadcrumb', items: [
+    { name: 'Home', url: '/' },
+    { name: 'Contact', url: nil }
+  ] %>
+    </div>
     <div class="row justify-content-center text-center mb-3">
       <div class="col-lg-8 fade-in-view">
         <%= render 'shared/icon_circle', icon: 'bx-envelope', color: 'primary', size: 'md' %>
