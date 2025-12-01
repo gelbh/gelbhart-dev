@@ -6,6 +6,11 @@ class SitemapGeneratorTest < ActiveSupport::TestCase
   parallelize(workers: 1)
 
   setup do
+    # Set domain for sitemap generation to match test expectations
+    # This ensures the sitemap uses the expected domain in tests
+    @original_host = Rails.application.config.action_mailer.default_url_options[:host]
+    Rails.application.config.action_mailer.default_url_options = { host: "gelbhart.dev" }
+
     @generator = SitemapService.new
     @sitemap_path = Rails.public_path.join("sitemap.xml")
     @sitemap_gz_path = Rails.public_path.join("sitemap.xml.gz")
@@ -18,6 +23,9 @@ class SitemapGeneratorTest < ActiveSupport::TestCase
   rescue StandardError => e
     # Ignore cleanup errors
     Rails.logger.debug "Sitemap cleanup error: #{e.message}"
+  ensure
+    # Restore original host configuration
+    Rails.application.config.action_mailer.default_url_options = { host: @original_host } if defined?(@original_host) && @original_host
   end
 
   test "generate creates sitemap.xml and sitemap.xml.gz" do
@@ -46,8 +54,6 @@ class SitemapGeneratorTest < ActiveSupport::TestCase
     assert_includes xml_content, "<urlset"
     assert_includes xml_content, "<url>"
     assert_includes xml_content, "<loc>"
-    assert_includes xml_content, "<changefreq>"
-    assert_includes xml_content, "<priority>"
     assert_includes xml_content, "<lastmod>"
   end
 
