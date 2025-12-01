@@ -30,7 +30,24 @@
       answer: "Video Captioner supports translation to 15+ languages, making it easy to create multilingual captions for your videos."
     }
   ])) %>
+  <%# Article structured data for project page %>
+  <% video_captioner_article_data = article_structured_data(
+    title: "Video Captioner",
+    url: "https://gelbhart.dev/video-captioner",
+    description: "AI-powered desktop tool for generating and translating video captions from YouTube videos or local files. Features automatic speech recognition and support for 15+ languages. All processing happens locally - no uploads, no file size limits, 100% private.",
+    keywords: "video captioner, AI transcription, video subtitles, speech recognition, video translation, Whisper AI, Python, desktop application",
+    image: "logos/social/logo_social.png"
+  ) %>
+  <%= render_structured_data(video_captioner_article_data) %>
 <% end %>
+<%# Breadcrumb Navigation %>
+<div class="container pt-4">
+  <%= render 'shared/breadcrumb', items: [
+    { name: 'Home', url: '/' },
+    { name: 'Projects', url: nil },
+    { name: 'Video Captioner', url: nil }
+  ] %>
+</div>
 <!-- Hero Section with Gradient Background -->
 <section class="position-relative video-captioner-hero" data-controller="scroll-animation">
   <!-- Animated Gradient Background -->
@@ -48,6 +65,14 @@
     </div>
   </div>
 </section>
+<!-- Breadcrumb Navigation -->
+<div class="container pt-4">
+  <%= render 'shared/breadcrumb', items: [
+    { name: 'Home', url: '/' },
+    { name: 'Projects', url: nil },
+    { name: 'Video Captioner', url: nil }
+  ] %>
+</div>
 <!-- Main Content -->
 <section class="container py-5 mt-4" data-controller="scroll-animation">
   <div class="row justify-content-center">

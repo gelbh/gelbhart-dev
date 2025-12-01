@@ -30,6 +30,15 @@
       answer: "Yes, NASA Exoplanet Explorer is completely free to use. You can access it online and explore all 5000+ confirmed exoplanets from NASA's database."
     }
   ])) %>
+  <%# Article structured data for project page %>
+  <% nasa_article_data = article_structured_data(
+    title: "NASA Exoplanet Explorer",
+    url: "https://gelbhart.dev/nasa-exoplanet-explorer",
+    description: "Interactive 3D visualization tool for exploring 5000+ confirmed exoplanets from NASA's Exoplanet Archive. Built with React, Three.js, and Express. Features interactive search, filtering, and 3D rendering of exoplanetary systems.",
+    keywords: "NASA exoplanets, exoplanet explorer, 3D visualization, Three.js, React, space exploration, astronomy, NASA Exoplanet Archive",
+    image: "logos/social/logo_social.png"
+  ) %>
+  <%= render_structured_data(nasa_article_data) %>
 <% end %>
 <!-- Hero Section with Gradient Background -->
 <section class="position-relative nasa-exoplanet-explorer-hero" data-controller="scroll-animation">
@@ -48,6 +57,14 @@
     </div>
   </div>
 </section>
+<!-- Breadcrumb Navigation -->
+<div class="container pt-4">
+  <%= render 'shared/breadcrumb', items: [
+    { name: 'Home', url: '/' },
+    { name: 'Projects', url: nil },
+    { name: 'NASA Exoplanet Explorer', url: nil }
+  ] %>
+</div>
 <!-- Main Content -->
 <section class="container py-5 mt-4" data-controller="scroll-animation">
   <div class="row justify-content-center">

@@ -30,6 +30,15 @@
       answer: "Yes, Hevy Tracker uses industry-standard OAuth 2.0 authentication. Your data is only used to sync between Hevy and your personal Google Sheets™. We don't store or share your information with any third parties."
     }
   ])) %>
+  <%# Article structured data for project page %>
+  <% hevy_article_data = article_structured_data(
+    title: "Hevy Tracker",
+    url: "https://gelbhart.dev/hevy-tracker",
+    description: "Google Workspace add-on that connects your Hevy workout data to Google Sheets™ with secure OAuth integration. Sync your fitness tracking data automatically.",
+    keywords: "Hevy Tracker, Google Sheets, fitness tracking, workout data, Google Workspace add-on, OAuth, Hevy integration, fitness analytics",
+    image: "logos/social/logo_social.png"
+  ) %>
+  <%= render_structured_data(hevy_article_data) %>
 <% end %>
 <!-- Hero Section with Gradient Background -->
 <section class="position-relative hevy-tracker-hero" data-controller="scroll-animation">
@@ -48,6 +57,14 @@
     </div>
   </div>
 </section>
+<!-- Breadcrumb Navigation -->
+<div class="container pt-4">
+  <%= render 'shared/breadcrumb', items: [
+    { name: 'Home', url: '/' },
+    { name: 'Projects', url: nil },
+    { name: 'Hevy Tracker', url: nil }
+  ] %>
+</div>
 <!-- Main Content -->
 <section class="container py-5 mt-4" data-controller="scroll-animation">
   <div class="row justify-content-center">
