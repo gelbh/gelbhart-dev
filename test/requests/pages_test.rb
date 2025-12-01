@@ -7,19 +7,37 @@ class PagesTest < ActionDispatch::IntegrationTest
     assert_select "title"
   end
 
-  test "GET /hevy-tracker returns hevy tracker page" do
+  test "GET /projects/hevy-tracker returns hevy tracker page" do
     get hevy_tracker_path
     assert_response :success
   end
 
-  test "GET /hevy-tracker/privacy returns privacy page" do
+  test "GET /projects/hevy-tracker/privacy returns privacy page" do
     get hevy_tracker_privacy_path
     assert_response :success
   end
 
-  test "GET /hevy-tracker/terms returns terms page" do
+  test "GET /projects/hevy-tracker/terms returns terms page" do
     get hevy_tracker_terms_path
     assert_response :success
+  end
+
+  test "GET /hevy-tracker redirects to /projects/hevy-tracker" do
+    get "/hevy-tracker"
+    assert_redirected_to "/projects/hevy-tracker"
+    assert_response :moved_permanently
+  end
+
+  test "GET /hevy-tracker/privacy redirects to /projects/hevy-tracker/privacy" do
+    get "/hevy-tracker/privacy"
+    assert_redirected_to "/projects/hevy-tracker/privacy"
+    assert_response :moved_permanently
+  end
+
+  test "GET /hevy-tracker/terms redirects to /projects/hevy-tracker/terms" do
+    get "/hevy-tracker/terms"
+    assert_redirected_to "/projects/hevy-tracker/terms"
+    assert_response :moved_permanently
   end
 
   test "GET /contact returns contact page" do
@@ -27,14 +45,26 @@ class PagesTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "GET /video-captioner returns video captioner page" do
+  test "GET /projects/video-captioner returns video captioner page" do
     get video_captioner_path
     assert_response :success
   end
 
-  test "GET /nasa-exoplanet-explorer returns nasa exoplanet explorer page" do
+  test "GET /video-captioner redirects to /projects/video-captioner" do
+    get "/video-captioner"
+    assert_redirected_to "/projects/video-captioner"
+    assert_response :moved_permanently
+  end
+
+  test "GET /projects/nasa-exoplanet-explorer returns nasa exoplanet explorer page" do
     get nasa_exoplanet_explorer_path
     assert_response :success
+  end
+
+  test "GET /nasa-exoplanet-explorer redirects to /projects/nasa-exoplanet-explorer" do
+    get "/nasa-exoplanet-explorer"
+    assert_redirected_to "/projects/nasa-exoplanet-explorer"
+    assert_response :moved_permanently
   end
 
   test "GET /robots.txt returns robots.txt with correct content type and caching" do
@@ -50,4 +80,3 @@ class PagesTest < ActionDispatch::IntegrationTest
     assert (cache_control.include?("max-age=21600") || cache_control.include?("max-age=3600"))
   end
 end
-

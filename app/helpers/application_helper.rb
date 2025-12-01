@@ -199,7 +199,7 @@ module ApplicationHelper
       "profile"
     else
       # For project pages, use article type
-      if request.path.match?(/\/(video-captioner|nasa-exoplanet-explorer|hevy-tracker)/)
+      if request.path.match?(/\/projects\/(video-captioner|nasa-exoplanet-explorer|hevy-tracker)/)
         "article"
       else
         "website"
