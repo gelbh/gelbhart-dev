@@ -4,7 +4,11 @@
   page_title_value = content_for?(:title) ? yield(:title) : page_title("")
   page_meta_description = content_for?(:meta_description) ? yield(:meta_description) : default_meta_description
   page_url = request.original_url
-  social_image_url = asset_url('logos/source/logo_social.svg')
+  social_image = social_image_url
+  social_image_dims = social_image_dimensions
+  og_type_value = og_type
+  page_updated_time = content_for?(:updated_time) ? yield(:updated_time) : Time.current.iso8601
+  page_keywords = content_for?(:keywords) ? yield(:keywords) : nil
 %>
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
@@ -66,22 +70,34 @@
     <meta name="author" content="Tomer Gelbhart - Full-Stack Developer, MSc Computer Science Student at UCD">
     <meta name="language" content="English">
     <meta name="robots" content="index, follow">
+    <% if page_keywords.present? %>
+      <meta name="keywords" content="<%= page_keywords %>">
+    <% end %>
     <link rel="canonical" href="<%= page_url %>">
     <%# Open Graph Meta Tags %>
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="<%= og_type_value %>">
     <meta property="og:locale" content="en_IE">
     <meta property="og:site_name" content="gelbhart.dev">
     <meta property="og:url" content="<%= page_url %>">
     <meta property="og:title" content="<%= page_title_value %>">
     <meta property="og:description" content="<%= page_meta_description %>">
-    <meta property="og:image" content="<%= social_image_url %>">
+    <meta property="og:image" content="<%= social_image %>">
+    <meta property="og:image:secure_url" content="<%= social_image.gsub('http://', 'https://') %>">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="<%= social_image_dims[:width] %>">
+    <meta property="og:image:height" content="<%= social_image_dims[:height] %>">
     <meta property="og:image:alt" content="Tomer Gelbhart - Full-Stack Developer Portfolio">
+    <meta property="og:updated_time" content="<%= page_updated_time %>">
+    <% if og_type_value == 'article' %>
+      <meta property="article:author" content="Tomer Gelbhart">
+    <% end %>
     <%# Twitter Card Meta Tags %>
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="<%= page_url %>">
     <meta name="twitter:title" content="<%= page_title_value %>">
     <meta name="twitter:description" content="<%= page_meta_description %>">
-    <meta name="twitter:image" content="<%= social_image_url %>">
+    <meta name="twitter:image" content="<%= social_image %>">
+    <meta name="twitter:image:alt" content="Tomer Gelbhart - Full-Stack Developer Portfolio">
     <%# Additional Meta Tags %>
     <meta name="theme-color" content="#0d6efd">
     <meta name="format-detection" content="telephone=no">
@@ -126,6 +142,15 @@
     <%= render_structured_data(person_structured_data) %>
     <%= render_structured_data(website_structured_data) %>
     <%= render_structured_data(organization_structured_data) %>
+    <%# WebPage structured data for current page %>
+    <% webpage_data = webpage_structured_data(
+      name: page_title_value,
+      url: page_url,
+      description: page_meta_description,
+      date_published: content_for?(:date_published) ? yield(:date_published) : nil,
+      date_modified: content_for?(:date_modified) ? yield(:date_modified) : nil
+    ) %>
+    <%= render_structured_data(webpage_data) %>
     <%# Page-specific structured data can be added via content_for :structured_data %>
     <% if content_for?(:structured_data) %>
       <%= yield(:structured_data) %>
