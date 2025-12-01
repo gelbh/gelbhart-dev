@@ -5,8 +5,10 @@ module ApplicationHelper
   end
 
   def meta_description(description)
-    # Ensure description is under 160 characters for SEO
-    content_for :meta_description, description.truncate(160)
+    # Optimize description length for SEO (optimal range: 155-160 characters)
+    # Truncate at 157 to leave room for ellipsis and ensure it stays within limits
+    optimized = description.length > 157 ? description.truncate(157, separator: " ", omission: "") : description
+    content_for :meta_description, optimized.strip
   end
 
   def project_link_url(project)
@@ -103,16 +105,18 @@ module ApplicationHelper
 
   def breadcrumb_structured_data(items)
     # items should be an array of hashes with :name and :url keys
-    # Example: [{ name: "Home", url: "/" }, { name: "Projects", url: "/projects" }]
+    # Example: [{ name: "Home", url: "/" }, { name: "Projects", url: "/projects" }, { name: "Current Page", url: nil }]
+    # For items with nil URLs (typically the current page), use the current request URL
     {
       "@context" => "https://schema.org",
       "@type" => "BreadcrumbList",
       "itemListElement" => items.map.with_index do |item, index|
+        url = item[:url] || request.original_url
         {
           "@type" => "ListItem",
           "position" => index + 1,
           "name" => item[:name],
-          "item" => item[:url].start_with?("http") ? item[:url] : "https://gelbhart.dev#{item[:url]}"
+          "item" => (url.present? && url.start_with?("http")) ? url : "https://gelbhart.dev#{url}"
         }
       end
     }
@@ -179,5 +183,169 @@ module ApplicationHelper
 
   def render_structured_data(data)
     content_tag :script, data.to_json.html_safe, type: "application/ld+json"
+  end
+
+  # SEO Helper Methods
+
+  # Determine Open Graph type based on current page
+  def og_type
+    # Use page-specific OG type if provided, otherwise default based on route
+    return content_for(:og_type) if content_for?(:og_type)
+
+    case request.path
+    when "/"
+      "website"
+    when "/contact"
+      "profile"
+    else
+      # For project pages, use article type
+      if request.path.match?(/\/(video-captioner|nasa-exoplanet-explorer|hevy-tracker)/)
+        "article"
+      else
+        "website"
+      end
+    end
+  end
+
+  # Get social media image URL (prefer PNG for better compatibility)
+  def social_image_url
+    # Allow page-specific social image override
+    return content_for(:social_image_url) if content_for?(:social_image_url)
+
+    # Use PNG version for better social media compatibility
+    asset_url("logos/social/logo_social.png")
+  end
+
+  # Get social image dimensions (standard OG image size)
+  def social_image_dimensions
+    { width: 1200, height: 630 }
+  end
+
+  # Generate WebPage structured data for individual pages
+  def webpage_structured_data(name:, url:, description: nil, date_published: nil, date_modified: nil, author: nil)
+    data = {
+      "@context" => "https://schema.org",
+      "@type" => "WebPage",
+      "name" => name,
+      "url" => (url.present? && url.start_with?("http")) ? url : "https://gelbhart.dev#{url}"
+    }
+
+    data["description"] = description if description.present?
+    data["datePublished"] = date_published.iso8601 if date_published.present?
+    data["dateModified"] = date_modified.iso8601 if date_modified.present?
+
+    if author.present?
+      data["author"] = author.is_a?(Hash) ? author : {
+        "@type" => "Person",
+        "name" => author.to_s
+      }
+    else
+      # Default author
+      data["author"] = {
+        "@type" => "Person",
+        "name" => "Tomer Gelbhart",
+        "url" => "https://gelbhart.dev"
+      }
+    end
+
+    # Add publisher (organization)
+    data["publisher"] = {
+      "@type" => "Organization",
+      "name" => "gelbhart.dev",
+      "logo" => {
+        "@type" => "ImageObject",
+        "url" => asset_url("logos/source/logo_social.svg")
+      }
+    }
+
+    # Add main entity if homepage
+    if url == "/" || url == "https://gelbhart.dev" || url == "https://gelbhart.dev/"
+      data["mainEntity"] = {
+        "@type" => "WebSite",
+        "@id" => "https://gelbhart.dev"
+      }
+    end
+
+    data
+  end
+
+  # Generate Article structured data for project pages and blog posts
+  def article_structured_data(title:, url:, description:, date_published: nil, date_modified: nil, image: nil, author: nil, keywords: nil)
+    data = {
+      "@context" => "https://schema.org",
+      "@type" => "Article",
+      "headline" => title,
+      "url" => (url.present? && url.start_with?("http")) ? url : "https://gelbhart.dev#{url}",
+      "description" => description
+    }
+
+    data["datePublished"] = date_published.iso8601 if date_published.present?
+    data["dateModified"] = date_modified.iso8601 if date_modified.present?
+    data["keywords"] = keywords if keywords.present?
+
+    if author.present?
+      data["author"] = author.is_a?(Hash) ? author : {
+        "@type" => "Person",
+        "name" => author.to_s
+      }
+    else
+      data["author"] = {
+        "@type" => "Person",
+        "name" => "Tomer Gelbhart",
+        "url" => "https://gelbhart.dev",
+        "sameAs" => [
+          "https://www.linkedin.com/in/tomer-gelbhart/",
+          "https://github.com/gelbh"
+        ]
+      }
+    end
+
+    # Add publisher
+    data["publisher"] = {
+      "@type" => "Organization",
+      "name" => "gelbhart.dev",
+      "logo" => {
+        "@type" => "ImageObject",
+        "url" => asset_url("logos/source/logo_social.svg")
+      }
+    }
+
+    # Add image if provided
+    if image.present?
+      image_url = image.is_a?(Hash) ? image[:url] : image
+      image_dims = image.is_a?(Hash) && image[:width] ? { width: image[:width], height: image[:height] } : social_image_dimensions
+
+      data["image"] = {
+        "@type" => "ImageObject",
+        "url" => (image_url.present? && image_url.start_with?("http")) ? image_url : asset_url(image_url),
+        "width" => image_dims[:width],
+        "height" => image_dims[:height]
+      }
+    end
+
+    data
+  end
+
+  # Generate ImageObject structured data for better image SEO
+  def image_object_structured_data(url:, width: nil, height: nil, caption: nil, alt_text: nil, content_url: nil)
+    image_url = (url.present? && url.start_with?("http")) ? url : asset_url(url)
+    dims = width && height ? { width: width, height: height } : social_image_dimensions
+
+    data = {
+      "@context" => "https://schema.org",
+      "@type" => "ImageObject",
+      "url" => image_url,
+      "width" => dims[:width],
+      "height" => dims[:height]
+    }
+
+    data["caption"] = caption if caption.present?
+    data["alternateName"] = alt_text if alt_text.present?
+    data["contentUrl"] = (content_url.present? && content_url.start_with?("http")) ? content_url : asset_url(content_url) if content_url.present?
+
+    # Add license if needed
+    data["license"] = "https://gelbhart.dev"
+
+    data
   end
 end
