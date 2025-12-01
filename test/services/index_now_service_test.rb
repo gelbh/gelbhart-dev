@@ -1,4 +1,5 @@
 require "test_helper"
+require "digest"
 
 class IndexNowServiceTest < ActiveSupport::TestCase
   setup do
@@ -56,11 +57,12 @@ class IndexNowServiceTest < ActiveSupport::TestCase
 
     stub_request = WebMock.stub_request(:post, "https://api.indexnow.org/IndexNow")
       .with(
-        body: hash_including(
-          host: "https://gelbhart.dev",
-          key: @test_api_key,
-          urlList: [ "https://gelbhart.dev/test" ]
-        ),
+        body: ->(body) {
+          json = JSON.parse(body)
+          json["host"] == "https://gelbhart.dev" &&
+          json["key"] == @test_api_key &&
+          json["urlList"] == [ "https://gelbhart.dev/test" ]
+        },
         headers: {
           "Content-Type" => "application/json"
         }
@@ -86,11 +88,12 @@ class IndexNowServiceTest < ActiveSupport::TestCase
 
     stub_request = WebMock.stub_request(:post, "https://api.indexnow.org/IndexNow")
       .with(
-        body: hash_including(
-          host: "https://gelbhart.dev",
-          key: @test_api_key,
-          urlList: urls
-        )
+        body: ->(body) {
+          json = JSON.parse(body)
+          json["host"] == "https://gelbhart.dev" &&
+          json["key"] == @test_api_key &&
+          json["urlList"].sort == urls.sort
+        }
       )
       .to_return(status: 202, body: "")
 
@@ -104,12 +107,16 @@ class IndexNowServiceTest < ActiveSupport::TestCase
 
   test "notify normalizes relative URLs to absolute" do
     Rails.env.stubs(:production?).returns(true)
+    # Set default_url_options for URL normalization
+    original_options = Rails.application.config.action_mailer.default_url_options
+    Rails.application.config.action_mailer.default_url_options = { host: "gelbhart.dev" }
 
     stub_request = WebMock.stub_request(:post, "https://api.indexnow.org/IndexNow")
       .with(
-        body: hash_including(
-          urlList: array_including(match(/^https:\/\/gelbhart\.dev/))
-        )
+        body: ->(body) {
+          json = JSON.parse(body)
+          json["urlList"].any? { |url| url.start_with?("https://gelbhart.dev") }
+        }
       )
       .to_return(status: 202, body: "")
 
@@ -119,6 +126,7 @@ class IndexNowServiceTest < ActiveSupport::TestCase
     assert_requested stub_request
   ensure
     Rails.env.unstub(:production?) if Rails.env.respond_to?(:unstub)
+    Rails.application.config.action_mailer.default_url_options = original_options if defined?(original_options)
   end
 
   test "notify handles HTTP errors gracefully" do
@@ -131,7 +139,7 @@ class IndexNowServiceTest < ActiveSupport::TestCase
 
     assert_equal false, result
   ensure
-    Rails.env.unstub(:production?).returns(false) if Rails.env.respond_to?(:unstub)
+    Rails.env.unstub(:production?) if Rails.env.respond_to?(:unstub)
   end
 
   test "notify handles network errors gracefully" do
@@ -163,21 +171,31 @@ class IndexNowServiceTest < ActiveSupport::TestCase
   test "notify implements rate limiting" do
     Rails.env.stubs(:production?).returns(true)
 
+    # Use memory store for this test since test environment uses null_store
+    original_cache = Rails.cache
+    Rails.cache = ActiveSupport::Cache::MemoryStore.new
+
     # First notification should succeed
-    WebMock.stub_request(:post, "https://api.indexnow.org/IndexNow")
+    stub1 = WebMock.stub_request(:post, "https://api.indexnow.org/IndexNow")
       .to_return(status: 202, body: "")
 
     result1 = @service.notify("https://gelbhart.dev/test")
     assert_equal true, result1
+    assert_requested stub1, times: 1
+
+    # Verify the URL is now in the rate limit cache
+    cache_key = "indexnow:rate_limit:#{Digest::MD5.hexdigest('https://gelbhart.dev/test')}"
+    assert Rails.cache.exist?(cache_key), "URL should be in rate limit cache"
 
     # Second notification for same URL should be rate limited (skipped)
     result2 = @service.notify("https://gelbhart.dev/test")
-    assert_equal false, result2
+    assert_equal false, result2, "Second notification should be rate limited and return false"
 
-    # Verify only one request was made
-    assert_requested :post, "https://api.indexnow.org/IndexNow", times: 1
+    # Verify no additional request was made (still only 1 total)
+    assert_requested stub1, times: 1
   ensure
     Rails.env.unstub(:production?) if Rails.env.respond_to?(:unstub)
+    Rails.cache = original_cache if defined?(original_cache)
   end
 
   test "notify removes duplicate URLs" do
@@ -191,9 +209,10 @@ class IndexNowServiceTest < ActiveSupport::TestCase
 
     stub_request = WebMock.stub_request(:post, "https://api.indexnow.org/IndexNow")
       .with(
-        body: hash_including(
-          urlList: [ "https://gelbhart.dev/test" ]
-        )
+        body: ->(body) {
+          json = JSON.parse(body)
+          json["urlList"] == [ "https://gelbhart.dev/test" ]
+        }
       )
       .to_return(status: 202, body: "")
 
@@ -218,9 +237,13 @@ class IndexNowServiceTest < ActiveSupport::TestCase
 
     stub_request = WebMock.stub_request(:post, "https://api.indexnow.org/IndexNow")
       .with(
-        body: hash_including(
-          urlList: array_including("https://gelbhart.dev/test", "https://gelbhart.dev/test2")
-        )
+        body: ->(body) {
+          json = JSON.parse(body)
+          url_list = json["urlList"]
+          url_list.include?("https://gelbhart.dev/test") &&
+          url_list.include?("https://gelbhart.dev/test2") &&
+          url_list.size == 2
+        }
       )
       .to_return(status: 202, body: "")
 
