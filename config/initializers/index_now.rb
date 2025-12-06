@@ -4,8 +4,9 @@
 # search engines (Bing, Yandex, Naver, Seznam.cz, Yep) about content changes.
 #
 # Configuration:
-# - INDEXNOW_API_KEY: Your IndexNow API key (32-character hex string)
+# - indexnow_api_key: Your IndexNow API key (32-character hex string) in Rails credentials
 #   Generate with: rails indexnow:generate_key
+#   Add to credentials: EDITOR='code --wait' rails credentials:edit
 #
 # The key file must be accessible at: https://gelbhart.dev/{key}.txt
 #
