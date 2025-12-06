@@ -103,6 +103,42 @@ module ApplicationHelper
     }
   end
 
+  # Normalize URL for structured data: ensure absolute URL, strip query params and fragments
+  def normalize_breadcrumb_url(url)
+    return nil if url.blank?
+
+    # If already absolute URL, parse and normalize it
+    if url.to_s.start_with?("http://", "https://")
+      begin
+        uri = URI.parse(url.to_s)
+        # Reconstruct URL without query params, fragments, and port (use standard ports)
+        scheme = uri.scheme || "https"
+        host = uri.host || "gelbhart.dev"
+        path = uri.path.presence || "/"
+
+        # Remove trailing slash except for root
+        path = path.chomp("/") unless path == "/"
+
+        # Build normalized URL
+        normalized = "#{scheme}://#{host}#{path}"
+        normalized
+      rescue URI::InvalidURIError, URI::BadURIError
+        # Fallback: if URL parsing fails, try basic normalization
+        cleaned = url.to_s.strip.gsub(/\?.*$/, "").gsub(/#.*$/, "")
+        # Ensure it's still a valid absolute URL
+        cleaned.start_with?("http://", "https://") ? cleaned : "https://gelbhart.dev#{cleaned.start_with?("/") ? cleaned : "/#{cleaned}"}"
+      end
+    else
+      # Relative URL - prepend domain
+      path = url.to_s.start_with?("/") ? url.to_s : "/#{url}"
+      # Remove query params and fragments from relative URLs
+      path = path.split("?").first.split("#").first
+      # Remove trailing slash except for root
+      path = path.chomp("/") unless path == "/"
+      "https://gelbhart.dev#{path}"
+    end
+  end
+
   def breadcrumb_structured_data(items)
     # items should be an array of hashes with :name and :url keys
     # Example: [{ name: "Home", url: "/" }, { name: "Projects", url: "/projects" }, { name: "Current Page", url: nil }]
@@ -111,14 +147,23 @@ module ApplicationHelper
       "@context" => "https://schema.org",
       "@type" => "BreadcrumbList",
       "itemListElement" => items.map.with_index do |item, index|
-        url = item[:url] || request.original_url
+        # Get URL: use provided URL or fall back to current request URL
+        raw_url = item[:url] || request.original_url
+        normalized_url = normalize_breadcrumb_url(raw_url)
+
+        # Ensure we have a valid URL
+        next nil if normalized_url.blank?
+
         {
           "@type" => "ListItem",
           "position" => index + 1,
           "name" => item[:name],
-          "item" => (url.present? && url.start_with?("http")) ? url : "https://gelbhart.dev#{url}"
+          "item" => {
+            "@id" => normalized_url,
+            "name" => item[:name]
+          }
         }
-      end
+      end.compact
     }
   end
 
