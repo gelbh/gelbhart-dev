@@ -27,12 +27,13 @@ bundle exec rake assets:clean
 # Generate sitemap
 bundle exec rake sitemap:generate
 
-# Generate IndexNow key file if API key is set
+# Generate IndexNow key file if API key is set in Rails credentials
 # The key file must be publicly accessible at https://gelbhart.dev/{key}.txt
+INDEXNOW_API_KEY=$(bundle exec rails runner "puts Rails.application.credentials.indexnow_api_key" 2>/dev/null || echo "")
 if [ -n "$INDEXNOW_API_KEY" ]; then
   echo "Generating IndexNow key file..."
   echo "$INDEXNOW_API_KEY" > public/${INDEXNOW_API_KEY}.txt
   echo "IndexNow key file created: public/${INDEXNOW_API_KEY}.txt"
 else
-  echo "Warning: INDEXNOW_API_KEY not set, skipping IndexNow key file generation"
+  echo "Warning: indexnow_api_key not set in Rails credentials, skipping IndexNow key file generation"
 fi
