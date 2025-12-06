@@ -4,17 +4,20 @@ require "digest"
 class IndexNowServiceTest < ActiveSupport::TestCase
   setup do
     @service = IndexNowService.new
-    @original_env = ENV.to_h.dup
     @test_api_key = "test_api_key_12345678901234567890"
-    ENV["INDEXNOW_API_KEY"] = @test_api_key
+
+    # Stub Rails credentials
+    @mock_credentials = OpenStruct.new(
+      indexnow_api_key: @test_api_key
+    )
+    Rails.application.stubs(:credentials).returns(@mock_credentials)
 
     # Clear cache before each test
     Rails.cache.clear
   end
 
   teardown do
-    ENV.clear
-    ENV.update(@original_env)
+    Rails.application.unstub(:credentials) if Rails.application.respond_to?(:unstub)
     WebMock.reset!
     Rails.cache.clear
   end
@@ -33,7 +36,7 @@ class IndexNowServiceTest < ActiveSupport::TestCase
 
   test "notify returns false when API key is missing" do
     Rails.env.stubs(:production?).returns(true)
-    ENV.delete("INDEXNOW_API_KEY")
+    @mock_credentials.indexnow_api_key = nil
 
     result = @service.notify("https://gelbhart.dev/test")
 

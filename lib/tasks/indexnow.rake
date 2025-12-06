@@ -18,8 +18,9 @@ namespace :indexnow do
     puts "Key file created: #{key_file_path}"
     puts ""
     puts "Next steps:"
-    puts "1. Set the following environment variable:"
-    puts "   INDEXNOW_API_KEY=#{api_key}"
+    puts "1. Add the key to Rails credentials:"
+    puts "   EDITOR='code --wait' rails credentials:edit"
+    puts "   Then add: indexnow_api_key: #{api_key}"
     puts ""
     puts "2. Verify the key file is accessible at:"
     puts "   https://gelbhart.dev/#{api_key}.txt"
@@ -29,10 +30,11 @@ namespace :indexnow do
 
   desc "Verify IndexNow key file exists and is accessible"
   task verify_key: :environment do
-    api_key = ENV["INDEXNOW_API_KEY"]&.strip
+    api_key = Rails.application.credentials.indexnow_api_key&.strip
 
     if api_key.blank?
-      puts "ERROR: INDEXNOW_API_KEY environment variable is not set"
+      puts "ERROR: indexnow_api_key not set in Rails credentials"
+      puts "Add to credentials: EDITOR='code --wait' rails credentials:edit"
       exit 1
     end
 
@@ -47,7 +49,7 @@ namespace :indexnow do
     file_content = File.read(key_file_path).strip
 
     unless file_content == api_key
-      puts "ERROR: Key file content does not match INDEXNOW_API_KEY"
+      puts "ERROR: Key file content does not match Rails credentials"
       puts "Expected: #{api_key}"
       puts "Found: #{file_content}"
       exit 1
@@ -65,10 +67,11 @@ namespace :indexnow do
     require "json"
     require "uri"
 
-    api_key = ENV["INDEXNOW_API_KEY"]&.strip
+    api_key = Rails.application.credentials.indexnow_api_key&.strip
 
     if api_key.blank?
-      puts "ERROR: INDEXNOW_API_KEY environment variable is not set"
+      puts "ERROR: indexnow_api_key not set in Rails credentials"
+      puts "Add to credentials: EDITOR='code --wait' rails credentials:edit"
       exit 1
     end
 

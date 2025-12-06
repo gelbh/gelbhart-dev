@@ -85,7 +85,7 @@ class IndexNowService
   end
 
   def fetch_api_key
-    ENV["INDEXNOW_API_KEY"]&.strip.presence
+    Rails.application.credentials.indexnow_api_key&.strip.presence
   end
 
   def send_notification(urls, api_key)
