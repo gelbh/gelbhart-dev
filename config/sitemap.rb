@@ -2,7 +2,7 @@
 require "sitemap_generator"
 
 # Use environment-aware domain with fallback
-base_host = ENV.fetch("SITEMAP_HOST", nil) ||
+base_host = Rails.application.credentials.sitemap_host ||
             Rails.application.config.action_mailer.default_url_options[:host] ||
             "gelbhart.dev"
 

@@ -124,13 +124,14 @@ namespace :analytics do
 
   desc "Test Google Analytics connection"
   task test: :environment do
-    unless ENV["GA4_PROPERTY_ID"]
-      puts "Error: GA4_PROPERTY_ID environment variable not set"
+    property_id = Rails.application.credentials.ga4_property_id
+    unless property_id
+      puts "Error: ga4_property_id not set in Rails credentials"
       exit 1
     end
 
     puts "Testing Google Analytics connection..."
-    puts "Property ID: #{ENV['GA4_PROPERTY_ID']}"
+    puts "Property ID: #{property_id}"
 
     begin
       service = GoogleAnalyticsService.new

@@ -7,11 +7,10 @@ require "rexml/document"
 
 class PageSpeedService
   API_BASE_URL = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed"
-  API_KEY = ENV["PAGESPEED_API_KEY"]
   DEFAULT_HOST = "https://gelbhart.dev"
 
   def initialize
-    @api_key = API_KEY
+    @api_key = Rails.application.credentials.pagespeed_api_key
   end
 
   def analyze_url(url, strategy: "desktop")

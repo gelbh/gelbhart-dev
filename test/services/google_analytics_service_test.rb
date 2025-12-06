@@ -3,8 +3,16 @@ require "ostruct"
 
 class GoogleAnalyticsServiceTest < ActiveSupport::TestCase
   setup do
-    @original_env = ENV.to_h.dup
-    ENV["GA4_PROPERTY_ID"] = "test-property-id"
+    # Stub Rails credentials
+    @mock_credentials = OpenStruct.new(
+      ga4_property_id: "test-property-id",
+      google_oauth_client_id: "test-client-id",
+      google_oauth_client_secret: "test-client-secret",
+      google_oauth_refresh_token: "test-refresh-token",
+      google_oauth_access_token: "test-access-token"
+    )
+    Rails.application.stubs(:credentials).returns(@mock_credentials)
+
     # Stub WebMock to prevent real HTTP requests during initialization
     WebMock.stub_request(:post, /oauth2\.googleapis\.com/).to_return(
       status: 200,
@@ -14,8 +22,7 @@ class GoogleAnalyticsServiceTest < ActiveSupport::TestCase
   end
 
   teardown do
-    ENV.clear
-    ENV.update(@original_env)
+    Rails.application.unstub(:credentials) if Rails.application.respond_to?(:unstub)
     WebMock.reset!
   end
 

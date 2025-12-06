@@ -60,7 +60,7 @@ module Api
     private
 
     def authenticate_token
-      expected_token = ENV["PAGESPEED_API_TOKEN"]
+      expected_token = Rails.application.credentials.pagespeed_api_token
 
       # If token is not configured, allow access (for development)
       return if expected_token.blank?

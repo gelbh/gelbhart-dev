@@ -6,8 +6,11 @@ require "signet/oauth_2/client"
 require "json"
 
 class GoogleAnalyticsService
-  PROPERTY_ID = ENV["GA4_PROPERTY_ID"]
   SCOPE = "https://www.googleapis.com/auth/analytics.readonly"
+
+  def self.property_id
+    Rails.application.credentials.ga4_property_id
+  end
 
   def initialize
     @initialization_error = nil
@@ -80,13 +83,13 @@ class GoogleAnalyticsService
     end
 
     # Check if PROPERTY_ID is missing (defensive check)
-    unless PROPERTY_ID.present?
+    unless self.class.property_id.present?
       if Rails.env.development?
         Rails.logger.warn "Using mock data: PROPERTY_ID is not set"
         return mock_stats
       else
         Rails.logger.error "PROPERTY_ID is missing in production"
-        raise StandardError.new("GA4_PROPERTY_ID environment variable is not set")
+        raise StandardError.new("ga4_property_id is not set in Rails credentials")
       end
     end
 
@@ -112,19 +115,13 @@ class GoogleAnalyticsService
   private
 
   def credentials_present?
-    PROPERTY_ID.present? && oauth_credentials_present?
+    self.class.property_id.present? && oauth_credentials_present?
   end
 
   def oauth_credentials_present?
-    # Check for environment variables (production) or files (development)
-    env_vars_present = ENV["GOOGLE_OAUTH_CLIENT_ID"].present? &&
-                       ENV["GOOGLE_OAUTH_CLIENT_SECRET"].present? &&
-                       ENV["GOOGLE_OAUTH_REFRESH_TOKEN"].present?
-
-    files_present = ENV["GOOGLE_OAUTH_CREDENTIALS"].present? &&
-                    File.exist?(Rails.root.join("config", "analytics-tokens.yaml"))
-
-    env_vars_present || files_present
+    Rails.application.credentials.google_oauth_client_id.present? &&
+      Rails.application.credentials.google_oauth_client_secret.present? &&
+      Rails.application.credentials.google_oauth_refresh_token.present?
   end
 
   def get_credentials
@@ -132,44 +129,24 @@ class GoogleAnalyticsService
   end
 
   def get_oauth_credentials
-    # Try environment variables first (for production)
-    if ENV["GOOGLE_OAUTH_CLIENT_ID"].present? && ENV["GOOGLE_OAUTH_CLIENT_SECRET"].present? && ENV["GOOGLE_OAUTH_REFRESH_TOKEN"].present?
-      return get_oauth_credentials_from_env
-    end
+    return nil unless Rails.application.credentials.google_oauth_client_id.present? &&
+                       Rails.application.credentials.google_oauth_client_secret.present? &&
+                       Rails.application.credentials.google_oauth_refresh_token.present?
 
-    # Fall back to file-based credentials (for development)
-    return nil unless ENV["GOOGLE_OAUTH_CREDENTIALS"].present?
-    return nil unless File.exist?(ENV["GOOGLE_OAUTH_CREDENTIALS"])
-
-    # Load credentials and handle both web and installed app formats
-    creds_data = JSON.parse(File.read(ENV["GOOGLE_OAUTH_CREDENTIALS"]))
-    client_info = creds_data["web"] || creds_data["installed"]
-
-    unless client_info
-      Rails.logger.error "Invalid OAuth credentials format"
-      return nil
-    end
-
-    client_id = Google::Auth::ClientId.new(client_info["client_id"], client_info["client_secret"])
-    token_store = Google::Auth::Stores::FileTokenStore.new(
-      file: Rails.root.join("config", "analytics-tokens.yaml").to_s
-    )
-
-    authorizer = Google::Auth::UserAuthorizer.new(client_id, SCOPE, token_store)
-    authorizer.get_credentials("default")
+    get_oauth_credentials_from_rails
   end
 
-  def get_oauth_credentials_from_env
-    # Create credentials directly from environment variables
+  def get_oauth_credentials_from_rails
+    # Create credentials directly from Rails credentials
     token_data = {
-      "client_id" => ENV["GOOGLE_OAUTH_CLIENT_ID"],
-      "access_token" => ENV["GOOGLE_OAUTH_ACCESS_TOKEN"],
-      "refresh_token" => ENV["GOOGLE_OAUTH_REFRESH_TOKEN"],
+      "client_id" => Rails.application.credentials.google_oauth_client_id,
+      "access_token" => Rails.application.credentials.google_oauth_access_token,
+      "refresh_token" => Rails.application.credentials.google_oauth_refresh_token,
       "scope" => [ SCOPE ],
       "expiration_time_millis" => (Time.now + 3600).to_i * 1000
     }
 
-    # Create a mock token store that returns our env-based credentials
+    # Create a mock token store that returns our credentials-based token data
     mock_store = Object.new
     def mock_store.load(id)
       # Return the token JSON that was set in the instance variable
@@ -178,8 +155,8 @@ class GoogleAnalyticsService
     mock_store.instance_variable_set(:@token_json, token_data.to_json)
 
     client_id = Google::Auth::ClientId.new(
-      ENV["GOOGLE_OAUTH_CLIENT_ID"],
-      ENV["GOOGLE_OAUTH_CLIENT_SECRET"]
+      Rails.application.credentials.google_oauth_client_id,
+      Rails.application.credentials.google_oauth_client_secret
     )
 
     authorizer = Google::Auth::UserAuthorizer.new(client_id, SCOPE, mock_store)
@@ -190,7 +167,7 @@ class GoogleAnalyticsService
     return 0 unless @client
 
     response = @client.run_report(
-      property: "properties/#{PROPERTY_ID}",
+      property: "properties/#{self.class.property_id}",
       date_ranges: [ { start_date: "2024-11-19", end_date: "today" } ],
       metrics: [ { name: "totalUsers" } ]
     )
@@ -205,7 +182,7 @@ class GoogleAnalyticsService
     return 0 unless @client
 
     response = @client.run_report(
-      property: "properties/#{PROPERTY_ID}",
+      property: "properties/#{self.class.property_id}",
       date_ranges: [ { start_date: "2024-11-19", end_date: "today" } ],
       metrics: [ { name: "screenPageViews" } ]
     )
@@ -220,7 +197,7 @@ class GoogleAnalyticsService
     return { list: [], total: 0 } unless @client
 
     response = @client.run_report(
-      property: "properties/#{PROPERTY_ID}",
+      property: "properties/#{self.class.property_id}",
       date_ranges: [ { start_date: "2024-11-19", end_date: "today" } ],
       dimensions: [ { name: "country" } ],
       metrics: [ { name: "totalUsers" } ],
@@ -251,7 +228,7 @@ class GoogleAnalyticsService
     return 0 unless @client
 
     response = @client.run_report(
-      property: "properties/#{PROPERTY_ID}",
+      property: "properties/#{self.class.property_id}",
       date_ranges: [ { start_date: "2024-11-19", end_date: "today" } ],
       metrics: [ { name: "engagementRate" } ]
     )
@@ -267,7 +244,7 @@ class GoogleAnalyticsService
     return 0 unless @client
 
     response = @client.run_report(
-      property: "properties/#{PROPERTY_ID}",
+      property: "properties/#{self.class.property_id}",
       date_ranges: [ { start_date: "2024-11-19", end_date: "today" } ],
       dimensions: [ { name: "eventName" } ],
       metrics: [ { name: "eventCount" } ],
