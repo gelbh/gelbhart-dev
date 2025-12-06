@@ -11,17 +11,10 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[8.1].define(version: 2025_12_03_140407) do
-  create_schema "extensions"
-
   # These are extensions that must be enabled in order to support this database
-  enable_extension "extensions.pg_stat_statements"
-  enable_extension "extensions.pgcrypto"
-  enable_extension "extensions.uuid-ossp"
-  enable_extension "graphql.pg_graphql"
   enable_extension "pg_catalog.plpgsql"
-  enable_extension "vault.supabase_vault"
 
-  create_table "public.pacman_scores", force: :cascade do |t|
+  create_table "pacman_scores", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.boolean "is_win"
     t.datetime "played_at"
@@ -32,7 +25,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_03_140407) do
     t.index ["score"], name: "index_pacman_scores_on_score_desc", order: :desc
   end
 
-  create_table "public.projects", force: :cascade do |t|
+  create_table "projects", force: :cascade do |t|
     t.jsonb "badges", default: []
     t.string "color"
     t.datetime "created_at", null: false
@@ -55,5 +48,4 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_03_140407) do
     t.index ["position"], name: "index_projects_on_position"
     t.index ["published"], name: "index_projects_on_published"
   end
-
 end
