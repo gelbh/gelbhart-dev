@@ -61,6 +61,27 @@ project.assign_attributes(
 )
 project.save!
 
+project = Project.find_or_initialize_by(title: 'Google Maps Converter')
+project.assign_attributes(
+  subtitle: 'V1 to V2 Style Converter',
+  description: 'Convert Google Maps JavaScript API V1 style JSON to V2 CBMS format. Free online tool for migrating custom map styles to the latest Google Maps API.',
+  icon: 'bx-map',
+  color: 'primary',
+  link_text: 'Learn More',
+  link_url: '/projects/google-maps-converter',
+  route_name: 'google_maps_converter',
+  github_url: 'https://github.com/gelbh/google-maps-converter',
+  badges: [
+    { text: 'JavaScript', color: 'warning', url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript' },
+    { text: 'Google Maps API', color: 'danger', url: 'https://developers.google.com/maps' },
+    { text: 'CodeMirror', color: 'info', url: 'https://codemirror.net/' }
+  ],
+  position: 4,
+  published: true,
+  featured: true
+)
+project.save!
+
 project = Project.find_or_initialize_by(title: 'Robot Motion Planning')
 project.assign_attributes(
   subtitle: 'MATLAB Application',
@@ -77,7 +98,7 @@ project.assign_attributes(
     { text: 'Genetic Algorithm', color: 'info', url: 'https://en.wikipedia.org/wiki/Genetic_algorithm' },
     { text: 'Path Planning', color: 'success', url: 'https://en.wikipedia.org/wiki/Motion_planning' }
   ],
-  position: 4,
+  position: 5,
   published: true,
   featured: true
 )
