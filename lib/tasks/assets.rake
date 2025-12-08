@@ -22,7 +22,7 @@ namespace :assets do
 
     # Run PurgeCSS using config file
     puts "Running PurgeCSS..."
-    success = system("npx purgecss --config purgecss.config.js")
+    success = system("npx purgecss --config .config/purgecss.config.js")
 
     unless success
       # Restore backup on failure

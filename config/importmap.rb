@@ -21,6 +21,10 @@ pin "date-fns/formatDistanceToNow", to: "https://ga.jspm.io/npm:date-fns@4.1.0/f
 pin "date-fns/format", to: "https://ga.jspm.io/npm:date-fns@4.1.0/format.js"
 pin "date-fns/differenceInDays", to: "https://ga.jspm.io/npm:date-fns@4.1.0/differenceInDays.js"
 
+# AJV for JSON schema validation (using CDN)
+# Note: CodeMirror is loaded via script tags in the view, not through importmap
+pin "ajv", to: "https://cdnjs.cloudflare.com/ajax/libs/ajv/8.17.1/ajv7.min.js"
+
 # Controllers
 pin_all_from "app/javascript/controllers", under: "controllers", preload: true
 

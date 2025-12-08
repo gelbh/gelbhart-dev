@@ -1,0 +1,211 @@
+#!/usr/bin/env bash
+#
+# Custom command to clobber assets, precompile, and start the Rails server using Overmind
+#
+
+set -euo pipefail
+
+# Constants
+readonly DEFAULT_PORT=3000
+readonly DEFAULT_PROCFILE="Procfile.dev"
+readonly PID_FILE="tmp/pids/server.pid"
+readonly OVERMIND_SOCKETS=(".overmind.sock" "./tmp/.overmind.sock")
+readonly WINDOWS_TERMINAL_PATH="/mnt/c/Users/gelbh/AppData/Local/Microsoft/WindowsApps/wt.exe"
+
+# Variables
+background=false
+port=$DEFAULT_PORT
+procfile=$DEFAULT_PROCFILE
+temp_procfile=""
+
+# Functions
+
+error_exit() {
+  echo "Error: $1" >&2
+  exit 1
+}
+
+check_rails_directory() {
+  if [[ ! -f "bin/rails" ]]; then
+    error_exit "Not in a Rails application directory"
+  fi
+}
+
+check_overmind_installed() {
+  if ! command -v overmind >/dev/null 2>&1; then
+    echo "Error: Overmind is not installed." >&2
+    echo ""
+    echo "Install it with one of these methods:"
+    echo "  • macOS: brew install overmind"
+    echo "  • Linux: Download from https://github.com/DarthSim/overmind/releases"
+    echo "  • Or install via Go: go install github.com/DarthSim/overmind/v2/cmd/overmind@latest"
+    echo ""
+    exit 1
+  fi
+}
+
+kill_process_by_pid() {
+  local pid=$1
+  if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+    echo "Killing Rails server (PID: $pid)"
+    kill "$pid" 2>/dev/null || true
+    sleep 2
+    if kill -0 "$pid" 2>/dev/null; then
+      kill -9 "$pid" 2>/dev/null || true
+    fi
+    return 0
+  fi
+  return 1
+}
+
+kill_existing_processes() {
+  local killed=false
+
+  for socket in "${OVERMIND_SOCKETS[@]}"; do
+    if [[ -S "$socket" ]]; then
+      if overmind quit 2>/dev/null; then
+        killed=true
+        break
+      fi
+    fi
+  done
+
+  if pkill -f "overmind.*start" 2>/dev/null; then
+    killed=true
+  fi
+
+  if [[ -f "$PID_FILE" ]]; then
+    local pid
+    pid=$(cat "$PID_FILE" 2>/dev/null || echo "")
+    if kill_process_by_pid "$pid"; then
+      killed=true
+    fi
+    rm -f "$PID_FILE"
+  fi
+
+  if pkill -f "bin/rails server" 2>/dev/null; then
+    killed=true
+  fi
+
+  if pkill -f "puma.*rails" 2>/dev/null; then
+    killed=true
+  fi
+
+  if [[ "$killed" == true ]]; then
+    echo "Cleaned up existing processes"
+    sleep 1
+  fi
+}
+
+parse_arguments() {
+  local prev_arg=""
+
+  for arg in "$@"; do
+    case "$arg" in
+      -b|--background)
+        background=true
+        ;;
+      -p|--port)
+        prev_arg="$arg"
+        ;;
+      --port=*)
+        port="${arg#*=}"
+        ;;
+      *)
+        if [[ "$prev_arg" == "-p" ]] || [[ "$prev_arg" == "--port" ]]; then
+          port="$arg"
+          prev_arg=""
+        fi
+        ;;
+    esac
+  done
+}
+
+setup_procfile() {
+  if [[ "$port" != "$DEFAULT_PORT" ]]; then
+    temp_procfile="Procfile.dev.tmp"
+    sed "s/-p $DEFAULT_PORT/-p $port/" "$DEFAULT_PROCFILE" > "$temp_procfile"
+    procfile="$temp_procfile"
+  fi
+}
+
+cleanup_temp_procfile() {
+  if [[ -n "$temp_procfile" ]] && [[ -f "$temp_procfile" ]]; then
+    rm -f "$temp_procfile"
+  fi
+}
+
+find_windows_terminal() {
+  if command -v wt.exe >/dev/null 2>&1; then
+    echo "wt.exe"
+  elif [[ -f "$WINDOWS_TERMINAL_PATH" ]]; then
+    echo "$WINDOWS_TERMINAL_PATH"
+  else
+    echo "wt.exe"
+  fi
+}
+
+open_logs_terminal() {
+  local overmind_path
+  overmind_path="$(command -v overmind 2>/dev/null || echo 'overmind')"
+  local wt_path
+  wt_path="$(find_windows_terminal)"
+  local project_dir
+  project_dir="$(pwd)"
+
+  echo "Opening logs in a new terminal window..."
+  $wt_path wsl.exe bash -c "cd $project_dir && $overmind_path connect" 2>/dev/null &
+  sleep 0.5
+  echo "✓ Logs opened in new terminal window"
+}
+
+start_servers_background() {
+  echo "== Starting servers in background (daemon mode) =="
+  overmind start -f "$procfile" -D
+  sleep 1
+
+  echo ""
+  echo "Servers started in background"
+  echo ""
+  echo "To view logs, open a new WSL terminal and run:"
+  echo "  cd $(pwd)"
+  echo "  $(command -v overmind 2>/dev/null || echo 'overmind') connect"
+  echo ""
+  echo "To stop: overmind quit"
+  echo ""
+  echo "Server will be available at: http://localhost:$port"
+}
+
+start_servers_foreground() {
+  echo "== Starting servers =="
+  echo "Server will be available at: http://localhost:$port"
+  echo ""
+  exec overmind start -f "$procfile"
+}
+
+# Main execution
+
+check_rails_directory
+check_overmind_installed
+
+echo "== Stopping any existing servers =="
+kill_existing_processes
+
+echo ""
+echo "== Clobbering assets =="
+bin/rails assets:clobber
+
+echo ""
+echo "== Precompiling assets =="
+bin/rails assets:precompile
+
+parse_arguments "$@"
+setup_procfile
+trap cleanup_temp_procfile EXIT
+
+echo ""
+if [[ "$background" == true ]]; then
+  start_servers_background
+else
+  start_servers_foreground
+fi

@@ -1,3 +1,16 @@
+// Suppress hotwire-livereload console logs
+const originalConsoleLog = console.log;
+console.log = function (...args) {
+  const message = args[0];
+  if (
+    typeof message === "string" &&
+    message.includes("[Hotwire::Livereload]")
+  ) {
+    return;
+  }
+  originalConsoleLog.apply(console, args);
+};
+
 import "@hotwired/turbo-rails";
 import "controllers";
 import * as bootstrap from "bootstrap";
