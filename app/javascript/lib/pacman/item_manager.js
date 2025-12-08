@@ -4,61 +4,14 @@
  * Handles all item/dot/pellet-related functionality for the Pac-Man game.
  * This includes generation, creation, collision detection, and effect application.
  */
+import { itemTypes } from "lib/pacman/config/item_types";
+
 export class ItemManager {
   constructor(controller) {
     this.controller = controller;
 
-    // Item types configuration
-    this.itemTypes = {
-      speedBoost: {
-        emoji: "⚡",
-        name: "Speed Boost",
-        color: "#FFD700",
-        points: 100,
-        duration: 5000,
-        positive: true,
-      },
-      slowDown: {
-        emoji: "🐌",
-        name: "Slow Down",
-        color: "#8B4513",
-        points: -50,
-        duration: 4000,
-        positive: false,
-      },
-      shield: {
-        emoji: "🛡️",
-        name: "Shield",
-        color: "#00CED1",
-        points: 150,
-        duration: 6000,
-        positive: true,
-      },
-      freeze: {
-        emoji: "❄️",
-        name: "Ghost Freeze",
-        color: "#87CEEB",
-        points: 200,
-        duration: 3000,
-        positive: true,
-      },
-      doublePoints: {
-        emoji: "⭐",
-        name: "Double Points",
-        color: "#FF69B4",
-        points: 100,
-        duration: 10000,
-        positive: true,
-      },
-      extraLife: {
-        emoji: "❤️",
-        name: "Extra Life",
-        color: "#FF0000",
-        points: 500,
-        duration: 0,
-        positive: true,
-      },
-    };
+    // Item types configuration (imported from shared config)
+    this.itemTypes = itemTypes;
   }
 
   /**

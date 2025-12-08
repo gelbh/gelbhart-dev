@@ -15,6 +15,18 @@
  *   - Inky (Cyan): Flanker coordinating with Blinky
  *   - Clyde (Orange): Zone controller with unpredictable behavior
  */
+import { GhostBoundaryHandler } from "./ghosts/boundary_handler";
+import {
+  calculateChaseTarget,
+  calculateAmbushTarget,
+  calculatePatrolTarget,
+  calculateScatterTarget,
+  calculateFrightenedTarget,
+  calculateScatterModeTarget,
+} from "./ghosts/personalities";
+import { GhostIndicators } from "./ghosts/indicators";
+import { GhostCollision } from "./ghosts/collision";
+
 export class GhostAI {
   constructor(dependencies = {}) {
     this.spriteManager = dependencies.spriteManager;
@@ -39,6 +51,11 @@ export class GhostAI {
     // Cached dot counts for performance (avoid filtering every frame)
     this.dotsRemaining = 0;
     this.totalDots = 0;
+
+    // Initialize helper modules
+    this.boundaryHandler = new GhostBoundaryHandler();
+    this.indicators = new GhostIndicators(this.gameContainer);
+    this.collision = new GhostCollision(this.audioManager);
   }
 
   /**
@@ -140,42 +157,7 @@ export class GhostAI {
    * @returns {Object|null} - Boundary info {type: 'section'|'header'|'footer', y: boundaryY} or null
    */
   checkBoundary(x, y, checkSectionBoundary) {
-    // Check section boundary
-    if (checkSectionBoundary) {
-      const sectionBoundary = checkSectionBoundary(x, y);
-      if (sectionBoundary !== null && sectionBoundary !== undefined) {
-        return { type: "section", y: sectionBoundary };
-      }
-    }
-
-    // Check header/footer boundaries
-    const header = document.querySelector(".header");
-    const footer = document.querySelector(".footer");
-    const margin = 30;
-
-    let minY = margin;
-    let maxY = document.documentElement.scrollHeight - margin;
-
-    if (header) {
-      const headerRect = header.getBoundingClientRect();
-      minY = Math.max(
-        minY,
-        headerRect.top + window.scrollY + headerRect.height + margin
-      );
-    }
-
-    if (footer) {
-      const footerRect = footer.getBoundingClientRect();
-      maxY = Math.min(maxY, footerRect.top + window.scrollY - margin);
-    }
-
-    if (y <= minY) {
-      return { type: "header", y: minY };
-    } else if (y >= maxY) {
-      return { type: "footer", y: maxY };
-    }
-
-    return null;
+    return this.boundaryHandler.checkBoundary(x, y, checkSectionBoundary);
   }
 
   /**
@@ -191,56 +173,12 @@ export class GhostAI {
     boundary,
     checkSectionBoundary = null
   ) {
-    const fleeDistance = 200;
-    const horizontalDistance = 300; // Prefer horizontal movement
-
-    // Try horizontal escape first (left or right)
-    const horizontalOptions = [
-      { x: ghost.x - horizontalDistance, y: ghost.y }, // Left
-      { x: ghost.x + horizontalDistance, y: ghost.y }, // Right
-    ];
-
-    // Try opposite vertical direction if blocked
-    let verticalOption = null;
-    if (boundary.type === "section" || boundary.type === "header") {
-      // Blocked from above, try going down
-      verticalOption = { x: ghost.x, y: ghost.y + fleeDistance };
-    } else if (boundary.type === "footer") {
-      // Blocked from below, try going up
-      verticalOption = { x: ghost.x, y: ghost.y - fleeDistance };
-    }
-
-    // Combine options and pick one that doesn't cross boundary
-    const options = [...horizontalOptions];
-    if (verticalOption) {
-      options.push(verticalOption);
-    }
-
-    // Add some randomness to escape direction
-    const randomAngle = Math.random() * Math.PI * 2;
-    options.push({
-      x: ghost.x + Math.cos(randomAngle) * fleeDistance,
-      y: ghost.y + Math.sin(randomAngle) * fleeDistance,
-    });
-
-    // Find first option that doesn't cross a boundary
-    for (const option of options) {
-      const testBoundary = this.checkBoundary(
-        option.x,
-        option.y,
-        checkSectionBoundary
-      );
-      if (!testBoundary || testBoundary.y !== boundary.y) {
-        return option;
-      }
-    }
-
-    // Fallback: just move horizontally away from Pac-Man
-    const dx = ghost.x - this.pacmanPosition.x;
-    return {
-      x: ghost.x + (dx > 0 ? horizontalDistance : -horizontalDistance),
-      y: ghost.y,
-    };
+    return this.boundaryHandler.findFrightenedAlternativeTarget(
+      ghost,
+      boundary,
+      this.pacmanPosition,
+      checkSectionBoundary
+    );
   }
 
   /**
@@ -259,33 +197,13 @@ export class GhostAI {
     boundary,
     checkSectionBoundary
   ) {
-    // If target would cross boundary, adjust it
-    const targetBoundary = this.checkBoundary(
+    return this.boundaryHandler.adjustTargetForBoundary(
+      ghost,
       targetX,
       targetY,
+      boundary,
       checkSectionBoundary
     );
-
-    if (targetBoundary && targetBoundary.y === boundary.y) {
-      // Target crosses the same boundary, adjust it
-      if (boundary.type === "section" || boundary.type === "header") {
-        // Blocked from above, keep target below boundary
-        targetY = Math.max(targetY, boundary.y + 50);
-      } else if (boundary.type === "footer") {
-        // Blocked from below, keep target above boundary
-        targetY = Math.min(targetY, boundary.y - 50);
-      }
-
-      // Also try to move horizontally around the boundary
-      const horizontalOffset = 200;
-      if (Math.abs(targetX - ghost.x) < horizontalOffset) {
-        // If target is close horizontally, add horizontal component
-        const dx = targetX - ghost.x;
-        targetX = ghost.x + (dx > 0 ? horizontalOffset : -horizontalOffset);
-      }
-    }
-
-    return { x: targetX, y: targetY };
   }
 
   /**
@@ -329,13 +247,11 @@ export class GhostAI {
 
       if (ghost.frightened) {
         // Run away from Pac-Man with more erratic movement
-        const fleeAngle = Math.atan2(
-          ghost.y - this.pacmanPosition.y,
-          ghost.x - this.pacmanPosition.x
-        );
-        const fleeDistance = 200;
-        targetX = ghost.x + Math.cos(fleeAngle) * fleeDistance;
-        targetY = ghost.y + Math.sin(fleeAngle) * fleeDistance;
+        const frightenedTarget = calculateFrightenedTarget(ghost, {
+          pacmanPosition: this.pacmanPosition,
+        });
+        targetX = frightenedTarget.x;
+        targetY = frightenedTarget.y;
 
         // If ghost is stuck at boundary or target would cross boundary, find alternative
         if (currentBoundary || wasAtBoundary) {
@@ -375,159 +291,58 @@ export class GhostAI {
       } else if (isScatterMode && ghost.personality !== "chase") {
         // Brief scatter mode - each ghost goes to their home corner
         // Blinky NEVER scatters - always aggressive!
-        const corners = [
-          { x: window.innerWidth * 0.9, y: this.pacmanPosition.y - 300 }, // Blinky: unused
-          { x: window.innerWidth * 0.1, y: this.pacmanPosition.y - 300 }, // Pinky: top-left
-          { x: window.innerWidth * 0.9, y: this.pacmanPosition.y + 500 }, // Inky: bottom-right
-          { x: window.innerWidth * 0.1, y: this.pacmanPosition.y + 500 }, // Clyde: bottom-left
-        ];
-        const corner = corners[index];
-        targetX = corner.x;
-        targetY = corner.y;
+        const scatterTarget = calculateScatterModeTarget(index, {
+          pacmanPosition: this.pacmanPosition,
+        });
+        targetX = scatterTarget.x;
+        targetY = scatterTarget.y;
       } else {
         // Chase mode (default) - use personality-based AI
+        const gameState = {
+          pacmanPosition: this.pacmanPosition,
+          pacmanVelocity: this.pacmanVelocity,
+          dotsRemaining: this.dotsRemaining,
+          totalDots: this.totalDots,
+        };
+
         switch (ghost.personality) {
           case "chase": // Blinky - Relentless pursuer with prediction
-            // Direct chase with slight prediction based on Pac-Man's momentum
-            const predictionTime = 0.33; // Predict 0.33 seconds ahead (20 frames at 60fps)
-            targetX =
-              this.pacmanPosition.x + this.pacmanVelocity.x * predictionTime;
-            targetY =
-              this.pacmanPosition.y + this.pacmanVelocity.y * predictionTime;
-
-            // Speed boost when few dots remain (Cruise Elroy mode)
-            // Use cached dot counts for performance (avoid filtering every frame)
-            if (this.dotsRemaining < this.totalDots * 0.3) {
-              // Less than 30% dots remaining
-              ghost.speedBoost = 1.3; // 30% faster
-            } else if (this.dotsRemaining < this.totalDots * 0.5) {
-              // Less than 50% dots
-              ghost.speedBoost = 1.15; // 15% faster
-            } else {
-              ghost.speedBoost = 1;
-            }
-
-            // Add slight randomness to prevent perfect prediction avoidance
-            if (Math.random() < 0.1) {
-              // 10% chance every frame
-              targetX += (Math.random() - 0.5) * 100;
-              targetY += (Math.random() - 0.5) * 100;
-            }
+            const chaseResult = calculateChaseTarget(ghost, gameState);
+            targetX = chaseResult.x;
+            targetY = chaseResult.y;
+            ghost.speedBoost = chaseResult.speedBoost;
             break;
 
           case "ambush": // Pinky - Advanced prediction ambush
-            // Predict Pac-Man's position based on velocity AND acceleration
-            const lookAheadTime = 1.0; // Predict 1 second ahead
-            const velocityMagnitude = Math.sqrt(
-              Math.pow(this.pacmanVelocity.x, 2) +
-                Math.pow(this.pacmanVelocity.y, 2)
+            const ambushTarget = calculateAmbushTarget(
+              ghost,
+              gameState,
+              ghost.scatterTimer
             );
-
-            // If Pac-Man is moving, predict future position
-            if (velocityMagnitude > 0) {
-              targetX =
-                this.pacmanPosition.x + this.pacmanVelocity.x * lookAheadTime;
-              targetY =
-                this.pacmanPosition.y + this.pacmanVelocity.y * lookAheadTime;
-
-              // Add flanking behavior - try to cut off from the side
-              const angleToIntercept = Math.atan2(
-                targetY - ghost.y,
-                targetX - ghost.x
-              );
-              const flankOffset = 150;
-              targetX += Math.cos(angleToIntercept + Math.PI / 2) * flankOffset;
-              targetY += Math.sin(angleToIntercept + Math.PI / 2) * flankOffset;
-            } else {
-              // If Pac-Man is stationary, circle around to cut off escape
-              const circleAngle = ghost.scatterTimer * 1.2 + Math.PI / 2; // 0.02 * 60 = 1.2 rad/s
-              targetX = this.pacmanPosition.x + Math.cos(circleAngle) * 150;
-              targetY = this.pacmanPosition.y + Math.sin(circleAngle) * 150;
-            }
+            targetX = ambushTarget.x;
+            targetY = ambushTarget.y;
             break;
 
           case "patrol": // Inky - Coordinated flanking with Blinky
-            const blinky = this.ghosts[0];
-
-            // Defensive check: If Blinky doesn't exist, fall back to direct chase
-            if (!blinky) {
-              targetX = this.pacmanPosition.x;
-              targetY = this.pacmanPosition.y;
-              break;
-            }
-
-            // Calculate where Pac-Man is trying to escape
-            const escapeAngle = Math.atan2(
-              this.pacmanPosition.y - blinky.y,
-              this.pacmanPosition.x - blinky.x
+            const patrolTarget = calculatePatrolTarget(
+              ghost,
+              gameState,
+              this.ghosts,
+              ghost.scatterTimer
             );
-
-            // Position perpendicular to Blinky's chase to create a pincer attack
-            const distanceFromPacman = 100;
-            const perpAngle = escapeAngle + Math.PI / 2;
-
-            // Alternate sides based on timer for unpredictability (every 3 seconds)
-            const side = Math.floor(ghost.scatterTimer / 3) % 2 === 0 ? 1 : -1;
-
-            targetX =
-              this.pacmanPosition.x +
-              Math.cos(perpAngle) * distanceFromPacman * side;
-            targetY =
-              this.pacmanPosition.y +
-              Math.sin(perpAngle) * distanceFromPacman * side;
-
-            // Add vertical advantage - prefer being above Pac-Man in open field
-            if (Math.abs(ghost.y - this.pacmanPosition.y) < 100) {
-              targetY = this.pacmanPosition.y - 200; // Position above
-            }
+            targetX = patrolTarget.x;
+            targetY = patrolTarget.y;
             break;
 
           case "scatter": // Clyde - Unpredictable ambusher with zone control
-            const distanceToPacman = Math.sqrt(
-              Math.pow(this.pacmanPosition.x - ghost.x, 2) +
-                Math.pow(this.pacmanPosition.y - ghost.y, 2)
+            const scatterTarget = calculateScatterTarget(
+              ghost,
+              gameState,
+              ghost.scatterTimer,
+              deltaTime
             );
-
-            // Zone-based behavior: Chase from optimal distance
-            if (distanceToPacman < 150) {
-              // Too close, maintain distance while cutting off escape
-              const retreatAngle = Math.atan2(
-                ghost.y - this.pacmanPosition.y,
-                ghost.x - this.pacmanPosition.x
-              );
-              const maintainDistance = 200;
-
-              // Don't just flee - position to block escape routes
-              const blockAngle =
-                retreatAngle + (Math.sin(ghost.scatterTimer * 3) * Math.PI) / 3; // 0.05 * 60 = 3 rad/s
-              targetX =
-                this.pacmanPosition.x + Math.cos(blockAngle) * maintainDistance;
-              targetY =
-                this.pacmanPosition.y + Math.sin(blockAngle) * maintainDistance;
-            } else if (distanceToPacman > 400) {
-              // Too far, close in aggressively
-              targetX = this.pacmanPosition.x;
-              targetY = this.pacmanPosition.y;
-            } else {
-              // Optimal zone - orbit and wait for opportunity
-              // Initialize orbit angle if not set
-              if (!ghost.orbitAngle)
-                ghost.orbitAngle = Math.atan2(
-                  this.pacmanPosition.y - ghost.y,
-                  this.pacmanPosition.x - ghost.x
-                );
-
-              // Rotate orbit angle at constant angular velocity (1.8 rad/s)
-              ghost.orbitAngle += 1.8 * deltaTime;
-
-              const orbitRadius = 250;
-              targetX =
-                this.pacmanPosition.x +
-                Math.cos(ghost.orbitAngle) * orbitRadius;
-              targetY =
-                this.pacmanPosition.y +
-                Math.sin(ghost.orbitAngle) * orbitRadius;
-            }
+            targetX = scatterTarget.x;
+            targetY = scatterTarget.y;
             break;
 
           default:
@@ -782,129 +597,14 @@ export class GhostAI {
    * Shows arrows at screen edges pointing to ghosts that are off-screen
    */
   updateGhostIndicators() {
-    const viewportTop = window.scrollY;
-    const viewportBottom = viewportTop + window.innerHeight;
-    const viewportLeft = 0;
-    const viewportRight = window.innerWidth;
-    const edgeMargin = 30; // Distance from edge to show indicator
-
-    this.ghosts.forEach((ghost, index) => {
-      // Check if ghost is off-screen
-      const isOffScreenTop = ghost.y < viewportTop - 50;
-      const isOffScreenBottom = ghost.y > viewportBottom + 50;
-      const isOffScreenLeft = ghost.x < viewportLeft - 50;
-      const isOffScreenRight = ghost.x > viewportRight + 50;
-
-      const isOffScreen =
-        isOffScreenTop ||
-        isOffScreenBottom ||
-        isOffScreenLeft ||
-        isOffScreenRight;
-
-      // Get or create indicator for this ghost
-      let indicator = ghost.indicator;
-      if (!indicator) {
-        indicator = document.createElement("div");
-        indicator.className = "ghost-indicator";
-        indicator.innerHTML = `
-          <div class="indicator-arrow"></div>
-          <div class="indicator-dot" style="background: ${this.getGhostColor(
-            ghost.color
-          )}"></div>
-        `;
-        this.gameContainer.appendChild(indicator);
-        ghost.indicator = indicator;
-      }
-
-      if (isOffScreen && !ghost.eaten) {
-        // Calculate direction angle from center of screen to ghost
-        const centerX = viewportLeft + (viewportRight - viewportLeft) / 2;
-        const centerY = viewportTop + window.innerHeight / 2;
-
-        const angle = Math.atan2(ghost.y - centerY, ghost.x - centerX);
-
-        // Calculate position on screen edge
-        let indicatorX, indicatorY;
-
-        // Determine which edge and position
-        const absAngle = Math.abs(angle);
-        const isMoreVertical =
-          absAngle > Math.PI / 4 && absAngle < (3 * Math.PI) / 4;
-
-        if (isMoreVertical) {
-          // Top or bottom edge
-          if (angle < 0) {
-            // Top edge
-            indicatorY = edgeMargin;
-            indicatorX = Math.max(
-              edgeMargin,
-              Math.min(viewportRight - edgeMargin, ghost.x)
-            );
-          } else {
-            // Bottom edge
-            indicatorY = window.innerHeight - edgeMargin;
-            indicatorX = Math.max(
-              edgeMargin,
-              Math.min(viewportRight - edgeMargin, ghost.x)
-            );
-          }
-        } else {
-          // Left or right edge
-          if (angle > -Math.PI / 2 && angle < Math.PI / 2) {
-            // Right edge
-            indicatorX = viewportRight - edgeMargin;
-            indicatorY = Math.max(
-              edgeMargin,
-              Math.min(window.innerHeight - edgeMargin, ghost.y - viewportTop)
-            );
-          } else {
-            // Left edge
-            indicatorX = edgeMargin;
-            indicatorY = Math.max(
-              edgeMargin,
-              Math.min(window.innerHeight - edgeMargin, ghost.y - viewportTop)
-            );
-          }
-        }
-
-        // Update indicator position and rotation
-        indicator.style.display = "flex";
-        indicator.style.left = `${indicatorX}px`;
-        indicator.style.top = `${indicatorY + viewportTop}px`;
-
-        // Rotate arrow to point towards ghost
-        const arrowRotation = (angle * 180) / Math.PI + 90; // +90 because arrow points up by default
-        const arrow = indicator.querySelector(".indicator-arrow");
-        if (arrow) {
-          arrow.style.transform = `rotate(${arrowRotation}deg)`;
-        }
-
-        // Add pulsing for frightened ghosts
-        if (ghost.frightened) {
-          indicator.classList.add("frightened");
-        } else {
-          indicator.classList.remove("frightened");
-        }
-      } else {
-        // Ghost is on screen, hide indicator
-        if (indicator) {
-          indicator.style.display = "none";
-        }
-      }
-    });
+    this.indicators.update(this.ghosts);
   }
 
   /**
    * Get ghost color hex value by color name
    */
   getGhostColor(colorName) {
-    const colors = {
-      red: "#FF0000",
-      pink: "#FFB8D1",
-      cyan: "#00FFFF",
-      orange: "#FFA500",
-    };
-    return colors[colorName] || "#FFFFFF";
+    return this.indicators.getGhostColor(colorName);
   }
 
   /**
@@ -915,58 +615,15 @@ export class GhostAI {
    * @returns {boolean} - True if a life was lost
    */
   checkGhostCollisions(onEatGhost = null, onLoseLife = null) {
-    const collisionRadius = 25;
-    let lifeLost = false;
-
-    this.ghosts.forEach((ghost) => {
-      if (ghost.eaten) return; // Skip already eaten ghosts
-
-      const distance = Math.sqrt(
-        Math.pow(this.pacmanPosition.x - ghost.x, 2) +
-          Math.pow(this.pacmanPosition.y - ghost.y, 2)
-      );
-
-      if (distance < collisionRadius) {
-        if (ghost.frightened) {
-          // Eat the ghost
-          ghost.eaten = true;
-          ghost.frightened = false;
-          ghost.element.classList.remove("frightened");
-          ghost.element.classList.add("eaten");
-
-          // Play eat ghost sound
-          if (this.audioManager) {
-            this.audioManager.play("eatGhost", true);
-          }
-
-          // Notify controller of ghost eaten
-          if (onEatGhost) {
-            onEatGhost(ghost);
-          }
-
-          // Respawn after reaching home - store timer for cleanup
-          const respawnTimer = setTimeout(() => {
-            this.respawnGhost(ghost);
-            // Remove this timer from tracking array
-            const index = this.ghostRespawnTimers.indexOf(respawnTimer);
-            if (index > -1) {
-              this.ghostRespawnTimers.splice(index, 1);
-            }
-          }, 3000);
-          this.ghostRespawnTimers.push(respawnTimer);
-        } else if (!this.activeEffects.shield) {
-          // Lose a life (unless shielded)
-          lifeLost = true;
-          if (onLoseLife) {
-            onLoseLife();
-          }
-        } else {
-          // Shield deflects ghost
-        }
-      }
-    });
-
-    return lifeLost;
+    return this.collision.check(
+      this.ghosts,
+      this.pacmanPosition,
+      this.activeEffects,
+      onEatGhost,
+      onLoseLife,
+      (ghost) => this.respawnGhost(ghost),
+      this.ghostRespawnTimers
+    );
   }
 
   /**
