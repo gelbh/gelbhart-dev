@@ -1,0 +1,510 @@
+// ============================================
+// GOOGLE MAPS CONVERTER PAGE
+// ============================================
+
+@use "../mixins" as *;
+
+// Local variables for glassmorphic styles
+$glass-bg-light: rgba(255, 255, 255, 0.05);
+$glass-bg-lighter: rgba(255, 255, 255, 0.03);
+$glass-bg-medium: rgba(255, 255, 255, 0.08);
+$glass-border: rgba(255, 255, 255, 0.1);
+$glass-border-subtle: rgba(255, 255, 255, 0.08);
+$glass-border-hover: rgba(255, 255, 255, 0.2);
+$primary-alpha-15: rgba(99, 102, 241, 0.15);
+$primary-alpha-25: rgba(99, 102, 241, 0.25);
+$primary-alpha-30: rgba(99, 102, 241, 0.3);
+$primary-alpha-80: rgba(99, 102, 241, 0.8);
+$primary-shadow: rgba(99, 102, 241, 0.4);
+$white-text: var(--bs-white);
+$text-placeholder: rgba(255, 255, 255, 0.5);
+$text-muted: rgba(255, 255, 255, 0.7);
+$text-primary: rgba(255, 255, 255, 0.9);
+$modal-bg-dark: rgba(20, 20, 30, 0.95);
+$modal-bg-darker: rgba(15, 15, 25, 0.95);
+$option-bg: rgba(20, 20, 30, 0.95);
+
+// Hero section
+.google-maps-converter-hero {
+  @include project-hero(50vh, 6rem, var(--spacing-xl));
+
+  @media (min-width: 768px) {
+    min-height: 60vh;
+    padding-top: 8rem;
+    padding-bottom: var(--spacing-2xl);
+  }
+}
+
+.google-maps-converter-gradient-bg {
+  @include gradient-bg;
+}
+
+.google-maps-converter-card {
+  background: $glass-bg-light;
+  backdrop-filter: blur(var(--blur-md));
+  border: 1px solid $glass-border;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin-left: 0;
+  margin-right: 0;
+
+  .card-body {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+}
+
+// Textarea styling
+#v1-input,
+#v2-output {
+  min-height: 300px;
+  resize: vertical;
+  font-size: 14px;
+  line-height: 1.6;
+
+  @media (max-width: 767.98px) {
+    min-height: 250px;
+    font-size: 13px;
+  }
+}
+
+// File input styling
+.cursor-pointer {
+  cursor: pointer;
+}
+
+// ============================================
+// STYLE MODAL - GLASSMORPHIC DESIGN
+// ============================================
+
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  pointer-events: auto;
+  z-index: 1040;
+
+  &.show {
+    pointer-events: auto;
+  }
+}
+
+.style-modal-dialog {
+  .modal-content {
+    border: none;
+  }
+}
+
+.style-modal-content {
+  @include glassmorphic-card(var(--color-primary), 15px);
+  background: $modal-bg-dark;
+  backdrop-filter: blur(15px);
+  border: 1px solid $glass-border;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+
+  @include dark-mode {
+    background: $modal-bg-darker;
+  }
+}
+
+.style-modal-header {
+  background: transparent;
+  border-bottom: 1px solid $glass-border;
+  padding: var(--spacing-lg);
+
+  .modal-title {
+    color: $white-text;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+
+    i {
+      color: var(--color-primary);
+    }
+  }
+}
+
+.style-modal-body {
+  padding: var(--spacing-lg);
+  min-height: 400px;
+}
+
+.style-modal-sidebar {
+  @media (max-width: 991.98px) {
+    margin-bottom: var(--spacing-lg);
+  }
+}
+
+.style-modal-sidebar-content {
+  background: $glass-bg-lighter;
+  backdrop-filter: blur(var(--blur-md));
+  border: 1px solid $glass-border-subtle;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  position: sticky;
+  top: var(--spacing-lg);
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+
+  @include dark-mode {
+    background: rgba(0, 0, 0, 0.2);
+  }
+}
+
+// Form inputs - consolidated styles
+.style-modal-input {
+  background: $glass-bg-light !important;
+  border: 1px solid $glass-border !important;
+  color: $white-text !important;
+  backdrop-filter: blur(5px);
+
+  &::placeholder {
+    color: $text-placeholder !important;
+  }
+
+  &:focus {
+    background: $glass-bg-medium !important;
+    border-color: var(--color-primary) !important;
+    color: $white-text !important;
+    box-shadow: 0 0 0 0.2rem $primary-alpha-25 !important;
+  }
+
+  // Select dropdown styling
+  &.form-select {
+    background-color: $glass-bg-light !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.75rem center !important;
+    background-size: 16px 12px !important;
+    padding-right: 2.5rem !important;
+    color: $white-text !important;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border-color: $glass-border !important;
+
+    &,
+    &:hover,
+    &:focus,
+    &:active,
+    &:visited,
+    &[aria-expanded="true"] {
+      color: $white-text !important;
+    }
+
+    &:focus {
+      background-color: $glass-bg-medium !important;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236366f1' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+      background-repeat: no-repeat !important;
+      background-position: right 0.75rem center !important;
+      background-size: 16px 12px !important;
+      border-color: var(--color-primary) !important;
+    }
+  }
+
+  option {
+    background: $option-bg !important;
+    color: $white-text !important;
+
+    &:checked,
+    &:selected {
+      background: $primary-alpha-30 !important;
+      color: $white-text !important;
+    }
+  }
+}
+
+// Higher specificity for select in modal context
+.style-modal-content {
+  .form-select.style-modal-input {
+    color: $white-text !important;
+    background-color: $glass-bg-light !important;
+    border-color: $glass-border !important;
+
+    &,
+    &:hover,
+    &:focus,
+    &:active {
+      color: $white-text !important;
+    }
+  }
+}
+
+// Dark mode override with highest specificity
+[data-bs-theme="dark"]
+  .style-modal-content
+  .form-select.style-modal-input:not([data-bs-theme="light"]) {
+  color: $white-text !important;
+  background-color: $glass-bg-light !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 0.75rem center !important;
+  background-size: 16px 12px !important;
+  padding-right: 2.5rem !important;
+  border-color: $glass-border !important;
+
+  &,
+  &:hover,
+  &:focus,
+  &:active,
+  &:visited,
+  &[aria-expanded="true"] {
+    color: $white-text !important;
+  }
+
+  &:focus {
+    background-color: $glass-bg-medium !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236366f1' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.75rem center !important;
+    background-size: 16px 12px !important;
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 0 0.2rem $primary-alpha-25 !important;
+  }
+}
+
+.style-modal-filter-item {
+  background: transparent !important;
+  border: 1px solid $glass-border;
+  transition: all var(--transition-normal) var(--ease-smooth);
+  margin-bottom: 0;
+
+  &:hover {
+    background: $glass-bg-light !important;
+    border-color: $glass-border-hover;
+  }
+
+  &.active {
+    background: $primary-alpha-15 !important;
+    border-color: var(--color-primary);
+
+    span {
+      color: $white-text !important;
+    }
+  }
+
+  .form-check-input {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+
+    &:checked {
+      background-color: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+
+    &:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 0.2rem $primary-alpha-25;
+    }
+  }
+}
+
+.style-modal-filters {
+  > div {
+    margin-bottom: var(--spacing-md) !important;
+  }
+
+  .btn-link {
+    &:hover,
+    &:focus {
+      color: $white-text !important;
+    }
+
+    &:focus {
+      box-shadow: none;
+    }
+
+    &[aria-expanded="true"] {
+      i {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  .gap-2 {
+    gap: 0.5rem !important;
+  }
+}
+
+.style-modal-grid-column {
+  min-height: 400px;
+}
+
+.style-modal-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+
+  > [class*="col-"] {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.style-modal-card {
+  @include glassmorphic-card(var(--color-primary), 10px);
+  background: $glass-bg-light;
+  backdrop-filter: blur(var(--blur-md));
+  border: 1px solid $glass-border;
+  transition: all var(--transition-normal) var(--ease-smooth);
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+
+  .style-modal-card-image-wrapper {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    background: rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+  }
+
+  .style-modal-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform var(--transition-normal) var(--ease-smooth);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 40px $primary-alpha-30 !important;
+      border-color: $primary-alpha-30;
+
+      .style-modal-card-image {
+        transform: scale(1.05);
+      }
+    }
+  }
+
+  &:active {
+    transform: translateY(-2px);
+  }
+
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .style-modal-card-url-icon {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    z-index: 10;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    border-radius: 50%;
+    color: $text-muted;
+    transition: all var(--transition-normal) var(--ease-smooth);
+    text-decoration: none;
+    border: 1px solid $glass-border;
+
+    i {
+      font-size: 1rem;
+    }
+
+    &:hover {
+      background: $primary-alpha-80;
+      color: $white-text;
+      border-color: var(--color-primary);
+      transform: scale(1.1);
+    }
+
+    &:focus {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+  }
+
+  .btn-primary {
+    background: var(--color-primary);
+    border: none;
+    transition: all var(--transition-normal) var(--ease-smooth);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px $primary-shadow;
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+@media (max-width: 991.98px) {
+  .style-modal-sidebar-content {
+    position: relative;
+    top: 0;
+    max-height: none;
+  }
+}
+
+.style-modal-content {
+  .text-white {
+    color: $text-primary !important;
+  }
+
+  .text-white-50 {
+    color: $text-placeholder !important;
+  }
+
+  .text-white-70 {
+    color: $text-muted !important;
+  }
+
+  .form-label {
+    color: $white-text !important;
+  }
+
+  .badge {
+    &.bg-primary {
+      background-color: $primary-alpha-25 !important;
+      color: var(--color-primary) !important;
+    }
+
+    &.bg-secondary {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+      color: $text-muted !important;
+    }
+  }
+
+  .btn-outline-primary {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+
+    &:hover {
+      background-color: var(--color-primary);
+      border-color: var(--color-primary);
+      color: $white-text;
+    }
+  }
+
+  .btn-outline-secondary {
+    color: $text-muted;
+    border-color: rgba(255, 255, 255, 0.3);
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.5);
+      color: $white-text;
+    }
+  }
+
+  .alert-danger {
+    background-color: rgba(220, 53, 69, 0.2);
+    border-color: rgba(220, 53, 69, 0.3);
+    color: #ff6b7a;
+  }
+}

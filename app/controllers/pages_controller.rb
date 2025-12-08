@@ -29,6 +29,9 @@ class PagesController < ApplicationController
   def nasa_exoplanet_explorer
   end
 
+  def google_maps_converter
+  end
+
   def robots
     respond_to :text
     expires_in 6.hours, public: true

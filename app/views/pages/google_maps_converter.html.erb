@@ -1,0 +1,483 @@
+<% content_for :title, page_title("Google Maps Converter") %>
+<% meta_description "Convert Google Maps JavaScript API V1 style JSON to V2 CBMS format. Free online tool for migrating custom map styles to the latest Google Maps API." %>
+<% content_for :structured_data do %>
+  <%= render_structured_data(software_application_structured_data(
+    name: "Google Maps Converter",
+    description: "Free online tool to convert Google Maps JavaScript API V1 style JSON to V2 CBMS format. Migrate your custom map styles to the latest Google Maps API with ease.",
+    url: "https://gelbhart.dev/projects/google-maps-converter",
+    application_category: "WebApplication",
+    operating_system: "Web",
+    offers: {
+      "price" => "0",
+      "priceCurrency" => "USD"
+    }
+  )) %>
+  <%= render_structured_data(faq_structured_data([
+    {
+      question: "What is Google Maps Converter?",
+      answer: "Google Maps Converter is a free online tool that converts Google Maps JavaScript API V1 style JSON to V2 CBMS (Cloud-Based Map Styling) format. It helps developers migrate their custom map styles to the latest Google Maps API."
+    },
+    {
+      question: "How does the conversion work?",
+      answer: "The converter analyzes your V1 style JSON and automatically maps properties to the V2 format. It handles feature types, element types, stylers, and visibility settings, ensuring your custom map styles work with the latest Google Maps API."
+    },
+    {
+      question: "Is Google Maps Converter free?",
+      answer: "Yes, Google Maps Converter is completely free to use. All conversion happens client-side in your browser - no data is sent to any server."
+    }
+  ])) %>
+  <%# Article structured data for project page %>
+  <% google_maps_converter_article_data = article_structured_data(
+    title: "Google Maps Converter",
+    url: "https://gelbhart.dev/projects/google-maps-converter",
+    description: "Free online tool to convert Google Maps JavaScript API V1 style JSON to V2 CBMS format. Migrate your custom map styles to the latest Google Maps API with ease.",
+    keywords: "Google Maps converter, V1 to V2 conversion, map style converter, Google Maps API, CBMS format, map styling, JavaScript",
+    image: "logos/social/logo_social.png"
+  ) %>
+  <%= render_structured_data(google_maps_converter_article_data) %>
+<% end %>
+<!-- Hero Section with Gradient Background -->
+<section class="position-relative google-maps-converter-hero" data-controller="scroll-animation">
+  <!-- Animated Gradient Background -->
+  <div class="google-maps-converter-gradient-bg"></div>
+  <div class="container py-4 position-relative zindex-5">
+    <div class="row justify-content-center text-center">
+      <div class="col-lg-8 fade-in-view">
+        <%= render 'shared/icon_circle', icon: 'bx-map', color: 'primary', size: 'lg' %>
+        <h1 class="display-5 mb-2 mt-3">Google Maps Converter</h1>
+        <p class="lead text-light mb-2">V1 to V2 Style Converter</p>
+        <p class="text-light opacity-75 mb-0">
+          Convert Google Maps JavaScript API V1 style JSON to V2 CBMS format. Free online tool for migrating custom map styles.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Breadcrumb Navigation -->
+<div class="container pt-4">
+  <%= render 'shared/breadcrumb', items: [
+    { name: 'Home', url: '/' },
+    { name: 'Projects', url: nil },
+    { name: 'Google Maps Converter', url: nil }
+  ] %>
+</div>
+<!-- Main Content -->
+<section class="container py-5 mt-4" data-controller="google-maps-converter scroll-animation style-modal" data-style-modal-google-maps-converter-outlet="google-maps-converter">
+  <div class="row justify-content-center">
+    <div class="col-lg-12">
+      <!-- Converter Interface -->
+      <div class="card google-maps-converter-card border-0 shadow-lg mb-4 fade-in-view delay-1">
+        <div class="card-body p-4 p-lg-5">
+          <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+            <div class="d-flex align-items-center">
+              <div class="me-3">
+                <%= render 'shared/icon_circle', icon: 'bx-code-alt', color: 'primary', size: 'md' %>
+              </div>
+              <h2 class="h3 mb-0">Style Converter</h2>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+              <button
+                      type="button"
+                      class="btn btn-outline-primary"
+                      data-style-modal-target="openStyleModalBtn"
+                      data-action="click->style-modal#openStyleModal"
+                >
+                <i class="bx bx-map me-2"></i>Browse Styles
+              </button>
+              <a href="https://github.com/gelbh/google-maps-converter" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary">
+                <i class="bx bxl-github me-2"></i><span class="d-none d-sm-inline">View on GitHub</span><span class="d-inline d-sm-none">GitHub</span>
+              </a>
+            </div>
+          </div>
+          <!-- Converter Grid -->
+          <div class="row g-3 mb-3">
+            <!-- V1 Input Column -->
+            <div class="col-md-6">
+              <div class="card bg-dark bg-opacity-50 border border-white border-opacity-20 h-100">
+                <div class="card-body p-3">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h3 class="h5 mb-0 text-white">V1 Input</h3>
+                    <label
+                      for="file-input"
+                      class="btn btn-sm btn-outline-light mb-0 cursor-pointer"
+                    >
+                      <i class="bx bx-upload me-1"></i>Upload File
+                    </label>
+                    <input
+                      type="file"
+                      id="file-input"
+                      accept=".json"
+                      class="d-none"
+                      data-google-maps-converter-target="fileInput"
+                      data-action="change->google-maps-converter#handleFileUpload"
+                      />
+                    </div>
+                    <textarea
+                    id="v1-input"
+                    class="form-control font-monospace bg-dark text-white border-white border-opacity-20"
+                    rows="15"
+                    placeholder="Paste your V1 style JSON here..."
+                    data-google-maps-converter-target="v1Input"
+                  ></textarea>
+                  </div>
+                </div>
+              </div>
+              <!-- V2 Output Column -->
+              <div class="col-md-6">
+                <div class="card bg-dark bg-opacity-50 border border-white border-opacity-20 h-100">
+                  <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                      <h3 class="h5 mb-0 text-white">V2 Output</h3>
+                      <div class="d-flex gap-2 align-items-center">
+                        <span
+                        class="badge bg-secondary d-none"
+                        data-google-maps-converter-target="validationStatus"
+                      ></span>
+                        <button
+                        type="button"
+                        class="btn btn-sm btn-outline-light"
+                        data-google-maps-converter-target="copyBtn"
+                        data-action="click->google-maps-converter#copy"
+                          >
+                          <i class="bx bx-copy me-1"></i>Copy
+                        </button>
+                        <button
+                        type="button"
+                        class="btn btn-sm btn-outline-light"
+                        data-google-maps-converter-target="downloadBtn"
+                        data-action="click->google-maps-converter#download"
+                          >
+                          <i class="bx bx-download me-1"></i>Download
+                        </button>
+                      </div>
+                    </div>
+                    <textarea
+                    id="v2-output"
+                    class="form-control font-monospace bg-dark text-white border-white border-opacity-20"
+                    rows="15"
+                    placeholder="V2 output will appear here after conversion..."
+                    readonly
+                    data-google-maps-converter-target="v2Output"
+                  ></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Convert Button -->
+            <div class="text-center mb-3">
+              <button
+                type="button"
+                class="btn btn-primary btn-lg"
+                data-google-maps-converter-target="convertBtn"
+                data-action="click->google-maps-converter#convert"
+                >
+                <span>Convert</span>
+                <i class="bx bx-right-arrow-alt ms-2"></i>
+              </button>
+            </div>
+            <!-- Error Display -->
+            <div
+            class="alert alert-danger d-none mb-3"
+            data-google-maps-converter-target="errorDisplay"
+            role="alert"
+          ></div>
+            <!-- Validation Errors -->
+            <div
+            class="alert alert-warning d-none mb-3"
+            data-google-maps-converter-target="validationErrors"
+            role="alert"
+          ></div>
+          </div>
+        </div>
+      </div>
+      <!-- Instructions Section -->
+      <div class="card google-maps-converter-card border-0 shadow-lg mb-4 fade-in-view delay-2">
+        <div class="card-body p-4 p-lg-5">
+          <div class="d-flex align-items-center mb-4">
+            <div class="me-3">
+              <%= render 'shared/icon_circle', icon: 'bx-info-circle', color: 'primary', size: 'md' %>
+            </div>
+            <h2 class="h3 mb-0">How to Use Your V2 Style in Google Cloud Console</h2>
+          </div>
+          <div>
+            <div class="d-flex gap-3 mb-4">
+              <span class="flex-shrink-0 d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary fw-semibold" style="width: 24px; height: 24px; font-size: 0.75rem;">1</span>
+              <div>
+                <p class="fw-semibold mb-1">Access Google Cloud Console</p>
+                <p class="text-muted mb-0">
+                  Navigate to the
+                  <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer" class="text-primary">Google Cloud Console</a>
+                  and sign in with your credentials.
+                </p>
+              </div>
+            </div>
+            <div class="d-flex gap-3 mb-4">
+              <span class="flex-shrink-0 d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary fw-semibold" style="width: 24px; height: 24px; font-size: 0.75rem;">2</span>
+              <div>
+                <p class="fw-semibold mb-1">Navigate to Map Styles</p>
+                <p class="text-muted mb-0">
+                  Go to the
+                  <a href="https://console.cloud.google.com/google/maps-apis/studio/styles" target="_blank" rel="noopener noreferrer" class="text-primary">Map Styles</a>
+                  section in Google Cloud Console. If prompted, select the appropriate project.
+                </p>
+              </div>
+            </div>
+            <div class="d-flex gap-3 mb-4">
+              <span class="flex-shrink-0 d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary fw-semibold" style="width: 24px; height: 24px; font-size: 0.75rem;">3</span>
+              <div>
+                <p class="fw-semibold mb-1">Create a New Map Style</p>
+                <p class="text-muted mb-2">
+                  Click on <strong>Create Style</strong>, then in the dialog that appears, select the <strong>JSON</strong> tab.
+                </p>
+                <p class="text-muted mb-0">
+                  You can either paste your converted V2 JSON directly into the provided field, or upload the JSON file you downloaded using the <strong>Upload a JSON File</strong> button.
+                </p>
+              </div>
+            </div>
+            <div class="d-flex gap-3 mb-4">
+              <span class="flex-shrink-0 d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary fw-semibold" style="width: 24px; height: 24px; font-size: 0.75rem;">4</span>
+              <div>
+                <p class="fw-semibold mb-1">Validate and Customize Your Style</p>
+                <p class="text-muted mb-2">Check for any errors in your JSON:</p>
+                <ul class="text-muted mb-2">
+                  <li>
+                    If errors are present, a warning will indicate the number of errors. Expand the warning to view details.
+                  </li>
+                  <li>
+                    If the JSON is valid, a map preview will display your custom style, and the <strong>Customize</strong> button will become available.
+                  </li>
+                </ul>
+                <p class="text-muted mb-0">
+                  Click <strong>Customize</strong> to create a new map style and optionally modify feature styles as needed.
+                </p>
+              </div>
+            </div>
+            <div class="d-flex gap-3 mb-4">
+              <span class="flex-shrink-0 d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary fw-semibold" style="width: 24px; height: 24px; font-size: 0.75rem;">5</span>
+              <div>
+                <p class="fw-semibold mb-1">Save and Publish Your Map Style</p>
+                <p class="text-muted mb-2">
+                  Click <strong>Save</strong>. In the <strong>Save and Publish Map Style</strong> dialog, enter a name for your style and, optionally, a description.
+                </p>
+                <p class="text-muted mb-0">
+                  Click <strong>Save</strong> again. The style is automatically published, and you'll be directed to your new style's main page.
+                </p>
+              </div>
+            </div>
+            <div class="d-flex gap-3 mb-0">
+              <span class="flex-shrink-0 d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary fw-semibold" style="width: 24px; height: 24px; font-size: 0.75rem;">6</span>
+              <div>
+                <p class="fw-semibold mb-1">Associate Your Style with a Map ID</p>
+                <p class="text-muted mb-0">
+                  To apply your new style to a map, associate it with a map ID. For detailed instructions, refer to the
+                  <a href="https://developers.google.com/maps/documentation/maps-static/cloud-customization/json" target="_blank" rel="noopener noreferrer" class="text-primary">Google Maps Platform documentation</a>.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <%# Style Browser Modal %>
+    <div
+      class="modal fade d-none"
+      id="style-modal"
+      tabindex="-1"
+      aria-labelledby="style-modal-label"
+      aria-hidden="true"
+      data-style-modal-target="styleModal"
+    >
+      <div class="modal-dialog modal-xl modal-dialog-scrollable style-modal-dialog" data-action="click->style-modal#handleDialogClick">
+        <div class="modal-content style-modal-content" data-action="click->style-modal#stopPropagation">
+          <div class="modal-header style-modal-header border-bottom border-white border-opacity-20">
+            <div class="d-flex flex-column w-100">
+              <div class="d-flex align-items-center justify-content-between w-100">
+                <h5 class="modal-title text-white mb-0" id="style-modal-label">
+                  <i class="bx bx-map me-2"></i>Browse Snazzy Maps Styles
+                </h5>
+                <button
+                  type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                  data-style-modal-target="closeStyleModalBtn"
+                  data-action="click->style-modal#closeStyleModal"
+                  ></button>
+              </div>
+              <a
+                href="https://snazzymaps.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-white-50 small text-decoration-none mt-1"
+                style="font-size: 0.75rem;"
+              >
+                <i class="bx bx-link-external me-1" style="font-size: 0.7rem;"></i>Visit Snazzy Maps
+              </a>
+            </div>
+          </div>
+          <div class="modal-body style-modal-body">
+            <div class="row g-4">
+              <!-- Left Sidebar: Search and Filters -->
+              <div class="col-lg-3 col-12 style-modal-sidebar">
+                <div class="style-modal-sidebar-content">
+                  <!-- Search Input -->
+                  <div class="mb-3">
+                    <label for="style-search-input" class="form-label text-white small fw-semibold mb-2">Search</label>
+                    <input
+                      type="text"
+                      id="style-search-input"
+                      class="form-control style-modal-input"
+                      placeholder="Search styles..."
+                      data-style-modal-target="styleSearchInput"
+                      data-action="input->style-modal#handleStyleSearch"
+                      />
+                    </div>
+                    <!-- Sort Select -->
+                    <div class="mb-3">
+                      <label for="style-sort-select" class="form-label text-white small fw-semibold mb-2">Sort By</label>
+                      <select
+                      id="style-sort-select"
+                      class="form-select style-modal-input"
+                      data-style-modal-target="styleSortSelect"
+                      data-action="change->style-modal#handleStyleSort"
+                        >
+                        <option value="relevance">Relevance</option>
+                        <option value="popular">Popular</option>
+                        <option value="recent">Recent</option>
+                        <option value="name">Name</option>
+                      </select>
+                    </div>
+                    <!-- Clear Filters Button -->
+                    <div class="mb-3">
+                      <button
+                      type="button"
+                      class="btn btn-sm btn-outline-secondary w-100"
+                      data-style-modal-target="clearFiltersBtn"
+                      data-action="click->style-modal#clearFilters"
+                        >
+                        Clear Filters
+                      </button>
+                    </div>
+                    <!-- Filter Section -->
+                    <div
+                    class="style-modal-filters"
+                    data-style-modal-target="filterControlsSection"
+                  >
+                      <!-- Tags Filters -->
+                      <div class="mb-3">
+                        <button
+                          class="btn btn-sm btn-link text-white p-0 text-decoration-none w-100 text-start d-flex align-items-center justify-content-between"
+                          type="button"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#tagsFiltersCollapse"
+                          aria-expanded="false"
+                          aria-controls="tagsFiltersCollapse"
+                        >
+                          <h6 class="text-white small fw-semibold mb-0">Tags</h6>
+                          <i class="bx bx-chevron-down" style="transition: transform 0.3s ease;"></i>
+                        </button>
+                        <div class="collapse" id="tagsFiltersCollapse">
+                          <div
+                            class="d-flex flex-column gap-2 mt-2"
+                            data-style-modal-target="tagFiltersContainer"
+                          ></div>
+                        </div>
+                      </div>
+                      <!-- Colors Filters -->
+                      <div class="mb-3">
+                        <button
+                          class="btn btn-sm btn-link text-white p-0 text-decoration-none w-100 text-start d-flex align-items-center justify-content-between"
+                          type="button"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#colorsFiltersCollapse"
+                          aria-expanded="false"
+                          aria-controls="colorsFiltersCollapse"
+                        >
+                          <h6 class="text-white small fw-semibold mb-0">Colors</h6>
+                          <i class="bx bx-chevron-down" style="transition: transform 0.3s ease;"></i>
+                        </button>
+                        <div class="collapse" id="colorsFiltersCollapse">
+                          <div
+                            class="d-flex flex-column gap-2 mt-2"
+                            data-style-modal-target="colorFiltersContainer"
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Right Column: Results Grid -->
+                <div class="col-lg-9 col-12 style-modal-grid-column">
+                  <!-- Results Count -->
+                  <div class="mb-3">
+                    <p class="text-white-50 small mb-0" data-style-modal-target="resultsCount">
+                      Loading...
+                    </p>
+                  </div>
+                  <!-- Loading State -->
+                  <div
+                  class="text-center py-5 d-none"
+                  data-style-modal-target="styleModalLoading"
+                >
+                    <div class="spinner-border text-primary mb-3" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="text-white-50 mb-0">Loading styles...</p>
+                  </div>
+                  <!-- Error State -->
+                  <div
+                  class="alert alert-danger d-none mb-3"
+                  data-style-modal-target="styleModalError"
+                  role="alert"
+                ></div>
+                  <!-- Empty State -->
+                  <div
+                  class="text-center py-5 d-none"
+                  data-style-modal-target="styleModalEmpty"
+                >
+                    <p class="h5 mb-2 text-white-50">No styles found</p>
+                    <p class="small text-white-50 mb-0">Try adjusting your search or filters</p>
+                  </div>
+                  <!-- Results Grid -->
+                  <div class="row g-3 style-modal-grid" data-style-modal-target="styleResultsGrid"></div>
+                  <!-- Pagination -->
+                  <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top border-white border-opacity-20">
+                    <button
+                    type="button"
+                    class="btn btn-outline-primary btn-sm"
+                    data-style-modal-target="paginationPrev"
+                    data-action="click->style-modal#handlePaginationPrev"
+                      >
+                      <i class="bx bx-chevron-left me-1"></i>Previous
+                    </button>
+                    <span class="text-white-50" data-style-modal-target="paginationInfo">
+                      Page 1 of 1
+                    </span>
+                    <button
+                    type="button"
+                    class="btn btn-outline-primary btn-sm"
+                    data-style-modal-target="paginationNext"
+                    data-action="click->style-modal#handlePaginationNext"
+                      >
+                      Next<i class="bx bx-chevron-right ms-1"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+      class="modal-backdrop fade d-none"
+      data-style-modal-target="styleModalOverlay"
+    ></div>
+    </section>
+    <%# Google Maps Converter Config %>
+    <script>
+      window.googleMapsConverterConfig = {
+        snazzyMapsApiKey: '<%= Rails.application.credentials.dig(:snazzy_maps, :api_key) %>'
+      };
+    </script>
+    <%# AJV for validation %>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ajv/8.17.1/ajv7.min.js"></script>
