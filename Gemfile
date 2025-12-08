@@ -48,8 +48,10 @@ group :development, :test do
 end
 
 group :development do
+  gem "dotenv-rails"
   gem "error_highlight", ">= 0.4.0", platforms: [ :ruby ]
   gem "htmlbeautifier"
+  gem "hotwire-livereload"
   gem "solargraph"
   gem "web-console"
 end
