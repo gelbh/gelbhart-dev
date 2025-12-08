@@ -3,7 +3,7 @@
 // --------------------------------------------------
 
 // Import theme variables via @use (creates module scope)
-@use "theme/variables" as *;
+@use "theme/variables/index" as *;
 @use "theme/variables-dark" as *;
 
 // Note: Bootstrap mixins (border-radius, box-shadow, color-mode) are replaced

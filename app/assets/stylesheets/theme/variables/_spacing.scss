@@ -1,0 +1,26 @@
+//
+// Spacing
+//
+
+$spacer: 1rem !default;
+
+// Grid settings overrides
+// Modifying default Bootstrap's $grid-breakpoints map
+$grid-breakpoints: (
+  xs: 0,
+  sm: 500px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1400px,
+) !default;
+
+// Grid containers
+// Modifying default Bootstrap's $container-max-widths map (max-width of .container)
+$container-max-widths: (
+  sm: 97%,
+  md: 95%,
+  lg: 95%,
+  xl: 95%,
+  xxl: 1320px,
+) !default;

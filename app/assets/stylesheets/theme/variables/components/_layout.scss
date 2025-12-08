@@ -1,0 +1,88 @@
+//
+// Layout Components
+// Cards, accordion, list-group, placeholders, thumbnails, figures
+//
+
+@use "sass:map";
+@use "../config" as *;
+@use "../colors" as *;
+@use "../spacing" as *;
+@use "../typography" as *;
+@use "../borders" as *;
+@use "../shadows" as *;
+@use "navigation" as *;
+
+// Placeholders
+$placeholder-opacity-max: 0.35 !default;
+$placeholder-opacity-min: 0.12 !default;
+
+// Cards
+$card-spacer-y: $spacer * 1.5 !default;
+$card-spacer-x: $spacer * 1.5 !default;
+$card-title-spacer-y: $spacer * 0.75 !default;
+$card-title-color: var(--#{$prefix}heading-color) !default;
+$card-border-radius: $border-radius-lg !default;
+$card-bg: var(--#{$prefix}body-bg) !default;
+$card-border-color: var(--#{$prefix}border-color) !default;
+$card-cap-padding-y: $card-spacer-y * 0.75 !default;
+$card-cap-bg: transparent !default;
+$card-transition: transform 0.2s ease-in-out, border-color 0.2s ease-in-out,
+  background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out !default;
+$card-img-overlay-padding: $spacer * 1.5 !default;
+
+// Accordion
+$accordion-padding-x: 1.5rem !default;
+$accordion-border-radius: $border-radius-lg !default;
+
+$accordion-button-color: var(--#{$prefix}heading-color) !default;
+$accordion-button-active-color: $accordion-button-color !default;
+$accordion-button-font-weight: $font-weight-medium !default;
+$accordion-button-active-bg: var(--#{$prefix}body-bg) !default;
+$accordion-icon-width: 0.625rem !default;
+$accordion-icon-color: $gray-800 !default;
+$accordion-icon-active-color: $white !default;
+
+$accordion-icon-box-size: 2.25rem !default;
+$accordion-icon-box-bg: $gray-100 !default;
+$accordion-icon-box-active-bg: $primary !default;
+$accordion-icon-box-active-box-shadow: 0 -0.5rem 1.125rem -0.5rem
+  rgba($primary, 0.9) !default;
+
+$accordion-button-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256' fill='#{$accordion-icon-color}'><path d='M225.813 48.907L128 146.72 30.187 48.907 0 79.093l128 128 128-128z'/></svg>") !default;
+$accordion-button-active-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256' fill='#{$accordion-icon-active-color}'><path d='M225.813 48.907L128 146.72 30.187 48.907 0 79.093l128 128 128-128z'/></svg>") !default;
+
+// List group
+$list-group-color: var(--#{$prefix}body-color) !default;
+$list-group-bg: transparent !default;
+$list-group-border-color: var(--#{$prefix}border-color) !default;
+$list-group-border-radius: $border-radius-lg !default;
+
+$list-group-item-padding-y: $spacer * 0.75 !default;
+$list-group-item-padding-x: $spacer !default;
+$list-group-item-bg-scale: -87% !default;
+$list-group-item-color-scale: 40% !default;
+
+$list-group-hover-bg: map.get($theme-faded-colors, "primary") !default;
+$list-group-active-color: $white !default;
+$list-group-active-bg: $primary !default;
+$list-group-active-box-shadow: $box-shadow-primary !default;
+
+$list-group-action-color: $nav-link-color !default;
+$list-group-action-hover-color: $primary !default;
+
+$list-group-action-font-weight: $font-weight-medium !default;
+$list-group-action-active-color: $list-group-active-color !default;
+$list-group-action-active-bg: $list-group-active-bg !default;
+$list-group-action-transition: color 0.2s ease-in-out,
+  background-color 0.2s ease-in-out, border-color 0.2s ease-in-out,
+  box-shadow 0.2s ease-in-out !default;
+
+// Image thumbnails
+$thumbnail-padding: 0.5rem !default;
+$thumbnail-border-width: 0 !default;
+$thumbnail-border-radius: var(--#{$prefix}border-radius-lg) !default;
+$thumbnail-bg: var(--#{$prefix}body-bg) !default;
+
+// Figures
+$figure-caption-font-size: $font-size-sm !default;
+$figure-caption-color: var(--#{$prefix}gray-600) !default;

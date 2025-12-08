@@ -1,0 +1,30 @@
+//
+// Code Components
+// Code blocks, pre, kbd
+//
+
+@use "sass:color";
+@use "../config" as *;
+@use "../colors" as *;
+@use "../spacing" as *;
+@use "../typography" as *;
+@use "../borders" as *;
+@use "../shadows" as *;
+
+$code-color: #e3116c !default;
+$code-dark-mode-color: #f33185 !default;
+$kbd-color: $white !default;
+$kbd-bg: $gray-900 !default;
+
+$pre-padding-y: $spacer * 1.5 !default;
+$pre-padding-x: $spacer * 1.5 !default;
+$pre-color: $gray-800 !default;
+$pre-bg: $white !default;
+$pre-border-width: var(--#{$prefix}border-width) !default;
+$pre-border-color: var(--#{$prefix}border-color) !default;
+$pre-border-radius: $border-radius-lg !default;
+$pre-box-shadow: $box-shadow-sm !default;
+
+$pre-line-numbers-border-width: $border-width !default;
+$pre-line-numbers-border-color: $border-color !default;
+$pre-line-numbers-color: color.adjust($gray-500, $lightness: -6%) !default;

@@ -3,7 +3,7 @@
 // --------------------------------------------------
 
 // Import theme variables (variables-dark forwards variables, so both are available)
-@use "theme/variables" as *;
+@use "theme/variables/index" as *;
 @use "theme/variables-dark" as *;
 @use "sass:color";
 

@@ -1,0 +1,65 @@
+//
+// Media Components
+// Carousel, gallery, comparison-slider
+//
+
+@use "sass:color";
+@use "../config" as *;
+@use "../colors" as *;
+@use "../spacing" as *;
+@use "../typography" as *;
+@use "../borders" as *;
+@use "../shadows" as *;
+
+// Carousel
+$carousel-nav-btn-border-radius: 50% !default;
+$carousel-nav-btn-bg: $white !default;
+$carousel-nav-btn-color: $gray-800 !default;
+$carousel-nav-btn-box-shadow: $box-shadow-sm !default;
+
+$carousel-nav-btn-hover-bg: $primary !default;
+$carousel-nav-btn-hover-color: $white !default;
+$carousel-nav-btn-hover-box-shadow: $box-shadow-primary !default;
+$carousel-nav-btn-transition: color 0.2s ease-in-out,
+  background-color 0.2s ease-in-out, border-color 0.2s ease-in-out,
+  box-shadow 0.2s ease-in-out, opacity 0.2s ease-in-out !default;
+
+$carousel-bullet-width: 0.3125rem !default;
+$carousel-bullet-height: 0.3125rem !default;
+$carousel-bullet-border-radius: $border-radius-pill !default;
+$carousel-bullet-spacer: $spacer * 0.875 !default;
+$carousel-bullet-transition: width 0.2s ease-in-out, height 0.2s ease-in-out,
+  background-color 0.2s ease-in-out !default;
+
+$carousel-bullet-bg: $gray-500 !default;
+$carousel-bullet-active-bg: $primary !default;
+$carousel-bullet-active-width: 1.5rem !default;
+
+$carousel-scrollbar-width: 0.1875rem !default;
+$carousel-scrollbar-bg: var(--#{$prefix}border-color) !default;
+$carousel-scrollbar-drag-bg: color.adjust($gray-500, $lightness: -6%) !default;
+
+$carousel-progressbar-height: 0.1875rem !default;
+$carousel-progressbar-bg: var(--#{$prefix}border-color) !default;
+$carousel-progressbar-fill-bg: $primary !default;
+
+// Gallery
+$gallery-indicator-size: 4.5rem !default;
+
+$gallery-image-indicator-color: $white !default;
+$gallery-image-indicator-font-size: $font-size-base * 2 !default;
+
+$gallery-video-indicator-bg: $white !default;
+$gallery-video-indicator-color: $gray-800 !default;
+$gallery-video-indicator-font-size: $font-size-base * 2 !default;
+$gallery-video-indicator-box-shadow: $box-shadow-sm !default;
+$gallery-video-indicator-hover-bg: $primary !default;
+$gallery-video-indicator-hover-color: $white !default;
+$gallery-video-indicator-hover-box-shadow: $box-shadow-primary !default;
+
+$gallery-overlay-bg: rgba($gray-900, 0.4) !default;
+$gallery-caption-color: $white !default;
+
+// Comparison slider
+$comparison-slider-divider-width: 0.1875rem !default;
+$comparison-slider-divider-color: $primary !default;

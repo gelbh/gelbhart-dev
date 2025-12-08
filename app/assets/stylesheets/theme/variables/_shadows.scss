@@ -1,0 +1,23 @@
+//
+// Theme shadows
+//
+
+@use "colors" as *;
+
+$box-shadow-sm: 0 0.275rem 0.75rem -0.0625rem rgba($gray-900, 0.06),
+  0 0.125rem 0.4rem -0.0625rem rgba($gray-900, 0.03) !default;
+$box-shadow: 0 0.275rem 1.25rem rgba($gray-900, 0.05),
+  0 0.25rem 0.5625rem rgba($gray-900, 0.03) !default;
+$box-shadow-lg: 0 0.3rem 1.525rem -0.375rem rgba($gray-900, 0.1),
+  0 0.25rem 0.8125rem -0.125rem rgba($gray-900, 0.06) !default;
+$box-shadow-inset: inset 0 0 0 transparent !default;
+
+$box-shadow-primary: 0 0.5rem 1.125rem -0.5rem rgba($primary, 0.9) !default;
+$box-shadow-secondary: 0 0.5rem 1.125rem -0.5rem rgba($gray-900, 0.15) !default;
+$box-shadow-info: 0 0.5rem 1.125rem -0.5rem rgba($info, 0.9) !default;
+$box-shadow-success: 0 0.5rem 1.125rem -0.5rem rgba($success, 0.9) !default;
+$box-shadow-warning: 0 0.5rem 1.125rem -0.5rem rgba($warning, 0.9) !default;
+$box-shadow-danger: 0 0.5rem 1.125rem -0.5rem rgba($danger, 0.9) !default;
+$box-shadow-dark: 0 0.5rem 1.125rem -0.5rem rgba($dark, 0.9) !default;
+
+$text-shadow: 0 0.0625rem $gray-900 !default;

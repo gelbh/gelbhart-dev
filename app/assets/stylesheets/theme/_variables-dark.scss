@@ -8,10 +8,10 @@
 
 // Use variables module to access base variables
 // Use namespace to access variables within this file
-@use "variables" as vars;
+@use "variables/index" as vars;
 
 // Forward variables so they're available to files that use this file
-@forward "variables";
+@forward "variables/index";
 
 // Global colors
 

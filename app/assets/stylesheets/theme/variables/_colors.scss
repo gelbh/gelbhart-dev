@@ -1,0 +1,88 @@
+//
+// Colors
+// Gray and brand colors to use across the Theme.
+//
+
+@use "sass:color";
+
+// Grayscale
+$white: #fff !default;
+$gray-100: #f3f6ff !default;
+$gray-200: #eff2fc !default;
+$gray-300: #e2e5f1 !default;
+$gray-400: #d4d7e5 !default;
+$gray-500: #b4b7c9 !default;
+$gray-600: #9397ad !default;
+$gray-700: #565973 !default;
+$gray-800: #33354d !default;
+$gray-900: #0b0f19 !default;
+$black: #000 !default;
+
+// Theme colors
+$primary: #6366f1 !default;
+$secondary: $gray-200 !default;
+$info: #4c82f7 !default;
+$success: #22c55e !default;
+$warning: #ffba08 !default;
+$danger: #ef4444 !default;
+$light: $white !default;
+$dark: $gray-900 !default;
+
+$primary-text-emphasis: color.adjust($primary, $lightness: -10%) !default;
+$secondary-text-emphasis: $gray-700 !default;
+$success-text-emphasis: color.adjust($success, $lightness: -10%) !default;
+$info-text-emphasis: color.adjust($info, $lightness: -10%) !default;
+$warning-text-emphasis: color.adjust($warning, $lightness: -10%) !default;
+$danger-text-emphasis: color.adjust($danger, $lightness: -10%) !default;
+$light-text-emphasis: $gray-700 !default;
+$dark-text-emphasis: $gray-900 !default;
+
+$primary-bg-subtle: tint-color($primary, 90%) !default;
+$secondary-bg-subtle: $gray-100 !default;
+$success-bg-subtle: tint-color($success, 90%) !default;
+$info-bg-subtle: tint-color($info, 90%) !default;
+$warning-bg-subtle: tint-color($warning, 90%) !default;
+$danger-bg-subtle: tint-color($danger, 90%) !default;
+$light-bg-subtle: $white !default;
+$dark-bg-subtle: tint-color($dark, 92%) !default;
+
+$primary-border-subtle: tint-color($primary, 75%) !default;
+$secondary-border-subtle: $gray-200 !default;
+$success-border-subtle: tint-color($success, 75%) !default;
+$info-border-subtle: tint-color($info, 75%) !default;
+$warning-border-subtle: tint-color($warning, 75%) !default;
+$danger-border-subtle: tint-color($danger, 75%) !default;
+$light-border-subtle: $gray-100 !default;
+$dark-border-subtle: $gray-200 !default;
+
+// Bootstrap's $theme-colors map
+$theme-colors: (
+  "primary": $primary,
+  "secondary": $secondary,
+  "success": $success,
+  "info": $info,
+  "warning": $warning,
+  "danger": $danger,
+  "light": $light,
+  "dark": $dark,
+) !default;
+
+// Faded colors map
+$theme-faded-colors: (
+  "primary": rgba($primary, 0.12),
+  "success": rgba($success, 0.12),
+  "info": rgba($info, 0.12),
+  "warning": rgba($warning, 0.12),
+  "danger": rgba($danger, 0.12),
+  "light": rgba($light, 0.05),
+  "dark": rgba($dark, 0.12),
+) !default;
+
+// Gradients map
+$theme-gradients: (
+  "primary": linear-gradient(90deg, $primary 0%, #7c3aed 50%, #a78bfa 100%),
+  "primary-translucent":
+    linear-gradient(180deg, rgba($primary, 0) 0%, rgba($primary, 0.6) 120%),
+  "dark-translucent":
+    linear-gradient(180deg, rgba($dark, 0.58) 0%, rgba($dark, 0.78) 100%),
+) !default;

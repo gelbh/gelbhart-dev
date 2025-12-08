@@ -1,0 +1,65 @@
+//
+// Base Components
+// Body, links, tables, paragraphs, blockquotes, inline lists, hr, icons
+//
+
+@use "sass:color";
+@use "../config" as *;
+@use "../colors" as *;
+@use "../spacing" as *;
+@use "../typography" as *;
+
+// Body
+$body-color: $gray-700 !default;
+$body-bg: $white !default;
+$text-muted: var(--#{$prefix}gray-600) !default;
+
+// Links
+$link-color: $primary !default;
+$link-decoration: underline !default;
+$link-hover-color: color.adjust($link-color, $lightness: -8%) !default;
+$link-hover-decoration: none !default;
+$link-transition: color 0.2s ease-in-out !default;
+$emphasized-link-hover-darken-percentage: 0% !default;
+
+// Paragraphs
+$paragraph-margin-bottom: $spacer * 1.25 !default;
+
+// Blockquote
+$blockquote-font-size: $font-size-base !default;
+$blockquote-footer-color: var(--#{$prefix}gray-600) !default;
+$blockquote-footer-font-size: $font-size-sm !default;
+
+// Inline list
+$list-inline-padding: $spacer !default;
+
+// Horizontal rule
+$hr-margin-y: 0 !default;
+$hr-color: var(--#{$prefix}border-color) !default;
+$hr-opacity: 1 !default;
+
+// Icon font
+$icons-font-family: "boxicons" !default;
+
+// Tables
+$table-cell-padding-y: 0.75rem !default;
+$table-cell-padding-x: 0.75rem !default;
+$table-cell-padding-y-sm: 0.375rem !default;
+$table-cell-padding-x-sm: 0.375rem !default;
+
+$table-color: var(--#{$prefix}body-color) !default;
+
+$table-th-color: $headings-color !default;
+$table-th-font-weight: $font-weight-semibold !default;
+
+$table-striped-bg-factor: 0.0375 !default;
+$table-active-bg-factor: 0.05 !default;
+$table-hover-bg-factor: 0.05 !default;
+$table-border-factor: 0.15 !default;
+
+$table-bg-scale: -90% !default;
+
+// Modifying default Bootstrap's $table-variants map
+$table-variants: (
+  "dark": $dark,
+) !default;

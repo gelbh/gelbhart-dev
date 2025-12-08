@@ -2,7 +2,7 @@
 // Social buttons
 // --------------------------------------------------
 
-@use "theme/variables" as *;
+@use "theme/variables/index" as *;
 
 @each $brand, $value in $social-buttons {
   .btn-#{$brand} {
