@@ -28,13 +28,24 @@
     <div class="row align-items-center mt-2">
       <div class="col-md-6 col-12">
         <ul class="nav justify-content-center justify-content-md-start mb-3 mb-md-0 flex-wrap">
-          <% projects_with_pages.each do |project| %>
-            <li class="nav-item">
-              <%= link_to project_link_url(project), class: "nav-link text-white py-2 px-3 footer-link" do %>
-                <%= project.title %>
+          <li class="nav-item dropdown footer-projects-dropdown">
+            <span class="nav-link text-white py-2 px-3 footer-link dropdown-toggle d-none d-md-inline-flex align-items-center" id="footerProjectsDropdown" role="button" aria-expanded="false">
+              Projects
+            </span>
+            <button class="nav-link text-white py-2 px-3 footer-link d-md-none d-flex align-items-center" type="button" data-bs-toggle="modal" data-bs-target="#mobileMenu" aria-label="Open mobile menu">
+              Projects
+            </button>
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="footerProjectsDropdown">
+              <% projects_with_pages.each do |project| %>
+                <li>
+                  <%= link_to project_link_url(project), class: "dropdown-item d-flex align-items-center #{current_page?(project_link_url(project)) ? 'active' : ''}" do %>
+                    <i class="bx <%= project.icon %> fs-lg me-2"></i>
+                    <%= project.title %>
+                  <% end %>
+                </li>
               <% end %>
-            </li>
-          <% end %>
+            </ul>
+          </li>
           <li class="nav-item">
             <%= link_to contact_path, class: "nav-link text-white py-2 px-3 footer-link" do %>
               Contact
