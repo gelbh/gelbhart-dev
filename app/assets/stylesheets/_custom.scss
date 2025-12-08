@@ -18,36 +18,39 @@
 
 // ---- Layout Components ----
 // Footer and scroll-to-top button styles
-@use "components/footer" as *;
+@use "components/layout/footer" as *;
 
 // Header styles
-@use "components/header" as *;
+@use "components/layout/header" as *;
 
 // ---- Page Sections ----
 // Hero section with animated backgrounds and gradient text
-@use "components/hero" as *;
+@use "components/sections/hero" as *;
 
 // Technologies & skills section with tech cards
-@use "components/tech-skills" as *;
+@use "components/sections/tech-skills" as *;
 
 // Contact page with glassmorphic cards and typing code background
-@use "components/contact" as *;
+@use "components/sections/contact" as *;
 
 // Project cards with hover effects and animations
-@use "components/projects" as *;
+@use "components/sections/projects" as *;
 
 // Pac-Man game styles:
-@use "components/pacman" as *;
+@use "components/pages/pacman" as *;
 
 // ---- Project Pages ----
 // Video Captioner page with hero and card styles
-@use "components/video-captioner" as *;
+@use "components/pages/video-captioner" as *;
 
 // Hevy Tracker page with hero, cards, gallery, and steps
-@use "components/hevy-tracker" as *;
+@use "components/pages/hevy-tracker" as *;
 
 // NASA Exoplanet Explorer page with hero and card styles
-@use "components/nasa-exoplanet-explorer" as *;
+@use "components/pages/nasa-exoplanet-explorer" as *;
+
+// Google Maps Converter page with hero, card, and CodeMirror styles
+@use "components/pages/google-maps-converter" as *;
 
 // Error page styles
 // Ensure error page buttons use solid indigo color matching logo (not pink gradient)
