@@ -8,7 +8,7 @@ default: &default
 
 development:
   <<: *default
-  database: gelbhart_dev_development
+  url: <%= ENV.fetch('DATABASE_URL', nil) || 'postgresql://localhost/gelbhart_dev_development' %>
 
 test:
   <<: *default
