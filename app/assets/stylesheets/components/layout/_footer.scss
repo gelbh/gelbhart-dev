@@ -274,3 +274,82 @@
     min-height: 48px;
   }
 }
+
+// Footer projects dropdown - hover behavior (opens upward on desktop, modal on mobile)
+.footer-projects-dropdown {
+  position: relative;
+
+  .dropdown-menu {
+    display: none !important;
+    bottom: 100%;
+    top: auto;
+    margin-bottom: 0.5rem;
+    margin-top: 0;
+    // Add a small invisible bridge to prevent gap issues
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: -0.5rem;
+      left: 0;
+      right: 0;
+      height: 0.5rem;
+    }
+  }
+
+  // Mobile: hide dropdown menu, show clickable button
+  @media (max-width: 767.98px) {
+    .dropdown-menu {
+      display: none !important;
+    }
+
+    button[data-bs-toggle="modal"] {
+      background: none;
+      border: none;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+    }
+  }
+
+  // Desktop: hover behavior
+  @media (min-width: 768px) {
+    @media (hover: hover) and (pointer: fine) {
+      // Show dropdown when hovering over the dropdown container
+      &:hover .dropdown-menu {
+        display: block !important;
+        animation: fade-in-up 0.2s ease-in-out;
+      }
+
+      &:hover .dropdown-toggle::after {
+        transform: rotate(180deg);
+      }
+
+      &:hover .dropdown-toggle {
+        color: #6366f1 !important;
+      }
+
+      .dropdown-toggle {
+        cursor: default;
+        pointer-events: none;
+      }
+    }
+
+    .dropdown-toggle {
+      &::after {
+        margin-left: 0.35rem;
+        transition: transform 0.3s ease;
+      }
+    }
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
