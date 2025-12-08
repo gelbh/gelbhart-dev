@@ -1,0 +1,80 @@
+//
+// Feedback Components
+// Alerts, badges, modals, tooltips, popovers, toasts, progress, close, spinners
+//
+
+@use "sass:color";
+@use "../config" as *;
+@use "../colors" as *;
+@use "../spacing" as *;
+@use "../typography" as *;
+@use "../borders" as *;
+@use "../shadows" as *;
+
+// Tooltips
+$tooltip-font-size: $font-size-base * 0.8125 !default;
+$tooltip-border-radius: $border-radius-sm !default;
+
+// Popovers
+$popover-border-color: var(--#{$prefix}border-color) !default;
+$popover-box-shadow: $box-shadow-sm !default;
+$popover-header-color: var(--#{$prefix}heading-color) !default;
+$popover-header-bg: transparent !default;
+$popover-header-padding-y: $spacer * 0.75 !default;
+$popover-header-padding-x: $spacer !default;
+$popover-header-font-size: $font-size-base !default;
+$popover-body-font-size: $font-size-sm !default;
+
+// Toasts
+$toast-padding-x: $spacer !default;
+$toast-padding-y: $spacer * 0.75 !default;
+$toast-background-color: $white !default;
+$toast-border-radius: $border-radius-lg !default;
+$toast-border-color: transparent !default;
+
+$toast-header-color: var(--#{$prefix}heading-color) !default;
+$toast-header-background-color: transparent !default;
+$toast-header-border-color: var(--#{$prefix}border-color) !default;
+
+// Badges
+$badge-font-size: 0.8125em !default;
+$badge-font-weight: $font-weight-medium !default;
+$badge-border-radius: $border-radius-sm !default;
+$badge-padding-y: 0.35em !default;
+$badge-padding-x: 0.6em !default;
+
+// Modal
+$modal-inner-padding: $spacer * 1.5 !default;
+
+$modal-content-border-width: 0 !default;
+$modal-content-border-color: var(--#{$prefix}border-color) !default;
+$modal-content-box-shadow-xs: $box-shadow !default;
+
+$modal-header-padding-y: $modal-inner-padding * 0.75 !default;
+$modal-header-border-width: $border-width !default;
+$modal-footer-margin-between: 0.75rem !default;
+
+$modal-fade-transform: scale(0.9) !default;
+$modal-transition: transform 0.2s ease-out !default;
+
+$modal-backdrop-opacity: 0.65 !default;
+
+// Alerts
+$alert-border-radius: $border-radius-lg !default;
+$alert-link-font-weight: $font-weight-medium !default;
+$alert-bg-scale: -90% !default;
+$alert-border-scale: -50% !default;
+$alert-color-scale: -90% !default;
+
+// Progress
+$progress-border-radius: $border-radius-pill !default;
+$progress-bg: color.adjust($gray-300, $lightness: 2%) !default;
+
+// Spinners
+$spinner-border-width: 0.15em !default;
+$spinner-border-width-sm: 0.1em !default;
+
+// Close
+$btn-close-width: 0.75em !default;
+$btn-close-focus-shadow: none !default;
+$btn-close-transition: opacity 0.25s ease-in-out !default;

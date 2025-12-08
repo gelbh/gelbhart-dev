@@ -1,0 +1,29 @@
+//
+// Borders
+// Define common border widths, colors, and radius sizes.
+//
+
+@use "colors" as *;
+
+$border-width: 1px !default;
+$border-color: $gray-300 !default;
+$border-light-color: rgba($white, 0.14) !default;
+
+$border-radius: 0.375rem !default;
+$border-radius-sm: 0.25rem !default;
+$border-radius-lg: 0.5rem !default;
+$border-radius-xl: 0.75rem !default;
+$border-radius-xxl: 1rem !default;
+$border-radius-pill: 50rem !default;
+
+// Border colors map
+$border-colors: (
+  "primary": rgba($primary, 0.35),
+  "success": rgba($success, 0.35),
+  "info": rgba($info, 0.35),
+  "warning": rgba($warning, 0.35),
+  "danger": rgba($danger, 0.35),
+  "light": $border-light-color,
+  "dark": rgba($dark, 0.35),
+  "white": rgba($white, 0.35),
+) !default;

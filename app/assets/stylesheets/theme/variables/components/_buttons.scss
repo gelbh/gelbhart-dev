@@ -1,0 +1,109 @@
+//
+// Buttons
+// Button variables (standard, icon, social, video, scroll-top)
+//
+
+@use "../colors" as *;
+@use "../spacing" as *;
+@use "../typography" as *;
+@use "../borders" as *;
+@use "../shadows" as *;
+
+// Buttons + Forms
+$input-btn-padding-y: 0.625rem !default;
+$input-btn-padding-x: 1.75rem !default;
+$input-btn-font-size: $font-size-sm !default;
+$input-btn-focus-width: 0 !default;
+
+$input-btn-padding-y-sm: 0.475rem !default;
+$input-btn-padding-x-sm: 1.25rem !default;
+$input-btn-font-size-sm: $font-size-xs !default;
+
+$input-btn-padding-y-lg: 0.785rem !default;
+$input-btn-padding-x-lg: 2rem !default;
+$input-btn-font-size-lg: $font-size-base !default;
+
+// Buttons
+$btn-color: $white !default;
+$btn-font-weight: $font-weight-medium !default;
+$btn-white-space: nowrap !default;
+$btn-focus-width: 0 !default;
+
+$btn-box-shadow: unset !default;
+$btn-focus-box-shadow: unset !default;
+$btn-active-box-shadow: unset !default;
+
+$btn-link-decoration: none !default;
+$btn-link-hover-decoration: none !default;
+
+$btn-transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out,
+  border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out !default;
+
+// Icon buttons
+$btn-icon-size: 2.75rem !default;
+$btn-icon-sm-size: 2.25rem !default;
+$btn-icon-lg-size: 3.25rem !default;
+$btn-icon-xl-size: 4.5rem !default;
+
+// Social buttons
+$social-buttons: (
+  "airbnb": #fd5c63,
+  "behance": #1769ff,
+  "blogger": #f57d00,
+  "codepen": #0ebeff,
+  "discord": #7289da,
+  "dribbble": #ea4c89,
+  "dropbox": #007ee5,
+  "facebook": #1877f2,
+  "flickr": #0063dc,
+  "foursquare": #f94877,
+  "gitlab": #fc6d26,
+  "github": #4078c0,
+  "google": #ea4335,
+  "instagram": #405de6,
+  "kickstarter": #2bde73,
+  "linkedin": #0077b5,
+  "medium": #00ab6c,
+  "messenger": #0084ff,
+  "ok": #ed812b,
+  "patreon": #f96854,
+  "pinterest": #e60023,
+  "product-hunt": #da552f,
+  "reddit": #ff4500,
+  "skype": #00aff0,
+  "slack": #611f69,
+  "snapchat": #fffc00,
+  "stack-overflow": #f48024,
+  "steam": #00adee,
+  "telegram": #08c,
+  "tiktok": #fe2c55,
+  "trip-advisor": #00af87,
+  "tumblr": #35465c,
+  "twitch": #9146ff,
+  "twitter": #1da1f2,
+  "vimeo": #1ab7ea,
+  "vk": #45668e,
+  "whatsapp": #128c7e,
+  "youtube": #f00,
+  "zoom": #2d8cff,
+) !default;
+
+// Video button
+$btn-video-border-radius: 50% !default;
+$btn-video-bg: $white !default;
+$btn-video-color: $gray-800 !default;
+$btn-video-box-shadow: $box-shadow-sm !default;
+
+$btn-video-hover-bg: $primary !default;
+$btn-video-hover-color: $white !default;
+$btn-video-hover-box-shadow: $box-shadow-primary !default;
+
+// Scroll to top button
+$btn-scroll-top-size: 2.75rem !default;
+$btn-scroll-top-icon-font-size: $font-size-base * 1.5 !default;
+$btn-scroll-top-bg: rgba($gray-900, 0.2) !default;
+$btn-scroll-top-hover-bg: rgba($gray-900, 0.4) !default;
+$btn-scroll-top-color: $white !default;
+$btn-scroll-top-hover-color: $white !default;
+$btn-scroll-top-transition: bottom 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55),
+  opacity 0.3s, background-color 0.25s ease-in-out !default;

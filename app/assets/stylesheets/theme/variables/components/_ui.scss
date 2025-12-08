@@ -1,0 +1,82 @@
+//
+// UI Components
+// Pagination, breadcrumb, steps, offcanvas
+//
+
+@use "sass:color";
+@use "sass:string";
+@use "../config" as *;
+@use "../colors" as *;
+@use "../spacing" as *;
+@use "../typography" as *;
+@use "../borders" as *;
+@use "../shadows" as *;
+@use "navigation" as *;
+
+// Pagination
+$pagination-padding-y: 0.45rem !default;
+$pagination-padding-x: 0.875rem !default;
+$pagination-font-size: $font-size-sm !default;
+
+$pagination-padding-y-sm: 0.265rem !default;
+$pagination-padding-x-sm: 0.65rem !default;
+$pagination-font-size-sm: $font-size-xs !default;
+
+$pagination-padding-y-lg: 0.625rem !default;
+$pagination-padding-x-lg: 1.125rem !default;
+$pagination-font-size-lg: $font-size-base !default;
+
+$pagination-margin: 0.125rem !default;
+$pagination-color: $nav-link-color !default;
+$pagination-font-weight: $nav-link-font-weight !default;
+$pagination-bg: transparent !default;
+$pagination-border-width: 0 !default;
+
+$pagination-hover-color: $nav-link-hover-color !default;
+$pagination-focus-color: $pagination-hover-color !default;
+$pagination-hover-bg: $gray-200 !default;
+
+$pagination-active-color: $white !default;
+$pagination-active-bg: $primary !default;
+$pagination-active-box-shadow: $box-shadow-primary !default;
+
+$pagination-disabled-bg: transparent !default;
+$pagination-transition: color 0.2s ease-in-out,
+  background-color 0.2s ease-in-out, border-color 0.2s ease-in-out,
+  box-shadow 0.2s ease-in-out !default;
+
+// Breadcrumb
+$breadcrumb-font-size: $font-size-sm !default;
+$breadcrumb-font-weight: $font-weight-medium !default;
+$breadcrumb-item-padding-x: 0.625rem !default;
+$breadcrumb-color: var(--#{$prefix}gray-600) !default;
+$breadcrumb-hover-color: var(--#{$prefix}gray-800) !default;
+$breadcrumb-active-color: var(--#{$prefix}primary) !default;
+$breadcrumb-divider-color: $breadcrumb-color !default;
+$breadcrumb-divider-font-size: 1.15em !default;
+$breadcrumb-divider: string.quote("\ea55") !default;
+$breadcrumb-divider-flipped: string.quote("\ed3f") !default;
+
+// Steps
+$steps-padding-y: $spacer * 1.5 !default;
+$steps-padding-x: $spacer * 1.5 !default;
+$steps-number-size: 7.625rem !default;
+$steps-number-border-radius: 50% !default;
+$steps-number-bg: $gray-100 !default;
+$steps-number-color: var(--#{$prefix}heading-color) !default;
+$steps-number-font-size: $font-size-base * 2 !default;
+$steps-number-font-weight: $font-weight-bold !default;
+$steps-number-inner-size: 5.625rem !default;
+$steps-number-inner-bg: $white !default;
+$steps-number-inner-box-shadow: $box-shadow-sm !default;
+$steps-connect-width: var(--#{$prefix}border-width) !default;
+$steps-connect-color: var(--#{$prefix}border-color) !default;
+
+$steps-number-size-sm: 5rem !default;
+$steps-number-inner-size-sm: 3.5rem !default;
+$steps-number-font-size-sm: $font-size-base * 1.5 !default;
+
+// Offcanvas
+$offcanvas-horizontal-width: 21rem !default;
+$offcanvas-border-width: 0 !default;
+$offcanvas-box-shadow: $box-shadow !default;

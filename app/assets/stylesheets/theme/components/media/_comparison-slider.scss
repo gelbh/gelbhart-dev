@@ -3,7 +3,7 @@
 // Based on https://github.com/sneas/img-comparison-slider
 // --------------------------------------------------
 
-@use "theme/variables" as *;
+@use "theme/variables/index" as *;
 
 img-comparison-slider {
   display: block;

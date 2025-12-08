@@ -1,0 +1,108 @@
+//
+// Forms
+// Form inputs, selects, checkboxes, switches, validation, input groups, range slider
+//
+
+@use "sass:color";
+@use "sass:map";
+@use "../colors" as *;
+@use "../spacing" as *;
+@use "../typography" as *;
+@use "../borders" as *;
+@use "../shadows" as *;
+@use "base" as *;
+
+// Forms
+$form-text-font-size: $font-size-xs !default;
+$form-text-color: $text-muted !default;
+
+$form-label-margin-bottom: 0.3125rem !default;
+$form-label-font-size: $font-size-sm !default;
+$form-label-font-weight: $font-weight-medium !default;
+$form-label-color: $gray-900 !default;
+$form-floating-label-opacity: 0.7 !default;
+
+$input-padding-x: 1rem !default;
+$input-padding-x-sm: 0.875rem !default;
+$input-padding-x-lg: 1.125rem !default;
+
+$input-color: $body-color !default;
+$input-bg: $white !default;
+$input-disabled-bg: $gray-100 !default;
+$input-border-color: $gray-400 !default;
+
+$input-focus-border-color: map.get($border-colors, "primary") !default;
+$input-focus-box-shadow: 0 0.5rem 1.125rem -0.5rem rgba($primary, 0.2) !default;
+
+$input-placeholder-color: $gray-500 !default;
+$input-disabled-placeholder-color: $gray-600 !default;
+
+$input-transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !default;
+
+// Range
+$form-range-thumb-bg: $primary !default;
+$form-range-thumb-active-bg: color.adjust(
+  $form-range-thumb-bg,
+  $lightness: -9%
+) !default;
+$form-range-track-bg: color.adjust($gray-300, $lightness: 2%) !default;
+
+// Select
+$form-select-disabled-bg: $gray-100 !default;
+$form-select-indicator-color: $input-color !default;
+
+// Form check
+$form-check-input-width: 1rem !default;
+$form-check-padding-start: $form-check-input-width + 0.5rem !default;
+$form-check-margin-bottom: $spacer * 0.25 !default;
+$form-check-input-border: 2px solid $gray-500 !default;
+$form-check-input-border-radius: 0.1875em !default;
+$form-check-input-disabled-opacity: 0.55 !default;
+$form-check-label-font-size: $font-size-sm !default;
+
+// Form switch
+$form-switch-width: 2.875em !default;
+$form-switch-height: 1.5rem !default;
+$form-switch-margin-bottom: $spacer * 0.5 !default;
+$form-switch-color: $white !default;
+$form-switch-focus-color: $form-switch-color !default;
+$form-switch-bg: $gray-500 !default;
+$form-switch-checked-bg: $primary !default;
+$form-switch-checked-box-shadow: $box-shadow-primary !default;
+
+// Form validation
+$form-feedback-font-size: $font-size-xs !default;
+$form-feedback-valid-color: $success !default;
+$form-feedback-invalid-color: $danger !default;
+$form-feedback-icon-valid-color: $form-feedback-valid-color !default;
+$form-feedback-icon-invalid-color: $form-feedback-invalid-color !default;
+
+$form-feedback-tooltip-font-size: $form-feedback-font-size !default;
+$form-feedback-tooltip-valid-color: $form-feedback-valid-color !default;
+$form-feedback-tooltip-invalid-color: $form-feedback-invalid-color !default;
+$form-feedback-tooltip-valid-bg: map.get(
+  $theme-faded-colors,
+  "success"
+) !default;
+$form-feedback-tooltip-invalid-bg: map.get(
+  $theme-faded-colors,
+  "danger"
+) !default;
+$form-feedback-tooltip-border-radius: $border-radius-sm !default;
+$form-feedback-icon-valid: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' fill='#{$form-feedback-icon-valid-color}'><path d='M10 1.667c-4.595 0-8.333 3.738-8.333 8.333S5.405 18.333 10 18.333s8.333-3.738 8.333-8.333S14.595 1.667 10 1.667zm0 15c-3.676 0-6.667-2.991-6.667-6.667S6.324 3.333 10 3.333 16.667 6.324 16.667 10 13.676 16.667 10 16.667zm-1.668-5.345L6.416 9.41 5.24 10.59l3.094 3.088 5.588-5.588-1.178-1.178-4.412 4.412z'/></svg>") !default;
+$form-feedback-icon-invalid: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' fill='#{$form-feedback-icon-invalid-color}'><path d='M7.643 13.535L10 11.178l2.357 2.357 1.178-1.178L11.178 10l2.357-2.357-1.178-1.178L10 8.822 7.643 6.465 6.465 7.643 8.822 10l-2.357 2.357 1.178 1.178zM10 18.333c4.595 0 8.333-3.738 8.333-8.333S14.595 1.667 10 1.667 1.667 5.405 1.667 10 5.405 18.333 10 18.333zm0-15c3.676 0 6.667 2.991 6.667 6.667S13.676 16.667 10 16.667 3.333 13.676 3.333 10 6.324 3.333 10 3.333z'/></svg>") !default;
+
+// Input group
+$input-group-addon-bg: $input-bg !default;
+
+// Range slider
+$range-slider-height: 0.1875rem !default;
+$range-slider-bg: color.adjust($gray-300, $lightness: 1%) !default;
+$range-slider-connect-bg: $primary !default;
+$range-slider-handle-size: 1.375rem !default;
+$range-slider-handle-bg: $white !default;
+$range-slider-handle-box-shadow: 0 0.125rem 0.5625rem -0.125rem rgba($black, 0.25) !default;
+$range-slider-tooltip-font-size: $font-size-xs !default;
+$range-slider-tooltip-bg: color.adjust($gray-800, $lightness: -10%) !default;
+$range-slider-tooltip-color: $white !default;
+$range-slider-pips-font-size: $font-size-base * 0.8125 !default;

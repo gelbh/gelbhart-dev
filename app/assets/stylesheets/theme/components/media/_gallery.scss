@@ -3,7 +3,7 @@
 // based on https://github.com/sachinchoolur/lightgallery.js
 // --------------------------------------------------
 
-@use "theme/variables" as *;
+@use "theme/variables/index" as *;
 
 .gallery {
   --#{$prefix}gallery-overlay-bg: #{$gallery-overlay-bg};

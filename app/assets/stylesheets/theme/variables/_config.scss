@@ -1,0 +1,14 @@
+//
+// Configuration Variables
+// Prefix and global options
+//
+
+// Prefix for :root CSS variables
+$prefix: si- !default;
+
+// Options
+// Modifying Bootstrap global options
+$enable-shadows: true !default;
+$enable-negative-margins: true !default;
+$enable-smooth-scroll: false !default;
+$enable-dark-mode: true !default;

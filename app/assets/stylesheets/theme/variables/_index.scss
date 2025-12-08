@@ -1,0 +1,40 @@
+//
+// Variables Index
+// Main entry point that forwards all theme variables
+//
+// Note: Bootstrap functions are loaded in application.scss before this file
+// This file expects Bootstrap functions to be available globally via @import in application.scss
+//
+
+// Use Sass modules for modern functions
+@use "sass:color";
+@use "sass:map";
+@use "sass:string";
+
+// Use variables needed within this file (with namespace to avoid conflicts)
+@use "config" as config;
+@use "colors" as colors;
+
+// Forward configuration first (prefix and options)
+@forward "config";
+
+// Forward core variables in dependency order
+@forward "colors";
+@forward "spacing";
+@forward "borders";
+@forward "shadows";
+@forward "typography";
+
+// User selection color (depends on prefix and colors)
+$user-selection-color: rgba(var(--#{config.$prefix}primary-rgb), 0.22) !default;
+
+// Forward component variables
+@forward "components/base";
+@forward "components/buttons";
+@forward "components/forms";
+@forward "components/navigation";
+@forward "components/layout";
+@forward "components/feedback";
+@forward "components/ui";
+@forward "components/code";
+@forward "components/media";
