@@ -96,7 +96,7 @@ CRITICAL_FILES=(
   "Gemfile.lock"
   "package.json"
   "package-lock.json"
-  "jest.config.js"
+  ".config/jest.config.js"
   "app/javascript/__tests__/setup.js"
 )
 
