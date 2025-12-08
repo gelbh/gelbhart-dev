@@ -30,6 +30,10 @@ module GelbhartDev
     # Use Sprockets for asset pipeline
     config.assets.initialize_on_precompile = false
 
+    # Use SQL format for schema to properly handle PostgreSQL-specific features
+    # (extensions, custom schemas, etc.) that may differ between environments
+    config.active_record.schema_format = :sql
+
     config.exceptions_app = self.routes
 
     config.action_dispatch.default_headers.merge!(
