@@ -156,6 +156,8 @@
       <%= yield(:structured_data) %>
     <% end %>
     <%# Application Stylesheets and Scripts %>
+    <%# Preload CSS with correct as attribute to avoid browser warnings %>
+    <%= tag.link rel: "preload", href: stylesheet_path("application"), as: "style", media: "all" %>
     <%= stylesheet_link_tag "application", media: "all" %>
     <%= javascript_importmap_tags %>
   </head>
