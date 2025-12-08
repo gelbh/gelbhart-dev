@@ -23,6 +23,10 @@ import LazyIframeController from "controllers/ui/lazy_iframe_controller";
 import ScrollAnimationController from "controllers/animation/scroll_controller";
 import ScrollToTopController from "controllers/animation/scroll_to_top_controller";
 
+// Project controllers
+import GoogleMapsConverterController from "controllers/projects/google_maps_converter_controller";
+import StyleModalController from "controllers/projects/style_modal_controller";
+
 // Register all controllers with their kebab-case names
 application.register("pacman-game", PacmanGameController);
 application.register("pacman-input", PacmanInputController);
@@ -36,6 +40,8 @@ application.register("lazy-iframe", LazyIframeController);
 application.register("scroll-animation", ScrollAnimationController);
 application.register("scroll-to-top", ScrollToTopController);
 application.register("theme", ThemeController);
+application.register("google-maps-converter", GoogleMapsConverterController);
+application.register("style-modal", StyleModalController);
 
 // Start Stimulus AFTER all controllers are registered
 // This prevents Stimulus from attempting to lazy-load controllers
