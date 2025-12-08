@@ -70,7 +70,6 @@ project.assign_attributes(
   link_text: 'Learn More',
   link_url: '/projects/google-maps-converter',
   route_name: 'google_maps_converter',
-  github_url: 'https://github.com/gelbh/google-maps-converter',
   badges: [
     { text: 'JavaScript', color: 'warning', url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript' },
     { text: 'Google Maps API', color: 'danger', url: 'https://developers.google.com/maps' },
