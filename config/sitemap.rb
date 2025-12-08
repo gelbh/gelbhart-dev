@@ -57,4 +57,7 @@ SitemapGenerator::Sitemap.create do
 
   nasa_lastmod = get_view_lastmod("pages/nasa_exoplanet_explorer.html.erb")
   add "/projects/nasa-exoplanet-explorer", lastmod: nasa_lastmod
+
+  google_maps_converter_lastmod = get_view_lastmod("pages/google_maps_converter.html.erb")
+  add "/projects/google-maps-converter", lastmod: google_maps_converter_lastmod
 end
