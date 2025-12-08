@@ -3,7 +3,7 @@
 // ============================================
 // Media queries and responsive adjustments
 
-@use "../_variables" as *;
+@use "../../_variables" as *;
 
 @media (max-width: 767.98px) {
   // Mobile breakpoint (md - 1px)

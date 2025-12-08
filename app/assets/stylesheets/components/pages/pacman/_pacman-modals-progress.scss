@@ -1,0 +1,49 @@
+// ============================================
+// PAC-MAN MODALS - PROGRESS BAR
+// ============================================
+
+.modal-progress {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: rgba(var(--color-primary), 0.1);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(var(--color-primary), 0.3);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.progress-label {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.progress-points {
+  font-size: 0.9rem;
+  color: var(--color-pacman-yellow);
+  font-weight: 600;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary),
+    var(--color-pacman-yellow)
+  );
+  transition: width var(--transition-normal) ease;
+  border-radius: var(--radius-sm);
+}
+

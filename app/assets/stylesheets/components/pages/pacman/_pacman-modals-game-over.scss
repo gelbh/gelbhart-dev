@@ -1,0 +1,47 @@
+// ============================================
+// PAC-MAN MODALS - GAME OVER & CONFIRMATION
+// ============================================
+
+.pacman-game-over-modal {
+  &.leaderboard-modal {
+    .modal-emoji {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    .modal-title {
+      font-size: 1.8rem;
+      margin-bottom: 5px;
+    }
+  }
+}
+
+.confirmation-modal {
+  .modal-content {
+    border-color: rgba(255, 165, 0, 0.6);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 165, 0, 0.3);
+
+    [data-bs-theme="dark"] & {
+      border-color: rgba(255, 165, 0, 0.7);
+    }
+  }
+
+  .modal-emoji {
+    animation: warningPulse 1s var(--ease-in-out) infinite;
+  }
+
+  .modal-title {
+    color: #ff9500;
+    text-shadow: 0 0 20px rgba(255, 149, 0, 0.6);
+  }
+
+  .modal-btn-primary {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+
+    &:hover {
+      box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
+      background: linear-gradient(135deg, #ff5252 0%, #dc4d5f 100%);
+    }
+  }
+}

@@ -1,0 +1,161 @@
+// ============================================
+// PAC-MAN MODALS - BASE STYLES
+// ============================================
+// Shared base styles for all modal components
+
+@use "../../_mixins" as *;
+
+.pacman-game-over-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+  opacity: 0;
+  transition: opacity var(--transition-normal) ease;
+
+  &.show {
+    opacity: 1;
+
+    .modal-content {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .modal-content {
+    background: linear-gradient(
+      135deg,
+      rgba(20, 20, 30, 0.98) 0%,
+      rgba(30, 30, 50, 0.98) 100%
+    );
+    border: 3px solid rgba(255, 215, 0, 0.5);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 215, 0, 0.2);
+    transform: scale(0.8) translateY(20px);
+    opacity: 0;
+    transition: all 0.4s var(--ease-bounce);
+
+    [data-bs-theme="dark"] & {
+      background: linear-gradient(
+        135deg,
+        rgba(15, 15, 25, 0.98) 0%,
+        rgba(25, 25, 40, 0.98) 100%
+      );
+      border-color: rgba(255, 215, 0, 0.6);
+    }
+  }
+
+  .modal-emoji {
+    font-size: 5rem;
+    margin-bottom: 20px;
+    animation: emojiPop 0.6s var(--ease-bounce) 0.2s both;
+  }
+
+  .modal-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--color-pacman-yellow);
+    margin-bottom: 10px;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    animation: titleSlide var(--transition-slow) ease 0.3s both;
+  }
+
+  .modal-message {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 30px;
+    animation: messageSlide var(--transition-slow) ease 0.4s both;
+  }
+
+  .modal-score {
+    background: rgba(255, 215, 0, 0.1);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 30px;
+    animation: scoreSlide var(--transition-slow) ease 0.5s both;
+
+    .score-label {
+      display: block;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .score-value {
+      display: block;
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--color-pacman-yellow);
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+    }
+  }
+
+  .modal-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    animation: buttonsSlide var(--transition-slow) ease 0.6s both;
+  }
+
+  .modal-btn {
+    padding: 15px 30px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all var(--transition-normal) var(--ease-smooth);
+
+    i {
+      font-size: 1.3rem;
+    }
+
+    &:hover {
+      transform: translateY(-3px);
+    }
+
+    &:active {
+      transform: translateY(-1px);
+    }
+  }
+
+  .modal-btn-primary {
+    background: var(--gradient-button);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+
+    &:hover {
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+    }
+  }
+
+  .modal-btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: white;
+    }
+  }
+}

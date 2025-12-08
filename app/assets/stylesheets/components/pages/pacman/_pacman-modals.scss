@@ -1,0 +1,18 @@
+// ============================================
+// PAC-MAN MODALS
+// ============================================
+// Main index file - imports all modal component modules
+
+// Import order matters for proper cascade and dependency resolution:
+// 1. Base styles (shared modal structure and common elements)
+// 2. Component-specific modals (game over, menu, settings, controls)
+// 3. Shared components (progress bar)
+// 4. Complex components (leaderboard - uses base styles)
+
+@use "pacman-modals-base" as *;
+@use "pacman-modals-game-over" as *;
+@use "pacman-modals-menu" as *;
+@use "pacman-modals-settings" as *;
+@use "pacman-modals-controls" as *;
+@use "pacman-modals-progress" as *;
+@use "pacman-modals-leaderboard" as *;
