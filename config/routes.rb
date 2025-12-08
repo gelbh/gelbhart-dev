@@ -38,6 +38,10 @@ Rails.application.routes.draw do
   get "projects/nasa-exoplanet-explorer", to: "pages#nasa_exoplanet_explorer", as: :nasa_exoplanet_explorer
   get "nasa-exoplanet-explorer", to: redirect("/projects/nasa-exoplanet-explorer", status: 301)
 
+  # Google Maps Converter
+  get "projects/google-maps-converter", to: "pages#google_maps_converter", as: :google_maps_converter
+  get "google-maps-converter", to: redirect("/projects/google-maps-converter", status: 301)
+
   get "/robots.txt", to: "pages#robots"
 
   # Ignore Chrome DevTools requests
