@@ -34,6 +34,12 @@ namespace :db do
         "-- COMMENT ON EXTENSION supabase_vault IS 'Supabase Vault Extension'; -- Supabase-specific"
       )
 
+      # Comment out Supabase-specific publication that requires wal_level = logical
+      content.gsub!(
+        /^CREATE PUBLICATION supabase_realtime WITH \(publish = 'insert, update, delete, truncate'\);$/,
+        "-- CREATE PUBLICATION supabase_realtime WITH (publish = 'insert, update, delete, truncate'); -- Supabase-specific, commented for local compatibility (requires wal_level = logical)"
+      )
+
       # Add IF NOT EXISTS to schema creation statements for Supabase schemas
       # pg_dump generates CREATE SCHEMA without IF NOT EXISTS, but we need it for idempotency
       %w[extensions graphql vault].each do |schema_name|
@@ -44,7 +50,7 @@ namespace :db do
       end
 
       File.write(structure_file, content)
-      puts "Post-processed structure.sql: Added IF NOT EXISTS to schemas and commented PostgreSQL 17+ and Supabase-specific features"
+      puts "Post-processed structure.sql: Added IF NOT EXISTS to schemas and commented PostgreSQL 17+ and Supabase-specific features (extensions, publications)"
     end
   end
 
