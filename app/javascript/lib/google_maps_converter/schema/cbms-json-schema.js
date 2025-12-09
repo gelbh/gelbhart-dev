@@ -10,21 +10,21 @@ let schemaCache = null;
 let schemaPromise = null;
 
 /**
- * Gets the asset path for the JSON schema file
+ * Gets the asset path for the JSON schema file.
+ * Uses Rails asset_path helper when available for production fingerprinting.
  * @returns {string} The asset path
  */
 function getSchemaPath() {
   if (typeof window !== "undefined" && window.assetPath) {
-    return window.assetPath(
-      "lib/google_maps_converter/schema/cbms-json-schema.json"
-    );
+    return window.assetPath("cbms-json-schema.json");
   }
-  return "/assets/lib/google_maps_converter/schema/cbms-json-schema.json";
+  return "/assets/cbms-json-schema.json";
 }
 
 /**
- * Loads the JSON schema from the JSON file
+ * Loads the JSON schema from the JSON file.
  * @returns {Promise<Object>} The schema object
+ * @throws {Error} If the schema cannot be loaded
  */
 async function loadSchema() {
   if (schemaCache) {
@@ -60,7 +60,7 @@ async function loadSchema() {
   return schemaPromise;
 }
 
-// Start loading the schema immediately
+// Preload schema on module initialization
 const preloadPromise = loadSchema().catch((error) => {
   console.error("Failed to preload CBMS JSON schema:", error);
   return null;
