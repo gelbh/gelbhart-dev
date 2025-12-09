@@ -15,7 +15,7 @@
  *   - Inky (Cyan): Flanker coordinating with Blinky
  *   - Clyde (Orange): Zone controller with unpredictable behavior
  */
-import { GhostBoundaryHandler } from "./ghosts/boundary_handler.js";
+import { GhostBoundaryHandler } from "lib/pacman/ghosts/boundary_handler";
 import {
   calculateChaseTarget,
   calculateAmbushTarget,
@@ -23,9 +23,9 @@ import {
   calculateScatterTarget,
   calculateFrightenedTarget,
   calculateScatterModeTarget,
-} from "./ghosts/personalities.js";
-import { GhostIndicators } from "./ghosts/indicators.js";
-import { GhostCollision } from "./ghosts/collision.js";
+} from "lib/pacman/ghosts/personalities";
+import { GhostIndicators } from "lib/pacman/ghosts/indicators";
+import { GhostCollision } from "lib/pacman/ghosts/collision";
 
 export class GhostAI {
   constructor(dependencies = {}) {

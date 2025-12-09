@@ -4,7 +4,7 @@
  * Based on cbms-json-schema.json
  */
 
-import { getParentFeatureIds } from "./feature-id-utils.js";
+import { getParentFeatureIds } from "lib/google_maps_converter/core/feature-id-utils";
 
 // Common property arrays to reduce duplication
 const COMMON_FILL_PROPERTIES = ["visible", "fillColor", "fillOpacity"];

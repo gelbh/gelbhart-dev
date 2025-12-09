@@ -3,8 +3,8 @@
  * Functions for working with V2 feature IDs and their relationships
  */
 
-import { ICON_SHIELD_PATTERNS } from "./constants.js";
-import { getV2Id, getAllV2Ids } from "./mapping.js";
+import { ICON_SHIELD_PATTERNS } from "lib/google_maps_converter/core/constants";
+import { getV2Id, getAllV2Ids } from "lib/google_maps_converter/core/mapping";
 
 /**
  * Gets all parent feature IDs for a given feature ID

@@ -5,7 +5,7 @@
  * Pure service with no UI concerns.
  */
 
-import { DEFAULT_FILENAMES } from "../core/constants.js";
+import { DEFAULT_FILENAMES } from "lib/google_maps_converter/core/constants";
 
 /**
  * Reads a JSON file and returns its content

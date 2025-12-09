@@ -9,10 +9,13 @@ import {
   isValidGeometryProperty,
   isValidLabelProperty,
   ensureRequiredElements,
-} from "./feature-properties.js";
-import { getV2Visibility } from "./mapping.js";
-import { isIconShieldFeature } from "./feature-id-utils.js";
-import { ensureSection, getOrCreateStyle } from "./style-utils.js";
+} from "lib/google_maps_converter/core/feature-properties";
+import { getV2Visibility } from "lib/google_maps_converter/core/mapping";
+import { isIconShieldFeature } from "lib/google_maps_converter/core/feature-id-utils";
+import {
+  ensureSection,
+  getOrCreateStyle,
+} from "lib/google_maps_converter/core/style-utils";
 
 /**
  * Handles labels.icon visibility rules
