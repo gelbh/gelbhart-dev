@@ -88,6 +88,11 @@ const schemaData = new Proxy(
       return schemaCache ? prop in schemaCache : false;
     },
     getOwnPropertyDescriptor(target, prop) {
+      // Check target first to match what Object.assign created
+      if (target && Object.prototype.hasOwnProperty.call(target, prop)) {
+        return Object.getOwnPropertyDescriptor(target, prop);
+      }
+      // Fall back to schemaCache if not on target
       return schemaCache
         ? Object.getOwnPropertyDescriptor(schemaCache, prop)
         : undefined;
