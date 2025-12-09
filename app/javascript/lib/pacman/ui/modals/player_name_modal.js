@@ -11,7 +11,7 @@ import {
   createModalButtons,
   createModalButton,
   bindModalActions,
-} from "../modal_system";
+} from "../modal_system.js";
 
 /**
  * Show player name prompt modal
