@@ -29,8 +29,14 @@ end
 
 ENV["RAILS_ENV"] ||= "test"
 ENV.delete("DATABASE_URL") if ENV["DATABASE_URL"].present?
+
 require_relative "../config/environment"
 require "rails/test_help"
+
+# Automatically maintain test database schema to match development
+# This ensures migrations are applied to the test database before running tests
+# maintain_test_schema! will automatically prepare the test database if needed
+ActiveRecord::Migration.maintain_test_schema!
 require "webmock/minitest"
 require "shoulda/matchers"
 require "mocha/minitest"
