@@ -152,7 +152,7 @@
   }
 }
 
-// Legacy card hover (for backwards compatibility)
+// Card hover utility class
 .card-hover {
   transition: all var(--transition-normal) ease;
   touch-action: manipulation;
