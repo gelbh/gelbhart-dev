@@ -1,13 +1,10 @@
 /**
  * Snazzy Maps Service
  *
- * API client for Snazzy Maps.
- * Handles fetching styles, searching, and filtering.
- * Pure service with no UI concerns.
- * Enhanced with modern caching using stale-while-revalidate pattern.
+ * API client for Snazzy Maps with stale-while-revalidate caching.
  */
 
-import { cache, CACHE_CONFIG } from "../utils/cache";
+import { cache, CACHE_CONFIG } from "../utils/cache.js";
 
 const API_BASE_URL = "https://snazzymaps.com/explore.json";
 
@@ -23,13 +20,7 @@ const inFlightRequests = new Map();
  * @returns {string|null} API key or null
  */
 const getApiKey = () => {
-  if (
-    typeof window !== "undefined" &&
-    window.googleMapsConverterConfig?.snazzyMapsApiKey
-  ) {
-    return window.googleMapsConverterConfig.snazzyMapsApiKey;
-  }
-  return null;
+  return window?.googleMapsConverterConfig?.snazzyMapsApiKey ?? null;
 };
 
 /**
@@ -49,17 +40,16 @@ const buildSearchParams = (options) => {
   if (options.page) params.append("page", options.page.toString());
   if (options.pageSize) params.append("pageSize", options.pageSize.toString());
 
-  if (options.tag) {
-    const tags = Array.isArray(options.tag) ? options.tag : [options.tag];
-    tags.filter(Boolean).forEach((t) => params.append("tag", t));
-  }
+  const normalizeArray = (value) =>
+    Array.isArray(value) ? value : value ? [value] : [];
 
-  if (options.color) {
-    const colors = Array.isArray(options.color)
-      ? options.color
-      : [options.color];
-    colors.filter(Boolean).forEach((c) => params.append("color", c));
-  }
+  normalizeArray(options.tag)
+    .filter(Boolean)
+    .forEach((t) => params.append("tag", t));
+
+  normalizeArray(options.color)
+    .filter(Boolean)
+    .forEach((c) => params.append("color", c));
 
   return params;
 };
@@ -74,49 +64,35 @@ const handleApiResponse = async (response) => {
   if (!response.ok) {
     let errorMessage = `Snazzy Maps API error: ${response.status} ${response.statusText}`;
 
-    // Try to parse JSON error response from API
-    // Clone response first since response body can only be read once
-    const clonedResponse = response.clone();
     try {
+      const clonedResponse = response.clone();
       const contentType = clonedResponse.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
+      if (contentType?.includes("application/json")) {
         const errorData = await clonedResponse.json();
         if (errorData.message) {
           errorMessage = errorData.message;
         }
       }
-    } catch (parseError) {
-      // If JSON parsing fails, use default error message based on status code
+    } catch {
+      // Use default error message if JSON parsing fails
     }
 
-    // Provide more specific error messages based on status code if JSON message not available
+    const statusMessages = {
+      400: `Bad request: Invalid parameters provided (${response.statusText})`,
+      401: `Unauthorized: Invalid or missing API key (${response.statusText})`,
+      403: `Forbidden: API key does not have access (${response.statusText})`,
+      404: `Not found: Requested resource does not exist (${response.statusText})`,
+      429: `Rate limited: Too many requests, please try again later (${response.statusText})`,
+    };
+
     if (
       errorMessage ===
-      `Snazzy Maps API error: ${response.status} ${response.statusText}`
+        `Snazzy Maps API error: ${response.status} ${response.statusText}` &&
+      statusMessages[response.status]
     ) {
-      switch (response.status) {
-        case 400:
-          errorMessage = `Bad request: Invalid parameters provided (${response.statusText})`;
-          break;
-        case 401:
-          errorMessage = `Unauthorized: Invalid or missing API key (${response.statusText})`;
-          break;
-        case 403:
-          errorMessage = `Forbidden: API key does not have access (${response.statusText})`;
-          break;
-        case 404:
-          errorMessage = `Not found: Requested resource does not exist (${response.statusText})`;
-          break;
-        case 429:
-          errorMessage = `Rate limited: Too many requests, please try again later (${response.statusText})`;
-          break;
-        case 500:
-        case 502:
-        case 503:
-        case 504:
-          errorMessage = `Server error: Snazzy Maps API is temporarily unavailable (${response.status} ${response.statusText})`;
-          break;
-      }
+      errorMessage = statusMessages[response.status];
+    } else if ([500, 502, 503, 504].includes(response.status)) {
+      errorMessage = `Server error: Snazzy Maps API is temporarily unavailable (${response.status} ${response.statusText})`;
     }
 
     throw new Error(errorMessage);
@@ -167,16 +143,15 @@ const extractStylesFromResponse = (response) => {
 };
 
 /**
- * Fetches styles from Snazzy Maps API with caching
- * Uses stale-while-revalidate pattern: serves cached data immediately, fetches fresh data in background
+ * Fetches styles from Snazzy Maps API with stale-while-revalidate caching
  * @param {Object} options - Query parameters
- * @param {string} [options.sort] - Sort order (e.g., 'popular', 'newest', 'alphabetical')
+ * @param {string} [options.sort] - Sort order
  * @param {string|string[]} [options.tag] - Filter by tag(s)
  * @param {string|string[]} [options.color] - Filter by color(s)
  * @param {string} [options.text] - Search text
  * @param {number} [options.page=1] - Page number
  * @param {number} [options.pageSize=12] - Number of styles per page
- * @returns {Promise<{styles: Array, total: number|null, totalPages: number|null, page: number, pageSize: number, hasFullPage: boolean, hasKnownTotal: boolean}>} API response
+ * @returns {Promise<{styles: Array, total: number|null, totalPages: number|null, page: number, pageSize: number, hasFullPage: boolean, hasKnownTotal: boolean}>}
  */
 export async function fetchStyles(options = {}) {
   const normalizedOptions = {
@@ -196,25 +171,19 @@ export async function fetchStyles(options = {}) {
     ttl = CACHE_CONFIG.TTL.STYLES_LIST_POPULAR;
   }
 
-  // Stale-while-revalidate: Check for fresh cached data first
   const cachedData = await cache.getAsync(cacheKey);
   if (cachedData) {
-    // Fresh cache exists, return it immediately (no background refresh needed)
     return cachedData;
   }
 
-  // Check for stale cached data
   const staleData = await cache.getStaleAsync(cacheKey);
   if (staleData) {
-    // Stale cache exists, return it immediately and refresh in background
     fetchFreshStyles(normalizedOptions, cacheKey, ttl).catch((error) => {
       console.warn("Background refresh failed:", error);
-      // On error, we already returned stale data, so user experience is preserved
     });
     return staleData;
   }
 
-  // No cache available, fetch fresh data
   return fetchFreshStyles(normalizedOptions, cacheKey, ttl);
 }
 
@@ -223,7 +192,7 @@ export async function fetchStyles(options = {}) {
  * @param {Object} normalizedOptions - Normalized query parameters
  * @param {string} cacheKey - Cache key
  * @param {number} ttl - Time to live in milliseconds
- * @returns {Promise<{styles: Array, total: number|null, totalPages: number|null, page: number, pageSize: number, hasFullPage: boolean, hasKnownTotal: boolean}>} API response
+ * @returns {Promise<{styles: Array, total: number|null, totalPages: number|null, page: number, pageSize: number, hasFullPage: boolean, hasKnownTotal: boolean}>}
  */
 async function fetchFreshStyles(normalizedOptions, cacheKey, ttl) {
   try {
@@ -240,25 +209,19 @@ async function fetchFreshStyles(normalizedOptions, cacheKey, ttl) {
       try {
         const data = await handleApiResponse(await fetch(url));
 
-        // Validate response structure
-        if (!validateResponse(data)) {
-          if (
-            typeof process !== "undefined" &&
-            process.env?.NODE_ENV !== "production"
-          ) {
-            console.warn("[Snazzy Maps API] Unexpected response structure:", {
-              isArray: Array.isArray(data),
-              keys: !Array.isArray(data) ? Object.keys(data || {}) : null,
-              data,
-            });
-          }
+        const isDevelopment =
+          typeof process !== "undefined" &&
+          process.env?.NODE_ENV !== "production";
+
+        if (!validateResponse(data) && isDevelopment) {
+          console.warn("[Snazzy Maps API] Unexpected response structure:", {
+            isArray: Array.isArray(data),
+            keys: !Array.isArray(data) ? Object.keys(data || {}) : null,
+            data,
+          });
         }
 
-        // Log API response structure in development to help debug pagination
-        if (
-          typeof process !== "undefined" &&
-          process.env?.NODE_ENV !== "production"
-        ) {
+        if (isDevelopment) {
           console.log("[Snazzy Maps API] Response structure:", {
             isArray: Array.isArray(data),
             keys: !Array.isArray(data) ? Object.keys(data) : null,
@@ -272,7 +235,6 @@ async function fetchFreshStyles(normalizedOptions, cacheKey, ttl) {
         const styles = extractStylesFromResponse(data);
         const hasFullPage = styles.length === normalizedOptions.pageSize;
 
-        // Extract pagination info from the pagination object (API returns it nested)
         const pagination = data.pagination || {};
         const total =
           pagination.totalItems ??
@@ -281,7 +243,7 @@ async function fetchFreshStyles(normalizedOptions, cacheKey, ttl) {
           data.count ??
           data.totalCount ??
           data.totalResults ??
-          (hasFullPage ? null : styles.length); // Only use styles.length if we didn't get a full page
+          (hasFullPage ? null : styles.length);
 
         const totalPages =
           pagination.totalPages ??
@@ -295,32 +257,25 @@ async function fetchFreshStyles(normalizedOptions, cacheKey, ttl) {
           totalPages,
           page: pagination.currentPage ?? normalizedOptions.page,
           pageSize: pagination.pageSize ?? normalizedOptions.pageSize,
-          hasFullPage, // Indicates if we got exactly pageSize results (suggests more pages may exist)
+          hasFullPage,
           hasKnownTotal:
             total !== null &&
             total !== styles.length &&
-            pagination.totalItems !== undefined, // True if we have a reliable total count from API
+            pagination.totalItems !== undefined,
         };
 
-        // Cache the result
         await cache.setAsync(cacheKey, result, ttl);
-
         return result;
       } finally {
-        // Remove from in-flight requests when done
         inFlightRequests.delete(cacheKey);
       }
     })();
 
-    // Store the request promise for deduplication
     inFlightRequests.set(cacheKey, requestPromise);
 
     return requestPromise;
   } catch (error) {
-    // Clean up in-flight request on error
     inFlightRequests.delete(cacheKey);
-
-    // If network fails, try to return stale cache as fallback
     const staleData = await cache.getStaleAsync(cacheKey);
     if (staleData) {
       console.warn(
@@ -329,14 +284,12 @@ async function fetchFreshStyles(normalizedOptions, cacheKey, ttl) {
       );
       return staleData;
     }
-    // No stale data available, throw the error
     throw error;
   }
 }
 
 /**
- * Fetches a single style by ID with caching
- * Uses stale-while-revalidate pattern: serves cached data immediately, fetches fresh data in background
+ * Fetches a single style by ID with stale-while-revalidate caching
  * @param {string|number} styleId - Style ID
  * @returns {Promise<Object>} Style object with parsed JSON
  */
@@ -344,25 +297,19 @@ export async function fetchStyleById(styleId) {
   const cacheKey = cache.generateKey("style", { id: styleId });
   const ttl = CACHE_CONFIG.TTL.STYLE_BY_ID;
 
-  // Stale-while-revalidate: Check for fresh cached data first
   const cachedData = await cache.getAsync(cacheKey);
   if (cachedData) {
-    // Fresh cache exists, return it immediately (no background refresh needed)
     return cachedData;
   }
 
-  // Check for stale cached data
   const staleData = await cache.getStaleAsync(cacheKey);
   if (staleData) {
-    // Stale cache exists, return it immediately and refresh in background
     fetchFreshStyleById(styleId, cacheKey, ttl).catch((error) => {
       console.warn("Background refresh failed:", error);
-      // On error, we already returned stale data, so user experience is preserved
     });
     return staleData;
   }
 
-  // No cache available, fetch fresh data
   return fetchFreshStyleById(styleId, cacheKey, ttl);
 }
 
@@ -384,43 +331,35 @@ async function fetchFreshStyleById(styleId, cacheKey, ttl) {
 
     const url = `${API_BASE_URL}?${params.toString()}`;
 
-    // Check for in-flight request with same cache key
     if (inFlightRequests.has(cacheKey)) {
       return inFlightRequests.get(cacheKey);
     }
 
-    // Create the request promise
     const requestPromise = (async () => {
       try {
         const data = await handleApiResponse(await fetch(url));
 
-        // Validate response structure
-        if (!validateResponse(data)) {
-          if (
-            typeof process !== "undefined" &&
-            process.env?.NODE_ENV !== "production"
-          ) {
-            console.warn(
-              `[Snazzy Maps API] Unexpected response structure for style ${styleId}:`,
-              {
-                isArray: Array.isArray(data),
-                keys: !Array.isArray(data) ? Object.keys(data || {}) : null,
-              }
-            );
-          }
+        const isDevelopment =
+          typeof process !== "undefined" &&
+          process.env?.NODE_ENV !== "production";
+
+        if (!validateResponse(data) && isDevelopment) {
+          console.warn(
+            `[Snazzy Maps API] Unexpected response structure for style ${styleId}:`,
+            {
+              isArray: Array.isArray(data),
+              keys: !Array.isArray(data) ? Object.keys(data || {}) : null,
+            }
+          );
         }
 
-        // Extract style data from response
-        // The API returns the same paginated structure: { pagination: {...}, styles: [...] }
         let styleData = null;
 
         if (Array.isArray(data)) {
           styleData = data[0];
-        } else if (data?.styles && Array.isArray(data.styles)) {
-          // Standard API format - extract from styles array
+        } else if (data?.styles?.[0]) {
           styleData = data.styles[0];
         } else if (data && typeof data === "object" && !Array.isArray(data)) {
-          // Direct style object (not in array)
           styleData = data;
         }
 
@@ -432,7 +371,6 @@ async function fetchFreshStyleById(styleId, cacheKey, ttl) {
           );
         }
 
-        // Parse JSON if available
         if (styleData.json) {
           try {
             styleData.parsedJson = JSON.parse(styleData.json);
@@ -444,17 +382,13 @@ async function fetchFreshStyleById(styleId, cacheKey, ttl) {
           }
         }
 
-        // Cache the result
         await cache.setAsync(cacheKey, styleData, ttl);
-
         return styleData;
       } finally {
-        // Remove from in-flight requests when done
         inFlightRequests.delete(cacheKey);
       }
     })();
 
-    // Store the request promise for deduplication
     inFlightRequests.set(cacheKey, requestPromise);
 
     return requestPromise;
@@ -527,11 +461,9 @@ const AVAILABLE_COLORS = [
 
 /**
  * Fetches available filter options (tags and colors)
- * Returns predefined lists that match Snazzy Maps API filter options
  * @returns {Promise<{tags: Array<string>, colors: Array<string>}>} Filter options
  */
 export async function fetchAvailableFilters() {
-  // Return predefined lists matching Snazzy Maps API filter options
   return {
     tags: [...AVAILABLE_TAGS],
     colors: [...AVAILABLE_COLORS],

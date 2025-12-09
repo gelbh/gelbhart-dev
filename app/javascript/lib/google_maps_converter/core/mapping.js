@@ -9,11 +9,10 @@ import {
   isValidGeometryProperty,
   isValidLabelProperty,
 } from "./feature-properties.js";
-import schemaData from "../schema/cbms-json-schema.json" with { type: "json" };
+import schemaData from "../schema/cbms-json-schema.js";
 
 /**
  * Gets the schema data
- * Uses static JSON import that works in both browser (via Vite) and Node.js
  * @returns {Object} The schema object
  */
 function getSchemaData() {
@@ -101,26 +100,26 @@ const featureTypeMap = Object.freeze({
   ],
   "road.highway": [
     "infrastructure.roadNetwork.road.highway",
-    "infrastructure.roadNetwork.ramp"
+    "infrastructure.roadNetwork.ramp",
   ],
   "road.highway.controlled_access": "infrastructure.roadNetwork.road.highway",
   "road.arterial": "infrastructure.roadNetwork.road.arterial",
   "road.local": [
     "infrastructure.roadNetwork.road.local",
     "infrastructure.roadNetwork.road.noOutlet",
-    "infrastructure.roadNetwork.noTraffic"
+    "infrastructure.roadNetwork.noTraffic",
   ],
   landscape: [
     "natural.land",
     "natural.base",
     "infrastructure.urbanArea",
-    "infrastructure.businessCorridor"
+    "infrastructure.businessCorridor",
   ],
   "landscape.man_made": [
     "infrastructure.building",
     "infrastructure.building.commercial",
     "infrastructure.urbanArea",
-    "infrastructure.businessCorridor"
+    "infrastructure.businessCorridor",
   ],
   "landscape.natural": [
     "natural.land",
@@ -147,13 +146,8 @@ const featureTypeMap = Object.freeze({
     "natural.water.river",
     "natural.water.other",
   ],
-  transit: [
-    "infrastructure.transitStation",
-    "infrastructure.railwayTrack"
-  ],
-  "transit.line": [
-    "infrastructure.railwayTrack"
-  ],
+  transit: ["infrastructure.transitStation", "infrastructure.railwayTrack"],
+  "transit.line": ["infrastructure.railwayTrack"],
   "transit.station": [
     "infrastructure.transitStation",
     "infrastructure.transitStation.busStation",
@@ -165,7 +159,7 @@ const featureTypeMap = Object.freeze({
     "infrastructure.transitStation.monorail",
     "infrastructure.transitStation.railStation.subwayStation",
     "infrastructure.transitStation.railStation.tramStation",
-    "pointOfInterest.transit.airport"
+    "pointOfInterest.transit.airport",
   ],
   "transit.station.airport": "pointOfInterest.transit.airport",
   "transit.station.bus": "infrastructure.transitStation.busStation",
@@ -297,8 +291,9 @@ const extractAllFeatureIdsFromSchema = () => {
   return Array.from(featureIds).sort();
 };
 
-// Extract feature IDs at module initialization for performance
-const cachedAllFeatureIds = Object.freeze(extractAllFeatureIdsFromSchema());
+// Cache for feature IDs - initialized lazily on first access
+// This allows the schema to load asynchronously before extraction
+let cachedAllFeatureIds = null;
 
 /**
  * Gets all V2 ids that should be affected by 'all' featureType
@@ -307,5 +302,13 @@ const cachedAllFeatureIds = Object.freeze(extractAllFeatureIdsFromSchema());
  * @returns {readonly string[]} Array of all V2 ids
  */
 export const getAllV2Ids = () => {
+  if (cachedAllFeatureIds === null) {
+    try {
+      cachedAllFeatureIds = Object.freeze(extractAllFeatureIdsFromSchema());
+    } catch (error) {
+      console.warn("Schema not ready:", error);
+      return [];
+    }
+  }
   return cachedAllFeatureIds;
 };
