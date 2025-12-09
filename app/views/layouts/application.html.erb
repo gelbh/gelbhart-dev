@@ -159,6 +159,15 @@
     <%# Preload CSS with correct as attribute to avoid browser warnings %>
     <%= tag.link rel: "preload", href: stylesheet_path("application"), as: "style", media: "all" %>
     <%= stylesheet_link_tag "application", media: "all" %>
+    <%# Expose asset_path helper for JavaScript %>
+    <script>
+      window.assetPath = function(path) {
+        const assetPaths = {
+          "cbms-json-schema.json": "<%= asset_path('cbms-json-schema.json') %>"
+        };
+        return assetPaths[path] || `/assets/${path}`;
+      };
+    </script>
     <%= javascript_importmap_tags %>
   </head>
   <body>
