@@ -5,7 +5,7 @@
  * Pure service with no UI concerns.
  */
 
-import schemaData from "../schema/cbms-json-schema.json" with { type: "json" };
+import schemaData from "../schema/cbms-json-schema.js";
 
 let ajvInstance = null;
 let schema = null;
@@ -56,7 +56,7 @@ const loadScript = (src) => {
 
 /**
  * Gets the schema data
- * Uses static JSON import that works in both browser (via Vite) and Node.js
+ * The schema is loaded asynchronously via the wrapper module
  * @returns {Object} The schema object
  */
 const getSchema = () => {
