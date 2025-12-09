@@ -61,10 +61,12 @@
         }
       })();
     </script>
+
     <%# Document Metadata %>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
     <title><%= page_title_value %></title>
+
     <%# SEO Meta Tags %>
     <meta name="description" content="<%= page_meta_description %>">
     <meta name="author" content="Tomer Gelbhart - Full-Stack Developer, MSc Computer Science Student at UCD">
@@ -74,6 +76,7 @@
       <meta name="keywords" content="<%= page_keywords %>">
     <% end %>
     <link rel="canonical" href="<%= page_url %>">
+
     <%# Open Graph Meta Tags %>
     <meta property="og:type" content="<%= og_type_value %>">
     <meta property="og:locale" content="en_IE">
@@ -91,6 +94,7 @@
     <% if og_type_value == 'article' %>
       <meta property="article:author" content="Tomer Gelbhart">
     <% end %>
+
     <%# Twitter Card Meta Tags %>
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="<%= page_url %>">
@@ -98,12 +102,15 @@
     <meta name="twitter:description" content="<%= page_meta_description %>">
     <meta name="twitter:image" content="<%= social_image %>">
     <meta name="twitter:image:alt" content="Tomer Gelbhart - Full-Stack Developer Portfolio">
+
     <%# Additional Meta Tags %>
     <meta name="theme-color" content="#0d6efd">
     <meta name="format-detection" content="telephone=no">
+
     <%# Security Tags %>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+
     <%# Favicon and App Icons %>
     <%= favicon_link_tag '/favicon.ico' %>
     <%= favicon_link_tag '/icons/favicons/favicon.svg', rel: 'icon', type: 'image/svg+xml' %>
@@ -115,11 +122,13 @@
     <%= tag :link, rel: 'manifest', href: asset_path('/site.webmanifest') %>
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="msapplication-config" content="/browserconfig.xml">
+
     <%# Resource Hints - Critical External Domains %>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://www.googletagmanager.com">
     <link rel="dns-prefetch" href="https://www.google-analytics.com">
+
     <%# Resource Hints - CDN Domains %>
     <link rel="dns-prefetch" href="https://unpkg.com">
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
@@ -130,14 +139,17 @@
       <link rel="preconnect" href="https://nasa-exoplanet-explorer.vercel.app">
       <link rel="dns-prefetch" href="https://nasa-exoplanet-explorer.onrender.com">
     <% end %>
+
     <%# Fonts - Async Loading to Prevent Render Blocking %>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript>
       <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     </noscript>
+
     <%# Icon Fonts %>
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css">
+
     <%# Structured Data (JSON-LD) for SEO and AI-driven search optimization %>
     <%= render_structured_data(person_structured_data) %>
     <%= render_structured_data(website_structured_data) %>
@@ -155,10 +167,12 @@
     <% if content_for?(:structured_data) %>
       <%= yield(:structured_data) %>
     <% end %>
+
     <%# Application Stylesheets and Scripts %>
     <%# Preload CSS with correct as attribute to avoid browser warnings %>
     <%= tag.link rel: "preload", href: stylesheet_path("application"), as: "style", media: "all" %>
     <%= stylesheet_link_tag "application", media: "all" %>
+
     <%# Expose asset_path helper for JavaScript %>
     <script>
       window.assetPath = function(path) {
@@ -170,14 +184,17 @@
     </script>
     <%= javascript_importmap_tags %>
   </head>
+
   <body>
     <main class="page-wrapper">
       <% unless controller_name == 'errors' %>
         <%= render 'shared/header' %>
       <% end %>
+
       <div class="container <%= 'mt-1 py-1 min-vh-100' unless controller_name == 'errors' %>">
         <%= yield %>
       </div>
+
       <% unless controller_name == 'errors' %>
         <%= render 'shared/footer' %>
         <%= link_to "#top", class: "btn-scroll-top", data: { scroll: "" } do %>
