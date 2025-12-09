@@ -16,7 +16,7 @@ import {
   bindModalActions,
   setupKeyboardHandler,
   modalExists,
-} from "../modal_system";
+} from "../modal_system.js";
 
 /**
  * Format date for display

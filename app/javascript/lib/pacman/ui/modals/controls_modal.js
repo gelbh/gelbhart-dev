@@ -12,7 +12,7 @@ import {
   bindModalActions,
   setupKeyboardHandler,
   modalExists,
-} from "../modal_system";
+} from "../modal_system.js";
 
 /**
  * Show controls modal (keyboard reference)
