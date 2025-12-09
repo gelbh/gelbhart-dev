@@ -3,8 +3,8 @@
  * Detects light/dark variant from V1 style data
  */
 
-import { hexToHsl, normalizeHex } from "../utils/color-utils.js";
-import { LIGHTNESS_THRESHOLD } from "./constants.js";
+import { hexToHsl, normalizeHex } from "lib/google_maps_converter/utils/color-utils";
+import { LIGHTNESS_THRESHOLD } from "lib/google_maps_converter/core/constants";
 
 /**
  * Detects variant (light/dark) from V1 style data

@@ -3,14 +3,14 @@
  * General utility functions for style manipulation
  */
 
-import { STROKE_WEIGHT_STEP, STROKE_WEIGHT_MAX } from "./constants.js";
+import { STROKE_WEIGHT_STEP, STROKE_WEIGHT_MAX } from "lib/google_maps_converter/core/constants";
 import {
   supportsGeometry,
   supportsLabel,
   isValidGeometryProperty,
   isValidLabelProperty,
-} from "./feature-properties.js";
-import { getV2Id } from "./mapping.js";
+} from "lib/google_maps_converter/core/feature-properties";
+import { getV2Id } from "lib/google_maps_converter/core/mapping";
 
 /**
  * Converts V1 weight to V2 strokeWidth

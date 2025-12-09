@@ -7,11 +7,11 @@ import {
   extractColor,
   normalizeHex,
   applyGamma,
-} from "../utils/color-utils.js";
+} from "lib/google_maps_converter/utils/color-utils";
 import {
   getExternalAdjustments,
   applyColorAdjustments,
-} from "./hsl-adjustments.js";
+} from "lib/google_maps_converter/core/hsl-adjustments";
 import {
   supportsGeometry,
   supportsLabel,
@@ -19,13 +19,13 @@ import {
   isValidLabelProperty,
   mapGeometryColor,
   ensureRequiredElements,
-} from "./feature-properties.js";
-import { getV2PropertyPath } from "./mapping.js";
+} from "lib/google_maps_converter/core/feature-properties";
+import { getV2PropertyPath } from "lib/google_maps_converter/core/mapping";
 import {
   ensureSection,
   getOrCreateStyle,
   convertWeight,
-} from "./style-utils.js";
+} from "lib/google_maps_converter/core/style-utils";
 
 /**
  * Applies weight/strokeWidth to a style if the feature supports it

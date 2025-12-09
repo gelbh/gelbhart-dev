@@ -11,7 +11,7 @@ import {
   createModalButtons,
   createModalButton,
   bindModalActions,
-} from "../modal_system.js";
+} from "lib/pacman/ui/modal_system";
 
 /**
  * Show player name prompt modal

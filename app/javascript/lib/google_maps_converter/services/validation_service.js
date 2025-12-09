@@ -5,7 +5,7 @@
  * Pure service with no UI concerns.
  */
 
-import schemaData from "../schema/cbms-json-schema.js";
+import schemaData from "lib/google_maps_converter/schema/cbms-json-schema";
 
 let ajvInstance = null;
 let schema = null;

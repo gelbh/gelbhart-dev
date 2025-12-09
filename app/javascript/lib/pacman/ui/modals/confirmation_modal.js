@@ -14,7 +14,7 @@ import {
   bindModalActions,
   setupKeyboardHandler,
   modalExists,
-} from "../modal_system.js";
+} from "lib/pacman/ui/modal_system";
 
 /**
  * Show confirmation modal

@@ -3,7 +3,10 @@
  * Converts V1 style JSON (featureType, elementType, stylers) to V2 CBMS format
  */
 
-import { getV2PropertyPath, getV2Visibility } from "./mapping.js";
+import {
+  getV2PropertyPath,
+  getV2Visibility,
+} from "lib/google_maps_converter/core/mapping";
 import {
   supportsGeometry,
   supportsLabel,
@@ -11,9 +14,9 @@ import {
   isValidLabelProperty,
   mapGeometryColor,
   ensureRequiredElements,
-} from "./feature-properties.js";
-import { detectVariant } from "./variant-detection.js";
-import { expandTargetIds } from "./feature-id-utils.js";
+} from "lib/google_maps_converter/core/feature-properties";
+import { detectVariant } from "lib/google_maps_converter/core/variant-detection";
+import { expandTargetIds } from "lib/google_maps_converter/core/feature-id-utils";
 import {
   validateRuleTypes,
   convertWeight,
@@ -23,18 +26,18 @@ import {
   setDefaultTransitVisibility,
   trackDirectlyMappedIds,
   separateRules,
-} from "./style-utils.js";
-import { handleHslAdjustments } from "./hsl-adjustments.js";
+} from "lib/google_maps_converter/core/style-utils";
+import { handleHslAdjustments } from "lib/google_maps_converter/core/hsl-adjustments";
 import {
   handleLabelsIconVisibility,
   handleGeneralVisibility,
-} from "./visibility-processing.js";
+} from "lib/google_maps_converter/core/visibility-processing";
 import {
   processGeometryColor,
   processLabelColor,
   processAllElementColors,
   applyWeightToStyle,
-} from "./color-processing.js";
+} from "lib/google_maps_converter/core/color-processing";
 
 // ============================================================================
 // Style Processing Functions

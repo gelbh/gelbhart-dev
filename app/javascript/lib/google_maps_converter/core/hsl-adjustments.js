@@ -3,9 +3,9 @@
  * Manages HSL adjustments and their application to colors
  */
 
-import { applyHslAdjustments } from "../utils/color-utils.js";
-import { PURE_BLACK, PURE_WHITE } from "./constants.js";
-import { getParentFeatureIds } from "./feature-id-utils.js";
+import { applyHslAdjustments } from "lib/google_maps_converter/utils/color-utils";
+import { PURE_BLACK, PURE_WHITE } from "lib/google_maps_converter/core/constants";
+import { getParentFeatureIds } from "lib/google_maps_converter/core/feature-id-utils";
 
 /**
  * Gets HSL adjustments for a feature ID, merging from feature and all applicable parents

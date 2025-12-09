@@ -4,7 +4,7 @@
  * API client for Snazzy Maps with stale-while-revalidate caching.
  */
 
-import { cache, CACHE_CONFIG } from "../utils/cache.js";
+import { cache, CACHE_CONFIG } from "lib/google_maps_converter/utils/cache";
 
 const API_BASE_URL = "https://snazzymaps.com/explore.json";
 

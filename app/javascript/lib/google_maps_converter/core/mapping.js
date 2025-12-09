@@ -8,8 +8,8 @@ import {
   labelProperties,
   isValidGeometryProperty,
   isValidLabelProperty,
-} from "./feature-properties.js";
-import schemaData from "../schema/cbms-json-schema.js";
+} from "lib/google_maps_converter/core/feature-properties";
+import schemaData from "lib/google_maps_converter/schema/cbms-json-schema";
 
 /**
  * Gets the schema data
