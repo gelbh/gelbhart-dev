@@ -1,7 +1,7 @@
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
-SET transaction_timeout = 0;
+-- SET transaction_timeout = 0; -- PostgreSQL 17+ only, commented for compatibility
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -21,14 +21,14 @@ CREATE SCHEMA auth;
 -- Name: extensions; Type: SCHEMA; Schema: -; Owner: -
 --
 
-CREATE SCHEMA extensions;
+CREATE SCHEMA IF NOT EXISTS extensions;
 
 
 --
 -- Name: graphql; Type: SCHEMA; Schema: -; Owner: -
 --
 
-CREATE SCHEMA graphql;
+CREATE SCHEMA IF NOT EXISTS graphql;
 
 
 --
@@ -63,21 +63,21 @@ CREATE SCHEMA storage;
 -- Name: vault; Type: SCHEMA; Schema: -; Owner: -
 --
 
-CREATE SCHEMA vault;
+CREATE SCHEMA IF NOT EXISTS vault;
 
 
 --
 -- Name: pg_graphql; Type: EXTENSION; Schema: -; Owner: -
 --
 
-CREATE EXTENSION IF NOT EXISTS pg_graphql WITH SCHEMA graphql;
+-- CREATE EXTENSION IF NOT EXISTS pg_graphql WITH SCHEMA graphql; -- Supabase-specific, commented for local compatibility
 
 
 --
 -- Name: EXTENSION pg_graphql; Type: COMMENT; Schema: -; Owner: -
 --
 
-COMMENT ON EXTENSION pg_graphql IS 'pg_graphql: GraphQL support';
+-- COMMENT ON EXTENSION pg_graphql IS 'pg_graphql: GraphQL support'; -- Supabase-specific
 
 
 --
@@ -112,14 +112,14 @@ COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
 -- Name: supabase_vault; Type: EXTENSION; Schema: -; Owner: -
 --
 
-CREATE EXTENSION IF NOT EXISTS supabase_vault WITH SCHEMA vault;
+-- CREATE EXTENSION IF NOT EXISTS supabase_vault WITH SCHEMA vault; -- Supabase-specific, commented for local compatibility
 
 
 --
 -- Name: EXTENSION supabase_vault; Type: COMMENT; Schema: -; Owner: -
 --
 
-COMMENT ON EXTENSION supabase_vault IS 'Supabase Vault Extension';
+-- COMMENT ON EXTENSION supabase_vault IS 'Supabase Vault Extension'; -- Supabase-specific
 
 
 --
