@@ -3,14 +3,41 @@ require "ostruct"
 
 class GoogleAnalyticsServiceTest < ActiveSupport::TestCase
   setup do
-    # Stub Rails credentials
+    # Stub Rails credentials with nested structure
+    # Create a mock that supports both direct access and dig
     @mock_credentials = OpenStruct.new(
       ga4_property_id: "test-property-id",
-      google_oauth_client_id: "test-client-id",
-      google_oauth_client_secret: "test-client-secret",
-      google_oauth_refresh_token: "test-refresh-token",
-      google_oauth_access_token: "test-access-token"
+      google_oauth: {
+        client_id: "test-client-id",
+        client_secret: "test-client-secret",
+        refresh_token: "test-refresh-token",
+        access_token: "test-access-token"
+      }
     )
+    # Add dig method support for nested access
+    def @mock_credentials.dig(*keys)
+      return nil if keys.empty?
+      first_key = keys.first
+      remaining_keys = keys[1..-1]
+
+      value = if @table.key?(first_key)
+                @table[first_key]
+      elsif respond_to?(first_key)
+                send(first_key)
+      else
+                nil
+      end
+
+      if remaining_keys.empty?
+        value
+      elsif value.respond_to?(:dig)
+        value.dig(*remaining_keys)
+      elsif value.is_a?(Hash)
+        remaining_keys.reduce(value) { |obj, key| obj&.[](key) }
+      else
+        nil
+      end
+    end
     Rails.application.stubs(:credentials).returns(@mock_credentials)
 
     # Stub WebMock to prevent real HTTP requests during initialization
