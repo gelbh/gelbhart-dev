@@ -10,7 +10,7 @@ class PageSpeedService
   DEFAULT_HOST = "https://gelbhart.dev"
 
   def initialize
-    @api_key = Rails.application.credentials.pagespeed_api_key
+    @api_key = Rails.application.credentials.dig(:pagespeed, :api_key)
   end
 
   def analyze_url(url, strategy: "desktop")
