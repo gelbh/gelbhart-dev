@@ -13,8 +13,9 @@ export class StyleBrowser {
    * Renders a grid of styles
    * @param {Array} styles - Array of style objects
    * @param {Function} onStyleSelect - Callback when a style is selected
+   * @param {string} searchQuery - Optional search query for highlighting
    */
-  renderStyles(styles, onStyleSelect) {
+  renderStyles(styles, onStyleSelect, searchQuery = "") {
     if (!this.containerElement) return;
 
     // Clear existing content
@@ -25,7 +26,7 @@ export class StyleBrowser {
     }
 
     styles.forEach((style) => {
-      const styleCard = this.createStyleCard(style, onStyleSelect);
+      const styleCard = this.createStyleCard(style, onStyleSelect, searchQuery);
       this.containerElement.appendChild(styleCard);
     });
   }
@@ -34,9 +35,10 @@ export class StyleBrowser {
    * Creates a style card element
    * @param {Object} style - Style object
    * @param {Function} onStyleSelect - Callback when style is selected
+   * @param {string} searchQuery - Optional search query for highlighting
    * @returns {HTMLElement} Style card element
    */
-  createStyleCard(style, onStyleSelect) {
+  createStyleCard(style, onStyleSelect, searchQuery = "") {
     const col = document.createElement("div");
     col.className = "col-md-4 col-sm-6 d-flex";
 
@@ -75,13 +77,16 @@ export class StyleBrowser {
     const cardBody = document.createElement("div");
     cardBody.className = "card-body p-3 d-flex flex-column";
 
-    // Style name
+    // Style name with highlighting
     const title = document.createElement("h5");
     title.className = "h6 mb-2 text-white fw-semibold";
-    title.textContent = style.name || "Unnamed Style";
+    const nameText = style.name || "Unnamed Style";
+    title.innerHTML = searchQuery
+      ? this.highlightSearchTerms(nameText, searchQuery)
+      : this.escapeHtml(nameText);
     cardBody.appendChild(title);
 
-    // Style description with truncation
+    // Style description with truncation and highlighting
     if (style.description) {
       const description = document.createElement("p");
       description.className = "text-white-50 small mb-3 flex-grow-1";
@@ -89,7 +94,9 @@ export class StyleBrowser {
       description.style.webkitLineClamp = "3";
       description.style.webkitBoxOrient = "vertical";
       description.style.overflow = "hidden";
-      description.textContent = style.description;
+      description.innerHTML = searchQuery
+        ? this.highlightSearchTerms(style.description, searchQuery)
+        : this.escapeHtml(style.description);
       cardBody.appendChild(description);
     } else {
       // Spacer if no description to maintain consistent height
@@ -168,17 +175,79 @@ export class StyleBrowser {
   }
 
   /**
-   * Shows empty state
+   * Shows empty state with suggestions
+   * @param {Object} options - Options for empty state
+   * @param {string} options.searchQuery - Current search query
+   * @param {Array} options.suggestedSearches - Suggested search terms
+   * @param {Array} options.popularTags - Popular tags to try
+   * @param {Array} options.popularColors - Popular colors to try
    */
-  showEmpty() {
+  showEmpty(options = {}) {
     if (!this.containerElement) return;
     this.containerElement.innerHTML = "";
     const emptyDiv = document.createElement("div");
     emptyDiv.className = "col-12 text-center py-5";
-    emptyDiv.innerHTML = `
+
+    let content = `
       <p class="h5 mb-2 text-white-50">No styles found</p>
-      <p class="small text-white-50 mb-0">Try adjusting your search or filters</p>
+      <p class="small text-white-50 mb-3">Try adjusting your search or filters</p>
     `;
+
+    // Add suggestions if available
+    if (options.suggestedSearches && options.suggestedSearches.length > 0) {
+      content += `
+        <div class="mt-4">
+          <p class="small text-white-50 mb-2">Try searching for:</p>
+          <div class="d-flex flex-wrap justify-content-center gap-2">
+      `;
+      options.suggestedSearches.slice(0, 5).forEach((term) => {
+        content += `
+          <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25 small">
+            ${this.escapeHtml(term)}
+          </span>
+        `;
+      });
+      content += `</div></div>`;
+    }
+
+    // Add popular tags/colors if no search query
+    if (
+      !options.searchQuery &&
+      (options.popularTags || options.popularColors)
+    ) {
+      content += `<div class="mt-4">`;
+      if (options.popularTags && options.popularTags.length > 0) {
+        content += `
+          <p class="small text-white-50 mb-2">Popular tags:</p>
+          <div class="d-flex flex-wrap justify-content-center gap-2 mb-3">
+        `;
+        options.popularTags.slice(0, 5).forEach((tag) => {
+          content += `
+            <span class="badge bg-secondary bg-opacity-25 text-white-50 border border-white border-opacity-10 small">
+              ${this.escapeHtml(tag)}
+            </span>
+          `;
+        });
+        content += `</div>`;
+      }
+      if (options.popularColors && options.popularColors.length > 0) {
+        content += `
+          <p class="small text-white-50 mb-2">Popular colors:</p>
+          <div class="d-flex flex-wrap justify-content-center gap-2">
+        `;
+        options.popularColors.slice(0, 5).forEach((color) => {
+          content += `
+            <span class="badge bg-secondary bg-opacity-25 text-white-50 border border-white border-opacity-10 small">
+              ${this.escapeHtml(color)}
+            </span>
+          `;
+        });
+        content += `</div>`;
+      }
+      content += `</div>`;
+    }
+
+    emptyDiv.innerHTML = content;
     this.containerElement.appendChild(emptyDiv);
   }
 
@@ -196,5 +265,51 @@ export class StyleBrowser {
     alert.textContent = message || "Failed to load styles";
     errorDiv.appendChild(alert);
     this.containerElement.appendChild(errorDiv);
+  }
+
+  /**
+   * Highlights search terms in text
+   * @param {string} text - Text to highlight
+   * @param {string} query - Search query
+   * @returns {string} HTML with highlighted matches
+   */
+  highlightSearchTerms(text, query) {
+    if (!query || !text) return this.escapeHtml(text);
+
+    const escapedText = this.escapeHtml(text);
+    const queryWords = query
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0)
+      .map((word) => this.escapeRegex(word));
+
+    if (queryWords.length === 0) return escapedText;
+
+    // Create regex pattern that matches any of the query words
+    const pattern = new RegExp(`(${queryWords.join("|")})`, "gi");
+    return escapedText.replace(
+      pattern,
+      '<mark class="style-search-highlight">$1</mark>'
+    );
+  }
+
+  /**
+   * Escapes HTML special characters
+   * @param {string} text - Text to escape
+   * @returns {string} Escaped text
+   */
+  escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  /**
+   * Escapes special regex characters
+   * @param {string} text - Text to escape
+   * @returns {string} Escaped text
+   */
+  escapeRegex(text) {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 }

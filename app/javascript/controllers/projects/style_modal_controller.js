@@ -6,6 +6,7 @@ import {
   fetchAvailableFilters,
 } from "lib/google_maps_converter/services/snazzy_maps_service";
 import { StyleBrowser } from "lib/google_maps_converter/ui/style_browser";
+import { SearchAutocomplete } from "lib/google_maps_converter/ui/search_autocomplete";
 
 /**
  * Style Modal Controller
@@ -21,6 +22,9 @@ export default class extends Controller {
     "openStyleModalBtn",
     "closeStyleModalBtn",
     "styleSearchInput",
+    "styleSearchClear",
+    "styleSearchLoading",
+    "autocompleteContainer",
     "styleSortSelect",
     "tagFiltersContainer",
     "colorFiltersContainer",
@@ -35,6 +39,7 @@ export default class extends Controller {
     "paginationNext",
     "paginationInfo",
     "paginationPageSize",
+    "searchStatus",
   ];
 
   static outlets = ["google-maps-converter"];
@@ -58,10 +63,37 @@ export default class extends Controller {
     };
     this.currentStyles = [];
     this.filterOptionsLoaded = false;
+    this.currentRequestAbortController = null;
+    this.searchHistory = this.loadSearchHistory();
+    this.popularSearches = [
+      "dark",
+      "minimal",
+      "colorful",
+      "retro",
+      "monochrome",
+      "night",
+      "satellite",
+      "terrain",
+    ];
 
     // Initialize style browser component
     if (this.hasStyleResultsGridTarget) {
       this.styleBrowser = new StyleBrowser(this.styleResultsGridTarget);
+    }
+
+    // Initialize autocomplete component
+    if (this.hasAutocompleteContainerTarget) {
+      this.autocomplete = new SearchAutocomplete(
+        this.autocompleteContainerTarget,
+        {
+          onSelect: (suggestion) => {
+            this.selectAutocompleteSuggestion(suggestion);
+          },
+          onDismiss: () => {
+            this.styleSearchInputTarget?.focus();
+          },
+        }
+      );
     }
 
     this.initialize();
@@ -71,6 +103,9 @@ export default class extends Controller {
     // Cleanup event listeners
     if (this.modalKeyboardHandler) {
       document.removeEventListener("keydown", this.modalKeyboardHandler);
+    }
+    if (this.autocompleteClickHandler) {
+      document.removeEventListener("click", this.autocompleteClickHandler);
     }
     if (this.hasStyleModalOverlayTarget && this.overlayClickHandler) {
       this.styleModalOverlayTarget.removeEventListener(
@@ -84,10 +119,19 @@ export default class extends Controller {
         this.modalClickHandler
       );
     }
+    // Cancel any pending requests
+    if (this.currentRequestAbortController) {
+      this.currentRequestAbortController.abort();
+    }
+    // Clear any pending debounced search
+    if (this.debounceTimeout) {
+      clearTimeout(this.debounceTimeout);
+      this.debounceTimeout = null;
+    }
   }
 
   initialize() {
-    // Debounce helper
+    // Adaptive debounce helper
     this.debounce = (func, wait) => {
       let timeout;
       return function executedFunction(...args) {
@@ -100,10 +144,25 @@ export default class extends Controller {
       };
     };
 
-    this.debouncedSearch = this.debounce(() => {
-      this.modalState.currentPage = 1;
-      this.loadStyles();
-    }, 400);
+    // Store debounce timeout for cancellation
+    this.debounceTimeout = null;
+
+    // Adaptive debounced search - shorter delay for short queries
+    this.debouncedSearch = (query) => {
+      // Clear any pending debounced search
+      if (this.debounceTimeout) {
+        clearTimeout(this.debounceTimeout);
+        this.debounceTimeout = null;
+      }
+
+      const queryLength = query?.trim().length || 0;
+      const delay = queryLength < 3 ? 200 : queryLength < 6 ? 400 : 600;
+      this.debounceTimeout = setTimeout(() => {
+        this.modalState.currentPage = 1;
+        this.loadStyles();
+        this.debounceTimeout = null;
+      }, delay);
+    };
 
     // Handle modal overlay/backdrop click - store reference for cleanup
     if (this.hasStyleModalOverlayTarget) {
@@ -140,6 +199,28 @@ export default class extends Controller {
       this.handleModalKeydown(e);
     };
     document.addEventListener("keydown", this.modalKeyboardHandler);
+
+    // Handle clicks outside autocomplete to dismiss it
+    this.autocompleteClickHandler = (e) => {
+      if (
+        this.autocomplete?.isVisible &&
+        !this.autocompleteContainerTarget.contains(e.target) &&
+        e.target !== this.styleSearchInputTarget
+      ) {
+        this.autocomplete.hide();
+      }
+    };
+    document.addEventListener("click", this.autocompleteClickHandler);
+
+    // Update clear button visibility on input change
+    if (this.hasStyleSearchInputTarget) {
+      this.styleSearchInputTarget.addEventListener("input", () => {
+        this.updateSearchUI();
+      });
+      this.styleSearchInputTarget.addEventListener("focus", () => {
+        this.showAutocomplete();
+      });
+    }
   }
 
   openStyleModal() {
@@ -162,6 +243,7 @@ export default class extends Controller {
       this.loadFilterOptions();
     }
     this.loadStyles();
+    this.updateSearchUI();
     this.styleSearchInputTarget?.focus();
   }
 
@@ -283,16 +365,34 @@ export default class extends Controller {
   }
 
   async loadStyles() {
+    // Cancel previous request if still pending
+    if (this.currentRequestAbortController) {
+      this.currentRequestAbortController.abort();
+    }
+
+    // Create new abort controller for this request
+    this.currentRequestAbortController = new AbortController();
+
+    // Show optimistic UI (keep previous results visible)
+    const previousStyles =
+      this.currentStyles.length > 0 ? [...this.currentStyles] : null;
+
     if (this.modalState.isLoading) return;
 
     this.modalState.isLoading = true;
     this.hideModalError();
     this.hideModalEmpty();
     this.showModalLoading();
+    this.showSearchLoading();
 
     try {
       const tags = Array.from(this.modalState.selectedTags);
       const colors = Array.from(this.modalState.selectedColors);
+
+      // Check if request was aborted
+      if (this.currentRequestAbortController.signal.aborted) {
+        return;
+      }
 
       const response = await fetchStyles({
         sort: this.modalState.sort,
@@ -302,6 +402,11 @@ export default class extends Controller {
         page: this.modalState.currentPage,
         pageSize: this.modalState.pageSize,
       });
+
+      // Check again if request was aborted after fetch
+      if (this.currentRequestAbortController.signal.aborted) {
+        return;
+      }
 
       this.currentStyles = response.styles || [];
 
@@ -349,10 +454,19 @@ export default class extends Controller {
           this.currentStyles.length;
       }
 
+      // Save successful search to history
+      if (this.modalState.searchText) {
+        this.saveToSearchHistory(this.modalState.searchText);
+      }
+
       this.renderStyles();
       this.updatePagination();
       this.updateResultsCount();
     } catch (error) {
+      // Don't show error if request was aborted
+      if (error.name === "AbortError") {
+        return;
+      }
       console.error("Failed to load styles:", error);
       this.showModalError(`Failed to load styles: ${error.message}`);
       this.currentStyles = [];
@@ -360,6 +474,8 @@ export default class extends Controller {
     } finally {
       this.modalState.isLoading = false;
       this.hideModalLoading();
+      this.hideSearchLoading();
+      this.currentRequestAbortController = null;
     }
   }
 
@@ -371,10 +487,15 @@ export default class extends Controller {
       return;
     }
 
-    this.styleBrowser.renderStyles(this.currentStyles, async (style) => {
-      await this.handleStyleSelection(style.id, style);
-      this.closeStyleModal();
-    });
+    const searchQuery = this.modalState.searchText || "";
+    this.styleBrowser.renderStyles(
+      this.currentStyles,
+      async (style) => {
+        await this.handleStyleSelection(style.id, style);
+        this.closeStyleModal();
+      },
+      searchQuery
+    );
   }
 
   updatePagination() {
@@ -405,10 +526,22 @@ export default class extends Controller {
   updateResultsCount() {
     if (!this.resultsCountTarget) return;
     const { totalResults } = this.modalState;
-    this.resultsCountTarget.textContent =
+    const countText =
       totalResults > 0
         ? `${totalResults} style${totalResults !== 1 ? "s" : ""} found`
         : "No styles found";
+    this.resultsCountTarget.textContent = countText;
+
+    // Announce to screen readers
+    if (this.hasSearchStatusTarget) {
+      this.searchStatusTarget.textContent = countText;
+      // Clear after announcement
+      setTimeout(() => {
+        if (this.hasSearchStatusTarget) {
+          this.searchStatusTarget.textContent = "";
+        }
+      }, 1000);
+    }
   }
 
   clearFilters() {
@@ -428,11 +561,244 @@ export default class extends Controller {
   }
 
   handleStyleSearch() {
-    this.modalState.searchText = this.styleSearchInputTarget.value;
+    const query = this.styleSearchInputTarget.value.trim();
+    const previousQuery = this.modalState.searchText;
+    this.modalState.searchText = query;
+    this.updateSearchUI();
+    this.showAutocomplete();
+
+    // If query is empty and we had a previous query, reset immediately
+    if (!query && previousQuery) {
+      // Cancel any pending debounced search
+      if (this.debounceTimeout) {
+        clearTimeout(this.debounceTimeout);
+        this.debounceTimeout = null;
+      }
+      this.modalState.currentPage = 1;
+      this.modalState.highestPageLoaded = 1;
+      this.modalState.hasKnownTotal = false;
+      this.loadStyles();
+      return;
+    }
+
+    // Don't search for empty queries if there was no previous query
+    if (!query) {
+      return;
+    }
+
     this.modalState.currentPage = 1;
     this.modalState.highestPageLoaded = 1;
     this.modalState.hasKnownTotal = false;
-    this.debouncedSearch();
+    this.debouncedSearch(query);
+  }
+
+  handleSearchKeydown(event) {
+    // Handle autocomplete keyboard navigation
+    if (this.autocomplete?.isVisible) {
+      if (this.autocomplete.handleKey(event.key)) {
+        event.preventDefault();
+        return;
+      }
+    }
+
+    // Enter key - trigger immediate search
+    if (event.key === "Enter") {
+      event.preventDefault();
+      this.autocomplete?.hide();
+      const query = this.styleSearchInputTarget.value.trim();
+      if (query) {
+        this.modalState.searchText = query;
+        this.modalState.currentPage = 1;
+        this.modalState.highestPageLoaded = 1;
+        this.modalState.hasKnownTotal = false;
+        this.saveToSearchHistory(query);
+        this.loadStyles();
+      }
+    }
+
+    // Escape key - clear search when focused
+    if (event.key === "Escape") {
+      if (this.modalState.searchText) {
+        event.preventDefault();
+        this.clearSearch();
+      } else {
+        this.autocomplete?.hide();
+      }
+    }
+  }
+
+  clearSearch() {
+    // Cancel any pending debounced search
+    if (this.debounceTimeout) {
+      clearTimeout(this.debounceTimeout);
+      this.debounceTimeout = null;
+    }
+    this.modalState.searchText = "";
+    if (this.hasStyleSearchInputTarget) {
+      this.styleSearchInputTarget.value = "";
+    }
+    this.updateSearchUI();
+    this.autocomplete?.hide();
+    this.modalState.currentPage = 1;
+    this.modalState.highestPageLoaded = 1;
+    this.modalState.hasKnownTotal = false;
+    this.loadStyles();
+  }
+
+  updateSearchUI() {
+    const hasText = this.styleSearchInputTarget?.value.trim().length > 0;
+    if (this.hasStyleSearchClearTarget) {
+      if (hasText) {
+        this.styleSearchClearTarget.classList.remove("d-none");
+      } else {
+        this.styleSearchClearTarget.classList.add("d-none");
+      }
+    }
+  }
+
+  showSearchLoading() {
+    if (this.hasStyleSearchLoadingTarget) {
+      this.styleSearchLoadingTarget.classList.remove("d-none");
+    }
+  }
+
+  hideSearchLoading() {
+    if (this.hasStyleSearchLoadingTarget) {
+      this.styleSearchLoadingTarget.classList.add("d-none");
+    }
+  }
+
+  showAutocomplete() {
+    if (!this.autocomplete) return;
+
+    const query = this.styleSearchInputTarget?.value.trim() || "";
+    const suggestions = this.buildAutocompleteSuggestions(query);
+    this.autocomplete.show(suggestions, query);
+
+    // Update ARIA attributes
+    if (this.hasStyleSearchInputTarget) {
+      this.styleSearchInputTarget.setAttribute(
+        "aria-expanded",
+        suggestions.length > 0 ? "true" : "false"
+      );
+    }
+    if (this.hasAutocompleteContainerTarget) {
+      this.autocompleteContainerTarget.setAttribute(
+        "aria-expanded",
+        suggestions.length > 0 ? "true" : "false"
+      );
+    }
+  }
+
+  buildAutocompleteSuggestions(query) {
+    const suggestions = [];
+    const queryLower = query.toLowerCase();
+
+    // Recent searches
+    this.searchHistory
+      .filter((item) => !query || item.toLowerCase().includes(queryLower))
+      .slice(0, 3)
+      .forEach((item) => {
+        suggestions.push({
+          text: item,
+          type: "recent",
+          icon: "bx-history",
+        });
+      });
+
+    // Popular searches
+    if (!query || query.length < 2) {
+      this.popularSearches.slice(0, 3).forEach((item) => {
+        if (!this.searchHistory.includes(item)) {
+          suggestions.push({
+            text: item,
+            type: "popular",
+            icon: "bx-trending-up",
+          });
+        }
+      });
+    }
+
+    // Tag matches
+    if (query && this.modalState.availableTags.length > 0) {
+      this.modalState.availableTags
+        .filter((tag) => tag.toLowerCase().includes(queryLower))
+        .slice(0, 3)
+        .forEach((tag) => {
+          suggestions.push({
+            text: tag,
+            type: "tags",
+            icon: "bx-tag",
+          });
+        });
+    }
+
+    // Color matches
+    if (query && this.modalState.availableColors.length > 0) {
+      this.modalState.availableColors
+        .filter((color) => color.toLowerCase().includes(queryLower))
+        .slice(0, 2)
+        .forEach((color) => {
+          suggestions.push({
+            text: color,
+            type: "colors",
+            icon: "bx-palette",
+          });
+        });
+    }
+
+    return suggestions;
+  }
+
+  selectAutocompleteSuggestion(suggestion) {
+    if (!suggestion || !suggestion.text) return;
+
+    this.modalState.searchText = suggestion.text;
+    if (this.hasStyleSearchInputTarget) {
+      this.styleSearchInputTarget.value = suggestion.text;
+      this.styleSearchInputTarget.setAttribute("aria-expanded", "false");
+    }
+    if (this.hasAutocompleteContainerTarget) {
+      this.autocompleteContainerTarget.setAttribute("aria-expanded", "false");
+    }
+    this.updateSearchUI();
+    this.saveToSearchHistory(suggestion.text);
+    this.modalState.currentPage = 1;
+    this.modalState.highestPageLoaded = 1;
+    this.modalState.hasKnownTotal = false;
+    this.loadStyles();
+  }
+
+  loadSearchHistory() {
+    try {
+      const stored = localStorage.getItem("snazzy_maps_search_history");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  saveToSearchHistory(query) {
+    if (!query || !query.trim()) return;
+
+    try {
+      const trimmed = query.trim();
+      // Remove if already exists
+      this.searchHistory = this.searchHistory.filter(
+        (item) => item !== trimmed
+      );
+      // Add to beginning
+      this.searchHistory.unshift(trimmed);
+      // Keep only last 10
+      this.searchHistory = this.searchHistory.slice(0, 10);
+      // Save to localStorage
+      localStorage.setItem(
+        "snazzy_maps_search_history",
+        JSON.stringify(this.searchHistory)
+      );
+    } catch {
+      // Ignore localStorage errors (e.g., private browsing)
+    }
   }
 
   handleStyleSort() {
@@ -649,8 +1015,96 @@ export default class extends Controller {
       this.styleModalEmptyTarget.classList.remove("d-none");
     }
     if (this.styleBrowser) {
-      this.styleBrowser.showEmpty();
+      const suggestedSearches = this.getSuggestedSearches(
+        this.modalState.searchText
+      );
+      this.styleBrowser.showEmpty({
+        searchQuery: this.modalState.searchText,
+        suggestedSearches,
+        popularTags: this.modalState.availableTags.slice(0, 5),
+        popularColors: this.modalState.availableColors.slice(0, 5),
+      });
     }
+  }
+
+  getSuggestedSearches(query) {
+    if (!query || query.length < 2) {
+      return this.popularSearches.slice(0, 5);
+    }
+
+    const queryLower = query.toLowerCase();
+    const suggestions = [];
+
+    // Find similar tags
+    this.modalState.availableTags.forEach((tag) => {
+      if (
+        tag.toLowerCase().includes(queryLower) ||
+        this.isSimilar(tag, query)
+      ) {
+        suggestions.push(tag);
+      }
+    });
+
+    // Find similar colors
+    this.modalState.availableColors.forEach((color) => {
+      if (
+        color.toLowerCase().includes(queryLower) ||
+        this.isSimilar(color, query)
+      ) {
+        suggestions.push(color);
+      }
+    });
+
+    // Add popular searches if no matches
+    if (suggestions.length === 0) {
+      suggestions.push(...this.popularSearches.slice(0, 3));
+    }
+
+    return suggestions.slice(0, 5);
+  }
+
+  isSimilar(str1, str2) {
+    // Simple similarity check - if strings share significant characters
+    const s1 = str1.toLowerCase();
+    const s2 = str2.toLowerCase();
+    if (s1.length < 3 || s2.length < 3) return false;
+    // Check if one contains the other or they share at least 60% of characters
+    return (
+      s1.includes(s2) || s2.includes(s1) || this.levenshteinRatio(s1, s2) > 0.6
+    );
+  }
+
+  levenshteinRatio(str1, str2) {
+    // Simple Levenshtein distance ratio
+    const longer = str1.length > str2.length ? str1 : str2;
+    const shorter = str1.length > str2.length ? str2 : str1;
+    if (longer.length === 0) return 1.0;
+    const distance = this.levenshteinDistance(longer, shorter);
+    return (longer.length - distance) / longer.length;
+  }
+
+  levenshteinDistance(str1, str2) {
+    const matrix = [];
+    for (let i = 0; i <= str2.length; i++) {
+      matrix[i] = [i];
+    }
+    for (let j = 0; j <= str1.length; j++) {
+      matrix[0][j] = j;
+    }
+    for (let i = 1; i <= str2.length; i++) {
+      for (let j = 1; j <= str1.length; j++) {
+        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          );
+        }
+      }
+    }
+    return matrix[str2.length][str1.length];
   }
 
   hideModalEmpty() {
@@ -662,15 +1116,22 @@ export default class extends Controller {
   // Handle modal keyboard shortcuts
   handleModalKeydown(event) {
     if (this.styleModalTarget.classList.contains("d-none")) return;
+
     if (event.key === "Escape") {
+      // If autocomplete is visible, hide it first
+      if (this.autocomplete?.isVisible) {
+        this.autocomplete.hide();
+        event.preventDefault();
+        return;
+      }
+      // If search has text, clear it
+      if (this.modalState.searchText) {
+        this.clearSearch();
+        event.preventDefault();
+        return;
+      }
+      // Otherwise close modal
       this.closeStyleModal();
-    }
-    if (
-      event.key === "Enter" &&
-      document.activeElement === this.styleSearchInputTarget
-    ) {
-      event.preventDefault();
-      this.loadStyles();
     }
   }
 

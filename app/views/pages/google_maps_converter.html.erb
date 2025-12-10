@@ -320,15 +320,57 @@
                   <!-- Search Input -->
                   <div class="mb-3">
                     <label for="style-search-input" class="form-label text-white small fw-semibold mb-2">Search</label>
-                    <input
-                      type="text"
-                      id="style-search-input"
-                      class="form-control style-modal-input"
-                      placeholder="Search styles..."
-                      data-style-modal-target="styleSearchInput"
-                      data-action="input->style-modal#handleStyleSearch"
+                    <div class="style-search-input-wrapper position-relative">
+                      <i class="bx bx-search style-search-icon" aria-hidden="true"></i>
+                      <input
+                        type="text"
+                        id="style-search-input"
+                        class="form-control style-modal-input style-search-input"
+                        placeholder="Search styles..."
+                        autocomplete="off"
+                        data-style-modal-target="styleSearchInput"
+                        data-action="input->style-modal#handleStyleSearch keydown->style-modal#handleSearchKeydown"
+                        aria-label="Search styles"
+                        aria-autocomplete="list"
+                        aria-controls="style-search-autocomplete"
+                        aria-expanded="false"
                       />
+                      <button
+                        type="button"
+                        class="btn btn-link style-search-clear d-none"
+                        data-style-modal-target="styleSearchClear"
+                        data-action="click->style-modal#clearSearch"
+                        aria-label="Clear search"
+                        title="Clear search (Esc)"
+                      >
+                        <i class="bx bx-x" aria-hidden="true"></i>
+                      </button>
+                      <div
+                        class="spinner-border spinner-border-sm style-search-loading d-none"
+                        role="status"
+                        data-style-modal-target="styleSearchLoading"
+                        aria-hidden="true"
+                      >
+                        <span class="visually-hidden">Searching...</span>
+                      </div>
                     </div>
+                    <div
+                      class="style-search-autocomplete d-none"
+                      data-style-modal-target="autocompleteContainer"
+                      role="listbox"
+                      aria-label="Search suggestions"
+                      aria-expanded="false"
+                      id="style-search-autocomplete"
+                    ></div>
+                  </div>
+                  <div
+                    class="visually-hidden"
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                    data-style-modal-target="searchStatus"
+                    id="style-search-status"
+                  ></div>
                     <!-- Sort Select -->
                     <div class="mb-3">
                       <label for="style-sort-select" class="form-label text-white small fw-semibold mb-2">Sort By</label>
