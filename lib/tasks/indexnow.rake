@@ -30,7 +30,7 @@ namespace :indexnow do
 
   desc "Verify IndexNow key file exists and is accessible"
   task verify_key: :environment do
-    api_key = Rails.application.credentials.indexnow_api_key&.strip
+    api_key = Rails.application.credentials.dig(:indexnow, :api_key)
 
     if api_key.blank?
       puts "ERROR: indexnow_api_key not set in Rails credentials"
@@ -67,7 +67,7 @@ namespace :indexnow do
     require "json"
     require "uri"
 
-    api_key = Rails.application.credentials.indexnow_api_key&.strip
+    api_key = Rails.application.credentials.dig(:indexnow, :api_key)
 
     if api_key.blank?
       puts "ERROR: indexnow_api_key not set in Rails credentials"

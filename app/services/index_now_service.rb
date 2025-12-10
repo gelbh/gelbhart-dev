@@ -85,7 +85,7 @@ class IndexNowService
   end
 
   def fetch_api_key
-    Rails.application.credentials.indexnow_api_key&.strip.presence
+    Rails.application.credentials.dig(:indexnow, :api_key)
   end
 
   def send_notification(urls, api_key)

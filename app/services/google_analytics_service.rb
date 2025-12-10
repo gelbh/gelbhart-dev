@@ -119,9 +119,9 @@ class GoogleAnalyticsService
   end
 
   def oauth_credentials_present?
-    Rails.application.credentials.google_oauth_client_id.present? &&
-      Rails.application.credentials.google_oauth_client_secret.present? &&
-      Rails.application.credentials.google_oauth_refresh_token.present?
+    Rails.application.credentials.dig(:google_oauth, :client_id).present? &&
+      Rails.application.credentials.dig(:google_oauth, :client_secret).present? &&
+      Rails.application.credentials.dig(:google_oauth, :refresh_token).present?
   end
 
   def get_credentials
@@ -129,9 +129,9 @@ class GoogleAnalyticsService
   end
 
   def get_oauth_credentials
-    return nil unless Rails.application.credentials.google_oauth_client_id.present? &&
-                       Rails.application.credentials.google_oauth_client_secret.present? &&
-                       Rails.application.credentials.google_oauth_refresh_token.present?
+    return nil unless Rails.application.credentials.dig(:google_oauth, :client_id).present? &&
+                       Rails.application.credentials.dig(:google_oauth, :client_secret).present? &&
+                       Rails.application.credentials.dig(:google_oauth, :refresh_token).present?
 
     get_oauth_credentials_from_rails
   end
@@ -139,9 +139,9 @@ class GoogleAnalyticsService
   def get_oauth_credentials_from_rails
     # Create credentials directly from Rails credentials
     token_data = {
-      "client_id" => Rails.application.credentials.google_oauth_client_id,
-      "access_token" => Rails.application.credentials.google_oauth_access_token,
-      "refresh_token" => Rails.application.credentials.google_oauth_refresh_token,
+      "client_id" => Rails.application.credentials.dig(:google_oauth, :client_id),
+      "access_token" => Rails.application.credentials.dig(:google_oauth, :access_token),
+      "refresh_token" => Rails.application.credentials.dig(:google_oauth, :refresh_token),
       "scope" => [ SCOPE ],
       "expiration_time_millis" => (Time.now + 3600).to_i * 1000
     }
@@ -155,8 +155,8 @@ class GoogleAnalyticsService
     mock_store.instance_variable_set(:@token_json, token_data.to_json)
 
     client_id = Google::Auth::ClientId.new(
-      Rails.application.credentials.google_oauth_client_id,
-      Rails.application.credentials.google_oauth_client_secret
+      Rails.application.credentials.dig(:google_oauth, :client_id),
+      Rails.application.credentials.dig(:google_oauth, :client_secret)
     )
 
     authorizer = Google::Auth::UserAuthorizer.new(client_id, SCOPE, mock_store)
