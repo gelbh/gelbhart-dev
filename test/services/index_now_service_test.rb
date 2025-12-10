@@ -6,10 +6,16 @@ class IndexNowServiceTest < ActiveSupport::TestCase
     @service = IndexNowService.new
     @test_api_key = "test_api_key_12345678901234567890"
 
-    # Stub Rails credentials
-    @mock_credentials = OpenStruct.new(
-      indexnow_api_key: @test_api_key
-    )
+    # Stub Rails credentials with nested structure
+    @mock_credentials = {
+      indexnow: {
+        api_key: @test_api_key
+      }
+    }
+    # Make mock support dig method
+    def @mock_credentials.dig(*keys)
+      keys.reduce(self) { |obj, key| obj&.[](key) }
+    end
     Rails.application.stubs(:credentials).returns(@mock_credentials)
 
     # Clear cache before each test
@@ -36,7 +42,7 @@ class IndexNowServiceTest < ActiveSupport::TestCase
 
   test "notify returns false when API key is missing" do
     Rails.env.stubs(:production?).returns(true)
-    @mock_credentials.indexnow_api_key = nil
+    @mock_credentials[:indexnow][:api_key] = nil
 
     result = @service.notify("https://gelbhart.dev/test")
 
