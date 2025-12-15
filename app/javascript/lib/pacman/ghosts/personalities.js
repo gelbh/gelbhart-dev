@@ -231,6 +231,21 @@ export function calculateFrightenedTarget(ghost, gameState) {
 export function calculateScatterModeTarget(ghostIndex, gameState) {
   const { pacmanPosition } = gameState;
 
+  // Safety check: return center position if pacmanPosition is invalid
+  if (
+    !pacmanPosition ||
+    pacmanPosition.x === undefined ||
+    pacmanPosition.y === undefined
+  ) {
+    return {
+      x: window.innerWidth / 2,
+      y: window.scrollY + window.innerHeight / 2,
+    };
+  }
+
+  // Validate ghostIndex is within bounds
+  const validIndex = Math.max(0, Math.min(3, Math.floor(ghostIndex)));
+
   // Brief scatter mode - each ghost goes to their home corner
   // Blinky NEVER scatters - always aggressive!
   const corners = [
@@ -240,5 +255,5 @@ export function calculateScatterModeTarget(ghostIndex, gameState) {
     { x: window.innerWidth * 0.1, y: pacmanPosition.y + 500 }, // Clyde: bottom-left
   ];
 
-  return corners[ghostIndex];
+  return corners[validIndex];
 }

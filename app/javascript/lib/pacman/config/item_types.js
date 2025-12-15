@@ -13,14 +13,6 @@ export const itemTypes = {
     duration: 5000,
     positive: true,
   },
-  slowDown: {
-    emoji: "🐌",
-    name: "Slow Down",
-    color: "#8B4513",
-    points: -50,
-    duration: 4000,
-    positive: false,
-  },
   shield: {
     emoji: "🛡️",
     name: "Shield",

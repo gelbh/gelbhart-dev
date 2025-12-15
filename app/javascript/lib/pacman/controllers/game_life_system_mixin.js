@@ -2,11 +2,14 @@
  * Game Life System Mixin
  *
  * Handles life loss, death, respawn, win/lose conditions, and game end handling.
+ *
+ * @mixin
  */
-
 export class GameLifeSystemMixin {
   /**
    * Lose a life and respawn or game over
+   *
+   * @returns {Promise<void>} Resolves when death/respawn sequence completes
    */
   async loseLife() {
     if (this.isDying) return; // Prevent multiple death triggers
@@ -68,6 +71,8 @@ export class GameLifeSystemMixin {
 
   /**
    * Game over - player lost
+   *
+   * @returns {Promise<void>} Resolves when game over sequence completes
    */
   async gameOver() {
     this.isGameActive = false;
@@ -79,6 +84,8 @@ export class GameLifeSystemMixin {
 
   /**
    * Win game - player cleared all dots
+   *
+   * @returns {Promise<void>} Resolves when win sequence completes
    */
   async winGame() {
     this.isGameActive = false;
@@ -89,8 +96,14 @@ export class GameLifeSystemMixin {
 
   /**
    * Handle game end - prompt for name if needed, submit score, show modal
+   *
+   * @param {boolean} isWin - Whether the player won (true) or lost (false)
+   * @returns {Promise<void>} Resolves when game end sequence completes
    */
   async handleGameEnd(isWin) {
+    // Capture score immediately to ensure it's preserved
+    const finalScore = this.score || 0;
+
     // Hide game visuals (but keep game state for potential restart)
     this.gameContainerTarget.classList.remove("active");
     this.hudTarget.classList.remove("active");
@@ -112,14 +125,29 @@ export class GameLifeSystemMixin {
     // If no player name, prompt for it
     if (!playerName) {
       playerName = await this.uiManager.showPlayerNamePrompt();
+      if (!playerName) {
+        // Still show game over modal even if no name
+        this.uiManager.showGameOverModal(isWin, finalScore, {
+          onRestart: () => this.restartGame(),
+          onQuit: () => this.stopGame(),
+          onViewLeaderboard: () => this.showLeaderboardFromGameEnd(),
+        });
+        return;
+      }
       await this.savePlayerName(playerName);
     }
 
     // Submit score to leaderboard
-    await this.submitScore(playerName, this.score, isWin);
+    const result = await this.submitScore(playerName, finalScore, isWin);
+    if (!result?.success) {
+      console.error(
+        "Failed to submit score:",
+        result?.error || "Unknown error"
+      );
+    }
 
     // Show game over modal with leaderboard option
-    this.uiManager.showGameOverModal(isWin, this.score, {
+    this.uiManager.showGameOverModal(isWin, finalScore, {
       onRestart: () => this.restartGame(),
       onQuit: () => this.stopGame(),
       onViewLeaderboard: () => this.showLeaderboardFromGameEnd(),

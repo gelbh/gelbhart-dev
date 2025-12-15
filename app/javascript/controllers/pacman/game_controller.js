@@ -104,7 +104,6 @@ export default class extends Controller {
     // Active powerup effects
     this.activeEffects = {
       speedBoost: false,
-      slowDown: false,
       shield: false,
       freeze: false,
       doublePoints: false,

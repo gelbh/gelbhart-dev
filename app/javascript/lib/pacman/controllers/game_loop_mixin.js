@@ -2,17 +2,28 @@
  * Game Loop Mixin
  *
  * Handles the main game loop, movement updates, and physics.
+ *
+ * @mixin
  */
-
 export class GameLoopMixin {
   /**
    * Main game loop - runs every frame
    * Handles all game updates and rendering
+   *
+   * @param {number} [timestamp=performance.now()] - Current timestamp in milliseconds
+   * @returns {void}
    */
   gameLoop(timestamp = performance.now()) {
     // Exit if game is no longer active
     // Important: Check BEFORE scheduling next frame to prevent multiple loops
-    if (!this.isGameActive) return;
+    if (!this.isGameActive) {
+      // Clear any pending animation frame
+      if (this._animationFrameId) {
+        cancelAnimationFrame(this._animationFrameId);
+        this._animationFrameId = null;
+      }
+      return;
+    }
 
     // Calculate delta time in seconds (for frame-rate independent movement)
     const deltaTime = this.lastFrameTime
@@ -88,12 +99,17 @@ export class GameLoopMixin {
 
     // Continue game loop - only if still active
     if (this.isGameActive) {
-      requestAnimationFrame((ts) => this.gameLoop(ts));
+      this._animationFrameId = requestAnimationFrame((ts) => this.gameLoop(ts));
+    } else {
+      this._animationFrameId = null;
     }
   }
 
   /**
    * Update Pac-Man's position based on velocity
+   *
+   * @param {number} deltaTime - Time since last frame in seconds
+   * @returns {void}
    */
   updatePacmanMovement(deltaTime) {
     // Calculate next position with delta-time based movement
@@ -155,6 +171,10 @@ export class GameLoopMixin {
 
   /**
    * Check if position would enter a locked section
+   *
+   * @param {number} x - X coordinate to check
+   * @param {number} y - Y coordinate to check
+   * @returns {number|null} Boundary Y position if blocked, null if allowed
    */
   checkSectionBoundary(x, y) {
     return this.collisionManager.checkSectionBoundary(

@@ -56,19 +56,33 @@ export function showGameOverModal(isWin, finalScore, callbacks = {}) {
 
   const modal = createModal("", createModalContent(content));
 
-  bindModalActions(modal, {
-    restart: () => {
-      modal.remove();
-      onRestart?.();
-    },
-    leaderboard: () => {
-      modal.remove();
-      onViewLeaderboard?.();
-    },
-    quit: () => {
-      modal.remove();
-      onQuit?.();
-    },
+  // Use requestAnimationFrame to ensure DOM is ready before binding actions
+  requestAnimationFrame(() => {
+    bindModalActions(modal, {
+      restart: () => {
+        modal.remove();
+        onRestart?.();
+      },
+      leaderboard: async () => {
+        try {
+          // Attempt to show leaderboard - only remove game over modal if successful
+          if (onViewLeaderboard) {
+            await onViewLeaderboard();
+            // If no error was thrown, leaderboard opened successfully
+            // Remove game over modal to show leaderboard
+            modal.remove();
+          }
+        } catch (error) {
+          // If leaderboard fails to open, keep game over modal visible
+          console.error("Failed to open leaderboard:", error);
+          // Modal stays visible so user can try again or use other options
+        }
+      },
+      quit: () => {
+        modal.remove();
+        onQuit?.();
+      },
+    });
   });
 
   return modal;

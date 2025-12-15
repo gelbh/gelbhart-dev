@@ -51,19 +51,33 @@ export class LeaderboardManager {
       const data = await api.post("/pacman_scores", {
         pacman_score: {
           player_name: playerName,
-          score: score,
+          score,
           is_win: isWin,
         },
       });
 
       if (!data.success) {
-        console.error("❌ Error submitting score:", data.errors);
+        console.error("Error submitting score:", data.errors);
       }
 
       return data;
     } catch (error) {
-      console.error("❌ Error submitting score:", error);
-      return { success: false, error: error.message };
+      const errorMessage =
+        error.response?.data?.error ||
+        (Array.isArray(error.response?.data?.errors)
+          ? error.response.data.errors.join(", ")
+          : error.response?.data?.errors) ||
+        error.response?.statusText ||
+        error.message ||
+        "Unknown error";
+
+      console.error("Error submitting score:", {
+        message: errorMessage,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+
+      return { success: false, error: errorMessage };
     }
   }
 
@@ -95,7 +109,7 @@ export class LeaderboardManager {
         player: playerData,
       };
     } catch (error) {
-      console.error("❌ Error fetching leaderboard:", error);
+      console.error("Error fetching leaderboard:", error);
       return {
         global: [],
         player: null,
