@@ -37,7 +37,9 @@ describe("PacmanMenuController", () => {
 
     // Mock game controller outlet
     mockGameController = {
-      showLeaderboardModal: jest.fn(),
+      showLeaderboardModal: jest.fn(() =>
+        Promise.resolve(document.createElement("div"))
+      ),
       showMenu: jest.fn(),
       stopGame: jest.fn(),
     };

@@ -77,7 +77,7 @@ export default class extends Controller {
   async showLeaderboardFromGameEnd() {
     const gameController = this.getGameController();
     if (!gameController) {
-      throw new Error("Game controller not available");
+      return;
     }
 
     try {
