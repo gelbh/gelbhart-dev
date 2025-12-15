@@ -1,0 +1,78 @@
+// ============================================
+// CUSTOM TOOLTIP STYLES
+// ============================================
+
+@use "../variables" as *;
+
+:root {
+  --bs-tooltip-bg: rgba(99, 102, 241, 0.95);
+  --bs-tooltip-color: #ffffff;
+  --bs-tooltip-opacity: 1;
+  --bs-tooltip-border-radius: var(--radius-md);
+  --bs-tooltip-padding-x: 0.75rem;
+  --bs-tooltip-padding-y: 0.5rem;
+  --bs-tooltip-font-size: 0.8125rem;
+  --bs-tooltip-max-width: 250px;
+  --bs-tooltip-arrow-width: 0.5rem;
+  --bs-tooltip-arrow-height: 0.5rem;
+}
+
+.tooltip {
+  .tooltip-inner {
+    background-color: var(--bs-tooltip-bg);
+    color: var(--bs-tooltip-color);
+    padding: var(--bs-tooltip-padding-y) var(--bs-tooltip-padding-x);
+    font-size: var(--bs-tooltip-font-size);
+    font-weight: 500;
+    line-height: 1.4;
+    border-radius: var(--bs-tooltip-border-radius);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: opacity var(--transition-fast) var(--ease-smooth),
+      transform var(--transition-fast) var(--ease-smooth);
+  }
+
+  &.show {
+    opacity: 1;
+    animation: tooltipFadeIn var(--transition-fast) var(--ease-smooth);
+  }
+}
+
+[data-bs-theme="dark"] {
+  --bs-tooltip-bg: rgba(99, 102, 241, 0.95);
+  --bs-tooltip-color: #ffffff;
+
+  .tooltip .tooltip-inner {
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+[data-bs-toggle="tooltip"] {
+  cursor: help;
+  transition: all var(--transition-fast) var(--ease-smooth);
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      filter: brightness(1.1);
+    }
+  }
+}
+
+a[data-bs-toggle="tooltip"],
+a.tech-badge,
+a.hero-badge,
+a.badge-hover {
+  cursor: pointer !important;
+}
