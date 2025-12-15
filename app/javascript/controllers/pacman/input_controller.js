@@ -172,7 +172,19 @@ export default class extends Controller {
     }
 
     // Handle mute toggle (M key) - delegate to game controller
+    // Skip if user is typing in an input field
     if (event.key === "m" || event.key === "M") {
+      // Don't intercept if user is typing in an input/textarea
+      const activeElement = document.activeElement;
+      if (
+        activeElement &&
+        (activeElement.tagName === "INPUT" ||
+          activeElement.tagName === "TEXTAREA" ||
+          activeElement.isContentEditable)
+      ) {
+        return; // Allow normal input behavior
+      }
+
       if (!this.gameController) return;
       const gameState = this.getGameState();
       if (gameState.isGameActive || gameState.isStarting) {

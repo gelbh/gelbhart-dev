@@ -8,10 +8,17 @@
  * - Container transform for fixed positioning
  * - Smooth scrolling animations
  * - Position resets for respawning
+ *
+ * @class
  */
 import eases from "eases";
 
 export class AnimationManager {
+  /**
+   * Create an AnimationManager instance
+   *
+   * @param {Object} controller - The Pac-Man game controller instance
+   */
   constructor(controller) {
     this.controller = controller;
     this.pacmanTarget = controller.pacmanTarget;
@@ -23,11 +30,17 @@ export class AnimationManager {
 
     // Track last container translate value to avoid redundant style updates
     this._lastContainerTranslateY = null;
+
+    // Track active animations for cleanup
+    this._deathAnimationInterval = null;
+    this._smoothScrollFrameId = null;
   }
 
   /**
    * Update the game container transform to account for scroll position
    * The container is fixed positioned, so we shift it to render document-space coords correctly
+   *
+   * @returns {void}
    */
   updateContainerTransform() {
     if (this.hasGameContainerTarget) {
@@ -42,6 +55,8 @@ export class AnimationManager {
   /**
    * Update Pac-Man's visual position and sprite
    * Updates left/top position, rotation based on direction, and sprite image
+   *
+   * @returns {void}
    */
   updatePacmanPosition() {
     const pacmanPosition = this.controller.pacmanPosition;
@@ -142,12 +157,19 @@ export class AnimationManager {
   /**
    * Smoothly scroll to a target Y position over a specified duration
    * Uses easeInOutCubic easing function for smooth animation
+   *
    * @param {number} targetY - Target scroll Y position
    * @param {number} duration - Animation duration in milliseconds
-   * @returns {Promise} Resolves when animation completes
+   * @returns {Promise<void>} Resolves when animation completes
    */
   smoothScrollTo(targetY, duration) {
     return new Promise((resolve) => {
+      // Cancel any existing smooth scroll
+      if (this._smoothScrollFrameId) {
+        cancelAnimationFrame(this._smoothScrollFrameId);
+        this._smoothScrollFrameId = null;
+      }
+
       const startY = window.scrollY;
       const distance = targetY - startY;
       const startTime = performance.now();
@@ -161,13 +183,14 @@ export class AnimationManager {
         window.scrollTo(0, startY + distance * eased);
 
         if (progress < 1) {
-          requestAnimationFrame(scroll);
+          this._smoothScrollFrameId = requestAnimationFrame(scroll);
         } else {
+          this._smoothScrollFrameId = null;
           resolve();
         }
       };
 
-      requestAnimationFrame(scroll);
+      this._smoothScrollFrameId = requestAnimationFrame(scroll);
     });
   }
 
@@ -223,10 +246,17 @@ export class AnimationManager {
   /**
    * Play the death animation for Pac-Man
    * Spins and shrinks Pac-Man while hiding ghosts
-   * @returns {Promise} Resolves when animation completes
+   *
+   * @returns {Promise<void>} Resolves when animation completes
    */
   playDeathAnimation() {
     return new Promise((resolve) => {
+      // Clear any existing death animation
+      if (this._deathAnimationInterval) {
+        clearInterval(this._deathAnimationInterval);
+        this._deathAnimationInterval = null;
+      }
+
       // Stop Pac-Man movement immediately
       this.controller.pacmanVelocity = { x: 0, y: 0 };
 
@@ -243,7 +273,7 @@ export class AnimationManager {
 
       // Death animation sequence (spin and fade)
       let frame = 0;
-      const animationInterval = setInterval(() => {
+      this._deathAnimationInterval = setInterval(() => {
         frame++;
 
         // Rotate and scale down
@@ -253,7 +283,8 @@ export class AnimationManager {
         sprite.style.opacity = scale;
 
         if (frame >= 10) {
-          clearInterval(animationInterval);
+          clearInterval(this._deathAnimationInterval);
+          this._deathAnimationInterval = null;
 
           // Reset sprite
           sprite.style.transform = "rotate(0deg) scale(1)";
@@ -268,5 +299,25 @@ export class AnimationManager {
         }
       }, 100);
     });
+  }
+
+  /**
+   * Clean up all active animations
+   * Cancels death animation interval and smooth scroll animation
+   *
+   * @returns {void}
+   */
+  cleanup() {
+    // Clear death animation if active
+    if (this._deathAnimationInterval) {
+      clearInterval(this._deathAnimationInterval);
+      this._deathAnimationInterval = null;
+    }
+
+    // Cancel smooth scroll animation if active
+    if (this._smoothScrollFrameId) {
+      cancelAnimationFrame(this._smoothScrollFrameId);
+      this._smoothScrollFrameId = null;
+    }
   }
 }

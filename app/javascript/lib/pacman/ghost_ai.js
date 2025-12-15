@@ -215,6 +215,15 @@ export class GhostAI {
    * @param {function} checkSectionBoundary - Callback to check section boundaries
    */
   updateGhosts(deltaTime = 1 / 60, checkSectionBoundary = null) {
+    // Safety check: don't update ghosts if pacmanPosition is undefined (game ended)
+    if (
+      !this.pacmanPosition ||
+      this.pacmanPosition.x === undefined ||
+      this.pacmanPosition.y === undefined
+    ) {
+      return;
+    }
+
     this.animationFrame++;
 
     this.ghosts.forEach((ghost, index) => {
@@ -294,8 +303,19 @@ export class GhostAI {
         const scatterTarget = calculateScatterModeTarget(index, {
           pacmanPosition: this.pacmanPosition,
         });
-        targetX = scatterTarget.x;
-        targetY = scatterTarget.y;
+        // Safety check: ensure scatterTarget is valid
+        if (
+          scatterTarget &&
+          scatterTarget.x !== undefined &&
+          scatterTarget.y !== undefined
+        ) {
+          targetX = scatterTarget.x;
+          targetY = scatterTarget.y;
+        } else {
+          // Fallback to center if scatter target is invalid
+          targetX = window.innerWidth / 2;
+          targetY = window.scrollY + window.innerHeight / 2;
+        }
       } else {
         // Chase mode (default) - use personality-based AI
         const gameState = {

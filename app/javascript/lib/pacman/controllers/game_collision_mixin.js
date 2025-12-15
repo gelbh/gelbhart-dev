@@ -2,11 +2,15 @@
  * Game Collision Mixin
  *
  * Handles collision-related callbacks and win condition checks.
+ *
+ * @mixin
  */
-
 export class GameCollisionMixin {
   /**
    * Called when a ghost is eaten
+   *
+   * @param {Object} ghost - Ghost object that was eaten
+   * @returns {void}
    */
   onGhostEaten(ghost) {
     // Award points for eating ghost (200, 400, 800, 1600, 3200, 6400)
@@ -22,22 +26,33 @@ export class GameCollisionMixin {
 
   /**
    * Check if all sections unlocked and all dots collected
+   *
+   * @returns {void}
    */
   checkWinCondition() {
-    // Don't check win condition during dot regeneration
-    if (this.regeneratingDots) return;
+    // Don't check win condition during dot regeneration or if game is not active
+    if (this.regeneratingDots || !this.isGameActive) {
+      return;
+    }
 
-    const allSectionsUnlocked = this.sections.every((s) => s.unlocked);
-    const allDotsCollected =
-      this.dots.length > 0 && this.dots.every((d) => d.collected);
+    try {
+      const allSectionsUnlocked = this.sections.every((s) => s.unlocked);
+      const allDotsCollected =
+        this.dots.length > 0 && this.dots.every((d) => d.collected);
 
-    if (allSectionsUnlocked && allDotsCollected) {
-      this.winGame();
+      if (allSectionsUnlocked && allDotsCollected) {
+        this.winGame();
+      }
+    } catch (error) {
+      console.warn("Error checking win condition:", error);
+      // Don't throw - just log the error
     }
   }
 
   /**
    * Check if score reached a section threshold
+   *
+   * @returns {void}
    */
   checkSectionThreshold() {
     this.sectionManager.checkSectionThreshold();

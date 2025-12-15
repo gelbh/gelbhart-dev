@@ -26,33 +26,77 @@ export default class extends Controller {
   }
 
   disconnect() {
-    // Cleanup if needed
+    // No cleanup needed
+  }
+
+  /**
+   * Get game controller reference from the same element.
+   * Falls back to Stimulus API when outlets aren't available (same element controllers).
+   * @returns {Controller|null} Game controller instance or null if not found
+   */
+  getGameController() {
+    if (this.hasPacmanGameOutlet) {
+      return this.pacmanGameOutlet;
+    }
+
+    if (this.element?._pacmanGameController) {
+      return this.element._pacmanGameController;
+    }
+
+    if (this.application?.element) {
+      try {
+        return this.application.getControllerForElementAndIdentifier(
+          this.element,
+          "pacman-game"
+        );
+      } catch {
+        // Fallback failed
+      }
+    }
+
+    return null;
   }
 
   /**
    * Show leaderboard from menu
    */
   async showLeaderboardFromMenu() {
-    if (!this.hasPacmanGameOutlet) {
-      return;
-    }
+    const gameController = this.getGameController();
+    if (!gameController) return;
 
     const data = await this.leaderboardManager.fetchLeaderboardData();
-    this.pacmanGameOutlet.showLeaderboardModal(data, () => {
-      this.pacmanGameOutlet.showMenu();
+    await gameController.showLeaderboardModal(data, () => {
+      gameController.showMenu();
     });
   }
 
   /**
    * Show leaderboard after game ends (calls stopGame when closed)
+   * @throws {Error} If leaderboard fails to open
    */
   async showLeaderboardFromGameEnd() {
-    if (!this.hasPacmanGameOutlet) return;
+    const gameController = this.getGameController();
+    if (!gameController) {
+      throw new Error("Game controller not available");
+    }
 
-    const data = await this.leaderboardManager.fetchLeaderboardData();
-    this.pacmanGameOutlet.showLeaderboardModal(data, () => {
-      this.pacmanGameOutlet.stopGame();
-    });
+    try {
+      const data = await this.leaderboardManager.fetchLeaderboardData();
+      if (!data) {
+        throw new Error("Failed to fetch leaderboard data");
+      }
+
+      const modal = await gameController.showLeaderboardModal(data, () => {
+        gameController.stopGame();
+      });
+
+      if (!modal) {
+        throw new Error("Leaderboard modal failed to open");
+      }
+    } catch (error) {
+      console.error("Error showing leaderboard from game end:", error);
+      throw error;
+    }
   }
 
   /**

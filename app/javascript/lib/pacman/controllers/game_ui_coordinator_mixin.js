@@ -176,7 +176,7 @@ export class GameUICoordinatorMixin {
     } else {
       // Fallback: fetch data and show modal directly
       const data = await this.fetchLeaderboardData();
-      this.uiManager.showLeaderboardModal(data, () => {
+      await this.uiManager.showLeaderboardModal(data, () => {
         this.showMenu();
       });
     }

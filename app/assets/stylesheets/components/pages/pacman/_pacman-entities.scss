@@ -36,11 +36,6 @@
     animation: speedTrail var(--transition-fast) var(--ease-in-out) infinite;
   }
 
-  &.slow-down {
-    filter: drop-shadow(0 0 15px rgba(139, 69, 19, 0.7)) brightness(0.7);
-    animation: slowPulse 1s var(--ease-in-out) infinite;
-  }
-
   &.shielded {
     filter: drop-shadow(0 0 25px rgba(0, 206, 209, 1))
       drop-shadow(0 0 40px rgba(0, 206, 209, 0.6));

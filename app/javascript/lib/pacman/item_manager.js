@@ -3,10 +3,17 @@
  *
  * Handles all item/dot/pellet-related functionality for the Pac-Man game.
  * This includes generation, creation, collision detection, and effect application.
+ *
+ * @class
  */
 import { itemTypes } from "lib/pacman/config/item_types";
 
 export class ItemManager {
+  /**
+   * Create an ItemManager instance
+   *
+   * @param {Object} controller - The Pac-Man game controller instance
+   */
   constructor(controller) {
     this.controller = controller;
 
@@ -17,6 +24,8 @@ export class ItemManager {
   /**
    * Generate dots across the playable area
    * Excludes locked sections
+   *
+   * @returns {void}
    */
   generateDots() {
     // Clear existing dots
@@ -143,6 +152,10 @@ export class ItemManager {
   /**
    * Create a collectible dot at specified position
    * Uses custom SVG for better performance than images
+   *
+   * @param {number} x - X coordinate for the dot
+   * @param {number} y - Y coordinate for the dot
+   * @returns {void}
    */
   createDot(x, y) {
     const dot = document.createElement("div");
@@ -253,7 +266,7 @@ export class ItemManager {
 
       // Random item type (weighted probabilities)
       const itemTypeKeys = Object.keys(this.itemTypes);
-      const weights = [25, 10, 15, 20, 20, 10]; // Speed, Slow, Shield, Freeze, Double, Life
+      const weights = [25, 15, 20, 20, 10]; // Speed, Shield, Freeze, Double, Life
 
       let totalWeight = weights.reduce((a, b) => a + b, 0);
       let random = Math.random() * totalWeight;
@@ -311,6 +324,8 @@ export class ItemManager {
 
   /**
    * Optimize dot visibility - only render dots within or near viewport for performance
+   *
+   * @returns {void}
    */
   optimizeDotVisibility() {
     // Only render dots within or near viewport for performance
@@ -335,19 +350,33 @@ export class ItemManager {
 
   /**
    * Check for dot collisions with Pac-Man
+   * Optimized with spatial filtering and squared distance calculation
    */
   checkDotCollisions() {
     const collisionRadius = 25;
+    const collisionRadiusSquared = collisionRadius * collisionRadius; // Use squared distance to avoid sqrt
+    const checkRadius = collisionRadius * 2; // Only check dots within 2x collision radius
+    const checkRadiusSquared = checkRadius * checkRadius;
 
-    this.controller.dots.forEach((dot) => {
-      if (dot.collected) return;
+    const pacmanX = this.controller.pacmanPosition.x;
+    const pacmanY = this.controller.pacmanPosition.y;
 
-      const distance = Math.sqrt(
-        Math.pow(this.controller.pacmanPosition.x - dot.x, 2) +
-          Math.pow(this.controller.pacmanPosition.y - dot.y, 2)
-      );
+    // Pre-filter dots: only check those within reasonable distance
+    // This avoids expensive distance calculations for far-away dots
+    for (let i = 0; i < this.controller.dots.length; i++) {
+      const dot = this.controller.dots[i];
+      if (dot.collected) continue;
 
-      if (distance < collisionRadius) {
+      // Quick distance check using squared values (avoids sqrt)
+      const dx = pacmanX - dot.x;
+      const dy = pacmanY - dot.y;
+      const distanceSquared = dx * dx + dy * dy;
+
+      // Skip dots that are definitely too far away
+      if (distanceSquared > checkRadiusSquared) continue;
+
+      // Only calculate actual distance if within check radius
+      if (distanceSquared < collisionRadiusSquared) {
         dot.collected = true;
         dot.element.classList.add("collected");
 
@@ -383,24 +412,37 @@ export class ItemManager {
         // Check if we reached a section threshold
         this.controller.checkSectionThreshold();
       }
-    });
+    }
   }
 
   /**
    * Check for item collisions with Pac-Man
+   * Optimized with spatial filtering and squared distance calculation
    */
   checkItemCollisions() {
     const collisionRadius = 30;
+    const collisionRadiusSquared = collisionRadius * collisionRadius;
+    const checkRadius = collisionRadius * 2;
+    const checkRadiusSquared = checkRadius * checkRadius;
 
-    this.controller.items.forEach((item) => {
-      if (item.collected) return;
+    const pacmanX = this.controller.pacmanPosition.x;
+    const pacmanY = this.controller.pacmanPosition.y;
 
-      const distance = Math.sqrt(
-        Math.pow(this.controller.pacmanPosition.x - item.x, 2) +
-          Math.pow(this.controller.pacmanPosition.y - item.y, 2)
-      );
+    // Pre-filter items: only check those within reasonable distance
+    for (let i = 0; i < this.controller.items.length; i++) {
+      const item = this.controller.items[i];
+      if (item.collected) continue;
 
-      if (distance < collisionRadius) {
+      // Quick distance check using squared values
+      const dx = pacmanX - item.x;
+      const dy = pacmanY - item.y;
+      const distanceSquared = dx * dx + dy * dy;
+
+      // Skip items that are definitely too far away
+      if (distanceSquared > checkRadiusSquared) continue;
+
+      // Only check collision if within check radius
+      if (distanceSquared < collisionRadiusSquared) {
         item.collected = true;
         item.element.classList.add("collected");
 
@@ -431,7 +473,7 @@ export class ItemManager {
           }
         }, 300);
       }
-    });
+    }
   }
 
   /**
@@ -441,9 +483,6 @@ export class ItemManager {
     switch (type) {
       case "speedBoost":
         this.activateSpeedBoost(config.duration);
-        break;
-      case "slowDown":
-        this.activateSlowDown(config.duration);
         break;
       case "shield":
         this.activateShield(config.duration);
@@ -472,8 +511,23 @@ export class ItemManager {
     }
 
     this.controller.activeEffects.speedBoost = true;
+    const oldSpeed = this.controller.pacmanSpeed;
     this.controller.pacmanSpeed = this.controller.baseSpeedBeforeEffect * 1.5; // 50% faster
     this.controller.pacmanTarget.classList.add("speed-boost");
+
+    // Update velocity immediately if Pac-Man is currently moving
+    // This ensures the speed boost applies even if no new key is pressed
+    if (
+      this.controller.pacmanVelocity.x !== 0 ||
+      this.controller.pacmanVelocity.y !== 0
+    ) {
+      // Calculate normalized direction from current velocity
+      const speedRatio = this.controller.pacmanSpeed / oldSpeed;
+      this.controller.pacmanVelocity = {
+        x: this.controller.pacmanVelocity.x * speedRatio,
+        y: this.controller.pacmanVelocity.y * speedRatio,
+      };
+    }
 
     // Create cooldown bar under Pac-Man
     this.showEffectCooldown("speedBoost", duration);
@@ -484,40 +538,21 @@ export class ItemManager {
       this.controller.pacmanTarget.classList.remove("speed-boost");
       this.removeEffectCooldown("speedBoost");
 
-      // Only restore base speed if no other speed effects are active
-      if (!this.controller.activeEffects.slowDown) {
-        this.controller.pacmanSpeed = this.controller.baseSpeedBeforeEffect;
-        this.controller.baseSpeedBeforeEffect = null;
-      }
-    }, duration);
-  }
+      // Restore base speed when speed boost ends
+      const currentSpeed = this.controller.pacmanSpeed;
+      this.controller.pacmanSpeed = this.controller.baseSpeedBeforeEffect;
+      this.controller.baseSpeedBeforeEffect = null;
 
-  /**
-   * Activate slow down effect
-   */
-  activateSlowDown(duration) {
-    // Store current base speed before modification (only if no other speed effect is active)
-    if (!this.controller.baseSpeedBeforeEffect) {
-      this.controller.baseSpeedBeforeEffect = this.controller.pacmanSpeed;
-    }
-
-    this.controller.activeEffects.slowDown = true;
-    this.controller.pacmanSpeed = this.controller.baseSpeedBeforeEffect * 0.6; // 40% slower
-    this.controller.pacmanTarget.classList.add("slow-down");
-
-    // Create cooldown bar under Pac-Man
-    this.showEffectCooldown("slowDown", duration);
-
-    this.clearEffectTimer("slowDown");
-    this.controller.effectTimers.slowDown = setTimeout(() => {
-      this.controller.activeEffects.slowDown = false;
-      this.controller.pacmanTarget.classList.remove("slow-down");
-      this.removeEffectCooldown("slowDown");
-
-      // Only restore base speed if no other speed effects are active
-      if (!this.controller.activeEffects.speedBoost) {
-        this.controller.pacmanSpeed = this.controller.baseSpeedBeforeEffect;
-        this.controller.baseSpeedBeforeEffect = null;
+      // Update velocity to match restored speed if Pac-Man is moving
+      if (
+        this.controller.pacmanVelocity.x !== 0 ||
+        this.controller.pacmanVelocity.y !== 0
+      ) {
+        const speedRatio = this.controller.pacmanSpeed / currentSpeed;
+        this.controller.pacmanVelocity = {
+          x: this.controller.pacmanVelocity.x * speedRatio,
+          y: this.controller.pacmanVelocity.y * speedRatio,
+        };
       }
     }, duration);
   }
@@ -590,13 +625,28 @@ export class ItemManager {
    * Activate power mode (from power pellet)
    */
   activatePowerMode() {
+    // Clear existing timers first to prevent overlap
+    if (this.controller.powerModeTimer) {
+      clearTimeout(this.controller.powerModeTimer);
+      this.controller.powerModeTimer = null;
+    }
+    if (this.controller.powerModeEndingTimer) {
+      clearTimeout(this.controller.powerModeEndingTimer);
+      this.controller.powerModeEndingTimer = null;
+    }
+
+    // Reset power mode state before activating
     this.controller.powerMode = true;
     this.controller.powerModeEnding = false;
-    this.controller.pacmanTarget.classList.add("powered");
+    this.controller.ghostsEatenThisPowerMode = 0;
+
+    if (this.controller.pacmanTarget) {
+      this.controller.pacmanTarget.classList.add("powered");
+    }
 
     // Make ghosts frightened (not eaten ones)
     this.controller.ghosts.forEach((ghost) => {
-      if (!ghost.eaten) {
+      if (!ghost.eaten && ghost.element) {
         ghost.frightened = true;
         ghost.element.classList.add("frightened");
         // Update sprite to frightened
@@ -606,14 +656,6 @@ export class ItemManager {
         }
       }
     });
-
-    // Clear existing timers
-    if (this.controller.powerModeTimer) {
-      clearTimeout(this.controller.powerModeTimer);
-    }
-    if (this.controller.powerModeEndingTimer) {
-      clearTimeout(this.controller.powerModeEndingTimer);
-    }
 
     // Use dynamic durations based on current difficulty
     const totalDuration = this.controller.powerModeDuration || 7000;
@@ -737,10 +779,53 @@ export class ItemManager {
 
     document.body.appendChild(notification);
 
-    setTimeout(() => {
+    // Track notification timer for cleanup
+    const notificationTimer = setTimeout(() => {
       if (notification.parentNode) {
         notification.remove();
       }
     }, 1500);
+
+    // Store timer reference on notification element for cleanup
+    notification._cleanupTimer = notificationTimer;
+  }
+
+  /**
+   * Clean up all active effects, timers, and DOM elements
+   * Clears effect timers, removes cooldown bars, and cleans up notifications
+   *
+   * @returns {void}
+   */
+  cleanup() {
+    // Clear all effect timers
+    if (this.controller.effectTimers) {
+      Object.keys(this.controller.effectTimers).forEach((effectType) => {
+        this.clearEffectTimer(effectType);
+      });
+    }
+
+    // Remove all effect cooldown bars
+    if (this.controller.pacmanTarget) {
+      const cooldownBars = this.controller.pacmanTarget.querySelectorAll(
+        ".pacman-effect-cooldown"
+      );
+      cooldownBars.forEach((bar) => bar.remove());
+    }
+
+    // Remove all item notifications
+    const notifications = document.querySelectorAll(".item-notification");
+    notifications.forEach((notification) => {
+      if (notification._cleanupTimer) {
+        clearTimeout(notification._cleanupTimer);
+      }
+      notification.remove();
+    });
+
+    // Reset active effects
+    if (this.controller.activeEffects) {
+      Object.keys(this.controller.activeEffects).forEach((key) => {
+        this.controller.activeEffects[key] = false;
+      });
+    }
   }
 }

@@ -6,11 +6,36 @@
 
 export class GameLeaderboardMixin {
   /**
+   * Get menu controller reference from the same element.
+   * Falls back to Stimulus API when outlets aren't available (same element controllers).
+   * @returns {Controller|null} Menu controller instance or null if not found
+   */
+  getMenuController() {
+    if (this.hasPacmanMenuOutlet) {
+      return this.pacmanMenuOutlet;
+    }
+
+    if (this.application?.element) {
+      try {
+        return this.application.getControllerForElementAndIdentifier(
+          this.element,
+          "pacman-menu"
+        );
+      } catch {
+        // Fallback failed
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * Get player name from localforage (delegated to menu controller)
    */
   async getPlayerName() {
-    if (this.hasPacmanMenuOutlet) {
-      return await this.pacmanMenuOutlet.getPlayerName();
+    const menuController = this.getMenuController();
+    if (menuController) {
+      return await menuController.getPlayerName();
     }
     return null;
   }
@@ -19,8 +44,9 @@ export class GameLeaderboardMixin {
    * Save player name to localforage (delegated to menu controller)
    */
   async savePlayerName(name) {
-    if (this.hasPacmanMenuOutlet) {
-      await this.pacmanMenuOutlet.savePlayerName(name);
+    const menuController = this.getMenuController();
+    if (menuController) {
+      await menuController.savePlayerName(name);
     }
   }
 
@@ -28,8 +54,9 @@ export class GameLeaderboardMixin {
    * Submit score to leaderboard API (delegated to menu controller)
    */
   async submitScore(playerName, score, isWin) {
-    if (this.hasPacmanMenuOutlet) {
-      return await this.pacmanMenuOutlet.submitScore(playerName, score, isWin);
+    const menuController = this.getMenuController();
+    if (menuController) {
+      return await menuController.submitScore(playerName, score, isWin);
     }
     return { success: false, error: "Menu controller not available" };
   }
@@ -38,8 +65,9 @@ export class GameLeaderboardMixin {
    * Fetch leaderboard data from API (delegated to menu controller)
    */
   async fetchLeaderboardData() {
-    if (this.hasPacmanMenuOutlet) {
-      return await this.pacmanMenuOutlet.fetchLeaderboardData();
+    const menuController = this.getMenuController();
+    if (menuController) {
+      return await menuController.fetchLeaderboardData();
     }
     return { global: [], player: null };
   }
@@ -48,30 +76,58 @@ export class GameLeaderboardMixin {
    * Show leaderboard modal (delegated to menu controller)
    */
   async showLeaderboard() {
-    if (this.hasPacmanMenuOutlet) {
-      const data = await this.pacmanMenuOutlet.fetchLeaderboardData();
-      this.uiManager.showLeaderboardModal(data, () => {
-        // Leaderboard closed
-      });
-    }
+    const menuController = this.getMenuController();
+    if (!menuController) return;
+
+    const data = await menuController.fetchLeaderboardData();
+    await this.uiManager.showLeaderboardModal(data);
   }
 
   /**
    * Show leaderboard modal (with onClose callback)
+   * @returns {Promise<HTMLElement|null>} The created modal element or null
    */
-  showLeaderboardModal(data, onClose) {
+  async showLeaderboardModal(data, onClose) {
     if (!this.uiManager) {
-      return;
+      return null;
     }
-    this.uiManager.showLeaderboardModal(data, onClose);
+    return await this.uiManager.showLeaderboardModal(data, onClose);
   }
 
   /**
    * Show leaderboard after game ends (calls stopGame when closed)
+   * @throws {Error} If leaderboard fails to open
    */
   async showLeaderboardFromGameEnd() {
-    if (this.hasPacmanMenuOutlet) {
-      await this.pacmanMenuOutlet.showLeaderboardFromGameEnd();
+    const menuController = this.getMenuController();
+    if (menuController) {
+      try {
+        await menuController.showLeaderboardFromGameEnd();
+        return;
+      } catch (error) {
+        console.error("Failed to show leaderboard from game end:", error);
+        throw error;
+      }
+    }
+
+    // Fallback: fetch data and show modal directly
+    // This handles cases where controllers are on the same element (outlets don't work)
+    try {
+      const data = await this.fetchLeaderboardData();
+      if (!data) {
+        throw new Error("Failed to fetch leaderboard data");
+      }
+
+      const modal = await this.uiManager.showLeaderboardModal(data, () => {
+        this.stopGame();
+      });
+
+      if (!modal) {
+        throw new Error("Leaderboard modal failed to open");
+      }
+    } catch (error) {
+      console.error("Error showing leaderboard from game end:", error);
+      throw error;
     }
   }
 }
