@@ -98,6 +98,11 @@
     transition: transform var(--transition-normal) ease;
   }
 
+  // Links should show pointer cursor
+  a {
+    cursor: pointer !important;
+  }
+
   @media (hover: hover) and (pointer: fine) {
     &:hover {
       color: var(--color-primary);
@@ -132,6 +137,12 @@
   transition: all var(--transition-normal) ease;
   cursor: default;
   touch-action: manipulation;
+
+  // Links should show pointer cursor
+  &.text-decoration-none,
+  &[href] {
+    cursor: pointer !important;
+  }
 
   @media (hover: hover) and (pointer: fine) {
     &:hover {
