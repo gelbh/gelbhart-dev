@@ -1,11 +1,9 @@
 /**
  * Theme core scripts
+ * Bootstrap is imported in application.js and available via window.bootstrap
  */
 
-// Bootstrap
-import "bootstrap/dist/js/bootstrap.bundle";
-
-// Core components
 import "./components/sticky-navbar";
 import "./components/scroll-top-button";
 import "./components/tooltip";
+import "./components/popover";

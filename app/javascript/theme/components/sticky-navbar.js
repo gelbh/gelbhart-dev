@@ -14,8 +14,8 @@ export default (() => {
     navbarH = navbar.offsetHeight,
     scrollOffset = 500;
 
-  const handleScroll = throttle((e) => {
-    if (e.currentTarget.pageYOffset > scrollOffset) {
+  const handleScroll = throttle(() => {
+    if (window.pageYOffset > scrollOffset) {
       if (navbarClass.contains("position-absolute")) {
         navbar.classList.add("navbar-stuck");
       } else {
