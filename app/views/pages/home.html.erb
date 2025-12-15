@@ -115,7 +115,7 @@
                       extra_classes: 'text-body fs-sm fw-normal px-3 py-2 badge-hover' %>
           <%= render 'shared/tech_badge', 
                       text: 'Ruby on Rails', 
-                      icon: 'bxs-badge-check', 
+                      icon: 'bx-server', 
                       color: 'secondary', 
                       url: 'https://rubyonrails.org/',
                       badge_class: 'hero-badge',
@@ -194,43 +194,50 @@
                       icon: 'bxl-javascript', 
                       color: 'warning', 
                       url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript',
-                      badge_class: 'tech-badge' %>
+                      badge_class: 'tech-badge',
+                      tooltip: 'Dynamic programming language for web development' %>
           <%= render 'shared/tech_badge', 
                       text: 'Python', 
                       icon: 'bxl-python', 
                       color: 'primary', 
                       url: 'https://www.python.org/',
-                      badge_class: 'tech-badge' %>
+                      badge_class: 'tech-badge',
+                      tooltip: 'Versatile language for data science, AI, and backend development' %>
           <%= render 'shared/tech_badge', 
                       text: 'Java', 
                       icon: 'bxl-java', 
                       color: 'danger', 
                       url: 'https://www.java.com/',
-                      badge_class: 'tech-badge' %>
+                      badge_class: 'tech-badge',
+                      tooltip: 'Object-oriented programming language for enterprise applications' %>
           <%= render 'shared/tech_badge', 
                       text: 'Ruby', 
-                      icon: 'bxs-badge-check', 
+                      icon: 'bx-server', 
                       color: 'danger', 
                       url: 'https://www.ruby-lang.org/',
-                      badge_class: 'tech-badge' %>
+                      badge_class: 'tech-badge',
+                      tooltip: 'Dynamic, object-oriented programming language' %>
           <%= render 'shared/tech_badge', 
                       text: 'C', 
                       icon: 'bx-code-curly', 
                       color: 'info', 
                       url: 'https://en.cppreference.com/w/c',
-                      badge_class: 'tech-badge' %>
+                      badge_class: 'tech-badge',
+                      tooltip: 'Low-level systems programming language' %>
           <%= render 'shared/tech_badge', 
                       text: 'SQL', 
                       icon: 'bx-data', 
                       color: 'info', 
                       url: 'https://www.w3schools.com/sql/',
-                      badge_class: 'tech-badge' %>
+                      badge_class: 'tech-badge',
+                      tooltip: 'Structured Query Language for database management' %>
           <%= render 'shared/tech_badge', 
                       text: 'HTML/CSS', 
                       icon: 'bxl-html5', 
                       color: 'danger', 
                       url: 'https://developer.mozilla.org/en-US/docs/Web/HTML',
-                      badge_class: 'tech-badge' %>
+                      badge_class: 'tech-badge',
+                      tooltip: 'Markup and styling languages for web pages' %>
         </div>
       </div>
     </div>
@@ -252,7 +259,8 @@
                           icon: 'bxl-bootstrap', 
                           color: 'purple', 
                           url: 'https://getbootstrap.com/',
-                          style: 'list' %>
+                          style: 'list',
+                          tooltip: 'Frontend CSS framework for responsive web design' %>
             </ul>
             <p class="text-muted fw-semibold mb-2 fs-sm">Backend</p>
             <ul class="list-unstyled mb-0">
@@ -261,7 +269,8 @@
                           icon: 'bx-server', 
                           color: 'danger', 
                           url: 'https://rubyonrails.org/',
-                          style: 'list' %>
+                          style: 'list',
+                          tooltip: 'Full-stack web application framework' %>
             </ul>
           </div>
           <div class="col-6">
@@ -272,13 +281,15 @@
                           icon: 'bx-mobile-alt', 
                           color: 'info', 
                           url: 'https://flutter.dev/',
-                          style: 'list' %>
+                          style: 'list',
+                          tooltip: 'Cross-platform mobile app development framework' %>
               <%= render 'shared/tech_badge', 
                           text: 'SwiftUI', 
                           icon: 'bxl-apple', 
                           color: 'secondary', 
-                          url: 'https://developer.apple.com/xcode/swiftui/',
-                          style: 'list' %>
+                          url: 'https://developer.apple.com/swiftui/',
+                          style: 'list',
+                          tooltip: 'Apple\'s declarative UI framework for iOS development' %>
             </ul>
           </div>
         </div>
@@ -297,31 +308,36 @@
                       icon: 'bx-scatter-chart', 
                       color: 'primary', 
                       url: 'https://www.tensorflow.org/',
-                      style: 'list' %>
+                      style: 'list',
+                      tooltip: 'Open-source machine learning platform by Google' %>
           <%= render 'shared/tech_badge', 
                       text: 'PyTorch', 
                       icon: 'bx-brain', 
                       color: 'warning', 
                       url: 'https://pytorch.org/',
-                      style: 'list' %>
+                      style: 'list',
+                      tooltip: 'Deep learning framework with dynamic computation graphs' %>
           <%= render 'shared/tech_badge', 
                       text: 'Pandas', 
                       icon: 'bx-data', 
                       color: 'info', 
                       url: 'https://pandas.pydata.org/',
-                      style: 'list' %>
+                      style: 'list',
+                      tooltip: 'Data manipulation and analysis library for Python' %>
           <%= render 'shared/tech_badge', 
                       text: 'NumPy', 
                       icon: 'bx-bar-chart', 
                       color: 'success', 
                       url: 'https://numpy.org/',
-                      style: 'list' %>
+                      style: 'list',
+                      tooltip: 'Fundamental package for numerical computing in Python' %>
           <%= render 'shared/tech_badge', 
                       text: 'Scikit-learn', 
                       icon: 'bx-line-chart', 
                       color: 'danger', 
                       url: 'https://scikit-learn.org/',
-                      style: 'list' %>
+                      style: 'list',
+                      tooltip: 'Machine learning library for Python' %>
         </ul>
       </div>
     </div>
@@ -343,19 +359,22 @@
                           icon: 'bxl-git', 
                           color: 'danger', 
                           url: 'https://git-scm.com/',
-                          style: 'list' %>
+                          style: 'list',
+                          tooltip: 'Distributed version control system' %>
               <%= render 'shared/tech_badge', 
                           text: 'GitHub Actions', 
                           icon: 'bxl-github', 
                           color: 'secondary', 
                           url: 'https://github.com/features/actions',
-                          style: 'list' %>
+                          style: 'list',
+                          tooltip: 'CI/CD platform integrated with GitHub' %>
               <%= render 'shared/tech_badge', 
                           text: 'GitLab CI/CD', 
                           icon: 'bxl-gitlab', 
                           color: 'warning', 
                           url: 'https://docs.gitlab.com/ee/ci/',
-                          style: 'list' %>
+                          style: 'list',
+                          tooltip: 'Continuous integration and deployment platform' %>
             </ul>
           </div>
           <div class="col-6">
@@ -366,13 +385,15 @@
                           icon: 'bx-check-circle', 
                           color: 'success', 
                           url: 'https://docs.pytest.org/',
-                          style: 'list' %>
+                          style: 'list',
+                          tooltip: 'Testing framework for Python' %>
               <%= render 'shared/tech_badge', 
                           text: 'npm', 
                           icon: 'bxl-nodejs', 
                           color: 'success', 
                           url: 'https://www.npmjs.com/',
-                          style: 'list' %>
+                          style: 'list',
+                          tooltip: 'Package manager for JavaScript and Node.js' %>
             </ul>
           </div>
         </div>
@@ -393,19 +414,22 @@
                           icon: 'bx-code-block', 
                           color: 'primary', 
                           url: 'https://code.visualstudio.com/',
-                          style: 'list' %>
+                          style: 'list',
+                          tooltip: 'Popular code editor by Microsoft' %>
               <%= render 'shared/tech_badge', 
                           text: 'Xcode', 
-                          icon: 'bxl-apple', 
+                          icon: 'bx-laptop', 
                           color: 'secondary', 
                           url: 'https://developer.apple.com/xcode/',
-                          style: 'list' %>
+                          style: 'list',
+                          tooltip: 'Apple\'s integrated development environment' %>
               <%= render 'shared/tech_badge', 
                           text: 'Eclipse', 
                           icon: 'bx-code-alt', 
                           color: 'warning', 
                           url: 'https://www.eclipse.org/',
-                          style: 'list' %>
+                          style: 'list',
+                          tooltip: 'Open-source IDE for Java and other languages' %>
             </ul>
           </div>
           <div class="col-6">
@@ -416,13 +440,15 @@
                           icon: 'bx-cloud', 
                           color: 'primary', 
                           url: 'https://vercel.com/',
-                          style: 'list' %>
+                          style: 'list',
+                          tooltip: 'Platform for frontend deployment and hosting' %>
               <%= render 'shared/tech_badge', 
                           text: 'Heroku', 
                           icon: 'bx-cloud', 
                           color: 'purple', 
                           url: 'https://www.heroku.com/',
-                          style: 'list' %>
+                          style: 'list',
+                          tooltip: 'Cloud platform for deploying applications' %>
             </ul>
           </div>
         </div>

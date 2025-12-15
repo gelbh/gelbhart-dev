@@ -174,6 +174,12 @@
   cursor: default;
   touch-action: manipulation;
 
+  // Links should show pointer cursor
+  &.text-decoration-none,
+  &[href] {
+    cursor: pointer !important;
+  }
+
   @media (hover: hover) and (pointer: fine) {
     &:hover {
       transform: translateY(-2px) scale(1.05);
