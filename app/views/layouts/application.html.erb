@@ -13,50 +13,59 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
   <head>
-    <%# Google Analytics - Deferred Loading %>
+    <%# Google Analytics - Optimized deferred loading %>
     <script>
-      // Initialize dataLayer and gtag function immediately for event queuing
+      // Initialize dataLayer and gtag immediately for event queuing
       window.dataLayer = window.dataLayer || [];
-      function gtag() {
+      const gtag = function() {
         dataLayer.push(arguments);
-      }
+      };
       gtag('js', new Date());
       gtag('config', 'G-VZ8VBVE21B');
 
-      // Defer loading the actual GTM script until after page becomes interactive
-      // This reduces main thread blocking while maintaining tracking functionality
-      (function() {
-        function injectGTMScript() {
-          // Prevent duplicate script injection
-          if (document.querySelector('script[src*="googletagmanager.com/gtag/js"]')) {
+      // Defer GTM script loading until user interaction or extended idle time
+      // Reduces main thread blocking while maintaining tracking
+      (() => {
+        let gaLoaded = false;
+
+        const injectGTMScript = () => {
+          if (gaLoaded || document.querySelector('script[src*="googletagmanager.com/gtag/js"]')) {
             return;
           }
 
+          gaLoaded = true;
           const script = document.createElement('script');
           script.async = true;
           script.src = 'https://www.googletagmanager.com/gtag/js?id=G-VZ8VBVE21B';
           document.head.appendChild(script);
-        }
+        };
 
-        function loadGTMWhenIdle() {
+        // Load on first user interaction
+        const interactionEvents = ['click', 'scroll', 'keydown', 'touchstart', 'mousemove'];
+        const loadOnInteraction = () => {
+          interactionEvents.forEach((event) => {
+            document.addEventListener(event, injectGTMScript, { once: true, passive: true });
+          });
+        };
+
+        // Load when idle (5s timeout for better performance)
+        const loadGTMWhenIdle = () => {
           if ('requestIdleCallback' in window) {
-            requestIdleCallback(injectGTMScript, { timeout: 2000 });
+            requestIdleCallback(injectGTMScript, { timeout: 5000 });
           } else {
-            // Fallback for browsers without requestIdleCallback
-            const delay = document.readyState === 'complete' ? 100 : 500;
+            const delay = document.readyState === 'complete' ? 3000 : 5000;
             setTimeout(injectGTMScript, delay);
           }
-        }
+        };
 
-        // Load GTM script based on page load state
+        loadOnInteraction();
+
+        // Fallback: load when idle if user doesn't interact
         if (document.readyState === 'complete') {
-          // Page already fully loaded
           loadGTMWhenIdle();
         } else if (document.readyState === 'interactive') {
-          // DOM ready
           loadGTMWhenIdle();
         } else {
-          // Wait for DOMContentLoaded
           document.addEventListener('DOMContentLoaded', loadGTMWhenIdle);
         }
       })();
@@ -147,7 +156,7 @@
     </noscript>
 
     <%# Icon Fonts %>
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <%# Boxicons subset is now included in application.css (only used icons) %>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css">
 
     <%# Structured Data (JSON-LD) for SEO and AI-driven search optimization %>
@@ -168,10 +177,26 @@
       <%= yield(:structured_data) %>
     <% end %>
 
-    <%# Application Stylesheets and Scripts %>
-    <%# Preload CSS with correct as attribute to avoid browser warnings %>
-    <%= tag.link rel: "preload", href: stylesheet_path("application"), as: "style", media: "all" %>
-    <%= stylesheet_link_tag "application", media: "all" %>
+    <%# Critical CSS - Inline above-the-fold styles for faster FCP %>
+    <%# Minified for performance: includes root vars, body, page-wrapper, header, container, and responsive breakpoints %>
+    <style>
+      :root{--si-primary:#6366f1;--si-font-sans-serif:"Manrope",sans-serif}body{font-family:var(--si-font-sans-serif);margin:0;padding:0;min-height:100vh}.page-wrapper{display:flex;flex-direction:column;min-height:100vh}.header{position:fixed;top:0;left:0;width:100%;z-index:1030;background-color:rgba(11,15,25,0.8);backdrop-filter:blur(8px);transition:background-color 0.2s ease-in-out}.container{width:100%;padding-right:1rem;padding-left:1rem;margin-right:auto;margin-left:auto}.header-logo{width:47px;height:47px;transition:transform 0.3s ease}.text-center{text-align:center}@media (min-width:992px){.container{max-width:960px}.text-lg-start{text-align:left}}
+    </style>
+
+    <%# Application Stylesheets - Async loading to prevent render blocking %>
+    <%= tag.link rel: "preload", href: stylesheet_path("application"), as: "style", onload: "this.onload=null;this.rel='stylesheet'", media: "all" %>
+    <noscript><%= stylesheet_link_tag "application", media: "all" %></noscript>
+    <script>
+      // Polyfill for async CSS loading (browsers without onload support on link tags)
+      (() => {
+        const links = document.querySelectorAll('link[rel="preload"][as="style"]');
+        links.forEach((link) => {
+          if (link.onload === null || typeof link.onload !== 'function') {
+            link.rel = 'stylesheet';
+          }
+        });
+      })();
+    </script>
 
     <%# Expose asset_path helper for JavaScript %>
     <script>
