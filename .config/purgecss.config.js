@@ -48,7 +48,8 @@ module.exports = {
     // Bootstrap utility classes that are toggled dynamically
     "d-none", // Toggled by theme_controller.js, lazy_iframe_controller.js
     // Icon classes (dynamically inserted)
-    /^bx-/, // Boxicons
+    // Note: Boxicons subset (~6KB) is included in application.css with only used icons
+    // No need to safelist all bx- classes - only safelist if icons are dynamically added via JS
     /^bi-/, // Bootstrap Icons
     /^fi-/, // Flag icons
     // Custom project classes that are dynamically generated
