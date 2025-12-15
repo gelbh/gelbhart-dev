@@ -5,14 +5,14 @@
 
 import throttle from "lodash.throttle";
 
-export default (() => {
-  let navbar = document.querySelector(".navbar-sticky");
+function initializeStickyNavbar() {
+  const navbar = document.querySelector(".navbar-sticky");
 
   if (navbar == null) return;
 
-  let navbarClass = navbar.classList,
-    navbarH = navbar.offsetHeight,
-    scrollOffset = 500;
+  const navbarClass = navbar.classList;
+  const navbarH = navbar.offsetHeight;
+  const scrollOffset = 500;
 
   const handleScroll = throttle(() => {
     if (window.pageYOffset > scrollOffset) {
@@ -33,4 +33,39 @@ export default (() => {
   }, 100);
 
   window.addEventListener("scroll", handleScroll);
-})();
+
+  // Return cleanup function
+  return () => {
+    window.removeEventListener("scroll", handleScroll);
+    // Reset body padding if it was set
+    if (document.body.style.paddingTop) {
+      document.body.style.paddingTop = "";
+    }
+    // Remove navbar-stuck class if present
+    navbar.classList.remove("navbar-stuck");
+  };
+}
+
+// Initialize on page load
+let cleanup = null;
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => {
+    cleanup = initializeStickyNavbar();
+  });
+} else {
+  cleanup = initializeStickyNavbar();
+}
+
+// Re-initialize on Turbo navigation
+document.addEventListener("turbo:load", () => {
+  if (cleanup) cleanup();
+  cleanup = initializeStickyNavbar();
+});
+
+// Cleanup before Turbo caches the page
+document.addEventListener("turbo:before-cache", () => {
+  if (cleanup) cleanup();
+  cleanup = null;
+});
+
+export default initializeStickyNavbar;
