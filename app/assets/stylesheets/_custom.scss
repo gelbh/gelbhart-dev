@@ -23,6 +23,12 @@
 // Header styles
 @use "components/layout/header" as *;
 
+// ---- UI Components ----
+// Custom tooltip styles matching theme colors
+@use "components/ui/tooltips" as *;
+// Tech badge info button and popover styles
+@use "components/ui/tech-info" as *;
+
 // ---- Page Sections ----
 // Hero section with animated backgrounds and gradient text
 @use "components/sections/hero" as *;

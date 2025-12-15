@@ -691,21 +691,22 @@ COMMENT ON FUNCTION extensions.set_graphql_placeholder() IS 'Reintroduces placeh
 
 CREATE FUNCTION pgbouncer.get_auth(p_usename text) RETURNS TABLE(username text, password text)
     LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO ''
     AS $_$
-begin
-    raise debug 'PgBouncer auth request: %', p_usename;
+  BEGIN
+      RAISE DEBUG 'PgBouncer auth request: %', p_usename;
 
-    return query
-    select 
-        rolname::text, 
-        case when rolvaliduntil < now() 
-            then null 
-            else rolpassword::text 
-        end 
-    from pg_authid 
-    where rolname=$1 and rolcanlogin;
-end;
-$_$;
+      RETURN QUERY
+      SELECT
+          rolname::text,
+          CASE WHEN rolvaliduntil < now()
+              THEN null
+              ELSE rolpassword::text
+          END
+      FROM pg_authid
+      WHERE rolname=$1 and rolcanlogin;
+  END;
+  $_$;
 
 
 --
@@ -2553,6 +2554,25 @@ CREATE TABLE auth.oauth_authorizations (
 
 
 --
+-- Name: oauth_client_states; Type: TABLE; Schema: auth; Owner: -
+--
+
+CREATE TABLE auth.oauth_client_states (
+    id uuid NOT NULL,
+    provider_type text NOT NULL,
+    code_verifier text,
+    created_at timestamp with time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE oauth_client_states; Type: COMMENT; Schema: auth; Owner: -
+--
+
+COMMENT ON TABLE auth.oauth_client_states IS 'Stores OAuth states for third-party provider authentication flows where Supabase acts as the OAuth client.';
+
+
+--
 -- Name: oauth_clients; Type: TABLE; Schema: auth; Owner: -
 --
 
@@ -3318,6 +3338,14 @@ ALTER TABLE ONLY auth.oauth_authorizations
 
 
 --
+-- Name: oauth_client_states oauth_client_states_pkey; Type: CONSTRAINT; Schema: auth; Owner: -
+--
+
+ALTER TABLE ONLY auth.oauth_client_states
+    ADD CONSTRAINT oauth_client_states_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: oauth_clients oauth_clients_pkey; Type: CONSTRAINT; Schema: auth; Owner: -
 --
 
@@ -3641,6 +3669,13 @@ CREATE INDEX identities_user_id_idx ON auth.identities USING btree (user_id);
 --
 
 CREATE INDEX idx_auth_code ON auth.flow_state USING btree (auth_code);
+
+
+--
+-- Name: idx_oauth_client_states_created_at; Type: INDEX; Schema: auth; Owner: -
+--
+
+CREATE INDEX idx_oauth_client_states_created_at ON auth.oauth_client_states USING btree (created_at);
 
 
 --
@@ -4479,7 +4514,7 @@ ALTER TABLE storage.vector_indexes ENABLE ROW LEVEL SECURITY;
 -- Name: supabase_realtime; Type: PUBLICATION; Schema: -; Owner: -
 --
 
-CREATE PUBLICATION supabase_realtime WITH (publish = 'insert, update, delete, truncate');
+-- CREATE PUBLICATION supabase_realtime WITH (publish = 'insert, update, delete, truncate'); -- Supabase-specific, commented for local compatibility (requires wal_level = logical)
 
 
 --
