@@ -1,0 +1,56 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Script to update README badges with current Ruby and Rails versions
+
+require 'fileutils'
+
+def read_ruby_version
+  File.read('.ruby-version').strip
+rescue Errno::ENOENT
+  nil
+end
+
+def read_rails_version
+  return nil unless File.exist?('Gemfile.lock')
+
+  gemfile_lock = File.read('Gemfile.lock')
+  match = gemfile_lock.match(/^\s+rails \((.+?)\)/)
+  match ? match[1] : nil
+end
+
+def update_readme(ruby_version, rails_version)
+  readme_path = 'README.md'
+  return unless File.exist?(readme_path)
+
+  readme = File.read(readme_path)
+
+  # Update Ruby version badge
+  if ruby_version
+    readme.gsub!(
+      /(badge\/Ruby-)[\d.]+(-6366f1)/,
+      "\\1#{ruby_version}\\2"
+    )
+  end
+
+  # Update Rails version badge
+  if rails_version
+    readme.gsub!(
+      /(badge\/Rails-)[\d.]+(-6366f1)/,
+      "\\1#{rails_version}\\2"
+    )
+  end
+
+  File.write(readme_path, readme)
+  puts "✓ Updated README badges: Ruby #{ruby_version}, Rails #{rails_version}"
+end
+
+ruby_version = read_ruby_version
+rails_version = read_rails_version
+
+if ruby_version.nil? && rails_version.nil?
+  puts "⚠ Could not determine Ruby or Rails versions"
+  exit 1
+end
+
+update_readme(ruby_version, rails_version)
