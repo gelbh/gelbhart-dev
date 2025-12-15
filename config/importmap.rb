@@ -17,12 +17,13 @@ pin "i18n-iso-countries", to: "https://ga.jspm.io/npm:i18n-iso-countries@7.14.0/
 pin "lodash.debounce", to: "https://ga.jspm.io/npm:lodash.debounce@4.0.8/index.js"
 pin "diacritics", to: "https://ga.jspm.io/npm:diacritics@1.3.0/index.js"
 pin "lodash.throttle", to: "https://ga.jspm.io/npm:lodash.throttle@4.1.1/index.js"
-pin "date-fns/formatDistanceToNow", to: "https://ga.jspm.io/npm:date-fns@4.1.0/formatDistanceToNow.js"
-pin "date-fns/format", to: "https://ga.jspm.io/npm:date-fns@4.1.0/format.js"
-pin "date-fns/differenceInDays", to: "https://ga.jspm.io/npm:date-fns@4.1.0/differenceInDays.js"
+
+# date-fns - using esm.sh for automatic minification and tree-shaking
+pin "date-fns/formatDistanceToNow", to: "https://esm.sh/date-fns@4.1.0/formatDistanceToNow"
+pin "date-fns/format", to: "https://esm.sh/date-fns@4.1.0/format"
+pin "date-fns/differenceInDays", to: "https://esm.sh/date-fns@4.1.0/differenceInDays"
 
 # AJV for JSON schema validation (using CDN)
-# Note: CodeMirror is loaded via script tags in the view, not through importmap
 pin "ajv", to: "https://cdnjs.cloudflare.com/ajax/libs/ajv/8.17.1/ajv7.min.js"
 
 # Controllers

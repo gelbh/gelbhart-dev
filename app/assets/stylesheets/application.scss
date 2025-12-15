@@ -26,5 +26,8 @@
 @import "theme/utilities";
 @import "theme/components";
 
+// Vendor styles - optimized boxicons subset (only 73 used icons, ~6KB vs 12KB full)
+@import "vendor/boxicons-subset";
+
 // Load custom styles - uses @use internally for component files
 @import "custom";

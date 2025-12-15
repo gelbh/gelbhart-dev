@@ -17,6 +17,8 @@ import * as bootstrap from "bootstrap";
 
 window.bootstrap = bootstrap;
 
+import "theme/theme";
+
 // Constants
 const NAVIGATION_FALLBACK_DELAY = 50;
 const MOBILE_MENU_HASH = "#mobileMenu";
