@@ -6,6 +6,8 @@
   badge_class = local_assigns.fetch(:badge_class, 'project-badge')
   extra_classes = local_assigns[:extra_classes] || ''
   description = local_assigns[:tooltip] || local_assigns[:description]
+  color = local_assigns[:color]
+  text = local_assigns[:text]
 %>
 
 <% if style == 'list' %>
