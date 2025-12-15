@@ -1,0 +1,470 @@
+#!/usr/bin/env bash
+#
+# bin/pagespeed - Interactive PageSpeed Insights API helper
+# Supports analyzing URLs, bulk analysis, and checking job status
+#
+
+set -euo pipefail
+
+# Colors for output
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly YELLOW='\033[1;33m'
+readonly BLUE='\033[0;34m'
+readonly NC='\033[0m' # No Color
+
+# Default values
+BASE_URL="${BASE_URL:-http://localhost:3000}"
+URL=""
+STRATEGY="desktop"
+JOB_ID=""
+MODE="analyze"  # analyze, status, bulk
+OUTPUT_FORMAT="json"  # json, scores, metrics, opportunities, diagnostics, summary
+TOKEN=""
+INTERACTIVE=false
+
+# Functions
+
+error_exit() {
+  echo -e "${RED}Error:${NC} $1" >&2
+  exit 1
+}
+
+show_help() {
+  cat << EOF
+${BLUE}PageSpeed Insights API Helper${NC}
+
+${GREEN}USAGE:${NC}
+  bin/pagespeed [OPTIONS] [URL]
+
+${GREEN}MODES:${NC}
+  analyze (default)  Analyze a single URL or all pages
+  status             Check status of a bulk analysis job
+
+${GREEN}OPTIONS:${NC}
+  -h, --help                    Show this help message
+  -i, --interactive             Interactive mode (prompts for inputs)
+  
+  ${YELLOW}Connection:${NC}
+  -b, --base-url URL           Base URL of the API (default: http://localhost:3000)
+  -t, --token TOKEN            API token (auto-detected from Rails credentials if not provided)
+  
+  ${YELLOW}Analysis:${NC}
+  -u, --url URL                URL to analyze (required for single analysis)
+  -s, --strategy STRATEGY      Analysis strategy: desktop or mobile (default: desktop)
+  --bulk                       Analyze all pages (bulk mode, no URL needed)
+  
+  ${YELLOW}Status:${NC}
+  -j, --job-id JOB_ID          Job ID to check status for (required for status mode)
+  
+  ${YELLOW}Output:${NC}
+  -f, --format FORMAT          Output format: json, scores, metrics, opportunities, diagnostics, summary (default: json)
+  
+${GREEN}EXAMPLES:${NC}
+  # Analyze a URL (desktop)
+  bin/pagespeed https://gelbhart.dev
+  
+  # Analyze a URL (mobile)
+  bin/pagespeed -s mobile https://gelbhart.dev
+  
+  # Interactive mode
+  bin/pagespeed -i
+  
+  # Bulk analysis (all pages)
+  bin/pagespeed --bulk
+  
+  # Check job status
+  bin/pagespeed --status -j abc123-def456-ghi789
+  
+  # Get just scores
+  bin/pagespeed -f scores https://gelbhart.dev
+  
+  # Use production server
+  bin/pagespeed -b https://gelbhart.dev -u https://gelbhart.dev/projects/hevy-tracker
+
+EOF
+}
+
+get_token() {
+  if [[ -n "$TOKEN" ]]; then
+    echo "$TOKEN"
+    return
+  fi
+  
+  # Try to get from Rails credentials
+  local token
+  token=$(rails runner "puts Rails.application.credentials.dig(:pagespeed, :api_token)" 2>/dev/null || echo "")
+  
+  if [[ -z "$token" ]]; then
+    if [[ "$INTERACTIVE" == true ]]; then
+      read -p "Enter PageSpeed API token (or press Enter to skip if not configured): " token
+    else
+      # In non-interactive mode, if token is required, we'll let the API handle it
+      token=""
+    fi
+  fi
+  
+  echo "$token"
+}
+
+check_jq() {
+  if ! command -v jq >/dev/null 2>&1; then
+    error_exit "jq is required for formatted output. Install it with: sudo apt-get install jq"
+  fi
+}
+
+interactive_mode() {
+  echo -e "${BLUE}=== PageSpeed Insights - Interactive Mode ===${NC}\n"
+  
+  # Select mode
+  echo "Select mode:"
+  echo "  1) Analyze URL"
+  echo "  2) Bulk analysis (all pages)"
+  echo "  3) Check job status"
+  read -p "Choice [1]: " mode_choice
+  mode_choice="${mode_choice:-1}"
+  
+  case "$mode_choice" in
+    1)
+      MODE="analyze"
+      read -p "Enter URL to analyze [https://gelbhart.dev]: " URL
+      URL="${URL:-https://gelbhart.dev}"
+      
+      echo ""
+      echo "Select strategy:"
+      echo "  1) Desktop (default)"
+      echo "  2) Mobile"
+      read -p "Choice [1]: " strategy_choice
+      strategy_choice="${strategy_choice:-1}"
+      if [[ "$strategy_choice" == "2" ]]; then
+        STRATEGY="mobile"
+      fi
+      ;;
+    2)
+      MODE="bulk"
+      echo ""
+      echo "Select strategy:"
+      echo "  1) Desktop (default)"
+      echo "  2) Mobile"
+      read -p "Choice [1]: " strategy_choice
+      strategy_choice="${strategy_choice:-1}"
+      if [[ "$strategy_choice" == "2" ]]; then
+        STRATEGY="mobile"
+      fi
+      ;;
+    3)
+      MODE="status"
+      read -p "Enter job ID: " JOB_ID
+      if [[ -z "$JOB_ID" ]]; then
+        error_exit "Job ID is required for status mode"
+      fi
+      ;;
+    *)
+      error_exit "Invalid choice"
+      ;;
+  esac
+  
+  echo ""
+  echo "Select output format:"
+  echo "  1) JSON (full response)"
+  echo "  2) Scores only"
+  echo "  3) Metrics only"
+  echo "  4) Opportunities only"
+  echo "  5) Diagnostics only"
+  echo "  6) Summary"
+  read -p "Choice [1]: " format_choice
+  format_choice="${format_choice:-1}"
+  
+  case "$format_choice" in
+    2) OUTPUT_FORMAT="scores" ;;
+    3) OUTPUT_FORMAT="metrics" ;;
+    4) OUTPUT_FORMAT="opportunities" ;;
+    5) OUTPUT_FORMAT="diagnostics" ;;
+    6) OUTPUT_FORMAT="summary" ;;
+    *) OUTPUT_FORMAT="json" ;;
+  esac
+}
+
+parse_arguments() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -h|--help)
+        show_help
+        exit 0
+        ;;
+      -i|--interactive)
+        INTERACTIVE=true
+        shift
+        ;;
+      -b|--base-url)
+        BASE_URL="$2"
+        shift 2
+        ;;
+      --base-url=*)
+        BASE_URL="${1#*=}"
+        shift
+        ;;
+      -t|--token)
+        TOKEN="$2"
+        shift 2
+        ;;
+      --token=*)
+        TOKEN="${1#*=}"
+        shift
+        ;;
+      -u|--url)
+        URL="$2"
+        shift 2
+        ;;
+      --url=*)
+        URL="${1#*=}"
+        shift
+        ;;
+      -s|--strategy)
+        STRATEGY="$2"
+        shift 2
+        ;;
+      --strategy=*)
+        STRATEGY="${1#*=}"
+        shift
+        ;;
+      --bulk)
+        MODE="bulk"
+        shift
+        ;;
+      --status)
+        MODE="status"
+        shift
+        ;;
+      -j|--job-id)
+        JOB_ID="$2"
+        shift 2
+        ;;
+      --job-id=*)
+        JOB_ID="${1#*=}"
+        shift
+        ;;
+      -f|--format)
+        OUTPUT_FORMAT="$2"
+        shift 2
+        ;;
+      --format=*)
+        OUTPUT_FORMAT="${1#*=}"
+        shift
+        ;;
+      http://*|https://*)
+        # URL as positional argument
+        if [[ -z "$URL" ]]; then
+          URL="$1"
+        fi
+        shift
+        ;;
+      *)
+        error_exit "Unknown option: $1. Use --help for usage information."
+        ;;
+    esac
+  done
+}
+
+validate_strategy() {
+  if [[ "$STRATEGY" != "desktop" && "$STRATEGY" != "mobile" ]]; then
+    error_exit "Strategy must be 'desktop' or 'mobile', got: $STRATEGY"
+  fi
+}
+
+validate_output_format() {
+  case "$OUTPUT_FORMAT" in
+    json|scores|metrics|opportunities|diagnostics|summary)
+      ;;
+    *)
+      error_exit "Invalid output format: $OUTPUT_FORMAT. Must be one of: json, scores, metrics, opportunities, diagnostics, summary"
+      ;;
+  esac
+}
+
+format_output() {
+  local response="$1"
+  
+  # Check for errors first (if jq is available)
+  if command -v jq >/dev/null 2>&1; then
+    if echo "$response" | jq -e '.error' >/dev/null 2>&1; then
+      echo "$response" | jq -r '.error'
+      return 1
+    fi
+  fi
+  
+  case "$OUTPUT_FORMAT" in
+    json)
+      if command -v jq >/dev/null 2>&1; then
+        echo "$response" | jq '.'
+      else
+        echo "$response"
+      fi
+      ;;
+    scores)
+      echo "$response" | jq '{
+        url: .url,
+        strategy: .strategy,
+        scores: .scores
+      }'
+      ;;
+    metrics)
+      echo "$response" | jq '{
+        url: .url,
+        strategy: .strategy,
+        metrics: .metrics
+      }'
+      ;;
+    opportunities)
+      echo "$response" | jq '{
+        url: .url,
+        strategy: .strategy,
+        opportunities: .opportunities
+      }'
+      ;;
+    diagnostics)
+      echo "$response" | jq '{
+        url: .url,
+        strategy: .strategy,
+        diagnostics: .diagnostics
+      }'
+      ;;
+    summary)
+      echo "$response" | jq '{
+        url: .url,
+        strategy: .strategy,
+        scores: .scores,
+        key_metrics: {
+          lcp: .metrics.largest_contentful_paint.display_value,
+          fcp: .metrics.first_contentful_paint.display_value,
+          cls: .metrics.cumulative_layout_shift.display_value,
+          tbt: .metrics.total_blocking_time.display_value,
+          tti: .metrics.time_to_interactive.display_value
+        },
+        top_opportunities: (.opportunities[:3] | map({title: .title, score: .score, savings: .display_value}))
+      }'
+      ;;
+  esac
+}
+
+analyze_url() {
+  local url="$1"
+  local strategy="$2"
+  local token="$3"
+  
+  local url_param=""
+  if [[ -n "$url" ]]; then
+    url_param="url=${url}&"
+  fi
+  
+  local token_param=""
+  if [[ -n "$token" ]]; then
+    token_param="token=${token}"
+  fi
+  
+  local api_url="${BASE_URL}/api/pagespeed/analyze?${url_param}strategy=${strategy}"
+  if [[ -n "$token_param" ]]; then
+    api_url="${api_url}&${token_param}"
+  fi
+  
+  curl -s "$api_url"
+}
+
+check_status() {
+  local job_id="$1"
+  local token="$2"
+  
+  local token_param=""
+  if [[ -n "$token" ]]; then
+    token_param="token=${token}"
+  fi
+  
+  local api_url="${BASE_URL}/api/pagespeed/status?job_id=${job_id}"
+  if [[ -n "$token_param" ]]; then
+    api_url="${api_url}&${token_param}"
+  fi
+  
+  curl -s "$api_url"
+}
+
+# Main execution
+
+# If interactive mode or no arguments, run interactive mode
+if [[ $# -eq 0 ]]; then
+  INTERACTIVE=true
+fi
+
+# Parse arguments
+parse_arguments "$@"
+
+# Run interactive mode if requested
+if [[ "$INTERACTIVE" == true ]]; then
+  interactive_mode
+fi
+
+# Validate inputs
+validate_strategy
+validate_output_format
+
+# Get token
+TOKEN=$(get_token)
+
+# Check for jq (needed for non-JSON formatted output)
+if [[ "$OUTPUT_FORMAT" != "json" ]]; then
+  check_jq
+fi
+
+# Execute based on mode
+case "$MODE" in
+  analyze)
+    if [[ -z "$URL" && "$INTERACTIVE" != true ]]; then
+      error_exit "URL is required for analyze mode. Use --url or --bulk for bulk analysis."
+    fi
+    
+    echo -e "${BLUE}Analyzing${NC} ${URL:-all pages} (${STRATEGY})..." >&2
+    response=$(analyze_url "$URL" "$STRATEGY" "$TOKEN")
+    
+    # Handle bulk analysis response (contains job_id)
+    if echo "$response" | jq -e '.job_id' >/dev/null 2>&1; then
+      echo -e "${GREEN}Bulk analysis started!${NC}" >&2
+      echo "$response" | jq '.'
+      job_id=$(echo "$response" | jq -r '.job_id')
+      echo -e "\n${YELLOW}Check status with:${NC} bin/pagespeed --status -j $job_id" >&2
+    else
+      format_output "$response"
+    fi
+    ;;
+    
+  bulk)
+    echo -e "${BLUE}Starting bulk analysis${NC} (${STRATEGY})..." >&2
+    response=$(analyze_url "" "$STRATEGY" "$TOKEN")
+    
+    if echo "$response" | jq -e '.job_id' >/dev/null 2>&1; then
+      echo -e "${GREEN}Bulk analysis started!${NC}" >&2
+      echo "$response" | jq '.'
+      job_id=$(echo "$response" | jq -r '.job_id')
+      echo -e "\n${YELLOW}Check status with:${NC} bin/pagespeed --status -j $job_id" >&2
+    else
+      format_output "$response"
+    fi
+    ;;
+    
+  status)
+    if [[ -z "$JOB_ID" ]]; then
+      error_exit "Job ID is required for status mode. Use -j or --job-id"
+    fi
+    
+    echo -e "${BLUE}Checking job status${NC}: $JOB_ID" >&2
+    response=$(check_status "$JOB_ID" "$TOKEN")
+    
+    if [[ "$OUTPUT_FORMAT" == "json" ]]; then
+      echo "$response" | jq '.'
+    else
+      format_output "$response"
+    fi
+    ;;
+    
+  *)
+    error_exit "Unknown mode: $MODE"
+    ;;
+esac
