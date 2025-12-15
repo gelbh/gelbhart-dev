@@ -3,7 +3,7 @@
  * Bootstrap is imported in application.js and available via window.bootstrap
  */
 
-import "./components/sticky-navbar";
-import "./components/scroll-top-button";
-import "./components/tooltip";
-import "./components/popover";
+import "theme/components/sticky-navbar";
+import "theme/components/scroll-top-button";
+import "theme/components/tooltip";
+import "theme/components/popover";
