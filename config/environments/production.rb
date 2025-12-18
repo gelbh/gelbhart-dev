@@ -29,7 +29,10 @@ Rails.application.configure do
   config.active_support.report_deprecations = false
 
   # Mailer
-  config.action_mailer.default_url_options = { host: "example.com" }
+  config.action_mailer.default_url_options = {
+    host: "gelbhart.dev",
+    protocol: "https"
+  }
 
   # Internationalization
   config.i18n.fallbacks = true
