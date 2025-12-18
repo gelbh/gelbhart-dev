@@ -3,7 +3,7 @@
   default_meta_description = 'Personal portfolio and development projects by Tomer Gelbhart. Full-stack developer specializing in Ruby on Rails and modern web applications.'
   page_title_value = content_for?(:title) ? yield(:title) : page_title("")
   page_meta_description = content_for?(:meta_description) ? yield(:meta_description) : default_meta_description
-  page_url = request.original_url
+  page_url = canonical_url
   social_image = social_image_url
   social_image_dims = social_image_dimensions
   og_type_value = og_type

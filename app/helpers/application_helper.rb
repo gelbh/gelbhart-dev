@@ -1,7 +1,19 @@
+# frozen_string_literal: true
+
 module ApplicationHelper
+  CANONICAL_BASE_URL = "https://gelbhart.dev".freeze
+
   def page_title(title)
     base_title = "gelbhart.dev"
     title.empty? ? base_title : "#{title} | #{base_title}"
+  end
+
+  # Returns the canonical URL for the current request.
+  # Always uses the primary domain (https://gelbhart.dev) and strips query
+  # parameters and fragments so search engines see a single, stable URL.
+  def canonical_url
+    path = request&.path.presence || "/"
+    "#{CANONICAL_BASE_URL}#{path}"
   end
 
   def meta_description(description)
@@ -38,7 +50,7 @@ module ApplicationHelper
       "@context" => "https://schema.org",
       "@type" => "Person",
       "name" => "Tomer Gelbhart",
-      "url" => "https://gelbhart.dev",
+      "url" => CANONICAL_BASE_URL,
       "jobTitle" => [ "Full-Stack Developer", "MSc Computer Science Student" ],
       "alumniOf" => {
         "@type" => "EducationalOrganization",
@@ -67,7 +79,7 @@ module ApplicationHelper
       "@context" => "https://schema.org",
       "@type" => "WebSite",
       "name" => "gelbhart.dev",
-      "url" => "https://gelbhart.dev",
+      "url" => CANONICAL_BASE_URL,
       "description" => "Personal portfolio and development projects by Tomer Gelbhart. Full-stack developer specializing in Ruby on Rails and modern web applications.",
       "author" => {
         "@type" => "Person",
@@ -77,7 +89,7 @@ module ApplicationHelper
         "@type" => "SearchAction",
         "target" => {
           "@type" => "EntryPoint",
-          "urlTemplate" => "https://gelbhart.dev/?q={search_term_string}"
+          "urlTemplate" => "#{CANONICAL_BASE_URL}/?q={search_term_string}"
         },
         "query-input" => "required name=search_term_string"
       }
@@ -89,7 +101,7 @@ module ApplicationHelper
       "@context" => "https://schema.org",
       "@type" => "Organization",
       "name" => "gelbhart.dev",
-      "url" => "https://gelbhart.dev",
+      "url" => CANONICAL_BASE_URL,
       "logo" => asset_url("logos/source/logo_social.svg"),
       "description" => "Personal portfolio and development projects by Tomer Gelbhart",
       "founder" => {
@@ -113,7 +125,7 @@ module ApplicationHelper
         uri = URI.parse(url.to_s)
         # Reconstruct URL without query params, fragments, and port (use standard ports)
         scheme = uri.scheme || "https"
-        host = uri.host || "gelbhart.dev"
+        host = uri.host || URI.parse(CANONICAL_BASE_URL).host
         path = uri.path.presence || "/"
 
         # Remove trailing slash except for root
@@ -126,7 +138,7 @@ module ApplicationHelper
         # Fallback: if URL parsing fails, try basic normalization
         cleaned = url.to_s.strip.gsub(/\?.*$/, "").gsub(/#.*$/, "")
         # Ensure it's still a valid absolute URL
-        cleaned.start_with?("http://", "https://") ? cleaned : "https://gelbhart.dev#{cleaned.start_with?("/") ? cleaned : "/#{cleaned}"}"
+        cleaned.start_with?("http://", "https://") ? cleaned : "#{CANONICAL_BASE_URL}#{cleaned.start_with?("/") ? cleaned : "/#{cleaned}"}"
       end
     else
       # Relative URL - prepend domain
@@ -135,7 +147,7 @@ module ApplicationHelper
       path = path.split("?").first.split("#").first
       # Remove trailing slash except for root
       path = path.chomp("/") unless path == "/"
-      "https://gelbhart.dev#{path}"
+      "#{CANONICAL_BASE_URL}#{path}"
     end
   end
 
@@ -187,7 +199,7 @@ module ApplicationHelper
       "author" => {
         "@type" => "Person",
         "name" => "Tomer Gelbhart",
-        "url" => "https://gelbhart.dev"
+        "url" => CANONICAL_BASE_URL
       }
     }
   end
@@ -197,13 +209,13 @@ module ApplicationHelper
       "@context" => "https://schema.org",
       "@type" => "ContactPage",
       "name" => "Contact - gelbhart.dev",
-      "url" => "https://gelbhart.dev/contact",
+      "url" => "#{CANONICAL_BASE_URL}/contact",
       "description" => "Get in touch with Tomer Gelbhart for internship opportunities, web development projects, or collaboration.",
       "mainEntity" => {
         "@type" => "Person",
         "name" => "Tomer Gelbhart",
         "email" => "tomer@gelbhart.dev",
-        "url" => "https://gelbhart.dev"
+        "url" => CANONICAL_BASE_URL
       }
     }
   end
@@ -272,7 +284,7 @@ module ApplicationHelper
       "@context" => "https://schema.org",
       "@type" => "WebPage",
       "name" => name,
-      "url" => (url.present? && url.start_with?("http")) ? url : "https://gelbhart.dev#{url}"
+      "url" => (url.present? && url.start_with?("http")) ? url : "#{CANONICAL_BASE_URL}#{url}"
     }
 
     data["description"] = description if description.present?
@@ -289,7 +301,7 @@ module ApplicationHelper
       data["author"] = {
         "@type" => "Person",
         "name" => "Tomer Gelbhart",
-        "url" => "https://gelbhart.dev"
+        "url" => CANONICAL_BASE_URL
       }
     end
 
@@ -304,10 +316,10 @@ module ApplicationHelper
     }
 
     # Add main entity if homepage
-    if url == "/" || url == "https://gelbhart.dev" || url == "https://gelbhart.dev/"
+    if url == "/" || url == CANONICAL_BASE_URL || url == "#{CANONICAL_BASE_URL}/"
       data["mainEntity"] = {
         "@type" => "WebSite",
-        "@id" => "https://gelbhart.dev"
+        "@id" => CANONICAL_BASE_URL
       }
     end
 
@@ -320,7 +332,7 @@ module ApplicationHelper
       "@context" => "https://schema.org",
       "@type" => "Article",
       "headline" => title,
-      "url" => (url.present? && url.start_with?("http")) ? url : "https://gelbhart.dev#{url}",
+      "url" => (url.present? && url.start_with?("http")) ? url : "#{CANONICAL_BASE_URL}#{url}",
       "description" => description
     }
 
@@ -337,7 +349,7 @@ module ApplicationHelper
       data["author"] = {
         "@type" => "Person",
         "name" => "Tomer Gelbhart",
-        "url" => "https://gelbhart.dev",
+        "url" => CANONICAL_BASE_URL,
         "sameAs" => [
           "https://www.linkedin.com/in/tomer-gelbhart/",
           "https://github.com/gelbh"
@@ -389,7 +401,7 @@ module ApplicationHelper
     data["contentUrl"] = (content_url.present? && content_url.start_with?("http")) ? content_url : asset_url(content_url) if content_url.present?
 
     # Add license if needed
-    data["license"] = "https://gelbhart.dev"
+    data["license"] = CANONICAL_BASE_URL
 
     data
   end
