@@ -13,7 +13,7 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
   <head>
-    <%# Google Analytics - Optimized deferred loading %>
+    <%# Google Analytics %>
     <script>
       // Initialize dataLayer and gtag immediately for event queuing
       window.dataLayer = window.dataLayer || [];
@@ -21,10 +21,9 @@
         dataLayer.push(arguments);
       };
       gtag('js', new Date());
-      gtag('config', 'G-VZ8VBVE21B');
+      gtag('config', 'G-CN6KDZR57X');
 
-      // Defer GTM script loading until user interaction or extended idle time
-      // Reduces main thread blocking while maintaining tracking
+      // Defer GTM script loading until user interaction
       (() => {
         let gaLoaded = false;
 
@@ -36,7 +35,7 @@
           gaLoaded = true;
           const script = document.createElement('script');
           script.async = true;
-          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-VZ8VBVE21B';
+          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-CN6KDZR57X';
           document.head.appendChild(script);
         };
 
@@ -48,7 +47,7 @@
           });
         };
 
-        // Load when idle (5s timeout for better performance)
+        // Load when idle
         const loadGTMWhenIdle = () => {
           if ('requestIdleCallback' in window) {
             requestIdleCallback(injectGTMScript, { timeout: 5000 });
@@ -143,26 +142,27 @@
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link rel="dns-prefetch" href="https://ga.jspm.io">
     <link rel="dns-prefetch" href="https://esm.sh">
+
     <%# Resource Hints - Page-Specific (NASA Exoplanet Explorer) %>
     <% if request.path == '/projects/nasa-exoplanet-explorer' %>
       <link rel="preconnect" href="https://nasa-exoplanet-explorer.vercel.app">
       <link rel="dns-prefetch" href="https://nasa-exoplanet-explorer.onrender.com">
     <% end %>
 
-    <%# Fonts - Async Loading to Prevent Render Blocking %>
+    <%# Fonts %>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript>
       <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     </noscript>
 
     <%# Icon Fonts %>
-    <%# Boxicons subset is now included in application.css (only used icons) %>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css">
 
-    <%# Structured Data (JSON-LD) for SEO and AI-driven search optimization %>
+    <%# Structured Data (JSON-LD) %>
     <%= render_structured_data(person_structured_data) %>
     <%= render_structured_data(website_structured_data) %>
     <%= render_structured_data(organization_structured_data) %>
+
     <%# WebPage structured data for current page %>
     <% webpage_data = webpage_structured_data(
       name: page_title_value,
@@ -172,13 +172,13 @@
       date_modified: content_for?(:date_modified) ? yield(:date_modified) : nil
     ) %>
     <%= render_structured_data(webpage_data) %>
-    <%# Page-specific structured data can be added via content_for :structured_data %>
+
+    <%# Page-specific structured data %>
     <% if content_for?(:structured_data) %>
       <%= yield(:structured_data) %>
     <% end %>
 
-    <%# Critical CSS - Inline above-the-fold styles for faster FCP %>
-    <%# Minified for performance: includes root vars, body, page-wrapper, header, container, and responsive breakpoints %>
+    <%# Critical CSS %>
     <style>
       :root{--si-primary:#6366f1;--si-font-sans-serif:"Manrope",sans-serif}body{font-family:var(--si-font-sans-serif);margin:0;padding:0;min-height:100vh}.page-wrapper{display:flex;flex-direction:column;min-height:100vh}.header{position:fixed;top:0;left:0;width:100%;z-index:1030;background-color:rgba(11,15,25,0.8);backdrop-filter:blur(8px);transition:background-color 0.2s ease-in-out}.container{width:100%;padding-right:1rem;padding-left:1rem;margin-right:auto;margin-left:auto}.header-logo{width:47px;height:47px;transition:transform 0.3s ease}.text-center{text-align:center}@media (min-width:992px){.container{max-width:960px}.text-lg-start{text-align:left}}
     </style>
