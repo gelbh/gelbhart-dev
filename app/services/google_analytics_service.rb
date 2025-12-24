@@ -1,4 +1,3 @@
-# app/services/google_analytics_service.rb
 require "google/analytics/data"
 require "googleauth"
 require "googleauth/stores/file_token_store"
@@ -23,7 +22,6 @@ class GoogleAnalyticsService
       if @credentials
         # Create client with OAuth credentials
         @client = Google::Analytics::Data.analytics_data do |config|
-          # Create a signet auth client from our OAuth credentials
           auth_client = Signet::OAuth2::Client.new(
             token_credential_uri: "https://oauth2.googleapis.com/token",
             client_id: @credentials.client_id,
