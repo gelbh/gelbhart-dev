@@ -40,14 +40,6 @@
   ) %>
   <%= render_structured_data(video_captioner_article_data) %>
 <% end %>
-<%# Breadcrumb Navigation %>
-<div class="container pt-4">
-  <%= render 'shared/breadcrumb', items: [
-    { name: 'Home', url: '/' },
-    { name: 'Projects', url: nil },
-    { name: 'Video Captioner', url: nil }
-  ] %>
-</div>
 <!-- Hero Section with Gradient Background -->
 <section class="position-relative video-captioner-hero" data-controller="scroll-animation">
   <!-- Animated Gradient Background -->
