@@ -17,8 +17,6 @@ module ApplicationHelper
   end
 
   def meta_description(description)
-    # Optimize description length for SEO (optimal range: 155-160 characters)
-    # Truncate at 157 to leave room for ellipsis and ensure it stays within limits
     optimized = description.length > 157 ? description.truncate(157, separator: " ", omission: "") : description
     content_for :meta_description, optimized.strip
   end
@@ -42,8 +40,6 @@ module ApplicationHelper
   end
 
   # Structured Data (JSON-LD) Helpers for SEO
-  # These helpers generate JSON-LD structured data for better search engine understanding
-  # and AI-driven search optimization (GEO - Generative Engine Optimization)
 
   def person_structured_data
     {
