@@ -143,3 +143,64 @@ input[type="radio"] {
     min-height: 48px;
   }
 }
+
+// ============================================
+// MOBILE UX
+// ============================================
+
+// Smooth scrolling with motion preference respect
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+// Better tap highlighting on mobile
+* {
+  -webkit-tap-highlight-color: rgba(99, 102, 241, 0.2);
+}
+
+// ============================================
+// SAFE AREA INSETS
+// ============================================
+
+// Main container safe area padding
+.container {
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
+
+// Page wrapper safe area support
+.page-wrapper {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+// Fixed/sticky elements need safe area consideration
+.header,
+.navbar-sticky {
+  padding-left: max(0.5rem, env(safe-area-inset-left));
+  padding-right: max(0.5rem, env(safe-area-inset-right));
+}
+
+// Footer safe area support
+footer,
+.footer {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+// Scroll-to-top button positioning with safe area
+.btn-scroll-top {
+  right: max(1.25rem, calc(env(safe-area-inset-right) + 0.5rem));
+  bottom: max(1.25rem, calc(env(safe-area-inset-bottom) + 0.5rem));
+}
+
+// Modal safe area support for bottom sheet modals
+.modal-dialog {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+// Mobile menu safe area support
+.mobile-menu-popup {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}

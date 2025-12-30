@@ -45,3 +45,58 @@ html {
   animation-delay: 0.8s;
   transition-delay: 0.8s;
 }
+
+// ============================================
+// STAT/COUNTER DISPLAY UTILITIES
+// ============================================
+// Prevents stat numbers from wrapping and ensures they scale properly
+
+.stat-value {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Fluid display sizes that scale based on container/viewport
+.display-fluid-1 {
+  font-size: clamp(2.5rem, 2rem + 3vw, 5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.display-fluid-2 {
+  font-size: clamp(2.25rem, 1.75rem + 2.75vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.display-fluid-3 {
+  font-size: clamp(2rem, 1.5rem + 2.5vw, 4rem);
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.display-fluid-4 {
+  font-size: clamp(1.75rem, 1.25rem + 2.25vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+// Container query aware stat display
+.stat-container {
+  container-type: inline-size;
+  container-name: stat;
+}
+
+@container stat (max-width: 140px) {
+  .display-fluid-1,
+  .display-fluid-2,
+  .display-fluid-3,
+  .display-fluid-4 {
+    font-size: clamp(1.25rem, 1rem + 6cqw, 1.75rem);
+  }
+}

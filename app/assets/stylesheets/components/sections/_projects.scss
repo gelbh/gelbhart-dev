@@ -2,6 +2,11 @@
 // PROJECT CARDS
 // ============================================
 
+.project-card-container {
+  container-type: inline-size;
+  container-name: project-card;
+}
+
 // Fade in when scrolling into view
 .fade-in-view {
   opacity: 0;
@@ -78,6 +83,46 @@
     &:hover {
       box-shadow: 0 1.5rem 3rem rgba(var(--color-primary), 0.2) !important;
       border-color: rgba(var(--color-primary), 0.3);
+    }
+  }
+}
+
+// Container query responsive adjustments for project cards
+@container project-card (max-width: 320px) {
+  .project-card {
+    padding: var(--spacing-md);
+
+    .project-badge {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.4rem;
+    }
+
+    .project-icon {
+      width: 48px;
+      height: 48px;
+
+      i {
+        font-size: 1.25rem;
+      }
+    }
+
+    h3,
+    .h5 {
+      font-size: var(--fs-lg);
+    }
+  }
+}
+
+@container project-card (min-width: 321px) and (max-width: 400px) {
+  .project-card {
+    .project-badge {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .project-icon {
+      width: 56px;
+      height: 56px;
     }
   }
 }
