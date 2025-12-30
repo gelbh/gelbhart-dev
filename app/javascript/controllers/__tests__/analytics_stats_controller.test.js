@@ -5,10 +5,10 @@ jest.mock("../../lib/api_client.js", () => {
   const mockApi = {
     get: jest.fn(() =>
       Promise.resolve({
-        active_users: 750,
+        active_users: 1005,
         page_views: 1880,
-        install_count: 294,
-        engagement_rate: 62,
+        install_count: 345,
+        engagement_rate: 52,
         countries: { list: [], total: 0 },
       })
     ),
