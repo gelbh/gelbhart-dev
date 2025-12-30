@@ -6,6 +6,7 @@ require "json"
 
 class GoogleAnalyticsService
   SCOPE = "https://www.googleapis.com/auth/analytics.readonly"
+  CACHE_KEY = "hevy_tracker_analytics"
 
   def self.property_id
     Rails.application.credentials.ga4_property_id
@@ -52,45 +53,60 @@ class GoogleAnalyticsService
     end
   end
 
+  # Fetch Hevy Tracker analytics
+  # Always returns data - prefers fresh > cached > database fallback > defaults
+  # @return [Hash] Analytics data with :source metadata indicating data freshness
   def fetch_hevy_tracker_stats
-    # In development, fall back to mock data if credentials are missing or initialization failed
-    if Rails.env.development?
-      return mock_stats if !credentials_present? || @initialization_error
+    # Try to fetch fresh data from Google Analytics API
+    fresh_data = fetch_fresh_stats
+
+    if fresh_data
+      # Success! Save to database for future fallback and return fresh data
+      persist_to_database(fresh_data)
+      return fresh_data.merge(source: "fresh", fetched_at: Time.current.iso8601)
     end
 
-    # If initialization failed, return mock data in development, otherwise log error
+    # API failed - try database fallback
+    fallback_result = load_from_database
+    if fallback_result
+      Rails.logger.info "Using database fallback for analytics (fetched at: #{fallback_result[:fetched_at]})"
+      return fallback_result[:data].merge(
+        source: "fallback",
+        fetched_at: fallback_result[:fetched_at].iso8601,
+        stale: true
+      )
+    end
+
+    # No database fallback - use hardcoded defaults
+    Rails.logger.warn "No cached analytics data available, using defaults"
+    default_stats.merge(source: "defaults", stale: true)
+  end
+
+  private
+
+  # Attempt to fetch fresh data from Google Analytics API
+  # @return [Hash, nil] Analytics data or nil if fetch fails
+  def fetch_fresh_stats
+    # Check for initialization errors
     if @initialization_error
-      if Rails.env.development?
-        Rails.logger.warn "Using mock data due to initialization error: #{@initialization_error.message}"
-        return mock_stats
-      else
-        Rails.logger.error "Initialization error in production: #{@initialization_error.message}"
-        raise @initialization_error
-      end
+      Rails.logger.error "GoogleAnalyticsService initialization error: #{@initialization_error.message}"
+      return nil
     end
 
-    # Check if client is nil (credentials appeared present but client initialization failed silently)
+    # Check if client is available
     if @client.nil?
-      if Rails.env.development?
-        Rails.logger.warn "Using mock data: client is nil despite credentials appearing present"
-        return mock_stats
-      else
-        Rails.logger.error "Client is nil in production - cannot fetch analytics data"
-        raise StandardError.new("Google Analytics client not initialized")
-      end
+      Rails.logger.error "Google Analytics client not initialized - credentials may be missing or invalid"
+      log_credential_status
+      return nil
     end
 
-    # Check if PROPERTY_ID is missing (defensive check)
+    # Check if property ID is set
     unless self.class.property_id.present?
-      if Rails.env.development?
-        Rails.logger.warn "Using mock data: PROPERTY_ID is not set"
-        return mock_stats
-      else
-        Rails.logger.error "PROPERTY_ID is missing in production"
-        raise StandardError.new("ga4_property_id is not set in Rails credentials")
-      end
+      Rails.logger.error "ga4_property_id is not set in Rails credentials"
+      return nil
     end
 
+    # Fetch all metrics
     {
       active_users: fetch_active_users,
       page_views: fetch_page_views,
@@ -98,22 +114,51 @@ class GoogleAnalyticsService
       engagement_rate: fetch_engagement_rate,
       install_count: fetch_install_count
     }
+  rescue Signet::AuthorizationError => e
+    Rails.logger.error "Google Analytics authorization failed (refresh token may be expired): #{e.message}"
+    nil
+  rescue Google::Apis::ClientError => e
+    Rails.logger.error "Google Analytics API client error: #{e.message}"
+    nil
+  rescue Google::Apis::ServerError => e
+    Rails.logger.error "Google Analytics API server error: #{e.message}"
+    nil
   rescue StandardError => e
-    Rails.logger.error "Google Analytics API Error: #{e.message}"
-    Rails.logger.error e.backtrace.join("\n") if Rails.env.development?
-    # In development, always fall back to mock data on errors
-    if Rails.env.development?
-      Rails.logger.warn "Falling back to mock data due to error: #{e.message}"
-      return mock_stats
-    end
-    # In production, re-raise the error
-    raise
+    Rails.logger.error "Google Analytics API error (#{e.class}): #{e.message}"
+    Rails.logger.error e.backtrace.first(5).join("\n") if Rails.env.development?
+    nil
   end
 
-  private
+  # Log credential status for debugging (without exposing secrets)
+  def log_credential_status
+    Rails.logger.info "Credential status - Property ID: #{self.class.property_id.present? ? 'SET' : 'MISSING'}, " \
+                      "Client ID: #{Rails.application.credentials.dig(:google_oauth, :client_id).present? ? 'SET' : 'MISSING'}, " \
+                      "Client Secret: #{Rails.application.credentials.dig(:google_oauth, :client_secret).present? ? 'SET' : 'MISSING'}, " \
+                      "Refresh Token: #{Rails.application.credentials.dig(:google_oauth, :refresh_token).present? ? 'SET' : 'MISSING'}"
+  end
 
-  def credentials_present?
-    self.class.property_id.present? && oauth_credentials_present?
+  # Save analytics data to database for future fallback
+  # @param data [Hash] Analytics data to persist
+  def persist_to_database(data)
+    AnalyticsCacheRecord.store(CACHE_KEY, data.deep_stringify_keys)
+  rescue StandardError => e
+    Rails.logger.error "Failed to persist analytics to database: #{e.message}"
+  end
+
+  # Load analytics data from database
+  # @return [Hash, nil] Hash with :data and :fetched_at or nil if not found
+  def load_from_database
+    result = AnalyticsCacheRecord.retrieve_with_metadata(CACHE_KEY)
+    return nil unless result
+
+    # Symbolize keys for consistency
+    {
+      data: result[:data].deep_symbolize_keys,
+      fetched_at: result[:fetched_at]
+    }
+  rescue StandardError => e
+    Rails.logger.error "Failed to load analytics from database: #{e.message}"
+    nil
   end
 
   def oauth_credentials_present?
@@ -263,8 +308,8 @@ class GoogleAnalyticsService
     0
   end
 
-  # Mock data for development when credentials are not set
-  def mock_stats
+  # Default fallback data when no cached data is available
+  def default_stats
     {
       active_users: 750,
       page_views: 1880,
