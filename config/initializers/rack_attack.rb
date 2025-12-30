@@ -10,6 +10,29 @@ Rack::Attack.throttle("contact_form/ip", limit: 3, period: 1.hour) do |req|
   req.ip if req.path == "/contact" && req.post?
 end
 
+# Block vulnerability scanners and bots probing for common exploits
+Rack::Attack.blocklist("scanner_probes") do |req|
+  # WordPress paths
+  req.path.start_with?("/wp-") ||
+  req.path.start_with?("/wordpress") ||
+  # PHP files
+  req.path.end_with?(".php") ||
+  # Config/sensitive files
+  req.path.start_with?("/.env") ||
+  req.path.start_with?("/.git") ||
+  req.path.start_with?("/.svn") ||
+  # Common exploit paths
+  req.path.start_with?("/cgi-bin") ||
+  req.path.downcase.include?("phpmyadmin") ||
+  # ACME probes (remove if using Let's Encrypt directly)
+  req.path.start_with?("/.well-known/")
+end
+
+# Minimal response for blocked requests
+Rack::Attack.blocklisted_responder = lambda do |_request|
+  [ 403, { "Content-Type" => "text/plain" }, [ "Forbidden" ] ]
+end
+
 # Custom response for throttled requests
 Rack::Attack.throttled_responder = lambda do |request|
   match_data = request.env["rack.attack.match_data"]
