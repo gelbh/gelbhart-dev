@@ -16,26 +16,24 @@ class Api::AnalyticsTest < ActionDispatch::IntegrationTest
   test "GET /api/analytics/hevy-tracker returns 200 with JSON response" do
     # Mock the GoogleAnalyticsService
     mock_stats = {
-      active_users: 750,
-      page_views: 1880,
+      active_users: 1005,
       countries: {
         list: [
-          { name: "United States", users: 289 }
+          { name: "United States", users: 404 }
         ],
-        total: 70
+        total: 72
       },
-      engagement_rate: 62,
-      install_count: 294
+      engagement_rate: 52,
+      install_count: 345
     }
 
     GoogleAnalyticsService.any_instance.stubs(:fetch_hevy_tracker_stats).returns(mock_stats)
     get "/api/analytics/hevy-tracker"
     json = assert_json_response(200)
 
-    assert_equal 750, json["active_users"]
-    assert_equal 1880, json["page_views"]
-    assert_equal 62, json["engagement_rate"]
-    assert_equal 294, json["install_count"]
+    assert_equal 1005, json["active_users"]
+    assert_equal 52, json["engagement_rate"]
+    assert_equal 345, json["install_count"]
     assert json["countries"].present?
   ensure
     GoogleAnalyticsService.unstub(:any_instance) if GoogleAnalyticsService.respond_to?(:unstub)
@@ -43,11 +41,10 @@ class Api::AnalyticsTest < ActionDispatch::IntegrationTest
 
   test "GET /api/analytics/hevy-tracker caches response for 5 minutes" do
     mock_stats = {
-      active_users: 750,
-      page_views: 1880,
+      active_users: 1005,
       countries: { list: [], total: 0 },
-      engagement_rate: 62,
-      install_count: 294
+      engagement_rate: 52,
+      install_count: 345
     }
 
     call_count = 0
@@ -71,11 +68,10 @@ class Api::AnalyticsTest < ActionDispatch::IntegrationTest
 
   test "GET /api/analytics/hevy-tracker sets cache headers" do
     mock_stats = {
-      active_users: 750,
-      page_views: 1880,
+      active_users: 1005,
       countries: { list: [], total: 0 },
-      engagement_rate: 62,
-      install_count: 294
+      engagement_rate: 52,
+      install_count: 345
     }
 
     GoogleAnalyticsService.any_instance.stubs(:fetch_hevy_tracker_stats).returns(mock_stats)
@@ -91,11 +87,10 @@ class Api::AnalyticsTest < ActionDispatch::IntegrationTest
   test "GET /api/analytics/hevy-tracker returns fallback data when API fails" do
     # The service now always returns data - it uses fallback when API fails
     fallback_stats = {
-      active_users: 750,
-      page_views: 1880,
+      active_users: 1005,
       countries: { list: [], total: 70 },
-      engagement_rate: 62,
-      install_count: 294,
+      engagement_rate: 52,
+      install_count: 345,
       source: "defaults",
       stale: true
     }
@@ -105,7 +100,7 @@ class Api::AnalyticsTest < ActionDispatch::IntegrationTest
     json = assert_json_response(200)
 
     # Should still return valid data
-    assert_equal 750, json["active_users"]
+    assert_equal 1005, json["active_users"]
     assert_equal "defaults", json["source"]
     assert json["stale"]
   ensure
@@ -114,11 +109,10 @@ class Api::AnalyticsTest < ActionDispatch::IntegrationTest
 
   test "GET /api/analytics/hevy-tracker includes source metadata" do
     mock_stats = {
-      active_users: 750,
-      page_views: 1880,
+      active_users: 1005,
       countries: { list: [], total: 0 },
-      engagement_rate: 62,
-      install_count: 294,
+      engagement_rate: 52,
+      install_count: 345,
       source: "fresh",
       fetched_at: Time.current.iso8601
     }

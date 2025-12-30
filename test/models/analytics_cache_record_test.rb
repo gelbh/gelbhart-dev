@@ -11,13 +11,13 @@ class AnalyticsCacheRecordTest < ActiveSupport::TestCase
   end
 
   test "store creates new record" do
-    data = { active_users: 100, page_views: 500 }
+    data = { active_users: 100, engagement_rate: 50 }
 
     record = AnalyticsCacheRecord.store("test_key", data)
 
     assert record.persisted?
     assert_equal "test_key", record.key
-    assert_equal({ "active_users" => 100, "page_views" => 500 }, record.data)
+    assert_equal({ "active_users" => 100, "engagement_rate" => 50 }, record.data)
     assert_not_nil record.fetched_at
   end
 
@@ -36,12 +36,12 @@ class AnalyticsCacheRecordTest < ActiveSupport::TestCase
   end
 
   test "retrieve returns stored data" do
-    data = { active_users: 100, page_views: 500 }
+    data = { active_users: 100, engagement_rate: 50 }
     AnalyticsCacheRecord.store("test_key", data)
 
     retrieved = AnalyticsCacheRecord.retrieve("test_key")
 
-    assert_equal({ "active_users" => 100, "page_views" => 500 }, retrieved)
+    assert_equal({ "active_users" => 100, "engagement_rate" => 50 }, retrieved)
   end
 
   test "retrieve returns nil for non-existent key" do
