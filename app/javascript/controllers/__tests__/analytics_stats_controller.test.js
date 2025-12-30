@@ -6,7 +6,6 @@ jest.mock("../../lib/api_client.js", () => {
     get: jest.fn(() =>
       Promise.resolve({
         active_users: 1005,
-        page_views: 1880,
         install_count: 345,
         engagement_rate: 52,
         countries: { list: [], total: 0 },
@@ -64,7 +63,6 @@ describe("AnalyticsStatsController", () => {
     );
     element.innerHTML = `
       <div data-analytics-stats-target="activeUsers"></div>
-      <div data-analytics-stats-target="pageViews"></div>
       <div data-analytics-stats-target="installCount"></div>
       <div data-analytics-stats-target="countries"></div>
       <div data-analytics-stats-target="engagementRate"></div>
@@ -118,7 +116,6 @@ describe("AnalyticsStatsController", () => {
     );
     newElement.innerHTML = `
       <div data-analytics-stats-target="activeUsers"></div>
-      <div data-analytics-stats-target="pageViews"></div>
       <div data-analytics-stats-target="installCount"></div>
       <div data-analytics-stats-target="countries"></div>
       <div data-analytics-stats-target="engagementRate"></div>
