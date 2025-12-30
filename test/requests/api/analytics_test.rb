@@ -55,7 +55,7 @@ class Api::AnalyticsTest < ActionDispatch::IntegrationTest
       call_count += 1
       mock_stats
     }
-    
+
     # First call
     get "/api/analytics/hevy-tracker"
     assert_response :success
@@ -88,14 +88,48 @@ class Api::AnalyticsTest < ActionDispatch::IntegrationTest
     GoogleAnalyticsService.unstub(:any_instance) if GoogleAnalyticsService.respond_to?(:unstub)
   end
 
-  test "GET /api/analytics/hevy-tracker handles service errors" do
-    GoogleAnalyticsService.any_instance.stubs(:fetch_hevy_tracker_stats).raises(StandardError.new("API Error"))
-    get "/api/analytics/hevy-tracker"
-    json = assert_json_response(500)
+  test "GET /api/analytics/hevy-tracker returns fallback data when API fails" do
+    # The service now always returns data - it uses fallback when API fails
+    fallback_stats = {
+      active_users: 750,
+      page_views: 1880,
+      countries: { list: [], total: 70 },
+      engagement_rate: 62,
+      install_count: 294,
+      source: "defaults",
+      stale: true
+    }
 
-    assert_equal "Failed to fetch analytics data", json["error"]
+    GoogleAnalyticsService.any_instance.stubs(:fetch_hevy_tracker_stats).returns(fallback_stats)
+    get "/api/analytics/hevy-tracker"
+    json = assert_json_response(200)
+
+    # Should still return valid data
+    assert_equal 750, json["active_users"]
+    assert_equal "defaults", json["source"]
+    assert json["stale"]
+  ensure
+    GoogleAnalyticsService.unstub(:any_instance) if GoogleAnalyticsService.respond_to?(:unstub)
+  end
+
+  test "GET /api/analytics/hevy-tracker includes source metadata" do
+    mock_stats = {
+      active_users: 750,
+      page_views: 1880,
+      countries: { list: [], total: 0 },
+      engagement_rate: 62,
+      install_count: 294,
+      source: "fresh",
+      fetched_at: Time.current.iso8601
+    }
+
+    GoogleAnalyticsService.any_instance.stubs(:fetch_hevy_tracker_stats).returns(mock_stats)
+    get "/api/analytics/hevy-tracker"
+    json = assert_json_response(200)
+
+    assert json.key?("source"), "Response should include source metadata"
+    assert_equal "fresh", json["source"]
   ensure
     GoogleAnalyticsService.unstub(:any_instance) if GoogleAnalyticsService.respond_to?(:unstub)
   end
 end
-

@@ -4,16 +4,15 @@ module Api
     # Enable caching for 5 minutes to avoid hitting API rate limits
     before_action :set_cache_headers
 
+    # Always returns analytics data with source metadata
+    # Response includes :source ("fresh", "fallback", or "defaults")
+    # and :stale (true when data is not fresh from the API)
     def hevy_tracker_stats
       stats = Rails.cache.fetch("hevy_tracker_analytics", expires_in: 5.minutes) do
         GoogleAnalyticsService.new.fetch_hevy_tracker_stats
       end
 
       render json: stats
-    rescue StandardError => e
-      Rails.logger.error "Analytics API Error: #{e.message}"
-      Rails.logger.error e.backtrace.join("\n") if Rails.env.development?
-      render json: { error: "Failed to fetch analytics data" }, status: :internal_server_error
     end
 
     private

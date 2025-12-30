@@ -2898,6 +2898,39 @@ COMMENT ON COLUMN auth.users.is_sso_user IS 'Auth: Set this column to true when 
 
 
 --
+-- Name: analytics_cache_records; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.analytics_cache_records (
+    id bigint NOT NULL,
+    key character varying NOT NULL,
+    data jsonb DEFAULT '{}'::jsonb NOT NULL,
+    fetched_at timestamp(6) without time zone NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: analytics_cache_records_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.analytics_cache_records_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: analytics_cache_records_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.analytics_cache_records_id_seq OWNED BY public.analytics_cache_records.id;
+
+
+--
 -- Name: ar_internal_metadata; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -3220,6 +3253,13 @@ ALTER TABLE ONLY auth.refresh_tokens ALTER COLUMN id SET DEFAULT nextval('auth.r
 
 
 --
+-- Name: analytics_cache_records id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.analytics_cache_records ALTER COLUMN id SET DEFAULT nextval('public.analytics_cache_records_id_seq'::regclass);
+
+
+--
 -- Name: pacman_scores id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -3463,6 +3503,14 @@ ALTER TABLE ONLY auth.users
 
 ALTER TABLE ONLY auth.users
     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: analytics_cache_records analytics_cache_records_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.analytics_cache_records
+    ADD CONSTRAINT analytics_cache_records_pkey PRIMARY KEY (id);
 
 
 --
@@ -3935,6 +3983,13 @@ CREATE INDEX users_instance_id_idx ON auth.users USING btree (instance_id);
 --
 
 CREATE INDEX users_is_anonymous_idx ON auth.users USING btree (is_anonymous);
+
+
+--
+-- Name: index_analytics_cache_records_on_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_analytics_cache_records_on_key ON public.analytics_cache_records USING btree (key);
 
 
 --
@@ -4576,6 +4631,7 @@ CREATE EVENT TRIGGER pgrst_drop_watch ON sql_drop
 SET search_path TO "\$user", public, extensions;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20251230161752'),
 ('20251208214526'),
 ('20251203140407'),
 ('20251120183019'),
