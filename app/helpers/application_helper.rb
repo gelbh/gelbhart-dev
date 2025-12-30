@@ -2,6 +2,29 @@
 
 module ApplicationHelper
   CANONICAL_BASE_URL = "https://gelbhart.dev".freeze
+  DEFAULT_META_DESCRIPTION = "Personal portfolio and development projects by Tomer Gelbhart. " \
+                             "Full-stack developer specializing in Ruby on Rails and modern web applications."
+
+  # Returns a struct containing all page metadata for use in the layout.
+  # Centralizes metadata computation to keep views clean.
+  PageMeta = Struct.new(
+    :title, :description, :url, :image, :image_dimensions,
+    :og_type, :updated_time, :keywords,
+    keyword_init: true
+  )
+
+  def page_meta
+    @page_meta ||= PageMeta.new(
+      title: content_for?(:title) ? content_for(:title) : page_title(""),
+      description: content_for?(:meta_description) ? content_for(:meta_description) : DEFAULT_META_DESCRIPTION,
+      url: canonical_url,
+      image: social_image_url,
+      image_dimensions: social_image_dimensions,
+      og_type: og_type,
+      updated_time: content_for?(:updated_time) ? content_for(:updated_time) : Time.current.iso8601,
+      keywords: content_for?(:keywords) ? content_for(:keywords) : nil
+    )
+  end
 
   def page_title(title)
     base_title = "gelbhart.dev"
