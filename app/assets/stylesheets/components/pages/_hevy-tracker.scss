@@ -54,12 +54,16 @@
   }
 }
 
-// Fix active tab styling for better contrast
 #spreadsheetTabs {
   .nav-link {
     &.active {
-      color: var(--bs-primary) !important;
+      color: var(--bs-white) !important;
       font-weight: 600;
+
+      i,
+      .bx {
+        color: var(--bs-white) !important;
+      }
     }
   }
 }
