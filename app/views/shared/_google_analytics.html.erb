@@ -1,70 +1,40 @@
 <%# Google Analytics - Deferred loading for performance %>
 <script>
-  // Initialize dataLayer and gtag immediately for event queuing
   window.dataLayer = window.dataLayer || [];
-  const gtag = function() {
-    dataLayer.push(arguments);
-  };
+  const gtag = (...args) => dataLayer.push(args);
   gtag('js', new Date());
   gtag('config', 'G-CN6KDZR57X');
 
-  // Defer GTM script loading until user interaction
   (() => {
-    let gaLoaded = false;
+    const GA_ID = 'G-CN6KDZR57X';
+    const IDLE_TIMEOUT = 5000;
+    let loaded = false;
 
-    const injectGTMScript = () => {
-      if (gaLoaded || document.querySelector('script[src*="googletagmanager.com/gtag/js"]')) {
-        return;
-      }
+    const injectScript = () => {
+      if (loaded || document.querySelector(`script[src*="gtag/js?id=${GA_ID}"]`)) return;
 
-      gaLoaded = true;
-      const script = document.createElement('script');
-      script.async = true;
-      script.src = 'https://www.googletagmanager.com/gtag/js?id=G-CN6KDZR57X';
-
-      // Handle script load errors gracefully (ad blockers, network issues, etc.)
-      script.onerror = () => {
-        // Silently fail - analytics is non-critical for page functionality
-        if (typeof console !== 'undefined' && console.debug) {
-          console.debug('GTM script failed to load (may be blocked by ad blocker or network issue)');
-        }
-      };
-
-      try {
-        document.head.appendChild(script);
-      } catch (e) {
-        // Silently fail if script injection fails
-      }
-    };
-
-    // Load on first user interaction
-    const interactionEvents = ['click', 'scroll', 'keydown', 'touchstart', 'mousemove'];
-    const loadOnInteraction = () => {
-      interactionEvents.forEach((event) => {
-        document.addEventListener(event, injectGTMScript, { once: true, passive: true });
+      loaded = true;
+      const script = Object.assign(document.createElement('script'), {
+        async: true,
+        src: `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`,
+        onerror: () => console.debug?.('GTM blocked or unavailable')
       });
+
+      try { document.head.appendChild(script); } catch {}
     };
 
-    // Load when idle
-    const loadGTMWhenIdle = () => {
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(injectGTMScript, { timeout: 5000 });
-      } else {
-        const delay = document.readyState === 'complete' ? 3000 : 5000;
-        setTimeout(injectGTMScript, delay);
-      }
+    const loadWhenIdle = () => {
+      window.requestIdleCallback?.(injectScript, { timeout: IDLE_TIMEOUT }) ??
+        setTimeout(injectScript, document.readyState === 'complete' ? 3000 : IDLE_TIMEOUT);
     };
 
-    loadOnInteraction();
+    ['click', 'scroll', 'keydown', 'touchstart', 'mousemove'].forEach(event =>
+      document.addEventListener(event, injectScript, { once: true, passive: true })
+    );
 
-    // Fallback: load when idle if user doesn't interact
-    if (document.readyState === 'complete') {
-      loadGTMWhenIdle();
-    } else if (document.readyState === 'interactive') {
-      loadGTMWhenIdle();
-    } else {
-      document.addEventListener('DOMContentLoaded', loadGTMWhenIdle);
-    }
+    document.readyState === 'loading'
+      ? document.addEventListener('DOMContentLoaded', loadWhenIdle)
+      : loadWhenIdle();
   })();
 </script>
 
