@@ -582,3 +582,21 @@
     transform: translateX(10px);
   }
 }
+
+// ============================================
+// REDUCED MOTION ACCESSIBILITY
+// ============================================
+// Respect user's motion preferences for accessibility
+// Users who have vestibular disorders or motion sensitivity
+// can enable "reduce motion" in their OS settings
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

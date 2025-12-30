@@ -5,10 +5,11 @@
 // Hero container - Full bleed
 .hero-section {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   position: relative;
-  padding-top: var(--spacing-3xl);
+  padding-top: var(--space-fluid-xl);
 }
 
 // Animated gradient background
@@ -19,6 +20,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   background: var(--gradient-primary);
   background-size: 200% 200%;
   animation: gradientShift var(--duration-gradient) ease infinite;
@@ -37,6 +39,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   background-image: linear-gradient(var(--grid-color) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
   background-size: var(--grid-size) var(--grid-size);
@@ -57,6 +60,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   z-index: var(--z-content);
   pointer-events: none;
@@ -232,6 +236,7 @@
 
 // Hero heading enhancement
 .hero-heading {
+  font-size: var(--fs-3xl);
   font-weight: 800;
   line-height: 1.2;
   letter-spacing: -0.02em;

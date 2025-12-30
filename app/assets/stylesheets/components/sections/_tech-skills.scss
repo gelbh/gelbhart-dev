@@ -2,12 +2,18 @@
 // TECHNOLOGIES & SKILLS SECTION
 // ============================================
 
+.tech-card-container {
+  container-type: inline-size;
+  container-name: tech-card;
+}
+
 // Tech card container
 .tech-card {
   background: var(--bs-body-bg);
   border: 1px solid rgba(var(--color-primary), 0.15);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
+  padding-inline: var(--space-fluid-md);
+  padding-block: var(--space-fluid-lg);
   transition: all 0.4s var(--ease-smooth);
   text-align: center;
   box-shadow: var(--shadow-sm);
@@ -164,4 +170,76 @@
 
 .bg-purple {
   background-color: var(--color-purple) !important;
+}
+
+// ============================================
+// CONTAINER QUERY RESPONSIVE ADJUSTMENTS
+// ============================================
+
+@container tech-card (max-width: 350px) {
+  .tech-card {
+    padding-inline: var(--spacing-md);
+    padding-block: var(--spacing-lg);
+
+    .tech-card-icon {
+      width: 3rem;
+      height: 3rem;
+      margin-bottom: var(--spacing-md);
+
+      i {
+        font-size: 1.5rem;
+      }
+    }
+
+    h3,
+    .h5 {
+      font-size: var(--fs-lg);
+      margin-bottom: var(--spacing-md);
+    }
+
+    // Stack columns vertically on narrow containers
+    .row {
+      flex-direction: column;
+
+      .col-6 {
+        width: 100%;
+        margin-bottom: var(--spacing-md);
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+
+  .tech-badge {
+    font-size: 0.75rem;
+    padding: var(--spacing-xs) 0.625rem;
+  }
+
+  .tech-item {
+    font-size: 0.85rem;
+    padding: var(--spacing-xs) 0;
+  }
+}
+
+@container tech-card (min-width: 351px) and (max-width: 500px) {
+  .tech-card {
+    padding-inline: var(--spacing-lg);
+    padding-block: var(--spacing-xl);
+
+    .tech-card-icon {
+      width: 3.5rem;
+      height: 3.5rem;
+
+      i {
+        font-size: 1.75rem;
+      }
+    }
+  }
+
+  .tech-badge {
+    font-size: 0.8rem;
+    padding: var(--spacing-xs) 0.75rem;
+  }
 }
