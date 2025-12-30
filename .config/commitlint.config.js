@@ -17,6 +17,7 @@ module.exports = {
         "chore",
         "revert",
         "config",
+        "security",
       ],
     ],
     "scope-case": [2, "always", "lower-case"],
