@@ -76,7 +76,6 @@ class GoogleAnalyticsService
 
     {
       active_users: fetch_active_users,
-      page_views: fetch_page_views,
       countries: fetch_top_countries,
       engagement_rate: fetch_engagement_rate,
       install_count: fetch_install_count
@@ -138,7 +137,6 @@ class GoogleAnalyticsService
 
   DEFAULT_STATS = {
     active_users: 1005,
-    page_views: 1880,
     countries: {
       list: [
         { name: "United States", users: 404 },
@@ -156,10 +154,6 @@ class GoogleAnalyticsService
 
   def fetch_active_users
     fetch_metric("totalUsers")
-  end
-
-  def fetch_page_views
-    fetch_metric("screenPageViews")
   end
 
   def fetch_engagement_rate

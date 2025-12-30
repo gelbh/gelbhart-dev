@@ -16,7 +16,6 @@ import localforage from "localforage";
 export default class extends Controller {
   static targets = [
     "activeUsers",
-    "pageViews",
     "installCount",
     "countries",
     "engagementRate",
@@ -35,7 +34,6 @@ export default class extends Controller {
   // Metric configuration for counter targets
   METRICS = [
     { key: "active_users", target: "activeUsers" },
-    { key: "page_views", target: "pageViews" },
     { key: "install_count", target: "installCount" },
     {
       key: "countries_total",
@@ -151,7 +149,6 @@ export default class extends Controller {
       const engagementRate = data.engagement_rate ?? 0;
       await localforage.setItem(this.DEFAULTS_KEY, {
         active_users: data.active_users,
-        page_views: data.page_views,
         install_count: data.install_count,
         countries_total: data.countries?.total || 0,
         countries_list: data.countries?.list || [],
