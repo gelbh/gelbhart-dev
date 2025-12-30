@@ -1,114 +1,48 @@
-<%
-  # Extract repeated values for DRY principle
-  default_meta_description = 'Personal portfolio and development projects by Tomer Gelbhart. Full-stack developer specializing in Ruby on Rails and modern web applications.'
-  page_title_value = content_for?(:title) ? yield(:title) : page_title("")
-  page_meta_description = content_for?(:meta_description) ? yield(:meta_description) : default_meta_description
-  page_url = canonical_url
-  social_image = social_image_url
-  social_image_dims = social_image_dimensions
-  og_type_value = og_type
-  page_updated_time = content_for?(:updated_time) ? yield(:updated_time) : Time.current.iso8601
-  page_keywords = content_for?(:keywords) ? yield(:keywords) : nil
-%>
+<% meta = page_meta %>
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
   <head>
-    <%# Google Analytics %>
-    <script>
-      // Initialize dataLayer and gtag immediately for event queuing
-      window.dataLayer = window.dataLayer || [];
-      const gtag = function() {
-        dataLayer.push(arguments);
-      };
-      gtag('js', new Date());
-      gtag('config', 'G-CN6KDZR57X');
-
-      // Defer GTM script loading until user interaction
-      (() => {
-        let gaLoaded = false;
-
-        const injectGTMScript = () => {
-          if (gaLoaded || document.querySelector('script[src*="googletagmanager.com/gtag/js"]')) {
-            return;
-          }
-
-          gaLoaded = true;
-          const script = document.createElement('script');
-          script.async = true;
-          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-CN6KDZR57X';
-          document.head.appendChild(script);
-        };
-
-        // Load on first user interaction
-        const interactionEvents = ['click', 'scroll', 'keydown', 'touchstart', 'mousemove'];
-        const loadOnInteraction = () => {
-          interactionEvents.forEach((event) => {
-            document.addEventListener(event, injectGTMScript, { once: true, passive: true });
-          });
-        };
-
-        // Load when idle
-        const loadGTMWhenIdle = () => {
-          if ('requestIdleCallback' in window) {
-            requestIdleCallback(injectGTMScript, { timeout: 5000 });
-          } else {
-            const delay = document.readyState === 'complete' ? 3000 : 5000;
-            setTimeout(injectGTMScript, delay);
-          }
-        };
-
-        loadOnInteraction();
-
-        // Fallback: load when idle if user doesn't interact
-        if (document.readyState === 'complete') {
-          loadGTMWhenIdle();
-        } else if (document.readyState === 'interactive') {
-          loadGTMWhenIdle();
-        } else {
-          document.addEventListener('DOMContentLoaded', loadGTMWhenIdle);
-        }
-      })();
-    </script>
+    <%= render 'shared/google_analytics' %>
 
     <%# Document Metadata %>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
-    <title><%= page_title_value %></title>
+    <title><%= meta.title %></title>
 
     <%# SEO Meta Tags %>
-    <meta name="description" content="<%= page_meta_description %>">
+    <meta name="description" content="<%= meta.description %>">
     <meta name="author" content="Tomer Gelbhart - Full-Stack Developer, MSc Computer Science Student at UCD">
     <meta name="language" content="English">
     <meta name="robots" content="index, follow">
-    <% if page_keywords.present? %>
-      <meta name="keywords" content="<%= page_keywords %>">
+    <% if meta.keywords.present? %>
+      <meta name="keywords" content="<%= meta.keywords %>">
     <% end %>
-    <link rel="canonical" href="<%= page_url %>">
+    <link rel="canonical" href="<%= meta.url %>">
 
     <%# Open Graph Meta Tags %>
-    <meta property="og:type" content="<%= og_type_value %>">
+    <meta property="og:type" content="<%= meta.og_type %>">
     <meta property="og:locale" content="en_IE">
     <meta property="og:site_name" content="gelbhart.dev">
-    <meta property="og:url" content="<%= page_url %>">
-    <meta property="og:title" content="<%= page_title_value %>">
-    <meta property="og:description" content="<%= page_meta_description %>">
-    <meta property="og:image" content="<%= social_image %>">
-    <meta property="og:image:secure_url" content="<%= social_image.gsub('http://', 'https://') %>">
+    <meta property="og:url" content="<%= meta.url %>">
+    <meta property="og:title" content="<%= meta.title %>">
+    <meta property="og:description" content="<%= meta.description %>">
+    <meta property="og:image" content="<%= meta.image %>">
+    <meta property="og:image:secure_url" content="<%= meta.image.gsub('http://', 'https://') %>">
     <meta property="og:image:type" content="image/png">
-    <meta property="og:image:width" content="<%= social_image_dims[:width] %>">
-    <meta property="og:image:height" content="<%= social_image_dims[:height] %>">
+    <meta property="og:image:width" content="<%= meta.image_dimensions[:width] %>">
+    <meta property="og:image:height" content="<%= meta.image_dimensions[:height] %>">
     <meta property="og:image:alt" content="Tomer Gelbhart - Full-Stack Developer Portfolio">
-    <meta property="og:updated_time" content="<%= page_updated_time %>">
-    <% if og_type_value == 'article' %>
+    <meta property="og:updated_time" content="<%= meta.updated_time %>">
+    <% if meta.og_type == 'article' %>
       <meta property="article:author" content="Tomer Gelbhart">
     <% end %>
 
     <%# Twitter Card Meta Tags %>
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="<%= page_url %>">
-    <meta name="twitter:title" content="<%= page_title_value %>">
-    <meta name="twitter:description" content="<%= page_meta_description %>">
-    <meta name="twitter:image" content="<%= social_image %>">
+    <meta name="twitter:url" content="<%= meta.url %>">
+    <meta name="twitter:title" content="<%= meta.title %>">
+    <meta name="twitter:description" content="<%= meta.description %>">
+    <meta name="twitter:image" content="<%= meta.image %>">
     <meta name="twitter:image:alt" content="Tomer Gelbhart - Full-Stack Developer Portfolio">
 
     <%# Additional Meta Tags %>
@@ -165,11 +99,11 @@
 
     <%# WebPage structured data for current page %>
     <% webpage_data = webpage_structured_data(
-      name: page_title_value,
-      url: page_url,
-      description: page_meta_description,
-      date_published: content_for?(:date_published) ? yield(:date_published) : nil,
-      date_modified: content_for?(:date_modified) ? yield(:date_modified) : nil
+      name: meta.title,
+      url: meta.url,
+      description: meta.description,
+      date_published: content_for?(:date_published) ? content_for(:date_published) : nil,
+      date_modified: content_for?(:date_modified) ? content_for(:date_modified) : nil
     ) %>
     <%= render_structured_data(webpage_data) %>
 
