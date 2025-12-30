@@ -63,9 +63,8 @@ class GoogleAnalyticsServiceTest < ActiveSupport::TestCase
     GoogleAnalyticsService.unstub(:any_instance) if GoogleAnalyticsService.respond_to?(:unstub)
   end
 
-  test "fetch_hevy_tracker_stats returns complete stats hash" do
-    Rails.env.stubs(:development?).returns(true)
-    # Stub the credentials check to return false, so service uses mock stats
+  test "fetch_hevy_tracker_stats returns complete stats hash with source metadata" do
+    # Stub the credentials check to return false, so service uses fallback
     GoogleAnalyticsService.any_instance.stubs(:oauth_credentials_present?).returns(false)
 
     service = GoogleAnalyticsService.new
@@ -79,14 +78,13 @@ class GoogleAnalyticsServiceTest < ActiveSupport::TestCase
     assert stats.key?(:countries)
     assert stats.key?(:engagement_rate)
     assert stats.key?(:install_count)
+    assert stats.key?(:source), "Response should include source metadata"
   ensure
-    Rails.env.unstub(:development?) if Rails.env.respond_to?(:unstub)
     GoogleAnalyticsService.unstub(:any_instance) if GoogleAnalyticsService.respond_to?(:unstub)
   end
 
-  test "fetch_hevy_tracker_stats returns mock stats in development without credentials" do
-    Rails.env.stubs(:development?).returns(true)
-    # Stub the credentials check to return false, so service uses mock stats
+  test "fetch_hevy_tracker_stats returns default stats without credentials" do
+    # Stub the credentials check to return false, so service uses default stats
     GoogleAnalyticsService.any_instance.stubs(:oauth_credentials_present?).returns(false)
 
     service = GoogleAnalyticsService.new
@@ -98,8 +96,9 @@ class GoogleAnalyticsServiceTest < ActiveSupport::TestCase
     assert_equal 1880, stats[:page_views]
     assert_equal 62, stats[:engagement_rate]
     assert_equal 294, stats[:install_count]
+    assert_equal "defaults", stats[:source]
+    assert stats[:stale]
   ensure
-    Rails.env.unstub(:development?) if Rails.env.respond_to?(:unstub)
     GoogleAnalyticsService.unstub(:any_instance) if GoogleAnalyticsService.respond_to?(:unstub)
   end
 
@@ -242,7 +241,7 @@ class GoogleAnalyticsServiceTest < ActiveSupport::TestCase
     assert_equal 0, result
   end
 
-  test "fetch_hevy_tracker_stats handles errors gracefully" do
+  test "fetch_hevy_tracker_stats handles individual metric errors gracefully" do
     # The WebMock stub from setup allows OAuth to succeed
     service = GoogleAnalyticsService.new
     assert_not_nil service.instance_variable_get(:@client), "Client should exist with credentials"
@@ -250,8 +249,68 @@ class GoogleAnalyticsServiceTest < ActiveSupport::TestCase
 
     stats = service.fetch_hevy_tracker_stats
 
-    # Should return mock stats on error
+    # Individual fetch methods catch errors and return 0, so we still get "fresh" data
+    # (just with zero values). This is intentional - partial API failures shouldn't
+    # break everything.
     assert stats.key?(:active_users)
     assert stats.key?(:page_views)
+    assert stats.key?(:source)
+    assert_equal "fresh", stats[:source]
+    # All values should be 0 due to errors
+    assert_equal 0, stats[:active_users]
+    assert_equal 0, stats[:page_views]
+  end
+
+  test "fetch_hevy_tracker_stats uses database fallback when API fails" do
+    # Store some data in the database first
+    cached_data = {
+      "active_users" => 999,
+      "page_views" => 5000,
+      "countries" => { "list" => [], "total" => 50 },
+      "engagement_rate" => 75,
+      "install_count" => 500
+    }
+    AnalyticsCacheRecord.store(GoogleAnalyticsService::CACHE_KEY, cached_data)
+
+    # Stub credentials to fail
+    GoogleAnalyticsService.any_instance.stubs(:oauth_credentials_present?).returns(false)
+
+    service = GoogleAnalyticsService.new
+    stats = service.fetch_hevy_tracker_stats
+
+    # Should return database fallback
+    assert_equal 999, stats[:active_users]
+    assert_equal 5000, stats[:page_views]
+    assert_equal "fallback", stats[:source]
+    assert stats[:stale]
+    assert stats.key?(:fetched_at)
+  ensure
+    GoogleAnalyticsService.unstub(:any_instance) if GoogleAnalyticsService.respond_to?(:unstub)
+    AnalyticsCacheRecord.where(key: GoogleAnalyticsService::CACHE_KEY).delete_all
+  end
+
+  test "fetch_hevy_tracker_stats persists fresh data to database" do
+    # The WebMock stub from setup allows OAuth to succeed
+    service = GoogleAnalyticsService.new
+    assert_not_nil service.instance_variable_get(:@client), "Client should exist with credentials"
+
+    # Mock successful API responses
+    mock_response = OpenStruct.new(
+      rows: [ OpenStruct.new(metric_values: [ OpenStruct.new(value: "1234") ]) ],
+      row_count: 1
+    )
+    service.instance_variable_get(:@client).stubs(:run_report).returns(mock_response)
+
+    # Clear any existing cache
+    AnalyticsCacheRecord.where(key: GoogleAnalyticsService::CACHE_KEY).delete_all
+
+    stats = service.fetch_hevy_tracker_stats
+
+    # Should persist to database
+    cached = AnalyticsCacheRecord.retrieve(GoogleAnalyticsService::CACHE_KEY)
+    assert_not_nil cached, "Data should be persisted to database"
+    assert cached.key?("active_users") || cached.key?(:active_users)
+  ensure
+    AnalyticsCacheRecord.where(key: GoogleAnalyticsService::CACHE_KEY).delete_all
   end
 end
