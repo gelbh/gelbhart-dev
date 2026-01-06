@@ -20,8 +20,8 @@ ActiveSupport.on_load(:active_record) do
   ActiveRecord::ConnectionAdapters::ConnectionPool.class_eval do
     alias_method :original_checkout, :checkout unless method_defined?(:original_checkout)
 
-    def checkout
-      connection = original_checkout
+    def checkout(*args)
+      connection = original_checkout(*args)
       begin
         connection.execute("SET search_path TO public, extensions, graphql, vault")
       rescue ActiveRecord::StatementInvalid
