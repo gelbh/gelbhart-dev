@@ -105,16 +105,44 @@ namespace :db do
         SQL
       end
 
-      # Add OR REPLACE to CREATE FUNCTION statements for idempotency
+      # Comment out Supabase-managed functions in extensions schema
+      # These functions are managed by Supabase and the application user lacks permissions to create/replace them
+      supabase_functions = %w[grant_pg_cron_access grant_pg_graphql_access grant_pg_net_access pgrst_ddl_watch pgrst_drop_watch]
+
+      # Process line by line to comment out entire function definitions
+      lines = content.split("\n")
+      in_supabase_function = false
+      commented_lines = lines.map do |line|
+        # Check if this line starts a Supabase-managed function
+        if line.match?(/^CREATE (OR REPLACE )?FUNCTION extensions\.(#{supabase_functions.join('|')})\(/)
+          in_supabase_function = true
+          "-- #{line} -- Supabase-managed function, commented out"
+        # Check if we're in a Supabase function and this is the end ($$;)
+        elsif in_supabase_function && line.strip.end_with?('$$;')
+          in_supabase_function = false
+          "-- #{line} -- Supabase-managed function, commented out"
+        # Check if we're in a Supabase function (comment out the line)
+        elsif in_supabase_function
+          "-- #{line}"
+        # Check for COMMENT ON FUNCTION for Supabase functions
+        elsif line.match?(/^COMMENT ON FUNCTION extensions\.(#{supabase_functions.join('|')})\(/)
+          "-- #{line} -- Supabase-managed function"
+        else
+          line
+        end
+      end
+      content = commented_lines.join("\n")
+
+      # Add OR REPLACE to CREATE FUNCTION statements for idempotency (only for non-Supabase functions)
       # Functions may already exist if structure.sql is loaded multiple times
-      # Only match if OR REPLACE is not already present
+      # Only match if OR REPLACE is not already present and not a Supabase-managed function
       content.gsub!(
-        /^CREATE FUNCTION (?!OR REPLACE)([\w.]+)\(/,
-        'CREATE OR REPLACE FUNCTION \1('
+        /^CREATE (OR REPLACE )?FUNCTION (?!extensions\.(?:#{supabase_functions.join('|')}))([\w.]+)\(/,
+        'CREATE OR REPLACE FUNCTION \3('
       )
 
       File.write(structure_file, content)
-      puts "Post-processed structure.sql: Added IF NOT EXISTS to schemas, tables, sequences, and indexes, made constraints conditional, added OR REPLACE to functions, commented PostgreSQL 17+ and Supabase-specific features (extensions, publications)"
+      puts "Post-processed structure.sql: Added IF NOT EXISTS to schemas, tables, sequences, and indexes, made constraints conditional, added OR REPLACE to functions (commented Supabase-managed functions), commented PostgreSQL 17+ and Supabase-specific features (extensions, publications)"
     end
   end
 
