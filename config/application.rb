@@ -30,9 +30,9 @@ module GelbhartDev
     # Use Sprockets for asset pipeline
     config.assets.initialize_on_precompile = false
 
-    # Use SQL format for schema to properly handle PostgreSQL-specific features
-    # (extensions, custom schemas, etc.) that may differ between environments
-    config.active_record.schema_format = :sql
+    # Use Ruby schema format (Rails default)
+    # Optional PostgreSQL extensions are handled conditionally in migrations
+    config.active_record.schema_format = :ruby
 
     config.exceptions_app = self.routes
 

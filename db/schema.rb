@@ -10,14 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_08_214526) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_30_161752) do
   # These are extensions that must be enabled in order to support this database
+  # Note: Supabase-specific extensions (pg_graphql, supabase_vault) are handled
+  # conditionally in db/migrate/20251208214526_enable_optional_postgres_extensions.rb
   enable_extension "extensions.pg_stat_statements"
   enable_extension "extensions.pgcrypto"
   enable_extension "extensions.uuid-ossp"
-  enable_extension "graphql.pg_graphql"
-  enable_extension "pg_catalog.plpgsql"
-  enable_extension "vault.supabase_vault"
+  enable_extension "plpgsql"
 
   create_table "pacman_scores", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -52,5 +52,14 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_08_214526) do
     t.index ["featured"], name: "index_projects_on_featured"
     t.index ["position"], name: "index_projects_on_position"
     t.index ["published"], name: "index_projects_on_published"
+  end
+
+  create_table "analytics_cache_records", force: :cascade do |t|
+    t.string "key", null: false
+    t.jsonb "data", default: {}, null: false
+    t.datetime "fetched_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_analytics_cache_records_on_key", unique: true
   end
 end
