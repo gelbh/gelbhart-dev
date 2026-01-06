@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS public.analytics_cache_records (
 -- Name: analytics_cache_records_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE IF NOT EXISTS IF NOT EXISTS public.analytics_cache_records_id_seq
+CREATE SEQUENCE IF NOT EXISTS public.analytics_cache_records_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -141,7 +141,7 @@ CREATE TABLE IF NOT EXISTS public.pacman_scores (
 -- Name: pacman_scores_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE IF NOT EXISTS IF NOT EXISTS public.pacman_scores_id_seq
+CREATE SEQUENCE IF NOT EXISTS public.pacman_scores_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -187,7 +187,7 @@ CREATE TABLE IF NOT EXISTS public.projects (
 -- Name: projects_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE IF NOT EXISTS IF NOT EXISTS public.projects_id_seq
+CREATE SEQUENCE IF NOT EXISTS public.projects_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE

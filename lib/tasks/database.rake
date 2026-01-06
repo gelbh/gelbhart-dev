@@ -59,22 +59,25 @@ namespace :db do
       # Add IF NOT EXISTS to CREATE TABLE statements for idempotency
       # This prevents errors when structure.sql is loaded and tables already exist
       # pg_dump doesn't generate IF NOT EXISTS by default
+      # Only match if IF NOT EXISTS is not already present
       content.gsub!(
-        /^CREATE TABLE (public\.)?(\w+) \(/,
+        /^CREATE TABLE (?!IF NOT EXISTS)(public\.)?(\w+) \(/,
         'CREATE TABLE IF NOT EXISTS \1\2 ('
       )
 
       # Add IF NOT EXISTS to CREATE SEQUENCE statements for idempotency
       # Sequences are created automatically with tables, but pg_dump includes them explicitly
+      # Only match if IF NOT EXISTS is not already present
       content.gsub!(
-        /^CREATE SEQUENCE (public\.)?(\w+)/,
+        /^CREATE SEQUENCE (?!IF NOT EXISTS)(public\.)?(\w+)/,
         'CREATE SEQUENCE IF NOT EXISTS \1\2'
       )
 
       # Add IF NOT EXISTS to CREATE INDEX statements for idempotency
       # Indexes may already exist if structure.sql is loaded multiple times
+      # Only match if IF NOT EXISTS is not already present
       content.gsub!(
-        /^CREATE INDEX (\w+) ON/,
+        /^CREATE INDEX (?!IF NOT EXISTS)(\w+) ON/,
         'CREATE INDEX IF NOT EXISTS \1 ON'
       )
 
