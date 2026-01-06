@@ -11,19 +11,13 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[8.1].define(version: 2025_12_30_161752) do
-  create_schema "extensions"
-  create_schema "graphql"
-  create_schema "vault"
-
   # These are extensions that must be enabled in order to support this database
-  enable_extension "extensions.pg_stat_statements"
-  enable_extension "extensions.pgcrypto"
-  enable_extension "extensions.uuid-ossp"
-  enable_extension "graphql.pg_graphql"
-  enable_extension "pg_catalog.plpgsql"
-  enable_extension "vault.supabase_vault"
+  # Note: Extensions in custom schemas (extensions, graphql, vault) are handled
+  # conditionally in db/migrate/20251208214526_enable_optional_postgres_extensions.rb
+  # Ruby schema format doesn't support schema-qualified extension names
+  enable_extension "plpgsql"
 
-  create_table "public.analytics_cache_records", force: :cascade do |t|
+  create_table "analytics_cache_records", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.jsonb "data", default: {}, null: false
     t.datetime "fetched_at", null: false
@@ -32,7 +26,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_30_161752) do
     t.index ["key"], name: "index_analytics_cache_records_on_key", unique: true
   end
 
-  create_table "public.pacman_scores", force: :cascade do |t|
+  create_table "pacman_scores", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.boolean "is_win"
     t.datetime "played_at"
@@ -43,7 +37,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_30_161752) do
     t.index ["score"], name: "index_pacman_scores_on_score_desc", order: :desc
   end
 
-  create_table "public.projects", force: :cascade do |t|
+  create_table "projects", force: :cascade do |t|
     t.jsonb "badges", default: []
     t.string "color"
     t.datetime "created_at", null: false
@@ -65,16 +59,5 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_30_161752) do
     t.index ["featured"], name: "index_projects_on_featured"
     t.index ["position"], name: "index_projects_on_position"
     t.index ["published"], name: "index_projects_on_published"
-  end
-
-  create_table "vault.secrets", id: :uuid, default: -> { "gen_random_uuid()" }, comment: "Table with encrypted `secret` column for storing sensitive information on disk.", force: :cascade do |t|
-    t.timestamptz "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.text "description", default: "", null: false
-    t.uuid "key_id"
-    t.text "name"
-    t.binary "nonce", default: -> { "_crypto_aead_det_noncegen()" }
-    t.text "secret", null: false
-    t.timestamptz "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.index ["name"], name: "secrets_name_idx", unique: true, where: "(name IS NOT NULL)"
   end
 end
