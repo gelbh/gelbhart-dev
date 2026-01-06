@@ -81,7 +81,7 @@ SET default_table_access_method = heap;
 -- Name: analytics_cache_records; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.analytics_cache_records (
+CREATE TABLE IF NOT EXISTS public.analytics_cache_records (
     id bigint NOT NULL,
     key character varying NOT NULL,
     data jsonb DEFAULT '{}'::jsonb NOT NULL,
@@ -114,7 +114,7 @@ ALTER SEQUENCE public.analytics_cache_records_id_seq OWNED BY public.analytics_c
 -- Name: ar_internal_metadata; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.ar_internal_metadata (
+CREATE TABLE IF NOT EXISTS public.ar_internal_metadata (
     key character varying NOT NULL,
     value character varying,
     created_at timestamp(6) without time zone NOT NULL,
@@ -126,7 +126,7 @@ CREATE TABLE public.ar_internal_metadata (
 -- Name: pacman_scores; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.pacman_scores (
+CREATE TABLE IF NOT EXISTS public.pacman_scores (
     id bigint NOT NULL,
     player_name character varying,
     score integer,
@@ -160,7 +160,7 @@ ALTER SEQUENCE public.pacman_scores_id_seq OWNED BY public.pacman_scores.id;
 -- Name: projects; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.projects (
+CREATE TABLE IF NOT EXISTS public.projects (
     id bigint NOT NULL,
     title character varying NOT NULL,
     subtitle character varying NOT NULL,
@@ -206,7 +206,7 @@ ALTER SEQUENCE public.projects_id_seq OWNED BY public.projects.id;
 -- Name: schema_migrations; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.schema_migrations (
+CREATE TABLE IF NOT EXISTS public.schema_migrations (
     version character varying NOT NULL
 );
 
