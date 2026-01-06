@@ -105,8 +105,16 @@ namespace :db do
         SQL
       end
 
+      # Add OR REPLACE to CREATE FUNCTION statements for idempotency
+      # Functions may already exist if structure.sql is loaded multiple times
+      # Only match if OR REPLACE is not already present
+      content.gsub!(
+        /^CREATE FUNCTION (?!OR REPLACE)([\w.]+)\(/,
+        'CREATE OR REPLACE FUNCTION \1('
+      )
+
       File.write(structure_file, content)
-      puts "Post-processed structure.sql: Added IF NOT EXISTS to schemas, tables, sequences, and indexes, made constraints conditional, commented PostgreSQL 17+ and Supabase-specific features (extensions, publications)"
+      puts "Post-processed structure.sql: Added IF NOT EXISTS to schemas, tables, sequences, and indexes, made constraints conditional, added OR REPLACE to functions, commented PostgreSQL 17+ and Supabase-specific features (extensions, publications)"
     end
   end
 
