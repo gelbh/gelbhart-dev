@@ -1,7 +1,13 @@
 namespace :db do
-  # Post-process structure.sql after generation to make schema creation idempotent
-  # This ensures CREATE SCHEMA statements include IF NOT EXISTS for Supabase schemas
-  # Hook into db:structure:dump task (which is used when schema_format = :sql)
+  # Post-process structure.sql after generation
+  #
+  # Supabase-managed schemas (auth, graphql, realtime, storage, pgbouncer, graphql_public)
+  # are excluded at dump time via structure_dump_flags in config/initializers/database_structure.rb
+  #
+  # This post-processing handles remaining edge cases:
+  # - PostgreSQL 17+ compatibility (transaction_timeout)
+  # - Supabase-specific extensions that may not exist in local environments
+  # - Adding IF NOT EXISTS to schema creation for idempotency
   post_process_structure = proc do
     structure_file = Rails.root.join("db", "structure.sql")
 
@@ -40,8 +46,9 @@ namespace :db do
         "-- CREATE PUBLICATION supabase_realtime WITH (publish = 'insert, update, delete, truncate'); -- Supabase-specific, commented for local compatibility (requires wal_level = logical)"
       )
 
-      # Add IF NOT EXISTS to schema creation statements for Supabase schemas
+      # Add IF NOT EXISTS to schema creation statements for schemas we want to keep
       # pg_dump generates CREATE SCHEMA without IF NOT EXISTS, but we need it for idempotency
+      # Note: Supabase-managed schemas are excluded at dump time via structure_dump_flags
       %w[extensions graphql vault].each do |schema_name|
         content.gsub!(
           /^CREATE SCHEMA #{Regexp.escape(schema_name)};$/,
@@ -63,5 +70,11 @@ namespace :db do
         post_process_structure.call
       end
     end
+  end
+
+  # Manual task to post-process existing structure.sql file
+  desc "Post-process structure.sql to comment out Supabase-managed schema objects"
+  task "structure:post_process" => :environment do
+    post_process_structure.call
   end
 end
