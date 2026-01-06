@@ -243,6 +243,11 @@
                   <i class="bx bx-trophy me-2"></i>Tier List
                 </button>
               </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="routine-builder-tab" data-bs-toggle="tab" data-bs-target="#routine-builder-view" type="button" role="tab" aria-controls="routine-builder-view" aria-selected="false">
+                  <i class="bx bx-list-ul me-2"></i>Routine Builder
+                </button>
+              </li>
             </ul>
             <!-- Tab Content -->
             <div class="tab-content" id="spreadsheetTabContent">
@@ -278,6 +283,23 @@
                 <div class="text-center mt-3 pb-3">
                   <h5 class="mb-2">Exercise Tier List</h5>
                   <p class="text-muted mb-0 small">Visualize your exercise performance and progress rankings</p>
+                </div>
+              </div>
+              <!-- Routine Builder View -->
+              <div class="tab-pane fade" id="routine-builder-view" role="tabpanel" aria-labelledby="routine-builder-tab">
+                <div class="gallery-item rounded-3 overflow-hidden position-relative" 
+                                     data-bs-toggle="modal" 
+                                     data-bs-target="#imageModal" 
+                                     data-image="<%= asset_path('hevy-tracker/routine-builder.webp') %>" 
+                                     data-alt="Hevy Tracker routine builder">
+                  <%= image_tag "hevy-tracker/routine-builder.webp", 
+                                        alt: "Hevy Tracker routine builder interface",
+                                        class: "img-fluid rounded-3",
+                                        loading: "lazy" %>
+                </div>
+                <div class="text-center mt-3 pb-3">
+                  <h5 class="mb-2">Routine Builder</h5>
+                  <p class="text-muted mb-0 small">Create and manage your workout routines</p>
                 </div>
               </div>
             </div>
