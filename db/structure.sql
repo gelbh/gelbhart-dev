@@ -98,7 +98,7 @@ COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UU
 -- Name: grant_pg_cron_access(); Type: FUNCTION; Schema: extensions; Owner: -
 --
 
-CREATE FUNCTION extensions.grant_pg_cron_access() RETURNS event_trigger
+CREATE OR REPLACE FUNCTION extensions.grant_pg_cron_access() RETURNS event_trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
@@ -142,7 +142,7 @@ COMMENT ON FUNCTION extensions.grant_pg_cron_access() IS 'Grants access to pg_cr
 -- Name: grant_pg_graphql_access(); Type: FUNCTION; Schema: extensions; Owner: -
 --
 
-CREATE FUNCTION extensions.grant_pg_graphql_access() RETURNS event_trigger
+CREATE OR REPLACE FUNCTION extensions.grant_pg_graphql_access() RETURNS event_trigger
     LANGUAGE plpgsql
     AS $_$
 DECLARE
@@ -207,7 +207,7 @@ COMMENT ON FUNCTION extensions.grant_pg_graphql_access() IS 'Grants access to pg
 -- Name: grant_pg_net_access(); Type: FUNCTION; Schema: extensions; Owner: -
 --
 
-CREATE FUNCTION extensions.grant_pg_net_access() RETURNS event_trigger
+CREATE OR REPLACE FUNCTION extensions.grant_pg_net_access() RETURNS event_trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
@@ -265,7 +265,7 @@ COMMENT ON FUNCTION extensions.grant_pg_net_access() IS 'Grants access to pg_net
 -- Name: pgrst_ddl_watch(); Type: FUNCTION; Schema: extensions; Owner: -
 --
 
-CREATE FUNCTION extensions.pgrst_ddl_watch() RETURNS event_trigger
+CREATE OR REPLACE FUNCTION extensions.pgrst_ddl_watch() RETURNS event_trigger
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -298,7 +298,7 @@ END; $$;
 -- Name: pgrst_drop_watch(); Type: FUNCTION; Schema: extensions; Owner: -
 --
 
-CREATE FUNCTION extensions.pgrst_drop_watch() RETURNS event_trigger
+CREATE OR REPLACE FUNCTION extensions.pgrst_drop_watch() RETURNS event_trigger
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -329,7 +329,7 @@ END; $$;
 -- Name: set_graphql_placeholder(); Type: FUNCTION; Schema: extensions; Owner: -
 --
 
-CREATE FUNCTION extensions.set_graphql_placeholder() RETURNS event_trigger
+CREATE OR REPLACE FUNCTION extensions.set_graphql_placeholder() RETURNS event_trigger
     LANGUAGE plpgsql
     AS $_$
     DECLARE
