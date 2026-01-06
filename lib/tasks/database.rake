@@ -81,8 +81,32 @@ namespace :db do
         'CREATE INDEX IF NOT EXISTS \1 ON'
       )
 
+      # Make ALTER TABLE ADD CONSTRAINT statements conditional
+      # When tables already exist (due to IF NOT EXISTS), constraints may also exist
+      # Wrap ADD CONSTRAINT in a DO block that checks if constraint exists first
+      content.gsub!(/^ALTER TABLE ONLY (public\.)?(\w+)\s+ADD CONSTRAINT (\w+) PRIMARY KEY \((.+?)\);/) do |match|
+        schema_prefix = $1 || ''
+        table_name = $2
+        constraint_name = $3
+        columns = $4
+        full_table = "#{schema_prefix}#{table_name}"
+
+        <<~SQL
+          DO $$
+          BEGIN
+            IF NOT EXISTS (
+              SELECT 1 FROM pg_constraint#{' '}
+              WHERE conname = '#{constraint_name}'#{' '}
+              AND conrelid = '#{full_table}'::regclass
+            ) THEN
+              ALTER TABLE ONLY #{full_table} ADD CONSTRAINT #{constraint_name} PRIMARY KEY (#{columns});
+            END IF;
+          END $$;
+        SQL
+      end
+
       File.write(structure_file, content)
-      puts "Post-processed structure.sql: Added IF NOT EXISTS to schemas, tables, sequences, and indexes, commented PostgreSQL 17+ and Supabase-specific features (extensions, publications)"
+      puts "Post-processed structure.sql: Added IF NOT EXISTS to schemas, tables, sequences, and indexes, made constraints conditional, commented PostgreSQL 17+ and Supabase-specific features (extensions, publications)"
     end
   end
 
