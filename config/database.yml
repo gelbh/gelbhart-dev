@@ -5,6 +5,7 @@ default: &default
   connect_timeout: 5
   checkout_timeout: 5
   reaping_frequency: 10
+  schema_search_path: public, extensions, graphql, vault
 
 development:
   <<: *default
