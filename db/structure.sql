@@ -18,17 +18,24 @@ CREATE SCHEMA IF NOT EXISTS extensions;
 
 
 --
--- Name: public; Type: SCHEMA; Schema: -; Owner: -
---
-
--- *not* creating schema, since initdb creates it
-
-
---
 -- Name: vault; Type: SCHEMA; Schema: -; Owner: -
 --
 
 CREATE SCHEMA IF NOT EXISTS vault;
+
+
+--
+-- Name: pg_graphql; Type: EXTENSION; Schema: -; Owner: -
+--
+
+-- CREATE EXTENSION IF NOT EXISTS pg_graphql WITH SCHEMA graphql; -- Supabase-specific, commented for local compatibility
+
+
+--
+-- Name: EXTENSION pg_graphql; Type: COMMENT; Schema: -; Owner: -
+--
+
+-- COMMENT ON EXTENSION pg_graphql IS 'pg_graphql: GraphQL support'; -- Supabase-specific
 
 
 --
@@ -60,6 +67,20 @@ COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
 
 
 --
+-- Name: supabase_vault; Type: EXTENSION; Schema: -; Owner: -
+--
+
+-- CREATE EXTENSION IF NOT EXISTS supabase_vault WITH SCHEMA vault; -- Supabase-specific, commented for local compatibility
+
+
+--
+-- Name: EXTENSION supabase_vault; Type: COMMENT; Schema: -; Owner: -
+--
+
+-- COMMENT ON EXTENSION supabase_vault IS 'Supabase Vault Extension'; -- Supabase-specific
+
+
+--
 -- Name: uuid-ossp; Type: EXTENSION; Schema: -; Owner: -
 --
 
@@ -71,6 +92,301 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA extensions;
 --
 
 COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
+
+
+--
+-- Name: grant_pg_cron_access(); Type: FUNCTION; Schema: extensions; Owner: -
+--
+
+CREATE FUNCTION extensions.grant_pg_cron_access() RETURNS event_trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF EXISTS (
+    SELECT
+    FROM pg_event_trigger_ddl_commands() AS ev
+    JOIN pg_extension AS ext
+    ON ev.objid = ext.oid
+    WHERE ext.extname = 'pg_cron'
+  )
+  THEN
+    grant usage on schema cron to postgres with grant option;
+
+    alter default privileges in schema cron grant all on tables to postgres with grant option;
+    alter default privileges in schema cron grant all on functions to postgres with grant option;
+    alter default privileges in schema cron grant all on sequences to postgres with grant option;
+
+    alter default privileges for user supabase_admin in schema cron grant all
+        on sequences to postgres with grant option;
+    alter default privileges for user supabase_admin in schema cron grant all
+        on tables to postgres with grant option;
+    alter default privileges for user supabase_admin in schema cron grant all
+        on functions to postgres with grant option;
+
+    grant all privileges on all tables in schema cron to postgres with grant option;
+    revoke all on table cron.job from postgres;
+    grant select on table cron.job to postgres with grant option;
+  END IF;
+END;
+$$;
+
+
+--
+-- Name: FUNCTION grant_pg_cron_access(); Type: COMMENT; Schema: extensions; Owner: -
+--
+
+COMMENT ON FUNCTION extensions.grant_pg_cron_access() IS 'Grants access to pg_cron';
+
+
+--
+-- Name: grant_pg_graphql_access(); Type: FUNCTION; Schema: extensions; Owner: -
+--
+
+CREATE FUNCTION extensions.grant_pg_graphql_access() RETURNS event_trigger
+    LANGUAGE plpgsql
+    AS $_$
+DECLARE
+    func_is_graphql_resolve bool;
+BEGIN
+    func_is_graphql_resolve = (
+        SELECT n.proname = 'resolve'
+        FROM pg_event_trigger_ddl_commands() AS ev
+        LEFT JOIN pg_catalog.pg_proc AS n
+        ON ev.objid = n.oid
+    );
+
+    IF func_is_graphql_resolve
+    THEN
+        -- Update public wrapper to pass all arguments through to the pg_graphql resolve func
+        DROP FUNCTION IF EXISTS graphql_public.graphql;
+        create or replace function graphql_public.graphql(
+            "operationName" text default null,
+            query text default null,
+            variables jsonb default null,
+            extensions jsonb default null
+        )
+            returns jsonb
+            language sql
+        as $$
+            select graphql.resolve(
+                query := query,
+                variables := coalesce(variables, '{}'),
+                "operationName" := "operationName",
+                extensions := extensions
+            );
+        $$;
+
+        -- This hook executes when `graphql.resolve` is created. That is not necessarily the last
+        -- function in the extension so we need to grant permissions on existing entities AND
+        -- update default permissions to any others that are created after `graphql.resolve`
+        grant usage on schema graphql to postgres, anon, authenticated, service_role;
+        grant select on all tables in schema graphql to postgres, anon, authenticated, service_role;
+        grant execute on all functions in schema graphql to postgres, anon, authenticated, service_role;
+        grant all on all sequences in schema graphql to postgres, anon, authenticated, service_role;
+        alter default privileges in schema graphql grant all on tables to postgres, anon, authenticated, service_role;
+        alter default privileges in schema graphql grant all on functions to postgres, anon, authenticated, service_role;
+        alter default privileges in schema graphql grant all on sequences to postgres, anon, authenticated, service_role;
+
+        -- Allow postgres role to allow granting usage on graphql and graphql_public schemas to custom roles
+        grant usage on schema graphql_public to postgres with grant option;
+        grant usage on schema graphql to postgres with grant option;
+    END IF;
+
+END;
+$_$;
+
+
+--
+-- Name: FUNCTION grant_pg_graphql_access(); Type: COMMENT; Schema: extensions; Owner: -
+--
+
+COMMENT ON FUNCTION extensions.grant_pg_graphql_access() IS 'Grants access to pg_graphql';
+
+
+--
+-- Name: grant_pg_net_access(); Type: FUNCTION; Schema: extensions; Owner: -
+--
+
+CREATE FUNCTION extensions.grant_pg_net_access() RETURNS event_trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_event_trigger_ddl_commands() AS ev
+    JOIN pg_extension AS ext
+    ON ev.objid = ext.oid
+    WHERE ext.extname = 'pg_net'
+  )
+  THEN
+    IF NOT EXISTS (
+      SELECT 1
+      FROM pg_roles
+      WHERE rolname = 'supabase_functions_admin'
+    )
+    THEN
+      CREATE USER supabase_functions_admin NOINHERIT CREATEROLE LOGIN NOREPLICATION;
+    END IF;
+
+    GRANT USAGE ON SCHEMA net TO supabase_functions_admin, postgres, anon, authenticated, service_role;
+
+    IF EXISTS (
+      SELECT FROM pg_extension
+      WHERE extname = 'pg_net'
+      -- all versions in use on existing projects as of 2025-02-20
+      -- version 0.12.0 onwards don't need these applied
+      AND extversion IN ('0.2', '0.6', '0.7', '0.7.1', '0.8', '0.10.0', '0.11.0')
+    ) THEN
+      ALTER function net.http_get(url text, params jsonb, headers jsonb, timeout_milliseconds integer) SECURITY DEFINER;
+      ALTER function net.http_post(url text, body jsonb, params jsonb, headers jsonb, timeout_milliseconds integer) SECURITY DEFINER;
+
+      ALTER function net.http_get(url text, params jsonb, headers jsonb, timeout_milliseconds integer) SET search_path = net;
+      ALTER function net.http_post(url text, body jsonb, params jsonb, headers jsonb, timeout_milliseconds integer) SET search_path = net;
+
+      REVOKE ALL ON FUNCTION net.http_get(url text, params jsonb, headers jsonb, timeout_milliseconds integer) FROM PUBLIC;
+      REVOKE ALL ON FUNCTION net.http_post(url text, body jsonb, params jsonb, headers jsonb, timeout_milliseconds integer) FROM PUBLIC;
+
+      GRANT EXECUTE ON FUNCTION net.http_get(url text, params jsonb, headers jsonb, timeout_milliseconds integer) TO supabase_functions_admin, postgres, anon, authenticated, service_role;
+      GRANT EXECUTE ON FUNCTION net.http_post(url text, body jsonb, params jsonb, headers jsonb, timeout_milliseconds integer) TO supabase_functions_admin, postgres, anon, authenticated, service_role;
+    END IF;
+  END IF;
+END;
+$$;
+
+
+--
+-- Name: FUNCTION grant_pg_net_access(); Type: COMMENT; Schema: extensions; Owner: -
+--
+
+COMMENT ON FUNCTION extensions.grant_pg_net_access() IS 'Grants access to pg_net';
+
+
+--
+-- Name: pgrst_ddl_watch(); Type: FUNCTION; Schema: extensions; Owner: -
+--
+
+CREATE FUNCTION extensions.pgrst_ddl_watch() RETURNS event_trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  cmd record;
+BEGIN
+  FOR cmd IN SELECT * FROM pg_event_trigger_ddl_commands()
+  LOOP
+    IF cmd.command_tag IN (
+      'CREATE SCHEMA', 'ALTER SCHEMA'
+    , 'CREATE TABLE', 'CREATE TABLE AS', 'SELECT INTO', 'ALTER TABLE'
+    , 'CREATE FOREIGN TABLE', 'ALTER FOREIGN TABLE'
+    , 'CREATE VIEW', 'ALTER VIEW'
+    , 'CREATE MATERIALIZED VIEW', 'ALTER MATERIALIZED VIEW'
+    , 'CREATE FUNCTION', 'ALTER FUNCTION'
+    , 'CREATE TRIGGER'
+    , 'CREATE TYPE', 'ALTER TYPE'
+    , 'CREATE RULE'
+    , 'COMMENT'
+    )
+    -- don't notify in case of CREATE TEMP table or other objects created on pg_temp
+    AND cmd.schema_name is distinct from 'pg_temp'
+    THEN
+      NOTIFY pgrst, 'reload schema';
+    END IF;
+  END LOOP;
+END; $$;
+
+
+--
+-- Name: pgrst_drop_watch(); Type: FUNCTION; Schema: extensions; Owner: -
+--
+
+CREATE FUNCTION extensions.pgrst_drop_watch() RETURNS event_trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  obj record;
+BEGIN
+  FOR obj IN SELECT * FROM pg_event_trigger_dropped_objects()
+  LOOP
+    IF obj.object_type IN (
+      'schema'
+    , 'table'
+    , 'foreign table'
+    , 'view'
+    , 'materialized view'
+    , 'function'
+    , 'trigger'
+    , 'type'
+    , 'rule'
+    )
+    AND obj.is_temporary IS false -- no pg_temp objects
+    THEN
+      NOTIFY pgrst, 'reload schema';
+    END IF;
+  END LOOP;
+END; $$;
+
+
+--
+-- Name: set_graphql_placeholder(); Type: FUNCTION; Schema: extensions; Owner: -
+--
+
+CREATE FUNCTION extensions.set_graphql_placeholder() RETURNS event_trigger
+    LANGUAGE plpgsql
+    AS $_$
+    DECLARE
+    graphql_is_dropped bool;
+    BEGIN
+    graphql_is_dropped = (
+        SELECT ev.schema_name = 'graphql_public'
+        FROM pg_event_trigger_dropped_objects() AS ev
+        WHERE ev.schema_name = 'graphql_public'
+    );
+
+    IF graphql_is_dropped
+    THEN
+        create or replace function graphql_public.graphql(
+            "operationName" text default null,
+            query text default null,
+            variables jsonb default null,
+            extensions jsonb default null
+        )
+            returns jsonb
+            language plpgsql
+        as $$
+            DECLARE
+                server_version float;
+            BEGIN
+                server_version = (SELECT (SPLIT_PART((select version()), ' ', 2))::float);
+
+                IF server_version >= 14 THEN
+                    RETURN jsonb_build_object(
+                        'errors', jsonb_build_array(
+                            jsonb_build_object(
+                                'message', 'pg_graphql extension is not enabled.'
+                            )
+                        )
+                    );
+                ELSE
+                    RETURN jsonb_build_object(
+                        'errors', jsonb_build_array(
+                            jsonb_build_object(
+                                'message', 'pg_graphql is only available on projects running Postgres 14 onwards.'
+                            )
+                        )
+                    );
+                END IF;
+            END;
+        $$;
+    END IF;
+
+    END;
+$_$;
+
+
+--
+-- Name: FUNCTION set_graphql_placeholder(); Type: COMMENT; Schema: extensions; Owner: -
+--
+
+COMMENT ON FUNCTION extensions.set_graphql_placeholder() IS 'Reintroduces placeholder function for graphql_public.graphql';
 
 
 SET default_tablespace = '';
@@ -128,11 +444,11 @@ CREATE TABLE IF NOT EXISTS public.ar_internal_metadata (
 
 CREATE TABLE IF NOT EXISTS public.pacman_scores (
     id bigint NOT NULL,
-    player_name character varying,
-    score integer,
+    created_at timestamp(6) without time zone NOT NULL,
     is_win boolean,
     played_at timestamp(6) without time zone,
-    created_at timestamp(6) without time zone NOT NULL,
+    player_name character varying,
+    score integer,
     updated_at timestamp(6) without time zone NOT NULL
 );
 
@@ -162,23 +478,23 @@ ALTER SEQUENCE public.pacman_scores_id_seq OWNED BY public.pacman_scores.id;
 
 CREATE TABLE IF NOT EXISTS public.projects (
     id bigint NOT NULL,
-    title character varying NOT NULL,
-    subtitle character varying NOT NULL,
-    description text NOT NULL,
-    icon character varying,
+    badges jsonb DEFAULT '[]'::jsonb,
     color character varying,
+    created_at timestamp(6) without time zone NOT NULL,
+    description text NOT NULL,
+    featured boolean DEFAULT true NOT NULL,
+    github_url character varying,
+    icon character varying,
+    link_icon character varying DEFAULT 'bx-right-arrow-alt'::character varying,
+    link_rel character varying,
+    link_target character varying,
     link_text character varying,
     link_url character varying,
-    link_icon character varying DEFAULT 'bx-right-arrow-alt'::character varying,
-    link_target character varying,
-    link_rel character varying,
-    github_url character varying,
-    badges jsonb DEFAULT '[]'::jsonb,
     "position" integer,
     published boolean DEFAULT true NOT NULL,
-    featured boolean DEFAULT true NOT NULL,
     route_name character varying,
-    created_at timestamp(6) without time zone NOT NULL,
+    subtitle character varying NOT NULL,
+    title character varying NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL
 );
 
@@ -236,40 +552,85 @@ ALTER TABLE ONLY public.projects ALTER COLUMN id SET DEFAULT nextval('public.pro
 -- Name: analytics_cache_records analytics_cache_records_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.analytics_cache_records
-    ADD CONSTRAINT analytics_cache_records_pkey PRIMARY KEY (id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint 
+    WHERE conname = 'analytics_cache_records_pkey' 
+    AND conrelid = 'public.analytics_cache_records'::regclass
+  ) THEN
+    ALTER TABLE ONLY public.analytics_cache_records ADD CONSTRAINT analytics_cache_records_pkey PRIMARY KEY (id);
+  END IF;
+END $$;
+
 
 
 --
 -- Name: ar_internal_metadata ar_internal_metadata_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.ar_internal_metadata
-    ADD CONSTRAINT ar_internal_metadata_pkey PRIMARY KEY (key);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint 
+    WHERE conname = 'ar_internal_metadata_pkey' 
+    AND conrelid = 'public.ar_internal_metadata'::regclass
+  ) THEN
+    ALTER TABLE ONLY public.ar_internal_metadata ADD CONSTRAINT ar_internal_metadata_pkey PRIMARY KEY (key);
+  END IF;
+END $$;
+
 
 
 --
 -- Name: pacman_scores pacman_scores_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.pacman_scores
-    ADD CONSTRAINT pacman_scores_pkey PRIMARY KEY (id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint 
+    WHERE conname = 'pacman_scores_pkey' 
+    AND conrelid = 'public.pacman_scores'::regclass
+  ) THEN
+    ALTER TABLE ONLY public.pacman_scores ADD CONSTRAINT pacman_scores_pkey PRIMARY KEY (id);
+  END IF;
+END $$;
+
 
 
 --
 -- Name: projects projects_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.projects
-    ADD CONSTRAINT projects_pkey PRIMARY KEY (id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint 
+    WHERE conname = 'projects_pkey' 
+    AND conrelid = 'public.projects'::regclass
+  ) THEN
+    ALTER TABLE ONLY public.projects ADD CONSTRAINT projects_pkey PRIMARY KEY (id);
+  END IF;
+END $$;
+
 
 
 --
 -- Name: schema_migrations schema_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.schema_migrations
-    ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint 
+    WHERE conname = 'schema_migrations_pkey' 
+    AND conrelid = 'public.schema_migrations'::regclass
+  ) THEN
+    ALTER TABLE ONLY public.schema_migrations ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
+  END IF;
+END $$;
+
 
 
 --
@@ -324,28 +685,28 @@ ALTER TABLE public.ar_internal_metadata ENABLE ROW LEVEL SECURITY;
 -- Name: ar_internal_metadata deny_public_ar_internal_metadata; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY deny_public_ar_internal_metadata ON public.ar_internal_metadata USING (false) WITH CHECK (false);
+CREATE POLICY deny_public_ar_internal_metadata ON public.ar_internal_metadata USING (false);
 
 
 --
 -- Name: pacman_scores deny_public_pacman_scores; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY deny_public_pacman_scores ON public.pacman_scores USING (false) WITH CHECK (false);
+CREATE POLICY deny_public_pacman_scores ON public.pacman_scores USING (false);
 
 
 --
 -- Name: projects deny_public_projects; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY deny_public_projects ON public.projects USING (false) WITH CHECK (false);
+CREATE POLICY deny_public_projects ON public.projects USING (false);
 
 
 --
 -- Name: schema_migrations deny_public_schema_migrations; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY deny_public_schema_migrations ON public.schema_migrations USING (false) WITH CHECK (false);
+CREATE POLICY deny_public_schema_migrations ON public.schema_migrations USING (false);
 
 
 --
@@ -367,10 +728,69 @@ ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.schema_migrations ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: supabase_realtime; Type: PUBLICATION; Schema: -; Owner: -
+--
+
+-- CREATE PUBLICATION supabase_realtime WITH (publish = 'insert, update, delete, truncate'); -- Supabase-specific, commented for local compatibility (requires wal_level = logical)
+
+
+--
+-- Name: issue_graphql_placeholder; Type: EVENT TRIGGER; Schema: -; Owner: -
+--
+
+CREATE EVENT TRIGGER issue_graphql_placeholder ON sql_drop
+         WHEN TAG IN ('DROP EXTENSION')
+   EXECUTE FUNCTION extensions.set_graphql_placeholder();
+
+
+--
+-- Name: issue_pg_cron_access; Type: EVENT TRIGGER; Schema: -; Owner: -
+--
+
+CREATE EVENT TRIGGER issue_pg_cron_access ON ddl_command_end
+         WHEN TAG IN ('CREATE EXTENSION')
+   EXECUTE FUNCTION extensions.grant_pg_cron_access();
+
+
+--
+-- Name: issue_pg_graphql_access; Type: EVENT TRIGGER; Schema: -; Owner: -
+--
+
+CREATE EVENT TRIGGER issue_pg_graphql_access ON ddl_command_end
+         WHEN TAG IN ('CREATE FUNCTION')
+   EXECUTE FUNCTION extensions.grant_pg_graphql_access();
+
+
+--
+-- Name: issue_pg_net_access; Type: EVENT TRIGGER; Schema: -; Owner: -
+--
+
+CREATE EVENT TRIGGER issue_pg_net_access ON ddl_command_end
+         WHEN TAG IN ('CREATE EXTENSION')
+   EXECUTE FUNCTION extensions.grant_pg_net_access();
+
+
+--
+-- Name: pgrst_ddl_watch; Type: EVENT TRIGGER; Schema: -; Owner: -
+--
+
+CREATE EVENT TRIGGER pgrst_ddl_watch ON ddl_command_end
+   EXECUTE FUNCTION extensions.pgrst_ddl_watch();
+
+
+--
+-- Name: pgrst_drop_watch; Type: EVENT TRIGGER; Schema: -; Owner: -
+--
+
+CREATE EVENT TRIGGER pgrst_drop_watch ON sql_drop
+   EXECUTE FUNCTION extensions.pgrst_drop_watch();
+
+
+--
 -- PostgreSQL database dump complete
 --
 
-SET search_path TO "$user", public;
+SET search_path TO "\$user", public, extensions;
 
 INSERT INTO "schema_migrations" (version) VALUES
 ('20251230161752'),
