@@ -56,8 +56,16 @@ namespace :db do
         )
       end
 
+      # Add IF NOT EXISTS to CREATE TABLE statements for idempotency
+      # This prevents errors when structure.sql is loaded and tables already exist
+      # pg_dump doesn't generate IF NOT EXISTS by default
+      content.gsub!(
+        /^CREATE TABLE (public\.)?(\w+) \(/,
+        'CREATE TABLE IF NOT EXISTS \1\2 ('
+      )
+
       File.write(structure_file, content)
-      puts "Post-processed structure.sql: Added IF NOT EXISTS to schemas and commented PostgreSQL 17+ and Supabase-specific features (extensions, publications)"
+      puts "Post-processed structure.sql: Added IF NOT EXISTS to schemas and tables, commented PostgreSQL 17+ and Supabase-specific features (extensions, publications)"
     end
   end
 
