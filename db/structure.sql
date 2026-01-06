@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS public.analytics_cache_records (
 -- Name: analytics_cache_records_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.analytics_cache_records_id_seq
+CREATE SEQUENCE IF NOT EXISTS IF NOT EXISTS public.analytics_cache_records_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -141,7 +141,7 @@ CREATE TABLE IF NOT EXISTS public.pacman_scores (
 -- Name: pacman_scores_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.pacman_scores_id_seq
+CREATE SEQUENCE IF NOT EXISTS IF NOT EXISTS public.pacman_scores_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -187,7 +187,7 @@ CREATE TABLE IF NOT EXISTS public.projects (
 -- Name: projects_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.projects_id_seq
+CREATE SEQUENCE IF NOT EXISTS IF NOT EXISTS public.projects_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -283,35 +283,35 @@ CREATE UNIQUE INDEX index_analytics_cache_records_on_key ON public.analytics_cac
 -- Name: index_pacman_scores_on_player_score_played; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_pacman_scores_on_player_score_played ON public.pacman_scores USING btree (player_name, score DESC, played_at DESC);
+CREATE INDEX IF NOT EXISTS index_pacman_scores_on_player_score_played ON public.pacman_scores USING btree (player_name, score DESC, played_at DESC);
 
 
 --
 -- Name: index_pacman_scores_on_score_desc; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_pacman_scores_on_score_desc ON public.pacman_scores USING btree (score DESC);
+CREATE INDEX IF NOT EXISTS index_pacman_scores_on_score_desc ON public.pacman_scores USING btree (score DESC);
 
 
 --
 -- Name: index_projects_on_featured; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_projects_on_featured ON public.projects USING btree (featured);
+CREATE INDEX IF NOT EXISTS index_projects_on_featured ON public.projects USING btree (featured);
 
 
 --
 -- Name: index_projects_on_position; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_projects_on_position ON public.projects USING btree ("position");
+CREATE INDEX IF NOT EXISTS index_projects_on_position ON public.projects USING btree ("position");
 
 
 --
 -- Name: index_projects_on_published; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_projects_on_published ON public.projects USING btree (published);
+CREATE INDEX IF NOT EXISTS index_projects_on_published ON public.projects USING btree (published);
 
 
 --

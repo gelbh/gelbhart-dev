@@ -64,8 +64,22 @@ namespace :db do
         'CREATE TABLE IF NOT EXISTS \1\2 ('
       )
 
+      # Add IF NOT EXISTS to CREATE SEQUENCE statements for idempotency
+      # Sequences are created automatically with tables, but pg_dump includes them explicitly
+      content.gsub!(
+        /^CREATE SEQUENCE (public\.)?(\w+)/,
+        'CREATE SEQUENCE IF NOT EXISTS \1\2'
+      )
+
+      # Add IF NOT EXISTS to CREATE INDEX statements for idempotency
+      # Indexes may already exist if structure.sql is loaded multiple times
+      content.gsub!(
+        /^CREATE INDEX (\w+) ON/,
+        'CREATE INDEX IF NOT EXISTS \1 ON'
+      )
+
       File.write(structure_file, content)
-      puts "Post-processed structure.sql: Added IF NOT EXISTS to schemas and tables, commented PostgreSQL 17+ and Supabase-specific features (extensions, publications)"
+      puts "Post-processed structure.sql: Added IF NOT EXISTS to schemas, tables, sequences, and indexes, commented PostgreSQL 17+ and Supabase-specific features (extensions, publications)"
     end
   end
 
