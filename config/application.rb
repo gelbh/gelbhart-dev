@@ -36,10 +36,21 @@ module GelbhartDev
 
     config.exceptions_app = self.routes
 
-    # Allow embedding only from corporate site (and self). X-Frame-Options cannot
+    # Allow embedding from corporate site (and self). X-Frame-Options cannot
     # express multiple origins; frame-ancestors replaces it when both are sent.
-    frame_ancestors = ["'self'", "https://gelbhart.com", "https://www.gelbhart.com"]
-    frame_ancestors += ["http://localhost:3000", "http://127.0.0.1:3000"] if Rails.env.development?
+    #
+    # Local dev origins are included in production too so a locally running
+    # gelbhart-innovations app can iframe production gelbhart.dev. Optional
+    # comma-separated ENV e.g. preview deploys: FRAME_ANCESTORS_EXTRA=https://foo.onrender.com
+    base_frame_ancestors = ["'self'", "https://gelbhart.com", "https://www.gelbhart.com"]
+    local_embed_origins = %w[
+      http://localhost:3000
+      http://127.0.0.1:3000
+      http://localhost:3001
+      http://127.0.0.1:3001
+    ]
+    extra = ENV.fetch("FRAME_ANCESTORS_EXTRA", "").split(",").map(&:strip).reject(&:empty?)
+    frame_ancestors = (base_frame_ancestors + local_embed_origins + extra).uniq
 
     config.action_dispatch.default_headers.merge!(
       "Content-Security-Policy" => "frame-ancestors #{frame_ancestors.join(' ')};",
