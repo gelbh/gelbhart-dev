@@ -19,9 +19,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_07_110752) do
   enable_extension "extensions.pg_stat_statements"
   enable_extension "extensions.pgcrypto"
   enable_extension "extensions.uuid-ossp"
-  enable_extension "graphql.pg_graphql"
   enable_extension "pg_catalog.plpgsql"
-  enable_extension "vault.supabase_vault"
 
   create_table "public.analytics_cache_records", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -65,16 +63,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_07_110752) do
     t.index ["featured"], name: "index_projects_on_featured"
     t.index ["position"], name: "index_projects_on_position"
     t.index ["published"], name: "index_projects_on_published"
-  end
-
-  create_table "vault.secrets", id: :uuid, default: -> { "gen_random_uuid()" }, comment: "Table with encrypted `secret` column for storing sensitive information on disk.", force: :cascade do |t|
-    t.timestamptz "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.text "description", default: "", null: false
-    t.uuid "key_id"
-    t.text "name"
-    t.binary "nonce", default: -> { "_crypto_aead_det_noncegen()" }
-    t.text "secret", null: false
-    t.timestamptz "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.index ["name"], name: "secrets_name_idx", unique: true, where: "(name IS NOT NULL)"
   end
 end
