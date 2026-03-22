@@ -36,8 +36,13 @@ module GelbhartDev
 
     config.exceptions_app = self.routes
 
+    # Allow embedding only from corporate site (and self). X-Frame-Options cannot
+    # express multiple origins; frame-ancestors replaces it when both are sent.
+    frame_ancestors = ["'self'", "https://gelbhart.com", "https://www.gelbhart.com"]
+    frame_ancestors += ["http://localhost:3000", "http://127.0.0.1:3000"] if Rails.env.development?
+
     config.action_dispatch.default_headers.merge!(
-      "X-Frame-Options" => "DENY",
+      "Content-Security-Policy" => "frame-ancestors #{frame_ancestors.join(' ')};",
       "X-Content-Type-Options" => "nosniff",
       "X-XSS-Protection" => "1; mode=block",
       "Referrer-Policy" => "strict-origin-when-cross-origin"
