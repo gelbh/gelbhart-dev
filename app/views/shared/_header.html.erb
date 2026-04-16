@@ -14,9 +14,14 @@
           </a>
           <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="projectsDropdown">
             <% projects_with_pages.each do |project| %>
+              <% icon_is_image = project.icon.to_s.match?(/\.(png|svg|webp|jpe?g)\z/i) %>
               <li>
                 <%= link_to project_link_url(project), class: "dropdown-item d-flex align-items-center #{current_page?(project_link_url(project)) ? 'active' : ''}" do %>
-                  <i class="bx <%= project.icon %> fs-lg me-2"></i>
+                  <% if icon_is_image %>
+                    <%= image_tag project.icon, alt: "#{project.title} icon", width: 20, height: 20, class: "me-2 project-dropdown-icon-img", loading: "lazy" %>
+                  <% else %>
+                    <i class="bx <%= project.icon %> fs-lg me-2"></i>
+                  <% end %>
                   <%= project.title %>
                 <% end %>
               </li>
@@ -62,9 +67,14 @@
               <div class="collapse" id="mobileProjectsDropdown">
                 <ul class="mobile-nav-sublist">
                   <% projects_with_pages.each do |project| %>
+                    <% icon_is_image = project.icon.to_s.match?(/\.(png|svg|webp|jpe?g)\z/i) %>
                     <li>
                       <%= link_to project_link_url(project), class: "mobile-nav-sublink d-flex align-items-center #{current_page?(project_link_url(project)) ? 'active' : ''}", data: { bs_dismiss: "modal" } do %>
-                        <i class="bx <%= project.icon %> me-2"></i>
+                        <% if icon_is_image %>
+                          <%= image_tag project.icon, alt: "#{project.title} icon", width: 18, height: 18, class: "me-2 project-dropdown-icon-img", loading: "lazy" %>
+                        <% else %>
+                          <i class="bx <%= project.icon %> me-2"></i>
+                        <% end %>
                         <%= project.title %>
                       <% end %>
                     </li>

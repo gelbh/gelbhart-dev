@@ -209,7 +209,7 @@
   border-radius: 0.5rem;
   padding: 0.5rem;
   margin-top: 0.5rem;
-  min-width: 220px;
+  min-width: 280px;
 }
 
 .dropdown-item {
@@ -223,6 +223,8 @@
   min-height: 44px;
   display: flex;
   align-items: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
 
   @media (any-pointer: coarse) {
     min-height: 48px;
@@ -261,11 +263,24 @@
   transition: all 0.2s ease;
 }
 
+.dropdown-item .project-dropdown-icon-img,
+#mobileMenu .mobile-nav-sublink .project-dropdown-icon-img {
+  filter: brightness(0) invert(1);
+  opacity: 0.8;
+  transition: all 0.2s ease;
+}
+
 .dropdown-item {
   @media (hover: hover) and (pointer: fine) {
     &:hover i {
       opacity: 1;
       color: #6366f1;
+    }
+
+    &:hover .project-dropdown-icon-img {
+      opacity: 1;
+      filter: invert(44%) sepia(55%) saturate(1327%) hue-rotate(220deg)
+        brightness(98%) contrast(92%);
     }
   }
 
@@ -274,9 +289,21 @@
     color: #6366f1;
   }
 
+  &:active .project-dropdown-icon-img {
+    opacity: 0.95;
+    filter: invert(44%) sepia(55%) saturate(1327%) hue-rotate(220deg)
+      brightness(98%) contrast(92%);
+  }
+
   &.active i {
     opacity: 1;
     color: #6366f1;
+  }
+
+  &.active .project-dropdown-icon-img {
+    opacity: 1;
+    filter: invert(44%) sepia(55%) saturate(1327%) hue-rotate(220deg)
+      brightness(98%) contrast(92%);
   }
 }
 
@@ -654,6 +681,14 @@
   .mobile-nav-sublink.active i {
     opacity: 1 !important;
     color: #6366f1 !important;
+    transform: scale(1.15) rotate(5deg) !important;
+  }
+
+  .mobile-nav-sublink:hover .project-dropdown-icon-img,
+  .mobile-nav-sublink.active .project-dropdown-icon-img {
+    opacity: 1 !important;
+    filter: invert(44%) sepia(55%) saturate(1327%) hue-rotate(220deg)
+      brightness(98%) contrast(92%) !important;
     transform: scale(1.15) rotate(5deg) !important;
   }
 }

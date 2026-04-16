@@ -42,6 +42,10 @@ Rails.application.routes.draw do
   get "projects/google-maps-converter", to: "pages#google_maps_converter", as: :google_maps_converter
   get "google-maps-converter", to: redirect("/projects/google-maps-converter", status: 301)
 
+  # VS Code Torch Checkpoint Inspector
+  get "projects/vscode-torch-checkpoint-inspector", to: "pages#vscode_torch_checkpoint_inspector", as: :vscode_torch_checkpoint_inspector
+  get "vscode-torch-checkpoint-inspector", to: redirect("/projects/vscode-torch-checkpoint-inspector", status: 301)
+
   get "/robots.txt", to: "pages#robots"
 
   # Ignore Chrome DevTools requests
