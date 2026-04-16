@@ -1,0 +1,142 @@
+<% content_for :title, page_title("Torch Checkpoint Inspector") %>
+<% meta_description "Inspect .pt and .pth PyTorch checkpoints directly in VS Code with a dedicated custom editor extension." %>
+
+<% content_for :structured_data do %>
+  <%= render_structured_data(software_application_structured_data(
+    name: "Torch Checkpoint Inspector",
+    description: "VS Code extension for inspecting .pt and .pth PyTorch checkpoint files in a dedicated custom editor.",
+    url: "https://gelbhart.dev/projects/vscode-torch-checkpoint-inspector",
+    application_category: "DeveloperApplication",
+    operating_system: "Cross-platform",
+    offers: {
+      "price" => "0",
+      "priceCurrency" => "USD"
+    }
+  )) %>
+
+  <% torch_inspector_article_data = article_structured_data(
+    title: "Torch Checkpoint Inspector",
+    url: "https://gelbhart.dev/projects/vscode-torch-checkpoint-inspector",
+    description: "Inspect .pt and .pth PyTorch checkpoints directly in VS Code with a dedicated custom editor extension.",
+    keywords: "PyTorch checkpoint inspector, VS Code extension, .pt viewer, .pth viewer, machine learning tooling",
+    image: "logos/social/logo_social.png"
+  ) %>
+  <%= render_structured_data(torch_inspector_article_data) %>
+<% end %>
+
+<!-- Hero Section with Gradient Background -->
+<section class="position-relative nasa-exoplanet-explorer-hero" data-controller="scroll-animation">
+  <!-- Animated Gradient Background -->
+  <div class="nasa-exoplanet-explorer-gradient-bg"></div>
+  <div class="container py-4 position-relative zindex-5">
+    <div class="row justify-content-center text-center">
+      <div class="col-lg-8 fade-in-view">
+        <img src="<%= asset_path('projects/vscode-torch-checkpoint-inspector/icon.png') %>"
+             alt="PyTorch logo"
+             width="88"
+             height="88"
+             loading="lazy"
+             class="mb-2">
+        <h1 class="display-5 mb-2 mt-3">Torch Checkpoint Inspector</h1>
+        <p class="lead text-light mb-2">VS Code Extension for .pt/.pth Files</p>
+        <p class="text-light opacity-75 mb-0">
+          Inspect PyTorch checkpoints directly in VS Code with a dedicated custom editor, configurable Python interpreter selection, and trusted-file unsafe-load support.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Breadcrumb Navigation -->
+<div class="container pt-4">
+  <%= render "shared/breadcrumb", items: [
+    { name: "Home", url: "/" },
+    { name: "Projects", url: nil },
+    { name: "Torch Checkpoint Inspector", url: nil }
+  ] %>
+</div>
+
+<!-- Main Content -->
+<section class="container py-5 mt-4" data-controller="scroll-animation">
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+      <div class="card nasa-exoplanet-explorer-card border-0 shadow-lg mb-4 fade-in-view delay-1">
+        <div class="card-body p-4 p-md-5">
+          <h2 class="h3 mb-3">Install Extension</h2>
+          <p class="text-muted mb-4">
+            Install from your preferred extension registry, then open any `.pt` or `.pth` file in VS Code to inspect checkpoint content in the custom editor.
+          </p>
+          <div class="d-flex flex-wrap gap-2">
+            <a href="https://marketplace.visualstudio.com/items?itemName=gelbhart.vscode-torch-checkpoint-inspector" target="_blank" rel="noopener" class="btn btn-primary">
+              <i class="bx bx-store me-2"></i>VS Marketplace
+            </a>
+            <a href="https://open-vsx.org/extension/gelbhart/vscode-torch-checkpoint-inspector" target="_blank" rel="noopener" class="btn btn-outline-primary">
+              <i class="bx bx-extension me-2"></i>Open VSX
+            </a>
+            <a href="https://github.com/gelbh/vscode-torch-checkpoint-inspector" target="_blank" rel="noopener" class="btn btn-outline-secondary">
+              <i class="bx bxl-github me-2"></i>GitHub
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4 mb-4 fade-in-view delay-2">
+        <div class="col-md-6">
+          <%= render "shared/feature_card",
+                        icon: "bx-file-blank",
+                        color: "primary",
+                        title: "Native Checkpoint Viewer",
+                        description: "Inspect `.pt` and `.pth` files in a dedicated VS Code custom editor instead of raw binary output.",
+                        card_classes: "nasa-exoplanet-explorer-card" %>
+        </div>
+        <div class="col-md-6">
+          <%= render "shared/feature_card",
+                        icon: "bx-code-curly",
+                        color: "success",
+                        title: "Python Environment Aware",
+                        description: "Uses `torchCheckpointInspector.pythonPath`, VS Code Python extension, or `python3` as fallback.",
+                        card_classes: "nasa-exoplanet-explorer-card" %>
+        </div>
+        <div class="col-md-6">
+          <%= render "shared/feature_card",
+                        icon: "bx-shield-alt-2",
+                        color: "warning",
+                        title: "Safer Loading Defaults",
+                        description: "Supports optional unsafe loading for trusted files using `torchCheckpointInspector.allowUnsafeLoad`.",
+                        card_classes: "nasa-exoplanet-explorer-card" %>
+        </div>
+        <div class="col-md-6">
+          <%= render "shared/feature_card",
+                        icon: "bx-table",
+                        color: "info",
+                        title: "DataFrame/Numpy Friendly",
+                        description: "Works with checkpoints that include tensors and common scientific Python objects.",
+                        card_classes: "nasa-exoplanet-explorer-card" %>
+        </div>
+      </div>
+
+      <div class="card nasa-exoplanet-explorer-card border-0 shadow mb-4 fade-in-view delay-3">
+        <div class="card-body p-4">
+          <h3 class="h4 mb-3">Requirements</h3>
+          <ul class="mb-0">
+            <li class="mb-2">VS Code 1.85 or newer (or compatible OSS/Cursor build)</li>
+            <li class="mb-2">Python with PyTorch installed</li>
+            <li><code>pandas</code> and <code>numpy</code> when checkpoints include DataFrame-related content</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card nasa-exoplanet-explorer-card border-0 shadow mb-4 fade-in-view delay-4">
+        <div class="card-body p-4">
+          <h3 class="h4 mb-3">Tech Stack</h3>
+          <div class="d-flex flex-wrap gap-2">
+            <%= render "shared/tech_badge", text: "VS Code Extension API", color: "primary", url: "https://code.visualstudio.com/api", extra_classes: "px-3 py-2" %>
+            <%= render "shared/tech_badge", text: "PyTorch", color: "danger", url: "https://pytorch.org/", extra_classes: "px-3 py-2" %>
+            <%= render "shared/tech_badge", text: "Python", color: "warning", url: "https://www.python.org/", extra_classes: "px-3 py-2" %>
+            <%= render "shared/tech_badge", text: "Open VSX", color: "info", url: "https://open-vsx.org/extension/gelbhart/vscode-torch-checkpoint-inspector", extra_classes: "px-3 py-2" %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

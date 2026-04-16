@@ -32,6 +32,9 @@ class PagesController < ApplicationController
   def google_maps_converter
   end
 
+  def vscode_torch_checkpoint_inspector
+  end
+
   def robots
     respond_to :text
     expires_in 6.hours, public: true

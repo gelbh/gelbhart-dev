@@ -3,12 +3,17 @@
 <% link_target = local_assigns[:link_target] %>
 <% link_rel = local_assigns[:link_rel] %>
 <% github_url = local_assigns[:github_url] %>
+<% is_image_icon = icon.to_s.match?(/\.(png|svg|webp|jpe?g)\z/i) %>
 <article class="card project-card border-0 shadow-sm h-100 <%= animation_delay %>">
   <div class="card-body p-4">
     <div class="d-flex align-items-center mb-3">
       <div class="flex-shrink-0">
         <div class="project-icon bg-<%= color %> bg-opacity-10 rounded-3 p-3">
-          <i class="bx <%= icon %> fs-1 text-<%= color %>"></i>
+          <% if is_image_icon %>
+            <%= image_tag icon, alt: "#{title} icon", width: 40, height: 40, loading: "lazy" %>
+          <% else %>
+            <i class="bx <%= icon %> fs-1 text-<%= color %>"></i>
+          <% end %>
         </div>
       </div>
       <div class="flex-grow-1 ms-3">

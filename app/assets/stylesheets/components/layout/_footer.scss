@@ -279,6 +279,30 @@
 .footer-projects-dropdown {
   position: relative;
 
+  .project-dropdown-icon-img {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+    transition: all 0.2s ease;
+  }
+
+  .dropdown-item:hover .project-dropdown-icon-img {
+    opacity: 1;
+    filter: invert(44%) sepia(55%) saturate(1327%) hue-rotate(220deg)
+      brightness(98%) contrast(92%);
+  }
+
+  .dropdown-item:active .project-dropdown-icon-img {
+    opacity: 0.95;
+    filter: invert(44%) sepia(55%) saturate(1327%) hue-rotate(220deg)
+      brightness(98%) contrast(92%);
+  }
+
+  .dropdown-item.active .project-dropdown-icon-img {
+    opacity: 1;
+    filter: invert(44%) sepia(55%) saturate(1327%) hue-rotate(220deg)
+      brightness(98%) contrast(92%);
+  }
+
   .dropdown-menu {
     display: none !important;
     bottom: 100%;

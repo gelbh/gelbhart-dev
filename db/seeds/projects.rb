@@ -81,6 +81,27 @@ project.assign_attributes(
 )
 project.save!
 
+project = Project.find_or_initialize_by(title: 'Torch Checkpoint Inspector')
+project.assign_attributes(
+  subtitle: 'VS Code Extension',
+  description: 'Inspect .pt and .pth PyTorch checkpoints directly in VS Code with a dedicated custom editor. Published on VS Marketplace and Open VSX.',
+  icon: 'projects/vscode-torch-checkpoint-inspector/pytorch.svg',
+  color: 'primary',
+  link_text: 'Learn More',
+  link_url: '/projects/vscode-torch-checkpoint-inspector',
+  route_name: 'vscode_torch_checkpoint_inspector',
+  github_url: 'https://github.com/gelbh/vscode-torch-checkpoint-inspector',
+  badges: [
+    { text: 'PyTorch', color: 'danger', url: 'https://pytorch.org/' },
+    { text: 'VS Code', color: 'primary', url: 'https://code.visualstudio.com/' },
+    { text: 'Open VSX', color: 'info', url: 'https://open-vsx.org/extension/gelbhart/vscode-torch-checkpoint-inspector' }
+  ],
+  position: 5,
+  published: true,
+  featured: true
+)
+project.save!
+
 project = Project.find_or_initialize_by(title: 'Robot Motion Planning')
 project.assign_attributes(
   subtitle: 'MATLAB Application',
@@ -97,7 +118,7 @@ project.assign_attributes(
     { text: 'Genetic Algorithm', color: 'info', url: 'https://en.wikipedia.org/wiki/Genetic_algorithm' },
     { text: 'Path Planning', color: 'success', url: 'https://en.wikipedia.org/wiki/Motion_planning' }
   ],
-  position: 5,
+  position: 6,
   published: true,
   featured: true
 )
