@@ -80,8 +80,25 @@ yarn-debug.log*
 # Ignore scripts
 scripts/
 
-# Video Captioner PyInstaller artifacts (GUI .pyw is the distributed build)
+# Python — bytecode, caches, tooling, virtualenvs (repo-wide)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg
+*.egg-info/
+
+.venv/
+.venv-*/
+venv/
+ENV/
+
+# Video Captioner downloads (PyInstaller / local build; GUI .pyw is distributed)
 /public/downloads/video_captioner.exe
 /public/downloads/build/
 /public/downloads/dist/
-/public/downloads/.venv-build/
