@@ -79,3 +79,9 @@ yarn-debug.log*
 
 # Ignore scripts
 scripts/
+
+# Video Captioner PyInstaller artifacts (GUI .pyw is the distributed build)
+/public/downloads/video_captioner.exe
+/public/downloads/build/
+/public/downloads/dist/
+/public/downloads/.venv-build/
