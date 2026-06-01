@@ -26,6 +26,9 @@ class PagesController < ApplicationController
   def video_captioner
   end
 
+  def nim_quantum_ml
+  end
+
   def nasa_exoplanet_explorer
   end
 

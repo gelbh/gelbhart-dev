@@ -1,0 +1,6 @@
+// Nim Quantum ML — wider Streamlit embed than default .container
+.nim-qml-demo-container {
+  max-width: min(96vw, 1680px);
+  margin-inline: auto;
+  padding-inline: clamp(0.75rem, 2.5vw, 2rem);
+}

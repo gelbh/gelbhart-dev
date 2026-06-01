@@ -1,0 +1,192 @@
+<% content_for :title, page_title("Nim Quantum ML") %>
+<% meta_description "Compare classical ML, simulated QML (VQC and QSVM), and inference-only IBM Quantum evaluation on Nim classification. Interactive Streamlit demo and Jupyter report." %>
+
+<% content_for :structured_data do %>
+  <%= render_structured_data(software_application_structured_data(
+    name: "Nim Quantum ML",
+    description: "COMP47950 project comparing classical ML, simulated quantum ML, and IBM Quantum inference on Nim classification.",
+    url: "https://nim-quantum-ml.streamlit.app/",
+    application_category: "WebApplication",
+    operating_system: "Cross-platform",
+    offers: {
+      "price" => "0",
+      "priceCurrency" => "USD"
+    }
+  )) %>
+
+  <% nim_qml_article_data = article_structured_data(
+    title: "Nim Quantum ML",
+    url: "https://gelbhart.dev/projects/nim-quantum-ml",
+    description: "Compare classical ML, simulated QML (VQC and QSVM), and inference-only IBM Quantum evaluation on Nim classification.",
+    keywords: "quantum machine learning, Qiskit, Nim game, VQC, QSVM, Streamlit, COMP47950",
+    image: "logos/social/logo_social.png"
+  ) %>
+  <%= render_structured_data(nim_qml_article_data) %>
+<% end %>
+
+<section class="position-relative nasa-exoplanet-explorer-hero" data-controller="scroll-animation">
+  <div class="nasa-exoplanet-explorer-gradient-bg"></div>
+  <div class="container py-4 position-relative zindex-5">
+    <div class="row justify-content-center text-center">
+      <div class="col-lg-8 fade-in-view">
+        <%= render 'shared/icon_circle', icon: 'bx-atom', color: 'secondary', size: 'lg' %>
+        <h1 class="display-5 mb-2 mt-3">Nim Quantum ML</h1>
+        <p class="lead text-light mb-2">COMP47950 Course Project</p>
+        <p class="text-light opacity-75 mb-0">
+          Compare classical ML, simulated QML (VQC and QSVM), and inference-only IBM Quantum evaluation on Nim classification.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container pt-4">
+  <%= render "shared/breadcrumb", items: [
+    { name: "Home", url: "/" },
+    { name: "Projects", url: nil },
+    { name: "Nim Quantum ML", url: nil }
+  ] %>
+</div>
+
+<section class="py-5 mt-4" data-controller="scroll-animation">
+  <div class="container-fluid nim-qml-demo-container mb-4 mb-xl-5">
+    <div class="row justify-content-center">
+      <div class="col-12">
+      <div class="card nasa-exoplanet-explorer-card border-0 shadow-lg fade-in-view delay-1">
+        <div class="card-body p-4 p-lg-5">
+          <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+            <div class="d-flex align-items-center">
+              <div class="me-3">
+                <%= render 'shared/icon_circle', icon: 'bx-atom', color: 'secondary', size: 'md' %>
+              </div>
+              <h2 class="h3 mb-0">Nim QML Demo</h2>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+              <a href="https://nim-quantum-ml.streamlit.app/" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary">
+                <i class="bx bx-link-external me-2"></i><span class="d-none d-sm-inline">Open in New Tab</span><span class="d-inline d-sm-none">Open</span>
+              </a>
+              <a href="https://github.com/gelbh/comp47950-qml-project" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary">
+                <i class="bx bxl-github me-2"></i><span class="d-none d-sm-inline">View on GitHub</span><span class="d-inline d-sm-none">GitHub</span>
+              </a>
+            </div>
+          </div>
+          <div class="d-md-none mb-4">
+            <div class="alert alert-info mb-4">
+              <div class="d-flex">
+                <i class="bx bx-mobile fs-4 me-3 flex-shrink-0"></i>
+                <div>
+                  <strong>Mobile notice:</strong> The Streamlit demo works best on desktop. Open it in a new tab for the full experience.
+                </div>
+              </div>
+            </div>
+            <div class="d-grid gap-2">
+              <a href="https://nim-quantum-ml.streamlit.app/" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg">
+                <i class="bx bx-link-external me-2"></i>Open Streamlit Demo
+              </a>
+              <a href="https://github.com/gelbh/comp47950-qml-project" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary">
+                <i class="bx bxl-github me-2"></i>View on GitHub
+              </a>
+            </div>
+          </div>
+          <div class="d-none d-md-block position-relative nasa-iframe-container"
+               style="padding-bottom: 90%; height: 0; overflow: hidden; border-radius: 0.5rem; background: #0e1117; min-height: 520px;"
+               data-controller="lazy-iframe">
+            <div data-lazy-iframe-target="placeholder" class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: #0e1117; border-radius: 0.5rem;">
+              <div class="text-center text-light">
+                <div class="spinner-border text-secondary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mb-0">Loading Nim QML demo...</p>
+              </div>
+            </div>
+            <div data-lazy-iframe-target="loading" class="position-absolute top-50 start-50 translate-middle d-none" style="z-index: 10;">
+              <div class="spinner-border text-secondary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+            <iframe
+              data-lazy-iframe-target="iframe"
+              data-src="https://nim-quantum-ml.streamlit.app/?embed=true"
+              width="100%"
+              height="100%"
+              style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+              title="Nim Quantum ML - Streamlit demo"
+              allow="fullscreen"
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+      <div class="row g-4 mb-4 fade-in-view delay-2">
+        <div class="col-md-6">
+          <%= render "shared/feature_card",
+                        icon: "bx-git-compare",
+                        color: "secondary",
+                        title: "Classical vs Quantum",
+                        description: "Side-by-side evaluation of classical baselines, variational quantum classifiers (VQC), and quantum SVM (QSVM) on Nim states.",
+                        card_classes: "nasa-exoplanet-explorer-card" %>
+        </div>
+        <div class="col-md-6">
+          <%= render "shared/feature_card",
+                        icon: "bx-game",
+                        color: "primary",
+                        title: "Interactive Nim Demo",
+                        description: "Streamlit app to play Nim, explore board states, and compare model predictions in real time.",
+                        card_classes: "nasa-exoplanet-explorer-card" %>
+        </div>
+        <div class="col-md-6">
+          <%= render "shared/feature_card",
+                        icon: "bx-chip",
+                        color: "info",
+                        title: "IBM Quantum Inference",
+                        description: "Inference-only runs on IBM Quantum hardware, separate from simulated training pipelines.",
+                        card_classes: "nasa-exoplanet-explorer-card" %>
+        </div>
+        <div class="col-md-6">
+          <%= render "shared/feature_card",
+                        icon: "bx-book-open",
+                        color: "success",
+                        title: "Reproducible Research",
+                        description: "Importable qml_project package, Jupyter notebook report, and MLflow experiment tracking.",
+                        card_classes: "nasa-exoplanet-explorer-card" %>
+        </div>
+      </div>
+
+      <div class="card nasa-exoplanet-explorer-card border-0 shadow mb-4 fade-in-view delay-3">
+        <div class="card-body p-4">
+          <h3 class="h4 mb-3">Tech Stack</h3>
+          <div class="d-flex flex-wrap gap-2">
+            <%= render "shared/tech_badge", text: "Python", color: "warning", url: "https://www.python.org/", extra_classes: "px-3 py-2" %>
+            <%= render "shared/tech_badge", text: "Qiskit", color: "primary", url: "https://www.ibm.com/quantum/qiskit", extra_classes: "px-3 py-2" %>
+            <%= render "shared/tech_badge", text: "Streamlit", color: "danger", url: "https://streamlit.io/", extra_classes: "px-3 py-2" %>
+            <%= render "shared/tech_badge", text: "MLflow", color: "info", url: "https://mlflow.org/", extra_classes: "px-3 py-2" %>
+            <%= render "shared/tech_badge", text: "Jupyter", color: "secondary", url: "https://jupyter.org/", extra_classes: "px-3 py-2" %>
+          </div>
+        </div>
+      </div>
+
+      <div class="card nasa-exoplanet-explorer-card border-0 shadow mb-4 fade-in-view delay-4">
+        <div class="card-body p-4">
+          <h3 class="h4 mb-3">About This Project</h3>
+          <p class="text-muted mb-3">
+            This COMP47950 submission compares classical machine learning, simulated quantum models, and IBM Quantum inference on a Nim classification task.
+            The main deliverable is the implementation notebook and report in the repository.
+          </p>
+          <p class="text-muted mb-0">
+            Source code lives in the
+            <%= link_to "comp47950-qml-project", "https://github.com/gelbh/comp47950-qml-project", target: "_blank", rel: "noopener", class: "text-primary" %>
+            repository, including the importable <code>qml_project</code> package under <code>src/</code>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+</section>

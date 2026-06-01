@@ -34,6 +34,10 @@ Rails.application.routes.draw do
   get "projects/video-captioner", to: "pages#video_captioner", as: :video_captioner
   get "video-captioner", to: redirect("/projects/video-captioner", status: 301)
 
+  # Nim Quantum ML
+  get "projects/nim-quantum-ml", to: "pages#nim_quantum_ml", as: :nim_quantum_ml
+  get "nim-quantum-ml", to: redirect("/projects/nim-quantum-ml", status: 301)
+
   # NASA Exoplanet Explorer
   get "projects/nasa-exoplanet-explorer", to: "pages#nasa_exoplanet_explorer", as: :nasa_exoplanet_explorer
   get "nasa-exoplanet-explorer", to: redirect("/projects/nasa-exoplanet-explorer", status: 301)
