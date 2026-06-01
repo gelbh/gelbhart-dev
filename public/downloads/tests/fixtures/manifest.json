@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "fixtures": [
+    {
+      "id": "short_en_speech",
+      "description": "Short English clip for baseline WER/CER checks",
+      "expected_language": "en"
+    },
+    {
+      "id": "short_es_speech",
+      "description": "Short Spanish clip for language detection and translation checks",
+      "expected_language": "es"
+    }
+  ]
+}
