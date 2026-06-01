@@ -32,6 +32,7 @@ module.exports = {
     "./app/helpers/**/*.rb",
     "./app/javascript/**/*.js",
     "./app/assets/stylesheets/**/*.scss",
+    "./db/seeds/**/*.rb",
     "./config/importmap.rb",
   ],
   css: cssConfig,
@@ -47,15 +48,16 @@ module.exports = {
     "muted", // Toggled by ui_manager.js
     // Bootstrap utility classes that are toggled dynamically
     "d-none", // Toggled by theme_controller.js, lazy_iframe_controller.js
-    // Icon classes (dynamically inserted)
-    // Note: Boxicons subset (~6KB) is included in application.css with only used icons
-    // No need to safelist all bx- classes - only safelist if icons are dynamically added via JS
+    // Boxicons (subset CSS + icons from partials/seeds; keep all bx/bxl rules)
+    /^bx-/,
+    /^bxl-/,
     /^bi-/, // Bootstrap Icons
     /^fi-/, // Flag icons
     // Custom project classes that are dynamically generated
     /^fade-in-view/, // Animation classes
     /^delay-/, // Animation delay classes
     /^nasa-exoplanet-explorer-/, // Project-specific classes
+    /^nim-qml-/, // Nim Quantum ML page
     /^hevy-tracker-/, // Project-specific classes
     /^video-captioner-/, // Project-specific classes
     /^pacman-/, // Pacman game classes (many dynamically added)

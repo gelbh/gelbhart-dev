@@ -58,7 +58,8 @@ namespace :assets do
     used_icons = []
     search_paths = [
       Rails.root.join("app/views/**/*.{html,erb}"),
-      Rails.root.join("app/javascript/**/*.js")
+      Rails.root.join("app/javascript/**/*.js"),
+      Rails.root.join("db/seeds/**/*.rb")
     ]
 
     search_paths.each do |pattern|
