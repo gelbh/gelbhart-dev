@@ -106,15 +106,13 @@ class ProjectTest < ActiveSupport::TestCase
   end
 
   test "ordered scope orders projects by position" do
-    create(:project, position: 3, title: "Third")
-    create(:project, position: 1, title: "First")
-    create(:project, position: 2, title: "Second")
+    third = create(:project, position: 3, title: "Third")
+    first = create(:project, position: 1, title: "First")
+    second = create(:project, position: 2, title: "Second")
 
-    ordered = Project.ordered
+    ordered = Project.where(id: [ first.id, second.id, third.id ]).ordered
 
-    assert_equal "First", ordered.first.title
-    assert_equal "Second", ordered.second.title
-    assert_equal "Third", ordered.third.title
+    assert_equal [ first, second, third ], ordered.to_a
   end
 
   test "scopes can be chained" do
