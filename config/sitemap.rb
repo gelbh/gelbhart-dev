@@ -55,6 +55,9 @@ SitemapGenerator::Sitemap.create do
   video_captioner_lastmod = get_view_lastmod("pages/video_captioner.html.erb")
   add "/projects/video-captioner", lastmod: video_captioner_lastmod
 
+  nim_qml_lastmod = get_view_lastmod("pages/nim_quantum_ml.html.erb")
+  add "/projects/nim-quantum-ml", lastmod: nim_qml_lastmod
+
   nasa_lastmod = get_view_lastmod("pages/nasa_exoplanet_explorer.html.erb")
   add "/projects/nasa-exoplanet-explorer", lastmod: nasa_lastmod
 
