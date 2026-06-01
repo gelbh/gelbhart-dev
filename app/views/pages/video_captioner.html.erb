@@ -81,13 +81,13 @@
             <%= render 'shared/icon_circle', icon: 'bx-download', color: 'primary', size: 'xl' %>
           </div>
           <h2 class="h3 mb-3">Download Desktop Tool</h2>
-          <p class="text-muted mb-4">Just double-click to launch! The app automatically installs everything it needs on first run.</p>
+          <p class="text-muted mb-4">Download the GUI app (Python 3.8+). On first run, dependencies install automatically.</p>
           <div class="d-grid gap-3 mb-4 col-lg-8 mx-auto">
             <a href="/downloads/video_captioner.pyw" download class="btn btn-primary btn-lg text-nowrap text-truncate">
-              <i class="bx bx-download me-2"></i><span class="d-none d-sm-inline">Download GUI Version (Recommended)</span><span class="d-inline d-sm-none">Download GUI</span>
+              <i class="bx bx-download me-2"></i><span class="d-none d-sm-inline">Download GUI App (.pyw)</span><span class="d-inline d-sm-none">Download GUI</span>
             </a>
           </div>
-          <small class="text-muted d-block mb-4">Windows: Use .pyw | Mac/Linux: Use .py</small>
+          <small class="text-muted d-block mb-4">Windows: double-click the .pyw file. Mac/Linux: use the .py download below.</small>
           <div class="d-flex gap-3 justify-content-center flex-wrap">
             <a href="/downloads/video_captioner.py" download class="btn btn-outline-primary">
               <i class="bx bx-download me-2"></i>.py version
@@ -143,17 +143,10 @@
             <h3 class="h4 mb-0">Requirements</h3>
           </div>
           <ul class="list-unstyled mb-0">
-            <li class="d-flex align-items-start mb-2">
-              <i class="bx bx-check-circle text-success me-2 mt-1 fs-5"></i>
-              <div>
-                <strong>Python 3.8+</strong> -
-                <a href="https://www.python.org/downloads/" target="_blank" rel="noopener" class="text-primary">Download here</a>
-              </div>
-            </li>
             <li class="d-flex align-items-start">
               <i class="bx bx-check-circle text-success me-2 mt-1 fs-5"></i>
               <div class="text-muted">
-                <small>All dependencies (whisper, yt-dlp, deep-translator, FFmpeg) are automatically installed on first run. No manual installation needed!</small>
+                <small>Python 3.8+ required. Dependencies (Whisper, yt-dlp, deep-translator, FFmpeg) install automatically on first run.</small>
               </div>
             </li>
           </ul>
@@ -173,9 +166,9 @@
               <i class="bx bx-info-circle fs-4 me-3"></i>
               <div>
                 <strong>Quick Start:</strong><br>
-                <strong>Windows (.pyw):</strong> Double-click the file<br>
+                <strong>Windows (.pyw):</strong> Double-click the downloaded file<br>
                 <strong>Windows (.py):</strong> Right-click → "Open with" → "Python"<br>
-                <strong>Mac/Linux:</strong> Terminal → <code>python3 [drag file here]</code>
+                <strong>Mac/Linux:</strong> Terminal → <code>python3 video_captioner.py</code>
               </div>
             </div>
           </div>
@@ -217,8 +210,28 @@
           </div>
         </div>
       </div>
+      <div class="card video-captioner-card border-0 shadow mb-4 fade-in-view delay-5">
+        <div class="card-body p-4">
+          <h3 class="h5 mb-3">Platform Matrix</h3>
+          <ul class="list-unstyled mb-0">
+            <li class="mb-2"><strong>Windows:</strong> Use Python `.pyw` for double-click launch.</li>
+            <li class="mb-2"><strong>macOS:</strong> Use Python `.py` from Terminal.</li>
+            <li><strong>Linux:</strong> Use Python `.py` or CLI script.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card video-captioner-card border-0 shadow mb-4 fade-in-view delay-5">
+        <div class="card-body p-4">
+          <h3 class="h5 mb-3">Troubleshooting</h3>
+          <ul class="list-unstyled mb-0">
+            <li class="mb-2"><strong>Install errors:</strong> Run again with internet access and admin permissions if package installation fails.</li>
+            <li class="mb-2"><strong>Burn captions disabled:</strong> FFmpeg was not detected; generate SRT output or install FFmpeg manually.</li>
+            <li><strong>Slow processing:</strong> Use `tiny`/`base` with `fast` profile for draft outputs.</li>
+          </ul>
+        </div>
+      </div>
       <!-- Tech Stack -->
-      <div class="card video-captioner-card border-0 shadow fade-in-view delay-5">
+      <div class="card video-captioner-card border-0 shadow fade-in-view delay-6">
         <div class="card-body p-4">
           <div class="d-flex align-items-center mb-3">
             <div class="me-3">
