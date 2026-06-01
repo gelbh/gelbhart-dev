@@ -48,11 +48,28 @@ class PagesTest < ActionDispatch::IntegrationTest
   test "GET /projects/video-captioner returns video captioner page" do
     get video_captioner_path
     assert_response :success
+    assert_select "a[href='/downloads/video_captioner.pyw']"
+    assert_no_match %r{/downloads/video_captioner\.exe}, response.body
+    assert_select "a[href='/downloads/video_captioner.py']"
+    assert_select "a[href='/downloads/video_captioner_standalone.py']"
   end
 
   test "GET /video-captioner redirects to /projects/video-captioner" do
     get "/video-captioner"
     assert_redirected_to "/projects/video-captioner"
+    assert_response :moved_permanently
+  end
+
+  test "GET /projects/nim-quantum-ml returns nim quantum ml page" do
+    get nim_quantum_ml_path
+    assert_response :success
+    assert_select "a[href='https://nim-quantum-ml.streamlit.app/']"
+    assert_select "a[href='https://github.com/gelbh/comp47950-qml-project']"
+  end
+
+  test "GET /nim-quantum-ml redirects to /projects/nim-quantum-ml" do
+    get "/nim-quantum-ml"
+    assert_redirected_to "/projects/nim-quantum-ml"
     assert_response :moved_permanently
   end
 

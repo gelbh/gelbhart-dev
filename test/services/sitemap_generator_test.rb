@@ -43,6 +43,7 @@ class SitemapGeneratorTest < ActiveSupport::TestCase
     assert_includes xml_content, "https://gelbhart.dev/projects/hevy-tracker"
     assert_includes xml_content, "https://gelbhart.dev/contact"
     assert_includes xml_content, "https://gelbhart.dev/projects/video-captioner"
+    assert_includes xml_content, "https://gelbhart.dev/projects/nim-quantum-ml"
     assert_includes xml_content, "https://gelbhart.dev/projects/nasa-exoplanet-explorer"
   end
 
