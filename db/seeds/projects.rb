@@ -40,6 +40,27 @@ project.assign_attributes(
 )
 project.save!
 
+project = Project.find_or_initialize_by(title: 'Nim Quantum ML')
+project.assign_attributes(
+  subtitle: 'COMP47950 Course Project',
+  description: 'Compare classical ML, simulated QML (VQC and QSVM), and inference-only IBM Quantum evaluation on Nim classification.',
+  icon: 'bx-atom',
+  color: 'secondary',
+  link_text: 'Learn More',
+  link_url: '/projects/nim-quantum-ml',
+  route_name: 'nim_quantum_ml',
+  github_url: 'https://github.com/gelbh/comp47950-qml-project',
+  badges: [
+    { text: 'Python', color: 'warning', url: 'https://www.python.org/' },
+    { text: 'Qiskit', color: 'primary', url: 'https://www.ibm.com/quantum/qiskit' },
+    { text: 'Streamlit', color: 'danger', url: 'https://streamlit.io/' }
+  ],
+  position: 3,
+  published: true,
+  featured: true
+)
+project.save!
+
 project = Project.find_or_initialize_by(title: 'NASA Exoplanet Explorer')
 project.assign_attributes(
   subtitle: '3D Visualization Tool',
@@ -55,7 +76,7 @@ project.assign_attributes(
     { text: 'Three.js', color: 'warning', url: 'https://threejs.org/' },
     { text: 'Node.js', color: 'success', url: 'https://nodejs.org/' }
   ],
-  position: 3,
+  position: 4,
   published: true,
   featured: true
 )
@@ -75,7 +96,7 @@ project.assign_attributes(
     { text: 'Google Maps API', color: 'danger', url: 'https://developers.google.com/maps' },
     { text: 'CodeMirror', color: 'info', url: 'https://codemirror.net/' }
   ],
-  position: 4,
+  position: 5,
   published: true,
   featured: true
 )
@@ -96,7 +117,7 @@ project.assign_attributes(
     { text: 'VS Code', color: 'primary', url: 'https://code.visualstudio.com/' },
     { text: 'Open VSX', color: 'info', url: 'https://open-vsx.org/extension/gelbhart/vscode-torch-checkpoint-inspector' }
   ],
-  position: 5,
+  position: 6,
   published: true,
   featured: true
 )
@@ -118,7 +139,7 @@ project.assign_attributes(
     { text: 'Genetic Algorithm', color: 'info', url: 'https://en.wikipedia.org/wiki/Genetic_algorithm' },
     { text: 'Path Planning', color: 'success', url: 'https://en.wikipedia.org/wiki/Motion_planning' }
   ],
-  position: 6,
+  position: 7,
   published: true,
   featured: true
 )
