@@ -1,0 +1,8 @@
+<%# locals: fixed (boolean), intensity (0–1 float) %>
+<div class="circuit-field<%= ' circuit-field--fixed' if local_assigns[:fixed] %>"
+     data-controller="circuit-field"
+     data-circuit-field-fixed-value="<%= local_assigns[:fixed] ? 'true' : 'false' %>"
+     data-circuit-field-intensity-value="<%= local_assigns.fetch(:intensity, 1) %>"
+     aria-hidden="true">
+  <canvas class="circuit-field__canvas" data-circuit-field-target="canvas"></canvas>
+</div>
