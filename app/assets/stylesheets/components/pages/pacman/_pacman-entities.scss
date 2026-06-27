@@ -123,7 +123,7 @@
   width: $power-pellet-size;
   height: $power-pellet-size;
   animation: pelletPulse 1.2s var(--ease-in-out) infinite;
-  filter: drop-shadow(0 0 10px rgba(var(--color-primary), 0.5));
+  filter: drop-shadow(0 0 10px rgba(var(--color-primary-rgb), 0.5));
   opacity: 0.75;
 
   .pellet-sprite {
@@ -156,7 +156,7 @@
   }
 
   &.ghost-red {
-    filter: drop-shadow(0 0 12px rgba(var(--color-ghost-red), 0.6));
+    filter: drop-shadow(0 0 12px rgba(var(--color-ghost-red-rgb), 0.6));
   }
 
   &.ghost-pink {
@@ -164,15 +164,15 @@
   }
 
   &.ghost-cyan {
-    filter: drop-shadow(0 0 12px rgba(var(--color-ghost-cyan), 0.6));
+    filter: drop-shadow(0 0 12px rgba(var(--color-ghost-cyan-rgb), 0.6));
   }
 
   &.ghost-orange {
-    filter: drop-shadow(0 0 12px rgba(var(--color-ghost-orange), 0.6));
+    filter: drop-shadow(0 0 12px rgba(var(--color-ghost-orange-rgb), 0.6));
   }
 
   &.frightened {
-    filter: drop-shadow(0 0 15px rgba(var(--color-ghost-frightened), 0.8));
+    filter: drop-shadow(0 0 15px rgba(var(--color-ghost-frightened-rgb), 0.8));
     animation: frightenedShake var(--transition-fast) var(--ease-in-out)
       infinite;
   }
@@ -260,7 +260,7 @@
 
   &.frightened {
     .indicator-arrow {
-      border-bottom-color: rgba(var(--color-ghost-frightened), 0.9);
+      border-bottom-color: rgba(var(--color-ghost-frightened-rgb), 0.9);
     }
 
     .indicator-dot {

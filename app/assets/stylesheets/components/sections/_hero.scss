@@ -14,18 +14,30 @@
 
 // Animated gradient background
 .hero-gradient-bg {
-  // Replaced gradient-bg mixin with direct CSS
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
   height: 100dvh;
-  background: var(--gradient-primary);
-  background-size: 200% 200%;
-  animation: gradientShift var(--duration-gradient) ease infinite;
+  overflow: hidden;
   opacity: var(--opacity-light);
   z-index: var(--z-background);
+}
+
+// Oversized gradient panned via transform so the drift runs on the compositor
+// instead of repainting a full-viewport layer every frame (background-position
+// is not GPU-composited).
+.hero-gradient-bg::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  background: var(--gradient-primary);
+  will-change: transform;
+  animation: gradientDrift var(--duration-gradient) var(--ease-in-out) infinite;
 }
 
 [data-bs-theme="dark"] .hero-gradient-bg {
@@ -72,12 +84,12 @@
   font-size: 1rem;
   font-weight: 600;
   color: var(--color-primary);
-  opacity: 0.15;
+  opacity: 0.1;
   animation: floatCode var(--duration-float) var(--ease-in-out) infinite;
 }
 
 [data-bs-theme="dark"] .code-snippet {
-  opacity: 0.18;
+  opacity: 0.1;
   animation: floatCodeDark var(--duration-float) var(--ease-in-out) infinite;
 }
 
@@ -138,14 +150,13 @@
   animation-duration: 27s;
 }
 
-// Enhanced gradient text
+// Gradient headline (brand signature). Static fill — the former infinite
+// background-position shimmer repainted the text every frame for no real gain.
 .text-gradient {
   background: var(--gradient-primary);
-  background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: gradientText 8s ease infinite;
   font-weight: 800;
 }
 
@@ -174,7 +185,8 @@
 
 // Badge hover effect
 .badge-hover {
-  transition: all var(--transition-normal) ease;
+  transition: transform var(--transition-normal) var(--ease-smooth),
+    box-shadow var(--transition-normal) var(--ease-smooth);
   cursor: default;
   touch-action: manipulation;
 
@@ -187,13 +199,13 @@
   @media (hover: hover) and (pointer: fine) {
     &:hover {
       transform: translateY(-2px) scale(1.05);
-      box-shadow: 0 4px 12px rgba(var(--color-primary), 0.2);
+      box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.2);
     }
   }
 
   &:active {
     transform: translateY(-1px) scale(1.02);
-    box-shadow: 0 2px 8px rgba(var(--color-primary), 0.15);
+    box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.15);
   }
 
   &:focus-visible {
@@ -250,11 +262,16 @@
     padding: 3rem 0;
   }
 
+  // Decorative snippets add noise on small screens; core content stays readable.
+  .floating-code {
+    display: none;
+  }
+
   .shape {
     opacity: 0.05;
   }
 
   .scroll-indicator {
-    bottom: var(--spacing-md);
+    bottom: max(var(--spacing-md), env(safe-area-inset-bottom, 0px));
   }
 }
