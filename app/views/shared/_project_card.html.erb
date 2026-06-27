@@ -4,7 +4,7 @@
 <% link_rel = local_assigns[:link_rel] %>
 <% github_url = local_assigns[:github_url] %>
 <% is_image_icon = icon.to_s.match?(/\.(png|svg|webp|jpe?g)\z/i) %>
-<article class="card project-card border-0 shadow-sm h-100 <%= animation_delay %>">
+<article class="card project-card h-100 <%= animation_delay %>">
   <div class="card-body p-4">
     <div class="d-flex align-items-center mb-3">
       <div class="flex-shrink-0">
@@ -12,7 +12,7 @@
           <% if is_image_icon %>
             <%= image_tag icon, alt: "#{title} icon", width: 40, height: 40, loading: "lazy" %>
           <% else %>
-            <i class="bx <%= icon %> fs-1 text-<%= color %>"></i>
+            <i class="bx <%= icon %> fs-1 text-<%= color %>" aria-hidden="true"></i>
           <% end %>
         </div>
       </div>
@@ -23,8 +23,8 @@
             <span class="fs-sm text-muted"><%= subtitle %></span>
           </div>
           <% if github_url.present? %>
-            <a href="<%= github_url %>" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-link text-muted p-1 ms-2" title="View on GitHub" onclick="event.stopPropagation();">
-              <i class="bx bxl-github fs-5"></i>
+            <a href="<%= github_url %>" target="_blank" rel="noopener noreferrer" class="btn btn-link text-muted icon-hit-area ms-2" title="View on GitHub" aria-label="View <%= title %> on GitHub" onclick="event.stopPropagation();">
+              <i class="bx bxl-github fs-5" aria-hidden="true"></i>
             </a>
           <% end %>
         </div>
@@ -38,11 +38,11 @@
     </div>
     <% if link_target.present? %>
       <a href="<%= link_url %>" target="<%= link_target %>" rel="<%= link_rel %>" class="btn btn-outline-primary stretched-link project-btn">
-        <%= link_text %> <i class="bx <%= link_icon %> fs-5 ms-2 arrow-icon"></i>
+        <%= link_text %> <i class="bx <%= link_icon %> fs-5 ms-2 arrow-icon" aria-hidden="true"></i>
       </a>
     <% else %>
       <%= link_to link_url, class: "btn btn-outline-primary stretched-link project-btn" do %>
-        <%= link_text %> <i class="bx <%= link_icon %> fs-5 ms-2 arrow-icon"></i>
+        <%= link_text %> <i class="bx <%= link_icon %> fs-5 ms-2 arrow-icon" aria-hidden="true"></i>
       <% end %>
     <% end %>
   </div>

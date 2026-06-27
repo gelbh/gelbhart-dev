@@ -36,7 +36,7 @@
       </ul>
     </div>
     <!-- Centered Logo -->
-    <%= link_to root_path, class: "navbar-brand order-2 order-lg-2 flex-shrink-1 mx-auto header-brand" do %>
+    <%= link_to root_path, class: "navbar-brand order-2 order-lg-2 flex-shrink-1 mx-auto header-brand", aria: { label: "gelbhart.dev home" } do %>
       <div class="d-flex align-items-center justify-content-center">
         <%= render 'shared/logo', width: 80, height: 40, css_class: 'header-logo', id: 'header' %>
       </div>

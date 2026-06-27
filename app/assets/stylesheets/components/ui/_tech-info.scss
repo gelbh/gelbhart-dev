@@ -25,9 +25,12 @@
     filter var(--transition-fast) var(--ease-smooth);
   font-size: 0.875rem;
   line-height: 1;
-  padding: 0.125rem !important;
-  min-width: auto;
-  min-height: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.5rem !important;
   cursor: pointer;
   background: transparent !important;
   border: none !important;
