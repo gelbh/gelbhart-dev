@@ -7,14 +7,18 @@
   container-name: tech-card;
 }
 
-// Tech card container
+// Tech card container — transparent so the animated background reads through;
+// the border + blur keep it legible as a card.
 .tech-card {
-  background: var(--bs-body-bg);
-  border: 1px solid rgba(var(--color-primary), 0.15);
+  background: transparent;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.15);
   border-radius: var(--radius-lg);
   padding-inline: var(--space-fluid-md);
   padding-block: var(--space-fluid-lg);
-  transition: all 0.4s var(--ease-smooth);
+  transition: transform 0.4s var(--ease-smooth), box-shadow 0.4s var(--ease-smooth),
+    border-color 0.4s var(--ease-smooth);
   text-align: center;
   box-shadow: var(--shadow-sm);
   touch-action: manipulation;
@@ -22,15 +26,15 @@
   @media (hover: hover) and (pointer: fine) {
     &:hover {
       transform: translateY(-8px);
-      border-color: rgba(var(--color-primary), 0.3);
-      box-shadow: 0 1rem 2rem rgba(var(--color-primary), 0.15);
+      border-color: rgba(var(--color-primary-rgb), 0.3);
+      box-shadow: 0 1rem 2rem rgba(var(--color-primary-rgb), 0.15);
     }
   }
 
   &:active {
     transform: translateY(-4px);
-    border-color: rgba(var(--color-primary), 0.25);
-    box-shadow: 0 0.75rem 1.5rem rgba(var(--color-primary), 0.12);
+    border-color: rgba(var(--color-primary-rgb), 0.25);
+    box-shadow: 0 0.75rem 1.5rem rgba(var(--color-primary-rgb), 0.12);
   }
 
   &:focus-visible {
@@ -40,12 +44,20 @@
 }
 
 [data-bs-theme="dark"] .tech-card {
-  border-color: rgba(var(--color-primary), 0.2);
+  border-color: rgba(var(--color-primary-rgb), 0.16);
   box-shadow: var(--shadow-sm);
 
   &:hover {
-    border-color: rgba(var(--color-primary), 0.4);
-    box-shadow: 0 1rem 2rem rgba(var(--color-primary), 0.25);
+    border-color: rgba(var(--color-primary-rgb), 0.4);
+    box-shadow: 0 1rem 2rem rgba(var(--color-primary-rgb), 0.25);
+  }
+}
+
+// Narrow cards: stack the two-column badge grids instead of squeezing side-by-side.
+@container tech-card (max-width: 420px) {
+  .tech-card .row > .col-6 {
+    flex: 0 0 100%;
+    max-width: 100%;
   }
 }
 
@@ -58,11 +70,13 @@
   justify-content: center;
   border-radius: var(--radius-lg);
   margin: 0 auto var(--spacing-lg);
-  transition: all 0.4s var(--ease-smooth);
+  transition: transform 0.4s var(--ease-smooth), box-shadow 0.4s var(--ease-smooth),
+    border-color 0.4s var(--ease-smooth);
 
   i {
     font-size: 2rem;
-    transition: all 0.4s var(--ease-smooth);
+    transition: transform 0.4s var(--ease-smooth), box-shadow 0.4s var(--ease-smooth),
+    border-color 0.4s var(--ease-smooth);
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -89,7 +103,8 @@
   padding: var(--spacing-sm) 0;
   font-size: 0.95rem;
   color: var(--bs-body-color);
-  transition: all var(--transition-normal) ease;
+  transition: color var(--transition-normal) var(--ease-smooth),
+    transform var(--transition-normal) var(--ease-smooth);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -140,7 +155,8 @@
   font-size: 0.85rem;
   padding: var(--spacing-sm) 0.875rem;
   font-weight: 500;
-  transition: all var(--transition-normal) ease;
+  transition: color var(--transition-normal) var(--ease-smooth),
+    transform var(--transition-normal) var(--ease-smooth);
   cursor: default;
   touch-action: manipulation;
 
@@ -153,13 +169,13 @@
   @media (hover: hover) and (pointer: fine) {
     &:hover {
       transform: translateY(-3px) scale(1.05);
-      box-shadow: 0 4px 12px rgba(var(--color-primary), 0.2);
+      box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.2);
     }
   }
 
   &:active {
     transform: translateY(-1px) scale(1.02);
-    box-shadow: 0 2px 8px rgba(var(--color-primary), 0.15);
+    box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.15);
   }
 }
 

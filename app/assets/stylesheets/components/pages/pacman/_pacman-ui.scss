@@ -192,9 +192,9 @@
   bottom: 0;
   background: linear-gradient(
     135deg,
-    rgba(var(--color-primary), 0.15) 0%,
-    rgba(var(--color-secondary), 0.15) 50%,
-    rgba(var(--color-accent), 0.15) 100%
+    rgba(var(--color-primary-rgb), 0.15) 0%,
+    rgba(var(--color-secondary-rgb), 0.15) 50%,
+    rgba(var(--color-accent-rgb), 0.15) 100%
   );
   backdrop-filter: blur(20px) saturate(180%);
   z-index: 100;
@@ -246,9 +246,9 @@
 [data-bs-theme="dark"] .pacman-section-lock {
   background: linear-gradient(
     135deg,
-    rgba(var(--color-primary), 0.2) 0%,
-    rgba(var(--color-secondary), 0.2) 50%,
-    rgba(var(--color-accent), 0.2) 100%
+    rgba(var(--color-primary-rgb), 0.2) 0%,
+    rgba(var(--color-secondary-rgb), 0.2) 50%,
+    rgba(var(--color-accent-rgb), 0.2) 100%
   );
   border-top-color: rgba(255, 215, 0, 0.8);
   border-bottom-color: rgba(255, 215, 0, 0.5);
