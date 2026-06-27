@@ -6,7 +6,7 @@
 
     <%# Document Metadata %>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
     <title><%= meta.title %></title>
 
     <%# SEO Meta Tags %>
@@ -46,7 +46,7 @@
     <meta name="twitter:image:alt" content="Tomer Gelbhart - Full-Stack Developer Portfolio">
 
     <%# Additional Meta Tags %>
-    <meta name="theme-color" content="#0d6efd">
+    <meta name="theme-color" content="#0b0f19">
     <meta name="format-detection" content="telephone=no">
 
     <%# Security Tags %>
@@ -89,8 +89,8 @@
       <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     </noscript>
 
-    <%# Icon Fonts %>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css">
+    <%# Page-specific head assets (e.g. flag-icons, only loaded where flags render) %>
+    <%= yield :head_assets if content_for?(:head_assets) %>
 
     <%# Structured Data (JSON-LD) %>
     <%= render_structured_data(person_structured_data) %>

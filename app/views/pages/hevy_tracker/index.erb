@@ -1,5 +1,11 @@
 <% content_for :title, page_title("Hevy Tracker") %>
 <% meta_description "Connect your Hevy workout data to Google Sheets™ with our secure OAuth integration. Easy setup guide for syncing fitness tracking between platforms." %>
+<%# flag-icons only renders in the country-stats widget on this page; load it
+    here (non-render-blocking) instead of in the global layout. %>
+<% content_for :head_assets do %>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"></noscript>
+<% end %>
 <% content_for :structured_data do %>
   <%= render_structured_data(software_application_structured_data(
     name: "Hevy Tracker",
