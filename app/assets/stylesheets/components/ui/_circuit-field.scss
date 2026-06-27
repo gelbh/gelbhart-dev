@@ -1,0 +1,30 @@
+// ============================================
+// WEBGL CIRCUIT FIELD (hero / project headers)
+// ============================================
+// Sits above the gradient wash, below the CSS grid. Disabled when
+// prefers-reduced-motion is on or WebGL init fails — CSS fallbacks remain.
+
+.circuit-field {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-circuit);
+  pointer-events: none;
+  overflow: hidden;
+
+  &--fixed {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  &--disabled {
+    display: none;
+  }
+}
+
+.circuit-field__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

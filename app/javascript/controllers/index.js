@@ -18,6 +18,7 @@ import CodeTyperController from "controllers/ui/code_typer_controller";
 import CounterController from "controllers/ui/counter_controller";
 import ThemeController from "controllers/ui/theme_controller";
 import LazyIframeController from "controllers/ui/lazy_iframe_controller";
+import CircuitFieldController from "controllers/ui/circuit_field_controller";
 
 // Animation controllers
 import ScrollAnimationController from "controllers/animation/scroll_controller";
@@ -37,6 +38,7 @@ application.register("analytics-stats", AnalyticsStatsController);
 application.register("code-typer", CodeTyperController);
 application.register("counter", CounterController);
 application.register("lazy-iframe", LazyIframeController);
+application.register("circuit-field", CircuitFieldController);
 application.register("scroll-animation", ScrollAnimationController);
 application.register("scroll-to-top", ScrollToTopController);
 application.register("theme", ThemeController);
