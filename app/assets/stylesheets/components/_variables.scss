@@ -6,19 +6,52 @@
 :root {
   // Primary brand colors
   --color-primary: #6366f1;
+  --color-primary-rgb: 99, 102, 241;
   --color-primary-dark: #4f46e5;
+  --color-primary-dark-rgb: 79, 70, 229;
   --color-secondary: #7c3aed;
+  --color-secondary-rgb: 124, 58, 237;
   --color-accent: #a78bfa;
+  --color-accent-rgb: 167, 139, 250;
+  --color-nav-active: #a5b4fc;
   --color-purple: #7c3aed;
+
+  // Surfaces & ink (DESIGN.md neutrals)
+  --color-surface: #0b0f19;
+  // Raised card panel — a translucent lift above the surface so cards read as
+  // foreground objects while the animated background still whispers through.
+  --color-surface-card: rgba(20, 26, 43, 0.6);
+  --color-surface-raised: #33354d;
+  --color-surface-menu: #1e2028;
+
+  // Terminal/console face — used by the contact console (loaded page-scoped).
+  --font-terminal: "JetBrains Mono", "Courier New", "Monaco", monospace;
+  --color-ink: #ffffff;
+  --color-ink-muted: rgba(255, 255, 255, 0.75);
+  --color-border-subtle: rgba(255, 255, 255, 0.1);
+
+  // Header-specific
+  --header-bg: rgba(11, 15, 25, 0.8);
+  --header-bg-stuck: rgba(11, 15, 25, 0.95);
+  --shadow-header-dropdown: 0 8px 24px rgba(99, 102, 241, 0.25);
+  --shadow-header-stuck: 0 0.375rem 1rem rgba(99, 102, 241, 0.2);
+  --shadow-mobile-menu: 0 20px 60px rgba(99, 102, 241, 0.35),
+    0 0 40px rgba(99, 102, 241, 0.2);
+  --z-header: 1030;
+  --z-header-controls: 1031;
 
   // Pac-Man colors
   --color-pacman-yellow: #ffd700;
   --color-pacman-glow: rgba(255, 215, 0, 0.6);
   --color-ghost-red: #ff0000;
+  --color-ghost-red-rgb: 255, 0, 0;
   --color-ghost-pink: #ffb8d1;
   --color-ghost-cyan: #00ffff;
+  --color-ghost-cyan-rgb: 0, 255, 255;
   --color-ghost-orange: #ffa500;
+  --color-ghost-orange-rgb: 255, 165, 0;
   --color-ghost-frightened: #0066ff;
+  --color-ghost-frightened-rgb: 0, 102, 255;
 
   // Terminal/code colors
   --color-code-green: #4af626;
@@ -100,8 +133,12 @@
 
   // Timing functions
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  // Overshoot curve — reserved for the Pac-Man arcade game motion only.
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-in-out: ease-in-out;
+  // Natural deceleration for entrances/reveals and UI chrome (no overshoot)
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
   // Animation durations
   --duration-pulse: 2s;
@@ -109,10 +146,10 @@
   --duration-gradient: 15s;
   --duration-grid: 20s;
 
-  // Shadows
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+  // Shadows (indigo glow — Glow-Not-Drop)
+  --shadow-sm: 0 2px 8px rgba(99, 102, 241, 0.08);
+  --shadow-md: 0 4px 16px rgba(99, 102, 241, 0.12);
+  --shadow-lg: 0 1rem 3rem rgba(99, 102, 241, 0.18);
   --shadow-primary: 0 0.5rem 1.125rem -0.5rem rgba(99, 102, 241, 0.9);
   --shadow-glow: 0 0 20px rgba(255, 215, 0, 0.3);
 
@@ -129,15 +166,18 @@
   --opacity-very-strong: 0.25;
 
   // Z-index layers
+  // Ambient page (hero backgrounds, content, scroll indicator)
   --z-background: -3;
+  --z-circuit: -2;
   --z-grid: -1;
   --z-content: 1;
   --z-floating: 10;
-  --z-hud: 10002;
+  // Pac-Man overlay stack (must sit above page chrome; see --z-header in header tokens)
   --z-overlay: 9998;
   --z-game: 9999;
   --z-pacman: 10000;
   --z-ghost: 10000;
+  --z-hud: 10002;
   --z-indicator: 10003;
   --z-modal: 10004;
 
@@ -150,7 +190,9 @@
     --opacity-light: 0.08;
     --opacity-medium: 0.12;
     --grid-color: rgba(99, 102, 241, 0.12);
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+    --shadow-sm: 0 2px 8px rgba(99, 102, 241, 0.15);
+    --shadow-md: 0 4px 16px rgba(99, 102, 241, 0.2);
+    --shadow-lg: 0 1rem 3rem rgba(99, 102, 241, 0.25);
   }
 }
 
