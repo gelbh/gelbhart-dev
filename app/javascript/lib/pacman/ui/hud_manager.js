@@ -56,7 +56,15 @@ export class HUDManager {
 
     if (this.livesTarget) {
       const livesCount = Math.max(0, lives);
-      this.livesTarget.textContent = "❤️".repeat(livesCount);
+      const label = `${livesCount} ${livesCount === 1 ? "life" : "lives"}`;
+      this.livesTarget.setAttribute("aria-label", label);
+      const visual = this.livesTarget.querySelector("[aria-hidden='true']");
+      const hearts = "❤️".repeat(livesCount);
+      if (visual) {
+        visual.textContent = hearts;
+      } else {
+        this.livesTarget.textContent = hearts;
+      }
     }
 
     if (

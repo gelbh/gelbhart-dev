@@ -3,9 +3,9 @@
 <% subtitle = local_assigns[:subtitle] %>
 
 <div class="text-<%= text_align %> mb-5">
-    <h2 class="h1 mb-3 fade-in-view <%= animation_delay %>"><%= title %></h2>
+    <h2 class="h1 mb-3 fade-in-view reveal-heading <%= animation_delay %>"><%= title %></h2>
     <% if subtitle.present? %>
-    <p class="fs-lg text-muted fade-in-view <%= animation_delay.present? ? "#{animation_delay.split('-').first}-#{animation_delay.split('-').last.to_i + 1}" : 'delay-1' %>">
+    <p class="fs-lg text-muted fade-in-view reveal-heading" style="--i: 1">
         <%= subtitle %>
     </p>
     <% end %>

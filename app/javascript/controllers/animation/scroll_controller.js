@@ -5,6 +5,13 @@ export default class extends Controller {
   static targets = ["element"]
 
   connect() {
+    // Progressive enhancement: only arm the hidden/reveal state when an
+    // observer can actually reveal it. Without `.reveal-ready` the CSS leaves
+    // content fully visible, so disabled/failed JS never blanks a section.
+    if (!("IntersectionObserver" in window)) return
+
+    document.documentElement.classList.add("reveal-ready")
+
     this.observer = new IntersectionObserver(
       (entries) => this.handleIntersection(entries),
       {
