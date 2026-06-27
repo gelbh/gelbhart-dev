@@ -24,7 +24,21 @@ html {
   z-index: 2;
 }
 
-// Animation/transition delay utility classes
+// Minimum 44×48px touch target for icon-only controls
+.icon-hit-area {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.5rem;
+  touch-action: manipulation;
+
+  @media (any-pointer: coarse) {
+    min-width: 48px;
+    min-height: 48px;
+  }
+}
 // Can be used for both animation-delay and transition-delay
 .delay-1 {
   animation-delay: 0.2s;
