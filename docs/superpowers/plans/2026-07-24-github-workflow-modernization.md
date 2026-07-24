@@ -8,7 +8,6 @@
 
 | Path | Role |
 |------|------|
-| `.gitignore` | Ignore unpublished tooling/brief paths |
 | `.nvmrc` | Aligned with `.node-version` (`20.9.0`) |
 | `.github/actions/setup-app/action.yml` | Ruby + Node + deps |
 | `.github/workflows/ci.yml` | PR jobs: `lint`, `test`, `system`, `seeds` |
