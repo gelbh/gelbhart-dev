@@ -1,0 +1,260 @@
+// ============================================
+// JET LAG MAP COMPANION PAGE
+// Custom: map-forward hero + screenshot stage
+// (Silicon/Bootstrap cover cards/steps)
+// ============================================
+
+.jetlag-hero {
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-top: 6rem;
+  padding-bottom: var(--spacing-xl);
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  padding-left: calc(50vw - 50%);
+  padding-right: calc(50vw - 50%);
+
+  @media (min-width: 768px) {
+    min-height: 60vh;
+    padding-top: 8rem;
+    padding-bottom: var(--spacing-2xl);
+  }
+
+  h1 {
+    text-wrap: balance;
+  }
+}
+
+.jetlag-gradient-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--gradient-primary);
+  background-size: 200% 200%;
+  animation: gradientShift var(--duration-gradient) ease infinite;
+  opacity: 0.12;
+  z-index: var(--z-grid);
+}
+
+.jetlag-card {
+  // Flat dark surface + indigo border/glow — no decorative backdrop blur
+  background: rgba(255, 255, 255, 0.05);
+  transition: border-color var(--transition-normal) var(--ease-smooth),
+    box-shadow var(--transition-normal) var(--ease-smooth),
+    transform var(--transition-normal) var(--ease-smooth);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  h2 {
+    text-wrap: balance;
+  }
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3) !important;
+    border-color: rgba(99, 102, 241, 0.3);
+  }
+}
+
+// Screenshot gallery — stage, not a lifting card
+.jetlag-gallery-header h2 {
+  text-wrap: balance;
+}
+
+.jetlag-gallery-stage {
+  position: relative;
+  border-radius: 1.5rem; // DESIGN.md rounded.xl
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  background:
+    radial-gradient(
+      ellipse 80% 60% at 50% 35%,
+      rgba(99, 102, 241, 0.14) 0%,
+      transparent 70%
+    ),
+    rgba(255, 255, 255, 0.03);
+  padding: clamp(1.25rem, 1rem + 1.5vw, 2rem);
+  overflow: hidden;
+}
+
+.jetlag-gallery-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.35rem;
+  justify-content: center;
+  border: 0;
+  padding: 0.35rem;
+  // Capsule: xl radius on a short bar reads as a pill (DESIGN.md rounded.xl)
+  border-radius: 1.5rem;
+  background: rgba(11, 15, 25, 0.55);
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-item {
+    flex: 0 0 auto;
+  }
+
+  .nav-link {
+    min-height: 44px;
+    border: 0 !important;
+    border-radius: 1.5rem;
+    padding: 0.5rem 0.85rem;
+    color: rgba(255, 255, 255, 0.72);
+    background: transparent;
+    font-weight: 500;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    box-shadow: none !important;
+    transition: color var(--transition-fast) var(--ease-smooth),
+      background-color var(--transition-fast) var(--ease-smooth);
+
+    &:hover {
+      color: #fff;
+      background: rgba(99, 102, 241, 0.15);
+    }
+
+    &.active {
+      color: #fff !important;
+      font-weight: 600;
+      background: rgba(99, 102, 241, 0.35) !important;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #6366f1;
+      outline-offset: 2px;
+    }
+  }
+}
+
+.jetlag-gallery-shot {
+  display: grid;
+  gap: 1.25rem;
+  align-items: center;
+  justify-items: center;
+
+  @media (min-width: 768px) {
+    grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+    gap: 2rem;
+    justify-items: stretch;
+    text-align: left;
+  }
+}
+
+.jetlag-gallery-caption {
+  max-width: 28rem;
+  text-align: center;
+
+  @media (min-width: 768px) {
+    text-align: left;
+    justify-self: start;
+  }
+
+  h3 {
+    text-wrap: balance;
+  }
+}
+
+.jetlag-phone-frame {
+  position: relative;
+  max-width: 20rem;
+  width: 100%;
+  margin-inline: auto;
+  border-radius: 1.5rem; // DESIGN.md rounded.xl
+  overflow: hidden;
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.35),
+    0 1.75rem 3.5rem rgba(99, 102, 241, 0.28);
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  &.gallery-item {
+    cursor: zoom-in;
+    display: block;
+    padding: 0;
+    background: transparent;
+    text-align: inherit;
+    appearance: none;
+    transition: transform var(--transition-normal) var(--ease-smooth),
+      box-shadow var(--transition-normal) var(--ease-smooth);
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow:
+          0 0 0 1px rgba(99, 102, 241, 0.45),
+          0 2rem 4rem rgba(99, 102, 241, 0.35);
+
+        .jetlag-gallery-zoom {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    }
+
+    &:focus-visible {
+      outline: 2px solid #6366f1;
+      outline-offset: 3px;
+    }
+  }
+}
+
+.jetlag-gallery-zoom {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem; // DESIGN.md rounded.md
+  background: rgba(11, 15, 25, 0.82);
+  border: 1px solid rgba(99, 102, 241, 0.45);
+  color: #fff;
+  font-size: 1.25rem;
+  opacity: 0.85;
+  transform: translateY(2px);
+  transition: opacity var(--transition-fast) var(--ease-smooth),
+    transform var(--transition-fast) var(--ease-smooth);
+  pointer-events: none;
+}
+
+.jetlag-hero .jetlag-phone-frame {
+  max-width: 18rem;
+
+  @media (min-width: 992px) {
+    max-width: 22rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jetlag-gradient-bg {
+    animation: none;
+  }
+
+  .jetlag-card:hover,
+  .jetlag-phone-frame.gallery-item:hover {
+    transform: none;
+  }
+
+  .jetlag-gallery-zoom {
+    opacity: 1;
+    transform: none;
+  }
+}

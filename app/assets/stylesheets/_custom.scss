@@ -34,6 +34,7 @@
 // ---- Page Sections ----
 // Hero section with animated backgrounds and gradient text
 @use "components/sections/hero" as *;
+@use "components/sections/home-deck" as *;
 
 // Technologies & skills section with tech cards
 @use "components/sections/tech-skills" as *;
@@ -56,6 +57,9 @@
 
 // NASA Exoplanet Explorer page with hero and card styles
 @use "components/pages/nasa-exoplanet-explorer" as *;
+
+// Jet Lag Map Companion page with map-forward hero and gallery
+@use "components/pages/jetlag" as *;
 
 // Nim Quantum ML page (wide demo embed)
 @use "components/pages/nim-quantum-ml" as *;
