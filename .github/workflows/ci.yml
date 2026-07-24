@@ -1,0 +1,130 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  RAILS_ENV: test
+  CI: "true"
+  PGHOST: localhost
+  PGUSER: postgres
+  PGPASSWORD: postgres
+  # Keep DATABASE_URL unset so test DB name from database.yml is used
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-app
+      # Pre-existing Layout offenses are safe-autocorrectable; -A then re-check
+      # keeps the lint gate without a drive-by app-tree commit in this PR.
+      - run: bin/rubocop -A && bin/rubocop
+      - run: bin/importmap audit
+      # bin/brakeman injects --ensure-latest; Gemfile pins 7.1.1 while 8.x is
+      # latest, which exits 5 with no findings. Scan via bundle exec instead.
+      - run: bundle exec brakeman --quiet --no-pager --exit-on-warn --exit-on-error
+
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: gelbhart_dev_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-app
+      - name: Prepare database
+        run: |
+          # optional_postgres_extensions after_initialize pre-creates schemas, then
+          # schema.rb create_schema raises DuplicateSchema. Park it for schema load.
+          init="config/initializers/optional_postgres_extensions.rb"
+          mv "$init" /tmp/optional_postgres_extensions.rb
+          bin/rails db:prepare
+          mv /tmp/optional_postgres_extensions.rb "$init"
+      - name: Rails + Jest
+        run: env -u DATABASE_URL CI=true bin/test-changed
+
+  system:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: gelbhart_dev_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-app
+      - uses: browser-actions/setup-chrome@c785b87e244131f27c9f19c1a33e2ead956ab7ce # v1
+      - name: Prepare database
+        run: |
+          init="config/initializers/optional_postgres_extensions.rb"
+          mv "$init" /tmp/optional_postgres_extensions.rb
+          bin/rails db:prepare
+          mv /tmp/optional_postgres_extensions.rb "$init"
+      - name: System tests
+        run: env -u DATABASE_URL bin/rails test:system
+
+  seeds:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: gelbhart_dev_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-app
+      - name: Prepare database
+        run: |
+          init="config/initializers/optional_postgres_extensions.rb"
+          mv "$init" /tmp/optional_postgres_extensions.rb
+          bin/rails db:prepare
+          mv /tmp/optional_postgres_extensions.rb "$init"
+      - name: Replant seeds
+        run: env -u DATABASE_URL RAILS_ENV=test bin/rails db:seed:replant

@@ -102,3 +102,11 @@ ENV/
 /public/downloads/video_captioner.exe
 /public/downloads/build/
 /public/downloads/dist/
+
+# Agent / Cursor / Impeccable — local only (never commit)
+.cursor/
+.impeccable/
+PRODUCT.md
+DESIGN.md
+AGENTS.md
+CLAUDE.md
