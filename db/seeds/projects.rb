@@ -5,7 +5,7 @@ project = Project.find_or_initialize_by(title: "Jet Lag Map Companion")
 project.assign_attributes(
   subtitle: "Live Map PWA",
   description: "Host or join synced map sessions for Jet Lag Hide + Seek — questions, zones, and pins stay live for the whole group.",
-  icon: "jetlag/icon.svg",
+  icon: "jetlag/icon-mark.svg",
   color: "primary",
   link_text: "Learn More",
   link_url: "/projects/jetlag",
