@@ -3,6 +3,10 @@ description: Ruby, Node, bundle, npm for CI jobs
 runs:
   using: composite
   steps:
+    - name: Ensure bin stubs are executable
+      shell: bash
+      # Repo tracks bin/* as 100644; CI needs +x for bin/rails, bin/rubocop, etc.
+      run: chmod +x bin/*
     - uses: ruby/setup-ruby@6aaa311d81eba98ae12eaffbcb63296ace0efcde # v1.307.0
       with:
         ruby-version: "3.3.10"
