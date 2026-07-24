@@ -36,7 +36,7 @@ gem "image_processing", "~> 1.2"
 gem "mini_racer"
 gem "rack-attack", "~> 6.6"
 gem "rexml"
-gem "sitemap_generator", "~> 6.1"
+gem "sitemap_generator", "~> 7.1"
 
 # Platform-specific
 gem "tzinfo-data", platforms: %i[windows jruby]
