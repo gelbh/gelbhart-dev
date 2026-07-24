@@ -2,10 +2,11 @@ name: Update README Badges
 
 on:
   push:
+    branches: [main]
     paths:
       - ".ruby-version"
       - "Gemfile.lock"
-  workflow_dispatch: # Allow manual triggering
+  workflow_dispatch:
 
 jobs:
   update-badges:
@@ -15,16 +16,18 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@6aaa311d81eba98ae12eaffbcb63296ace0efcde # v1.307.0
         with:
           ruby-version: .ruby-version
           bundler-cache: true
 
       - name: Update README badges
-        run: bin/update-readme-badges
+        run: |
+          chmod +x bin/update-readme-badges bin/rails bin/rake bin/ruby 2>/dev/null || true
+          bin/update-readme-badges
 
       - name: Check for changes
         id: verify-changed-files
