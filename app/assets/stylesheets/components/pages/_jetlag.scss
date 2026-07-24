@@ -62,6 +62,10 @@
     width: 100%;
     height: auto;
   }
+
+  &.gallery-item {
+    cursor: zoom-in;
+  }
 }
 
 .jetlag-hero .jetlag-phone-frame {
