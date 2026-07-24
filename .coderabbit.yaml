@@ -1,0 +1,84 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en-US
+
+reviews:
+  # Soft PR App: comment/summary trail only. Optional CLI pre-push review is separate.
+  profile: assertive
+  request_changes_workflow: false
+  pre_merge_checks:
+    docstrings:
+      mode: "off"
+    title:
+      mode: "off"
+    description:
+      mode: "off"
+    issue_assessment:
+      mode: "off"
+  high_level_summary: true
+  high_level_summary_placeholder: "@coderabbitai summary"
+  auto_title_placeholder: "@coderabbitai"
+  poem: false
+  review_status: true
+  comment_placeholder: false
+  disable_placeholder_comment_notifications: false
+  collapse_walkthrough: false
+  sequence_diagrams: true
+  changed_files_summary: true
+  path_filters:
+    - "!**/*.lock"
+    - "!**/node_modules/**"
+    - "!**/coverage/**"
+    - "!**/app/assets/builds/**"
+    - "!**/public/assets/**"
+    - "!**/log/**"
+    - "!**/tmp/**"
+  instructions: |
+    gelbhart.dev — personal portfolio on Ruby on Rails 8, Silicon theme,
+    Bootstrap 5, Stimulus, Minitest, Jest.
+
+    Conventions:
+    - Conventional Commits for PR titles
+    - Prefer Silicon theme components and Bootstrap utilities before custom CSS
+    - Theme priority: Silicon components → Bootstrap utilities → minimal _custom.scss
+
+    Focus on bugs, security, accessibility, SEO regressions, and broken project
+    showcases. De-prioritize style-only nits when behavior is correct. Do not
+    suggest unrelated refactors.
+  path_instructions:
+    - path: "app/views/**"
+      instructions: |
+        Review views for:
+        - Silicon/Bootstrap patterns before custom markup
+        - Accessibility on interactive controls and landmarks
+        - Consistent meta/SEO helpers where other project pages use them
+    - path: "app/assets/stylesheets/**"
+      instructions: |
+        Review styles for:
+        - Theme variables (--bs-*) and existing _custom.scss patterns
+        - Minimal scoped overrides; avoid reimplementing Silicon components
+        - Motion and reduced-motion preferences
+    - path: "app/javascript/**"
+      instructions: |
+        Review Stimulus/JS for:
+        - Controller lifecycle cleanup
+        - No broken analytics or easter-egg regressions (Pac-Man)
+        - Jest coverage for non-trivial behavior changes
+    - path: "test/**"
+      instructions: |
+        Review tests for:
+        - Behavior-focused assertions on changed paths
+        - Request/system coverage for new routes/pages
+    - path: ".github/workflows/**"
+      instructions: |
+        Review CI for:
+        - Required job names lint/test/system/seeds on PRs
+        - Main smoke stays non-gating
+        - Action SHA pins preserved
+
+chat:
+  auto_reply: true
+
+knowledge_base:
+  opt_out: false
+  learnings:
+    scope: auto
