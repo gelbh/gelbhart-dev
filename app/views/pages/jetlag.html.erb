@@ -1,0 +1,396 @@
+<% content_for :title, page_title("Jet Lag Map Companion") %>
+<% meta_description "Unofficial fan companion for Jet Lag Hide + Seek — host or join synced map sessions; seekers ask on the live map, hiders answer and set zones." %>
+<% content_for :structured_data do %>
+  <%= render_structured_data(software_application_structured_data(
+    name: "Jet Lag Map Companion",
+    description: "Unofficial fan companion for Jet Lag Hide + Seek. Host or join synced map sessions: seekers ask questions on the live map, hiders answer and set hiding zones.",
+    url: "https://jetlag.gelbhart.dev",
+    application_category: "WebApplication",
+    operating_system: "Web",
+    offers: {
+      "price" => "0",
+      "priceCurrency" => "USD"
+    }
+  )) %>
+  <%= render_structured_data(faq_structured_data([
+    {
+      question: "What is Jet Lag Map Companion?",
+      answer: "A live map companion for Hide + Seek sessions: seekers ask questions on the shared map; hiders answer, set hiding zones, and watch the hunt unfold in sync."
+    },
+    {
+      question: "Is Jet Lag Map Companion official?",
+      answer: "No. It is an unofficial fan companion — not affiliated with Jet Lag: The Game, Nebula, or the board game."
+    },
+    {
+      question: "Is Jet Lag Map Companion free?",
+      answer: "Yes. Open the web app at jetlag.gelbhart.dev; the source is on GitHub."
+    },
+    {
+      question: "Does it work on phones?",
+      answer: "Yes. It is built as a mobile-first PWA — add it to your home screen for a full-screen map."
+    },
+    {
+      question: "Where is the code?",
+      answer: "The source is at https://github.com/gelbh/jetlag."
+    }
+  ])) %>
+  <% jetlag_article_data = article_structured_data(
+    title: "Jet Lag Map Companion",
+    url: "https://gelbhart.dev/projects/jetlag",
+    description: "Unofficial fan companion for Jet Lag Hide + Seek with live synced map sessions.",
+    keywords: "Jet Lag Map Companion, Jet Lag Hide and Seek, live map, PWA, Leaflet, Firebase",
+    image: "logos/social/logo_social.png"
+  ) %>
+  <%= render_structured_data(jetlag_article_data) %>
+<% end %>
+
+<section class="position-relative jetlag-hero" data-controller="scroll-animation">
+  <div class="jetlag-gradient-bg"></div>
+  <%= render "shared/circuit_field", intensity: 0.85 %>
+  <div class="container py-4 position-relative zindex-5">
+    <div class="row align-items-center g-4 g-lg-5">
+      <div class="col-lg-6 order-2 order-lg-1 fade-in-view">
+        <%= image_tag "jetlag/icon.svg", width: 64, height: 64, class: "mb-3", alt: "Jet Lag Map Companion", loading: "eager" %>
+        <h1 class="display-5 mb-2">Jet Lag Map Companion</h1>
+        <p class="lead text-light mb-2">Live map sessions for Hide + Seek</p>
+        <p class="text-light opacity-75 mb-4" style="max-width: 40rem;">
+          Unofficial fan companion for Jet Lag: The Game. Host or join synced map sessions — seekers ask on the live map, hiders answer and set zones, everyone stays on the same board.
+        </p>
+        <div class="d-flex flex-column flex-sm-row gap-3">
+          <a href="https://jetlag.gelbhart.dev" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg">
+            <i class="bx bx-map me-2" aria-hidden="true"></i>Open app
+          </a>
+          <a href="https://github.com/gelbh/jetlag" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-lg">
+            <i class="bx bxl-github me-2" aria-hidden="true"></i>GitHub
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-6 order-1 order-lg-2 fade-in-view delay-1">
+        <div class="jetlag-phone-frame">
+          <%= image_tag "jetlag/01-hero-map.webp",
+                alt: "Jet Lag Map Companion live seeker map over Dublin with play zone and timers",
+                srcset: "#{asset_path('jetlag/01-hero-map-400.webp')} 400w, #{asset_path('jetlag/01-hero-map.webp')} 800w",
+                sizes: "(min-width: 992px) 352px, 288px",
+                width: 800,
+                height: 1731,
+                loading: "eager",
+                fetchpriority: "high" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container pt-4">
+  <%= render "shared/breadcrumb", items: [
+    { name: "Home", url: "/" },
+    { name: "Projects", url: nil },
+    { name: "Jet Lag Map Companion", url: nil }
+  ] %>
+</div>
+
+<section class="container py-5 mt-4" data-controller="scroll-animation">
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+      <div class="card jetlag-card border-0 shadow-lg mb-4 fade-in-view delay-1">
+        <div class="card-body p-4 p-lg-5">
+          <div class="d-flex align-items-center mb-4">
+            <div class="me-3">
+              <%= render "shared/icon_circle", icon: "bx-rocket", color: "primary", size: "md" %>
+            </div>
+            <h2 class="h3 mb-0">How a session works</h2>
+          </div>
+          <div class="steps steps-sm steps-horizontal-md steps-center mb-0">
+            <div class="step">
+              <div class="step-number"><div class="step-number-inner">1</div></div>
+              <div class="step-body">
+                <h3 class="h5 mb-2">Create &amp; share</h3>
+                <p class="mb-0 text-light opacity-75 small">Host frames the play area and shares the 4-letter code.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-number"><div class="step-number-inner">2</div></div>
+              <div class="step-body">
+                <h3 class="h5 mb-2">Join a role</h3>
+                <p class="mb-0 text-light opacity-75 small">Everyone joins as seeker, hider, or observer on their phone.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-number"><div class="step-number-inner">3</div></div>
+              <div class="step-body">
+                <h3 class="h5 mb-2">Hunt in sync</h3>
+                <p class="mb-0 text-light opacity-75 small">Questions, zones, and pins update live on one shared map.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="jetlag-gallery mb-4 fade-in-view delay-2">
+        <div class="jetlag-gallery-header mb-3 mb-lg-4">
+          <h2 class="h3 mb-2">In the app</h2>
+          <p class="text-light opacity-75 mb-0" style="max-width: 40rem;">
+            Real session UI — tap a screen to enlarge.
+          </p>
+        </div>
+
+        <div class="jetlag-gallery-stage">
+          <ul class="nav jetlag-gallery-tabs mb-4" id="jetlagGalleryTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="jetlag-home-tab" data-bs-toggle="tab" data-bs-target="#jetlag-home-pane" type="button" role="tab" aria-controls="jetlag-home-pane" aria-selected="true">Home</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="jetlag-join-tab" data-bs-toggle="tab" data-bs-target="#jetlag-join-pane" type="button" role="tab" aria-controls="jetlag-join-pane" aria-selected="false">Join</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="jetlag-map-tab" data-bs-toggle="tab" data-bs-target="#jetlag-map-pane" type="button" role="tab" aria-controls="jetlag-map-pane" aria-selected="false">Map</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="jetlag-answered-tab" data-bs-toggle="tab" data-bs-target="#jetlag-answered-pane" type="button" role="tab" aria-controls="jetlag-answered-pane" aria-selected="false">Hunt</button>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="jetlagGalleryTabContent">
+            <div class="tab-pane fade show active" id="jetlag-home-pane" role="tabpanel" aria-labelledby="jetlag-home-tab" tabindex="0">
+              <div class="jetlag-gallery-shot">
+                <button type="button"
+                        class="gallery-item jetlag-phone-frame"
+                        data-bs-toggle="modal"
+                        data-bs-target="#jetlagImageModal"
+                        data-image="<%= asset_path('jetlag/02-home-full.webp') %>"
+                        data-alt="Jet Lag Map Companion home screen with active session shortcut"
+                        aria-label="Enlarge home screen screenshot">
+                  <%= image_tag "jetlag/02-home.webp",
+                        alt: "Jet Lag Map Companion home screen with Create, Join, and active session shortcut",
+                        class: "img-fluid",
+                        srcset: "#{asset_path('jetlag/02-home-400.webp')} 400w, #{asset_path('jetlag/02-home.webp')} 800w",
+                        sizes: "(min-width: 992px) 20rem, min(100vw - 3rem, 18rem)",
+                        loading: "lazy",
+                        width: 800,
+                        height: 1731 %>
+                  <span class="jetlag-gallery-zoom" aria-hidden="true">
+                    <i class="bx bx-expand-alt"></i>
+                  </span>
+                </button>
+                <div class="jetlag-gallery-caption">
+                  <h3 class="h5 mb-2">Home</h3>
+                  <p class="text-light opacity-75 mb-0">Landing with create/join and a jump back into the active session.</p>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="jetlag-join-pane" role="tabpanel" aria-labelledby="jetlag-join-tab" tabindex="0">
+              <div class="jetlag-gallery-shot">
+                <button type="button"
+                        class="gallery-item jetlag-phone-frame"
+                        data-bs-toggle="modal"
+                        data-bs-target="#jetlagImageModal"
+                        data-image="<%= asset_path('jetlag/03-join-full.webp') %>"
+                        data-alt="Join session screen with four-letter code and role picker"
+                        aria-label="Enlarge join session screenshot">
+                  <%= image_tag "jetlag/03-join.webp",
+                        alt: "Join game screen with session code entry and seeker, hider, observer roles",
+                        class: "img-fluid",
+                        srcset: "#{asset_path('jetlag/03-join-400.webp')} 400w, #{asset_path('jetlag/03-join.webp')} 800w",
+                        sizes: "(min-width: 992px) 20rem, min(100vw - 3rem, 18rem)",
+                        loading: "lazy",
+                        width: 800,
+                        height: 1731 %>
+                  <span class="jetlag-gallery-zoom" aria-hidden="true">
+                    <i class="bx bx-expand-alt"></i>
+                  </span>
+                </button>
+                <div class="jetlag-gallery-caption">
+                  <h3 class="h5 mb-2">Join</h3>
+                  <p class="text-light opacity-75 mb-0">Enter the four-letter code and pick seeker, hider, or observer.</p>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="jetlag-map-pane" role="tabpanel" aria-labelledby="jetlag-map-tab" tabindex="0">
+              <div class="jetlag-gallery-shot">
+                <button type="button"
+                        class="gallery-item jetlag-phone-frame"
+                        data-bs-toggle="modal"
+                        data-bs-target="#jetlagImageModal"
+                        data-image="<%= asset_path('jetlag/01-hero-map-full.webp') %>"
+                        data-alt="Live map mid-session with zone and timers"
+                        aria-label="Enlarge live map screenshot">
+                  <%= image_tag "jetlag/01-hero-map.webp",
+                        alt: "Live seeker map with play zone, location, and hiding timer",
+                        class: "img-fluid",
+                        srcset: "#{asset_path('jetlag/01-hero-map-400.webp')} 400w, #{asset_path('jetlag/01-hero-map.webp')} 800w",
+                        sizes: "(min-width: 992px) 20rem, min(100vw - 3rem, 18rem)",
+                        loading: "lazy",
+                        width: 800,
+                        height: 1731 %>
+                  <span class="jetlag-gallery-zoom" aria-hidden="true">
+                    <i class="bx bx-expand-alt"></i>
+                  </span>
+                </button>
+                <div class="jetlag-gallery-caption">
+                  <h3 class="h5 mb-2">Live map</h3>
+                  <p class="text-light opacity-75 mb-0">Mid-session map with zone state, HUD timers, and the tool dock.</p>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="jetlag-answered-pane" role="tabpanel" aria-labelledby="jetlag-answered-tab" tabindex="0">
+              <div class="jetlag-gallery-shot">
+                <button type="button"
+                        class="gallery-item jetlag-phone-frame"
+                        data-bs-toggle="modal"
+                        data-bs-target="#jetlagImageModal"
+                        data-image="<%= asset_path('jetlag/04-answered-full.webp') %>"
+                        data-alt="Game sheet showing answered Measure and Radar questions"
+                        aria-label="Enlarge hunt narrowed screenshot">
+                  <%= image_tag "jetlag/04-answered.webp",
+                        alt: "Answered Measure and Radar questions narrowing the hunt on the map",
+                        class: "img-fluid",
+                        srcset: "#{asset_path('jetlag/04-answered-400.webp')} 400w, #{asset_path('jetlag/04-answered.webp')} 800w",
+                        sizes: "(min-width: 992px) 20rem, min(100vw - 3rem, 18rem)",
+                        loading: "lazy",
+                        width: 800,
+                        height: 1731 %>
+                  <span class="jetlag-gallery-zoom" aria-hidden="true">
+                    <i class="bx bx-expand-alt"></i>
+                  </span>
+                </button>
+                <div class="jetlag-gallery-caption">
+                  <h3 class="h5 mb-2">Hunt narrowed</h3>
+                  <p class="text-light opacity-75 mb-0">Measure and Radar answers sync so the group sees the same board.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card jetlag-card border-0 shadow mb-4 fade-in-view delay-3">
+        <div class="card-body p-4">
+          <h2 class="h4 mb-3">Tech stack</h2>
+          <div class="d-flex flex-wrap gap-2">
+            <%= render "shared/tech_badge", text: "React", color: "primary", url: "https://react.dev/", extra_classes: "px-3 py-2" %>
+            <%= render "shared/tech_badge", text: "Leaflet", color: "success", url: "https://leafletjs.com/", extra_classes: "px-3 py-2" %>
+            <%= render "shared/tech_badge", text: "Firebase", color: "warning", url: "https://firebase.google.com/", extra_classes: "px-3 py-2" %>
+            <%= render "shared/tech_badge", text: "Cloudflare Workers", color: "info", url: "https://workers.cloudflare.com/", extra_classes: "px-3 py-2" %>
+            <%= render "shared/tech_badge", text: "PWA", color: "secondary", url: "https://web.dev/progressive-web-apps/", extra_classes: "px-3 py-2" %>
+          </div>
+        </div>
+      </div>
+
+      <div class="card jetlag-card border-0 shadow mb-4 fade-in-view delay-4">
+        <div class="card-body p-4">
+          <h2 class="h4 mb-3">FAQ</h2>
+          <div class="accordion accordion-flush" id="jetlagFaq">
+            <div class="accordion-item bg-transparent border-secondary border-opacity-25">
+              <h3 class="accordion-header" id="jetlagFaqHeadingOne">
+                <button class="accordion-button collapsed bg-transparent text-light" type="button" data-bs-toggle="collapse" data-bs-target="#jetlagFaqOne" aria-expanded="false" aria-controls="jetlagFaqOne">
+                  What is Jet Lag Map Companion?
+                </button>
+              </h3>
+              <div id="jetlagFaqOne" class="accordion-collapse collapse" aria-labelledby="jetlagFaqHeadingOne" data-bs-parent="#jetlagFaq">
+                <div class="accordion-body text-light opacity-75">
+                  A live map companion for Hide + Seek sessions: seekers ask questions on the shared map; hiders answer, set hiding zones, and watch the hunt unfold in sync.
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item bg-transparent border-secondary border-opacity-25">
+              <h3 class="accordion-header" id="jetlagFaqHeadingTwo">
+                <button class="accordion-button collapsed bg-transparent text-light" type="button" data-bs-toggle="collapse" data-bs-target="#jetlagFaqTwo" aria-expanded="false" aria-controls="jetlagFaqTwo">
+                  Is it official?
+                </button>
+              </h3>
+              <div id="jetlagFaqTwo" class="accordion-collapse collapse" aria-labelledby="jetlagFaqHeadingTwo" data-bs-parent="#jetlagFaq">
+                <div class="accordion-body text-light opacity-75">
+                  No. It is an unofficial fan companion — not affiliated with Jet Lag: The Game, Nebula, or the board game.
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item bg-transparent border-secondary border-opacity-25">
+              <h3 class="accordion-header" id="jetlagFaqHeadingThree">
+                <button class="accordion-button collapsed bg-transparent text-light" type="button" data-bs-toggle="collapse" data-bs-target="#jetlagFaqThree" aria-expanded="false" aria-controls="jetlagFaqThree">
+                  Is it free?
+                </button>
+              </h3>
+              <div id="jetlagFaqThree" class="accordion-collapse collapse" aria-labelledby="jetlagFaqHeadingThree" data-bs-parent="#jetlagFaq">
+                <div class="accordion-body text-light opacity-75">
+                  Yes. Open the web app at jetlag.gelbhart.dev; the source is on GitHub.
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item bg-transparent border-secondary border-opacity-25">
+              <h3 class="accordion-header" id="jetlagFaqHeadingFour">
+                <button class="accordion-button collapsed bg-transparent text-light" type="button" data-bs-toggle="collapse" data-bs-target="#jetlagFaqFour" aria-expanded="false" aria-controls="jetlagFaqFour">
+                  Does it work on phones?
+                </button>
+              </h3>
+              <div id="jetlagFaqFour" class="accordion-collapse collapse" aria-labelledby="jetlagFaqHeadingFour" data-bs-parent="#jetlagFaq">
+                <div class="accordion-body text-light opacity-75">
+                  Yes. It is built as a mobile-first PWA — add it to your home screen for a full-screen map.
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item bg-transparent border-secondary border-opacity-25">
+              <h3 class="accordion-header" id="jetlagFaqHeadingFive">
+                <button class="accordion-button collapsed bg-transparent text-light" type="button" data-bs-toggle="collapse" data-bs-target="#jetlagFaqFive" aria-expanded="false" aria-controls="jetlagFaqFive">
+                  Where is the code?
+                </button>
+              </h3>
+              <div id="jetlagFaqFive" class="accordion-collapse collapse" aria-labelledby="jetlagFaqHeadingFive" data-bs-parent="#jetlagFaq">
+                <div class="accordion-body text-light opacity-75">
+                  The source is at <a href="https://github.com/gelbh/jetlag" target="_blank" rel="noopener noreferrer" class="text-primary">github.com/gelbh/jetlag</a>.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card jetlag-card border-0 shadow mb-4 fade-in-view delay-5">
+        <div class="card-body p-4">
+          <p class="mb-0 text-light opacity-75 small">
+            <i class="bx bx-info-circle me-1" aria-hidden="true"></i>
+            Unofficial fan companion. Not affiliated with Jet Lag: The Game, Nebula, or the board game.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="jetlagImageModal" tabindex="-1" aria-labelledby="jetlagImageModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content bg-dark border-0">
+      <div class="modal-header border-secondary border-opacity-25">
+        <h2 class="modal-title h5 text-white" id="jetlagImageModalLabel">Screenshot</h2>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center p-0">
+        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" class="img-fluid" id="jetlagModalImage" width="1" height="1">
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    if (document.documentElement.dataset.jetlagLightboxListener === 'true') return;
+    document.documentElement.dataset.jetlagLightboxListener = 'true';
+
+    document.addEventListener('turbo:load', function () {
+      const imageModal = document.getElementById('jetlagImageModal');
+      if (!imageModal || imageModal.dataset.jetlagLightboxBound === 'true') return;
+
+      imageModal.dataset.jetlagLightboxBound = 'true';
+      imageModal.addEventListener('show.bs.modal', function (event) {
+        const trigger = event.relatedTarget;
+        if (!trigger) return;
+        const img = document.getElementById('jetlagModalImage');
+        const title = imageModal.querySelector('.modal-title');
+        img.src = trigger.getAttribute('data-image') || '';
+        img.alt = trigger.getAttribute('data-alt') || '';
+        img.removeAttribute('width');
+        img.removeAttribute('height');
+        if (title) title.textContent = trigger.getAttribute('data-alt') || 'Screenshot';
+      });
+    });
+  })();
+</script>
