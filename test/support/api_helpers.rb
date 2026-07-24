@@ -22,4 +22,3 @@ module ApiHelpers
     json
   end
 end
-

@@ -2,17 +2,13 @@
 # This initializer runs when the database connection is established and ensures
 # that optional extensions (like Supabase-specific ones) don't cause errors
 # when they're referenced in schema.rb but don't exist locally.
+#
+# Schemas (extensions/graphql/vault) are created by db/schema.rb via create_schema.
+# Do not pre-create them here — that races with schema load and raises DuplicateSchema.
 
-if defined?(Rails) && Rails.env.development? || Rails.env.test?
+if defined?(Rails) && (Rails.env.development? || Rails.env.test?)
   Rails.application.config.after_initialize do
     ActiveRecord::Base.connection_pool.with_connection do |connection|
-      # Ensure schemas exist (idempotent)
-      %w[extensions graphql vault].each do |schema_name|
-        connection.execute("CREATE SCHEMA IF NOT EXISTS #{connection.quote_column_name(schema_name)}")
-      rescue ActiveRecord::StatementInvalid
-        # Ignore if schema creation fails (permissions, etc.)
-      end
-
       # Check and enable only extensions that are available
       optional_extensions = [
         { name: "pg_stat_statements", schema: "extensions" },

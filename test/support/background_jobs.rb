@@ -10,4 +10,3 @@ module BackgroundJobHelpers
     perform_enqueued_jobs
   end
 end
-
