@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :pacman_score do
     sequence(:player_name) { |n| "Player#{n}" }
     score { Faker::Number.between(from: 100, to: 10000) }
-    is_win { [true, false].sample }
+    is_win { [ true, false ].sample }
     played_at { Faker::Time.between(from: 1.month.ago, to: Time.current) }
 
     trait :win do
@@ -27,4 +27,3 @@ FactoryBot.define do
     end
   end
 end
-

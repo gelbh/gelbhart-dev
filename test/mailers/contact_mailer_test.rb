@@ -18,7 +18,7 @@ class ContactMailerTest < ActionMailer::TestCase
       message: "This is a test message"
     )
 
-    assert_equal ["gelbharttomer@gmail.com"], email.to
+    assert_equal [ "gelbharttomer@gmail.com" ], email.to
     assert_equal "gelbharttomer@gmail.com", email.from.first
     assert_equal "New Contact Form Message from Test User", email.subject
     assert_equal "test@example.com", email.reply_to.first
@@ -55,4 +55,3 @@ class ContactMailerTest < ActionMailer::TestCase
     end
   end
 end
-

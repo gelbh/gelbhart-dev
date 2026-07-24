@@ -41,10 +41,6 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup-app
       - name: Prepare database
-        run: |
-          init="config/initializers/optional_postgres_extensions.rb"
-          mv "$init" /tmp/optional_postgres_extensions.rb
-          bin/rails db:prepare
-          mv /tmp/optional_postgres_extensions.rb "$init"
-      - run: bin/rubocop -A && bin/rubocop
+        run: bin/rails db:prepare
+      - run: bin/rubocop
       - run: env -u DATABASE_URL CI=true bin/test-changed

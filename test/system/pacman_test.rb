@@ -24,4 +24,3 @@ class PacmanTest < ActionDispatch::SystemTestCase
     assert_selector "body"
   end
 end
-

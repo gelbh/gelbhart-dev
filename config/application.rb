@@ -42,7 +42,7 @@ module GelbhartDev
     # Local dev origins are included in production too so a locally running
     # gelbhart-innovations app can iframe production gelbhart.dev. Optional
     # comma-separated ENV e.g. preview deploys: FRAME_ANCESTORS_EXTRA=https://foo.onrender.com
-    base_frame_ancestors = ["'self'", "https://gelbhart.com", "https://www.gelbhart.com"]
+    base_frame_ancestors = [ "'self'", "https://gelbhart.com", "https://www.gelbhart.com" ]
     local_embed_origins = %w[
       http://localhost:3000
       http://127.0.0.1:3000

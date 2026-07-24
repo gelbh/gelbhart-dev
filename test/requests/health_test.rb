@@ -25,7 +25,7 @@ class HealthTest < ActionDispatch::IntegrationTest
   test "GET /_up returns 503 on database connection failure" do
     # Mock the connection pool to raise an error
     ActiveRecord::Base.connection_pool.stubs(:with_connection).raises(PG::ConnectionBad.new("Connection failed"))
-    
+
     get "/_up"
     json = assert_json_response(503)
 
@@ -35,4 +35,3 @@ class HealthTest < ActionDispatch::IntegrationTest
     ActiveRecord::Base.connection_pool.unstub(:with_connection) if ActiveRecord::Base.connection_pool.respond_to?(:unstub)
   end
 end
-
