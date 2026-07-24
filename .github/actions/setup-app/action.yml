@@ -1,0 +1,16 @@
+name: Setup gelbhart-dev app
+description: Ruby, Node, bundle, npm for CI jobs
+runs:
+  using: composite
+  steps:
+    - uses: ruby/setup-ruby@6aaa311d81eba98ae12eaffbcb63296ace0efcde # v1.307.0
+      with:
+        ruby-version: "3.3.10"
+        bundler-cache: true
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      with:
+        node-version-file: ".node-version"
+        cache: npm
+    - name: Install npm dependencies
+      shell: bash
+      run: npm ci
