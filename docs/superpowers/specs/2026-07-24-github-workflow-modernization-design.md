@@ -31,10 +31,6 @@ flowchart LR
   merge --> render[Render deploy]
 ```
 
-## Gitignore (private paths)
-
-Shared `.gitignore` excludes unpublished editor/tooling directories and private brief filenames (see the ignore block at the bottom of `.gitignore`).
-
 ## CI
 
 **PR** (`.github/workflows/ci.yml`): `lint` (RuboCop, importmap audit, Brakeman), `test` (Rails + Jest via `bin/test-changed`), `system`, `seeds`.

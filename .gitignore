@@ -102,11 +102,3 @@ ENV/
 /public/downloads/video_captioner.exe
 /public/downloads/build/
 /public/downloads/dist/
-
-# Unpublished tooling and design briefs
-.cursor/
-.impeccable/
-PRODUCT.md
-DESIGN.md
-AGENTS.md
-CLAUDE.md
