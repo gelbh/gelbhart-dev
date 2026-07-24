@@ -126,15 +126,16 @@
         </div>
       </div>
 
-      <div class="card jetlag-card border-0 shadow-lg mb-4 fade-in-view delay-2">
-        <div class="card-body p-4 p-lg-5">
-          <div class="d-flex align-items-center mb-4">
-            <div class="me-3">
-              <%= render "shared/icon_circle", icon: "bx-images", color: "primary", size: "md" %>
-            </div>
-            <h2 class="h3 mb-0">In the app</h2>
-          </div>
-          <ul class="nav nav-tabs mb-3" id="jetlagGalleryTabs" role="tablist">
+      <div class="jetlag-gallery mb-4 fade-in-view delay-2">
+        <div class="jetlag-gallery-header mb-3 mb-lg-4">
+          <h2 class="h3 mb-2">In the app</h2>
+          <p class="text-light opacity-75 mb-0" style="max-width: 40rem;">
+            Real session UI — tap a screen to enlarge.
+          </p>
+        </div>
+
+        <div class="jetlag-gallery-stage">
+          <ul class="nav jetlag-gallery-tabs mb-4" id="jetlagGalleryTabs" role="tablist">
             <li class="nav-item" role="presentation">
               <button class="nav-link active" id="jetlag-home-tab" data-bs-toggle="tab" data-bs-target="#jetlag-home-pane" type="button" role="tab" aria-controls="jetlag-home-pane" aria-selected="true">Home</button>
             </li>
@@ -142,99 +143,120 @@
               <button class="nav-link" id="jetlag-join-tab" data-bs-toggle="tab" data-bs-target="#jetlag-join-pane" type="button" role="tab" aria-controls="jetlag-join-pane" aria-selected="false">Join</button>
             </li>
             <li class="nav-item" role="presentation">
-              <button class="nav-link" id="jetlag-map-tab" data-bs-toggle="tab" data-bs-target="#jetlag-map-pane" type="button" role="tab" aria-controls="jetlag-map-pane" aria-selected="false">Live map</button>
+              <button class="nav-link" id="jetlag-map-tab" data-bs-toggle="tab" data-bs-target="#jetlag-map-pane" type="button" role="tab" aria-controls="jetlag-map-pane" aria-selected="false">Map</button>
             </li>
             <li class="nav-item" role="presentation">
-              <button class="nav-link" id="jetlag-answered-tab" data-bs-toggle="tab" data-bs-target="#jetlag-answered-pane" type="button" role="tab" aria-controls="jetlag-answered-pane" aria-selected="false">Hunt narrowed</button>
+              <button class="nav-link" id="jetlag-answered-tab" data-bs-toggle="tab" data-bs-target="#jetlag-answered-pane" type="button" role="tab" aria-controls="jetlag-answered-pane" aria-selected="false">Hunt</button>
             </li>
           </ul>
+
           <div class="tab-content" id="jetlagGalleryTabContent">
             <div class="tab-pane fade show active" id="jetlag-home-pane" role="tabpanel" aria-labelledby="jetlag-home-tab" tabindex="0">
-              <button type="button"
-                      class="gallery-item jetlag-phone-frame"
-                      data-bs-toggle="modal"
-                      data-bs-target="#jetlagImageModal"
-                      data-image="<%= asset_path('jetlag/02-home-full.webp') %>"
-                      data-alt="Jet Lag Map Companion home screen with active session shortcut"
-                      aria-label="Enlarge home screen screenshot">
-                <%= image_tag "jetlag/02-home.webp",
-                      alt: "Jet Lag Map Companion home screen with Create, Join, and active session DVWE",
-                      class: "img-fluid",
-                      srcset: "#{asset_path('jetlag/02-home-400.webp')} 400w, #{asset_path('jetlag/02-home.webp')} 800w",
-                      sizes: "(min-width: 992px) 352px, 288px",
-                      loading: "lazy",
-                      width: 800,
-                      height: 1731 %>
-              </button>
-              <div class="text-center mt-3">
-                <h3 class="h5 mb-2">Home</h3>
-                <p class="text-light opacity-75 mb-0 small">Landing with create/join and a jump back into the active session.</p>
+              <div class="jetlag-gallery-shot">
+                <button type="button"
+                        class="gallery-item jetlag-phone-frame"
+                        data-bs-toggle="modal"
+                        data-bs-target="#jetlagImageModal"
+                        data-image="<%= asset_path('jetlag/02-home-full.webp') %>"
+                        data-alt="Jet Lag Map Companion home screen with active session shortcut"
+                        aria-label="Enlarge home screen screenshot">
+                  <%= image_tag "jetlag/02-home.webp",
+                        alt: "Jet Lag Map Companion home screen with Create, Join, and active session DVWE",
+                        class: "img-fluid",
+                        srcset: "#{asset_path('jetlag/02-home-400.webp')} 400w, #{asset_path('jetlag/02-home.webp')} 800w",
+                        sizes: "(min-width: 992px) 20rem, min(100vw - 3rem, 18rem)",
+                        loading: "lazy",
+                        width: 800,
+                        height: 1731 %>
+                  <span class="jetlag-gallery-zoom" aria-hidden="true">
+                    <i class="bx bx-expand-alt"></i>
+                  </span>
+                </button>
+                <div class="jetlag-gallery-caption">
+                  <h3 class="h5 mb-2">Home</h3>
+                  <p class="text-light opacity-75 mb-0">Landing with create/join and a jump back into the active session.</p>
+                </div>
               </div>
             </div>
             <div class="tab-pane fade" id="jetlag-join-pane" role="tabpanel" aria-labelledby="jetlag-join-tab" tabindex="0">
-              <button type="button"
-                      class="gallery-item jetlag-phone-frame"
-                      data-bs-toggle="modal"
-                      data-bs-target="#jetlagImageModal"
-                      data-image="<%= asset_path('jetlag/03-join-full.webp') %>"
-                      data-alt="Join session screen with four-letter code and role picker"
-                      aria-label="Enlarge join session screenshot">
-                <%= image_tag "jetlag/03-join.webp",
-                      alt: "Join game screen with session code entry and seeker, hider, observer roles",
-                      class: "img-fluid",
-                      srcset: "#{asset_path('jetlag/03-join-400.webp')} 400w, #{asset_path('jetlag/03-join.webp')} 800w",
-                      sizes: "(min-width: 992px) 352px, 288px",
-                      loading: "lazy",
-                      width: 800,
-                      height: 1731 %>
-              </button>
-              <div class="text-center mt-3">
-                <h3 class="h5 mb-2">Join</h3>
-                <p class="text-light opacity-75 mb-0 small">Enter the four-letter code and pick seeker, hider, or observer.</p>
+              <div class="jetlag-gallery-shot">
+                <button type="button"
+                        class="gallery-item jetlag-phone-frame"
+                        data-bs-toggle="modal"
+                        data-bs-target="#jetlagImageModal"
+                        data-image="<%= asset_path('jetlag/03-join-full.webp') %>"
+                        data-alt="Join session screen with four-letter code and role picker"
+                        aria-label="Enlarge join session screenshot">
+                  <%= image_tag "jetlag/03-join.webp",
+                        alt: "Join game screen with session code entry and seeker, hider, observer roles",
+                        class: "img-fluid",
+                        srcset: "#{asset_path('jetlag/03-join-400.webp')} 400w, #{asset_path('jetlag/03-join.webp')} 800w",
+                        sizes: "(min-width: 992px) 20rem, min(100vw - 3rem, 18rem)",
+                        loading: "lazy",
+                        width: 800,
+                        height: 1731 %>
+                  <span class="jetlag-gallery-zoom" aria-hidden="true">
+                    <i class="bx bx-expand-alt"></i>
+                  </span>
+                </button>
+                <div class="jetlag-gallery-caption">
+                  <h3 class="h5 mb-2">Join</h3>
+                  <p class="text-light opacity-75 mb-0">Enter the four-letter code and pick seeker, hider, or observer.</p>
+                </div>
               </div>
             </div>
             <div class="tab-pane fade" id="jetlag-map-pane" role="tabpanel" aria-labelledby="jetlag-map-tab" tabindex="0">
-              <button type="button"
-                      class="gallery-item jetlag-phone-frame"
-                      data-bs-toggle="modal"
-                      data-bs-target="#jetlagImageModal"
-                      data-image="<%= asset_path('jetlag/01-hero-map-full.webp') %>"
-                      data-alt="Live map mid-session with zone and timers"
-                      aria-label="Enlarge live map screenshot">
-                <%= image_tag "jetlag/01-hero-map.webp",
-                      alt: "Live seeker map with play zone, location, and hiding timer",
-                      class: "img-fluid",
-                      srcset: "#{asset_path('jetlag/01-hero-map-400.webp')} 400w, #{asset_path('jetlag/01-hero-map.webp')} 800w",
-                      sizes: "(min-width: 992px) 352px, 288px",
-                      loading: "lazy",
-                      width: 800,
-                      height: 1731 %>
-              </button>
-              <div class="text-center mt-3">
-                <h3 class="h5 mb-2">Live map</h3>
-                <p class="text-light opacity-75 mb-0 small">Mid-session map with zone state, HUD timers, and the tool dock.</p>
+              <div class="jetlag-gallery-shot">
+                <button type="button"
+                        class="gallery-item jetlag-phone-frame"
+                        data-bs-toggle="modal"
+                        data-bs-target="#jetlagImageModal"
+                        data-image="<%= asset_path('jetlag/01-hero-map-full.webp') %>"
+                        data-alt="Live map mid-session with zone and timers"
+                        aria-label="Enlarge live map screenshot">
+                  <%= image_tag "jetlag/01-hero-map.webp",
+                        alt: "Live seeker map with play zone, location, and hiding timer",
+                        class: "img-fluid",
+                        srcset: "#{asset_path('jetlag/01-hero-map-400.webp')} 400w, #{asset_path('jetlag/01-hero-map.webp')} 800w",
+                        sizes: "(min-width: 992px) 20rem, min(100vw - 3rem, 18rem)",
+                        loading: "lazy",
+                        width: 800,
+                        height: 1731 %>
+                  <span class="jetlag-gallery-zoom" aria-hidden="true">
+                    <i class="bx bx-expand-alt"></i>
+                  </span>
+                </button>
+                <div class="jetlag-gallery-caption">
+                  <h3 class="h5 mb-2">Live map</h3>
+                  <p class="text-light opacity-75 mb-0">Mid-session map with zone state, HUD timers, and the tool dock.</p>
+                </div>
               </div>
             </div>
             <div class="tab-pane fade" id="jetlag-answered-pane" role="tabpanel" aria-labelledby="jetlag-answered-tab" tabindex="0">
-              <button type="button"
-                      class="gallery-item jetlag-phone-frame"
-                      data-bs-toggle="modal"
-                      data-bs-target="#jetlagImageModal"
-                      data-image="<%= asset_path('jetlag/04-answered-full.webp') %>"
-                      data-alt="Game sheet showing answered Measure and Radar questions"
-                      aria-label="Enlarge hunt narrowed screenshot">
-                <%= image_tag "jetlag/04-answered.webp",
-                      alt: "Answered Measure and Radar questions narrowing the hunt on the map",
-                      class: "img-fluid",
-                      srcset: "#{asset_path('jetlag/04-answered-400.webp')} 400w, #{asset_path('jetlag/04-answered.webp')} 800w",
-                      sizes: "(min-width: 992px) 352px, 288px",
-                      loading: "lazy",
-                      width: 800,
-                      height: 1731 %>
-              </button>
-              <div class="text-center mt-3">
-                <h3 class="h5 mb-2">Hunt narrowed</h3>
-                <p class="text-light opacity-75 mb-0 small">Measure and Radar answers sync so the group sees the same board.</p>
+              <div class="jetlag-gallery-shot">
+                <button type="button"
+                        class="gallery-item jetlag-phone-frame"
+                        data-bs-toggle="modal"
+                        data-bs-target="#jetlagImageModal"
+                        data-image="<%= asset_path('jetlag/04-answered-full.webp') %>"
+                        data-alt="Game sheet showing answered Measure and Radar questions"
+                        aria-label="Enlarge hunt narrowed screenshot">
+                  <%= image_tag "jetlag/04-answered.webp",
+                        alt: "Answered Measure and Radar questions narrowing the hunt on the map",
+                        class: "img-fluid",
+                        srcset: "#{asset_path('jetlag/04-answered-400.webp')} 400w, #{asset_path('jetlag/04-answered.webp')} 800w",
+                        sizes: "(min-width: 992px) 20rem, min(100vw - 3rem, 18rem)",
+                        loading: "lazy",
+                        width: 800,
+                        height: 1731 %>
+                  <span class="jetlag-gallery-zoom" aria-hidden="true">
+                    <i class="bx bx-expand-alt"></i>
+                  </span>
+                </button>
+                <div class="jetlag-gallery-caption">
+                  <h3 class="h5 mb-2">Hunt narrowed</h3>
+                  <p class="text-light opacity-75 mb-0">Measure and Radar answers sync so the group sees the same board.</p>
+                </div>
               </div>
             </div>
           </div>
