@@ -38,6 +38,9 @@ class PagesController < ApplicationController
   def vscode_torch_checkpoint_inspector
   end
 
+  def jetlag
+  end
+
   def robots
     respond_to :text
     expires_in 6.hours, public: true

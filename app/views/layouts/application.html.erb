@@ -133,13 +133,13 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
+  <body class="<%= 'page-home' if controller_name == 'pages' && action_name == 'home' %>">
     <main class="page-wrapper">
       <% unless controller_name == 'errors' %>
         <%= render 'shared/header' %>
       <% end %>
 
-      <div class="container <%= 'mt-1 py-1 min-vh-100' unless controller_name == 'errors' %>">
+      <div class="container <%= 'mt-1 py-1 min-vh-100' unless controller_name == 'errors' %> <%= 'home-deck' if controller_name == 'pages' && action_name == 'home' %>">
         <%= yield %>
       </div>
 

@@ -1,8 +1,8 @@
 <% content_for :title, page_title("") %>
 <% meta_description "Tomer Gelbhart's developer portfolio showcasing full-stack web development projects, Ruby on Rails expertise, and professional software engineering work." %>
 <!-- Hero Section with Pac-Man Game -->
-<section class="position-relative overflow-hidden hero-section" 
-         data-controller="pacman-game pacman-input pacman-menu" 
+<section class="position-relative overflow-hidden hero-section home-panel home-panel--hero"
+         data-controller="pacman-game pacman-input pacman-menu"
          data-pacman-game-asset-manifest-value="<%= pacman_asset_manifest.to_json %>">
   <!-- Animated Gradient Background -->
   <div class="hero-gradient-bg"></div>
@@ -148,7 +148,7 @@
   </a>
 </section>
 <!-- Projects Section -->
-<section id="projects" class="container py-5" data-controller="scroll-animation">
+<section id="projects" class="container py-5 home-panel home-panel--projects" data-controller="scroll-animation">
   <%= render 'shared/section_header', title: 'Featured Projects' %>
   <!-- Project cards -->
   <% cache @projects do %>
@@ -176,7 +176,7 @@
   <% end %>
 </section>
 <!-- Technologies & Skills Section -->
-<section id="technologies" class="container py-5 my-5" data-controller="scroll-animation">
+<section id="technologies" class="container py-5 my-5 home-panel home-panel--tech" data-controller="scroll-animation">
   <%= render 'shared/section_header',
         title: 'Technologies & Skills',
         subtitle: 'Programming languages, frameworks, and tools I work with' %>
@@ -457,7 +457,7 @@
   </div>
 </section>
 <!-- Call-to-Action Section -->
-<section id="cta" class="position-relative py-5 my-5" data-controller="scroll-animation">
+<section id="cta" class="position-relative py-5 my-5 home-panel home-panel--cta" data-controller="scroll-animation">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-10">

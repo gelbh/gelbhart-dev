@@ -50,6 +50,10 @@ Rails.application.routes.draw do
   get "projects/vscode-torch-checkpoint-inspector", to: "pages#vscode_torch_checkpoint_inspector", as: :vscode_torch_checkpoint_inspector
   get "vscode-torch-checkpoint-inspector", to: redirect("/projects/vscode-torch-checkpoint-inspector", status: 301)
 
+  # Jet Lag Map Companion
+  get "projects/jetlag", to: "pages#jetlag", as: :jetlag
+  get "jetlag", to: redirect("/projects/jetlag", status: 301)
+
   get "/robots.txt", to: "pages#robots"
 
   # Ignore Chrome DevTools requests

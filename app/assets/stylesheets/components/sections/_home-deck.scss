@@ -1,0 +1,145 @@
+// ============================================
+// HOME DECK — soft viewport panels (desktop)
+// CSS scroll-snap proximity + distinct enters.
+// Mobile keeps free scroll; reduced-motion skips snap.
+// ============================================
+
+.page-home .home-deck {
+  // Outer layout container is the deck host; panels snap within the viewport.
+  max-width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.page-home .home-panel.container {
+  // Nested Bootstrap containers keep content width; panel owns the fold.
+  max-width: var(--bs-breakpoint-xl, 1140px);
+  margin-inline: auto;
+  padding-left: var(--bs-gutter-x, 0.75rem);
+  padding-right: var(--bs-gutter-x, 0.75rem);
+}
+
+// Soft snap: prefers one idea per fold without trapping the wheel.
+@media (min-width: 992px) {
+  html:has(body.page-home) {
+    scroll-snap-type: y proximity;
+    scroll-padding-top: 4.5rem; // fixed header clearance
+  }
+
+  .page-home .home-panel {
+    scroll-snap-align: start;
+    scroll-snap-stop: normal;
+    box-sizing: border-box;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    // safe center: centers short panels; falls back when content is tall
+    justify-content: safe center;
+    padding-block: clamp(4.5rem, 8vh, 6.5rem);
+  }
+
+  // Tall content (project grid / tech stacks): snap to start, then free-scroll
+  .page-home .home-panel--projects,
+  .page-home .home-panel--tech {
+    justify-content: flex-start;
+  }
+
+  .page-home .home-panel--hero {
+    // Hero already sizes itself; keep snap align without double padding
+    padding-block: 0;
+    justify-content: center;
+  }
+
+  .page-home .footer,
+  .page-home .btn-scroll-top {
+    scroll-snap-align: none;
+  }
+}
+
+@media (min-width: 992px) and (prefers-reduced-motion: reduce) {
+  html:has(body.page-home) {
+    scroll-snap-type: none;
+  }
+}
+
+// --------------------------------------------
+// Distinct section enters (not uniform fade-up)
+// html.reveal-ready is set by scroll_controller.
+// --------------------------------------------
+
+// Projects: cards arrive from the left — arcade side-scroll read
+html.reveal-ready body.page-home .home-panel--projects .fade-in-view {
+  --reveal-distance: 0;
+  opacity: 0;
+  transform: translateX(-1.75rem);
+  transition: opacity 0.6s var(--ease-out-quint),
+    transform 0.6s var(--ease-out-quint);
+  transition-delay: calc(var(--i, 0) * 80ms);
+
+  &.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// Technologies: slight scale + soft focus pull (contained blur)
+html.reveal-ready body.page-home .home-panel--tech .fade-in-view {
+  --reveal-distance: 0;
+  opacity: 0;
+  transform: scale(0.97);
+  filter: blur(6px);
+  transition: opacity 0.65s var(--ease-out-quint),
+    transform 0.65s var(--ease-out-quint),
+    filter 0.65s var(--ease-out-quint);
+  transition-delay: calc(var(--i, 0) * 70ms);
+
+  &.visible {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+// CTA: rises farther and settles — closing beat
+html.reveal-ready body.page-home .home-panel--cta .fade-in-view {
+  --reveal-distance: 2.5rem;
+  opacity: 0;
+  transform: translateY(var(--reveal-distance));
+  transition: opacity 0.7s var(--ease-out-quint),
+    transform 0.7s var(--ease-out-expo, var(--ease-out-quint));
+
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.reveal-ready body.page-home .home-panel .fade-in-view {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+}
+
+// Mobile: no snap. Lighter enters (no blur tax on tech cards).
+@media (max-width: 991.98px) {
+  html.reveal-ready body.page-home .home-panel--tech .fade-in-view {
+    filter: none;
+    transform: translateY(1.25rem);
+
+    &.visible {
+      transform: none;
+    }
+  }
+
+  html.reveal-ready body.page-home .home-panel--projects .fade-in-view {
+    transform: translateY(1.25rem);
+
+    &.visible {
+      transform: none;
+    }
+  }
+}

@@ -96,4 +96,18 @@ class PagesTest < ActionDispatch::IntegrationTest
     # Accept either 21600 (6 hours) or 3600 (1 hour) as valid cache times
     assert (cache_control.include?("max-age=21600") || cache_control.include?("max-age=3600"))
   end
+
+  test "GET /projects/jetlag returns jetlag page" do
+    get jetlag_path
+    assert_response :success
+    assert_select "h1", text: /Jet Lag Map Companion/
+    assert_select "a[href='https://jetlag.gelbhart.dev']"
+    assert_select "a[href='https://github.com/gelbh/jetlag']"
+  end
+
+  test "GET /jetlag redirects to /projects/jetlag" do
+    get "/jetlag"
+    assert_redirected_to "/projects/jetlag"
+    assert_response :moved_permanently
+  end
 end
