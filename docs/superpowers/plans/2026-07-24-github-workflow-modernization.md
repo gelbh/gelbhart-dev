@@ -1,6 +1,6 @@
 # GitHub Workflow Modernization Implementation Plan
 
-**Goal:** Land PR CI, main smoke, CodeRabbit config, Dependabot, PR template, shared gitignore for private paths, and a `main` ruleset.
+**Goal:** Land PR CI, main smoke, CodeRabbit config, Dependabot, PR template, and a `main` ruleset.
 
 **Status:** Implemented on `main` (PRs #3, #11).
 
@@ -25,5 +25,4 @@
 ## Success criteria
 
 - Merges to `main` require green `lint` / `test` / `system` / `seeds` (+ GitGuardian).
-- Private tooling paths stay out of git via `.gitignore`.
 - Render remains the only production deploy path.
