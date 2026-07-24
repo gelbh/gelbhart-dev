@@ -63,4 +63,7 @@ SitemapGenerator::Sitemap.create do
 
   google_maps_converter_lastmod = get_view_lastmod("pages/google_maps_converter.html.erb")
   add "/projects/google-maps-converter", lastmod: google_maps_converter_lastmod
+
+  jetlag_lastmod = get_view_lastmod("pages/jetlag.html.erb")
+  add "/projects/jetlag", lastmod: jetlag_lastmod
 end
