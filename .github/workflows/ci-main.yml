@@ -1,0 +1,46 @@
+name: CI main smoke
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-main-${{ github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  RAILS_ENV: test
+  CI: "true"
+  PGHOST: localhost
+  PGUSER: postgres
+  PGPASSWORD: postgres
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: gelbhart_dev_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-app
+      - name: Prepare database
+        run: bin/rails db:prepare
+      - run: bin/rubocop
+      - run: env -u DATABASE_URL CI=true bin/test-changed
