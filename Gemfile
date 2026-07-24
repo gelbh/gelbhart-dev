@@ -3,7 +3,7 @@
 source "https://rubygems.org"
 
 # Core framework
-gem "rails", "~> 8.1.0"
+gem "rails", "~> 8.1.3"
 
 # Server
 gem "puma", ">= 5.0"
@@ -13,7 +13,7 @@ gem "webrick"
 gem "pg"
 
 # Asset pipeline
-gem "bootstrap", "~> 5.3.0"
+gem "bootstrap", "~> 5.3.8"
 gem "dartsass-rails"
 gem "importmap-rails"
 gem "sprockets-rails"
