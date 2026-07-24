@@ -55,7 +55,7 @@
                 alt: "Jet Lag Map Companion live seeker map over Dublin with play zone and timers",
                 width: 390,
                 height: 844,
-                loading: "eager" %>
+                loading: "lazy" %>
         </div>
       </div>
       <div class="col-lg-6 order-2 order-lg-1 fade-in-view">
@@ -325,17 +325,20 @@
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  // Match Hevy Tracker: Turbo navigations never fire DOMContentLoaded again.
+  document.addEventListener('turbo:load', function () {
     const imageModal = document.getElementById('jetlagImageModal');
-    if (!imageModal) return;
-    imageModal.addEventListener('show.bs.modal', function (event) {
-      const trigger = event.relatedTarget;
-      if (!trigger) return;
-      const img = document.getElementById('jetlagModalImage');
-      const title = imageModal.querySelector('.modal-title');
-      img.src = trigger.getAttribute('data-image') || '';
-      img.alt = trigger.getAttribute('data-alt') || '';
-      if (title) title.textContent = trigger.getAttribute('data-alt') || 'Screenshot';
-    });
+
+    if (imageModal) {
+      imageModal.addEventListener('show.bs.modal', function (event) {
+        const trigger = event.relatedTarget;
+        if (!trigger) return;
+        const img = document.getElementById('jetlagModalImage');
+        const title = imageModal.querySelector('.modal-title');
+        img.src = trigger.getAttribute('data-image') || '';
+        img.alt = trigger.getAttribute('data-alt') || '';
+        if (title) title.textContent = trigger.getAttribute('data-alt') || 'Screenshot';
+      });
+    }
   });
 </script>
