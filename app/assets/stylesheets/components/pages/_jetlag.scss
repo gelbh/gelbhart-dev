@@ -21,6 +21,10 @@
     padding-top: 8rem;
     padding-bottom: var(--spacing-2xl);
   }
+
+  h1 {
+    text-wrap: balance;
+  }
 }
 
 .jetlag-gradient-bg {
@@ -37,10 +41,16 @@
 }
 
 .jetlag-card {
+  // Flat dark surface + indigo border/glow — no decorative backdrop blur
   background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  transition: all var(--transition-normal) var(--ease-smooth);
+  transition: border-color var(--transition-normal) var(--ease-smooth),
+    box-shadow var(--transition-normal) var(--ease-smooth),
+    transform var(--transition-normal) var(--ease-smooth);
   border: 1px solid rgba(255, 255, 255, 0.1);
+
+  h2 {
+    text-wrap: balance;
+  }
 
   &:hover {
     transform: translateY(-5px);
@@ -65,6 +75,18 @@
 
   &.gallery-item {
     cursor: zoom-in;
+    // Reset Bootstrap btn chrome when used as the lightbox trigger
+    display: block;
+    width: 100%;
+    padding: 0;
+    background: transparent;
+    text-align: inherit;
+    appearance: none;
+
+    &:focus-visible {
+      outline: 2px solid #6366f1;
+      outline-offset: 2px;
+    }
   }
 }
 
