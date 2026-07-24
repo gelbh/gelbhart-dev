@@ -1,6 +1,28 @@
 # Seed data for Projects
 # This file seeds the projects table with initial project data
 
+project = Project.find_or_initialize_by(title: "Jet Lag Map Companion")
+project.assign_attributes(
+  subtitle: "Live Map PWA",
+  description: "Host or join synced map sessions for Jet Lag Hide + Seek — questions, zones, and pins stay live for the whole group.",
+  icon: "jetlag/icon.svg",
+  color: "primary",
+  link_text: "Learn More",
+  link_url: "/projects/jetlag",
+  route_name: "jetlag",
+  github_url: "https://github.com/gelbh/jetlag",
+  badges: [
+    { text: "React", color: "primary", url: "https://react.dev/" },
+    { text: "Leaflet", color: "success", url: "https://leafletjs.com/" },
+    { text: "Firebase", color: "warning", url: "https://firebase.google.com/" },
+    { text: "PWA", color: "info", url: "https://web.dev/progressive-web-apps/" }
+  ],
+  position: 1,
+  published: true,
+  featured: true
+)
+project.save!
+
 project = Project.find_or_initialize_by(title: 'Hevy Tracker')
 project.assign_attributes(
   subtitle: 'Google Apps Script',
@@ -15,7 +37,7 @@ project.assign_attributes(
     { text: 'OAuth 2.0', color: 'success', url: 'https://oauth.net/2/' },
     { text: 'Google Apps', color: 'info', url: 'https://workspace.google.com/' }
   ],
-  position: 1,
+  position: 2,
   published: true,
   featured: true
 )
@@ -34,7 +56,7 @@ project.assign_attributes(
     { text: 'Whisper AI', color: 'primary', url: 'https://openai.com/research/whisper' },
     { text: 'Python', color: 'warning', url: 'https://www.python.org/' }
   ],
-  position: 2,
+  position: 3,
   published: true,
   featured: true
 )
@@ -55,7 +77,7 @@ project.assign_attributes(
     { text: 'Qiskit', color: 'primary', url: 'https://www.ibm.com/quantum/qiskit' },
     { text: 'Streamlit', color: 'danger', url: 'https://streamlit.io/' }
   ],
-  position: 3,
+  position: 4,
   published: true,
   featured: true
 )
@@ -76,7 +98,7 @@ project.assign_attributes(
     { text: 'Three.js', color: 'warning', url: 'https://threejs.org/' },
     { text: 'Node.js', color: 'success', url: 'https://nodejs.org/' }
   ],
-  position: 4,
+  position: 5,
   published: true,
   featured: true
 )
@@ -96,7 +118,7 @@ project.assign_attributes(
     { text: 'Google Maps API', color: 'danger', url: 'https://developers.google.com/maps' },
     { text: 'CodeMirror', color: 'info', url: 'https://codemirror.net/' }
   ],
-  position: 5,
+  position: 6,
   published: true,
   featured: true
 )
@@ -117,7 +139,7 @@ project.assign_attributes(
     { text: 'VS Code', color: 'primary', url: 'https://code.visualstudio.com/' },
     { text: 'Open VSX', color: 'info', url: 'https://open-vsx.org/extension/gelbhart/vscode-torch-checkpoint-inspector' }
   ],
-  position: 6,
+  position: 7,
   published: true,
   featured: true
 )
@@ -139,7 +161,7 @@ project.assign_attributes(
     { text: 'Genetic Algorithm', color: 'info', url: 'https://en.wikipedia.org/wiki/Genetic_algorithm' },
     { text: 'Path Planning', color: 'success', url: 'https://en.wikipedia.org/wiki/Motion_planning' }
   ],
-  position: 7,
+  position: 8,
   published: true,
   featured: true
 )
