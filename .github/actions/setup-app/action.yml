@@ -10,10 +10,12 @@ runs:
     - uses: ruby/setup-ruby@6aaa311d81eba98ae12eaffbcb63296ace0efcde # v1.307.0
       with:
         ruby-version: "3.3.10"
-        # Gemfile.lock BUNDLED WITH 2.5.22 trips on Ruby 3.3.10 default gem
-        # error_highlight 0.6 vs Gemfile 0.7; newer bundler handles this.
-        bundler: "2.7.2"
         bundler-cache: true
+    # Hosted Ruby 3.3.10 activates default error_highlight 0.6.0 before Bundler can
+    # switch to Gemfile 0.7.0; newer RubyGems resolves default-gem activation.
+    - name: Update RubyGems for default-gem compatibility
+      shell: bash
+      run: gem update --system
     - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
       with:
         node-version-file: ".node-version"
