@@ -9,10 +9,9 @@ Rails.application.config.after_initialize do
       expires_in: 1.hour    # Auto-expire old entries
     )
   )
-  
+
   # Accessor method for rate limit cache
   Rails.cache.define_singleton_method(:rate_limit) do
     @rate_limit_cache
   end
 end
-

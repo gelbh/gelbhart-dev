@@ -212,4 +212,3 @@ class Api::PacmanScoresTest < ActionDispatch::IntegrationTest
     assert_response :created
   end
 end
-

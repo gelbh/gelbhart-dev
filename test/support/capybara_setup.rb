@@ -19,4 +19,3 @@ Capybara.default_max_wait_time = 5
 
 # Screenshot configuration
 Capybara.save_path = Rails.root.join("tmp", "screenshots")
-
