@@ -49,16 +49,6 @@
   <%= render "shared/circuit_field", intensity: 0.85 %>
   <div class="container py-4 position-relative zindex-5">
     <div class="row align-items-center g-4 g-lg-5">
-      <div class="col-12 order-1 d-lg-none fade-in-view">
-        <div class="jetlag-phone-frame">
-          <%= image_tag "jetlag/01-hero-map.webp",
-                alt: "Jet Lag Map Companion live seeker map over Dublin with play zone and timers",
-                width: 390,
-                height: 844,
-                loading: "eager",
-                fetchpriority: "high" %>
-        </div>
-      </div>
       <div class="col-lg-6 order-2 order-lg-1 fade-in-view">
         <%= image_tag "jetlag/icon.svg", width: 64, height: 64, class: "mb-3", alt: "Jet Lag Map Companion", loading: "eager" %>
         <h1 class="display-5 mb-2">Jet Lag Map Companion</h1>
@@ -75,12 +65,14 @@
           </a>
         </div>
       </div>
-      <div class="col-lg-6 order-lg-2 d-none d-lg-block fade-in-view delay-1">
+      <div class="col-lg-6 order-1 order-lg-2 fade-in-view delay-1">
         <div class="jetlag-phone-frame">
           <%= image_tag "jetlag/01-hero-map.webp",
                 alt: "Jet Lag Map Companion live seeker map over Dublin with play zone and timers",
-                width: 390,
-                height: 844,
+                srcset: "#{asset_path('jetlag/01-hero-map-400.webp')} 400w, #{asset_path('jetlag/01-hero-map.webp')} 800w",
+                sizes: "(min-width: 992px) 352px, 288px",
+                width: 800,
+                height: 1731,
                 loading: "eager",
                 fetchpriority: "high" %>
         </div>
@@ -162,15 +154,17 @@
                       class="gallery-item jetlag-phone-frame"
                       data-bs-toggle="modal"
                       data-bs-target="#jetlagImageModal"
-                      data-image="<%= asset_path('jetlag/02-home.webp') %>"
+                      data-image="<%= asset_path('jetlag/02-home-full.webp') %>"
                       data-alt="Jet Lag Map Companion home screen with active session shortcut"
                       aria-label="Enlarge home screen screenshot">
                 <%= image_tag "jetlag/02-home.webp",
                       alt: "Jet Lag Map Companion home screen with Create, Join, and active session DVWE",
                       class: "img-fluid",
+                      srcset: "#{asset_path('jetlag/02-home-400.webp')} 400w, #{asset_path('jetlag/02-home.webp')} 800w",
+                      sizes: "(min-width: 992px) 352px, 288px",
                       loading: "lazy",
-                      width: 390,
-                      height: 844 %>
+                      width: 800,
+                      height: 1731 %>
               </button>
               <div class="text-center mt-3">
                 <h3 class="h5 mb-2">Home</h3>
@@ -182,15 +176,17 @@
                       class="gallery-item jetlag-phone-frame"
                       data-bs-toggle="modal"
                       data-bs-target="#jetlagImageModal"
-                      data-image="<%= asset_path('jetlag/03-join.webp') %>"
+                      data-image="<%= asset_path('jetlag/03-join-full.webp') %>"
                       data-alt="Join session screen with four-letter code and role picker"
                       aria-label="Enlarge join session screenshot">
                 <%= image_tag "jetlag/03-join.webp",
                       alt: "Join game screen with session code entry and seeker, hider, observer roles",
                       class: "img-fluid",
+                      srcset: "#{asset_path('jetlag/03-join-400.webp')} 400w, #{asset_path('jetlag/03-join.webp')} 800w",
+                      sizes: "(min-width: 992px) 352px, 288px",
                       loading: "lazy",
-                      width: 390,
-                      height: 844 %>
+                      width: 800,
+                      height: 1731 %>
               </button>
               <div class="text-center mt-3">
                 <h3 class="h5 mb-2">Join</h3>
@@ -202,15 +198,17 @@
                       class="gallery-item jetlag-phone-frame"
                       data-bs-toggle="modal"
                       data-bs-target="#jetlagImageModal"
-                      data-image="<%= asset_path('jetlag/01-hero-map.webp') %>"
+                      data-image="<%= asset_path('jetlag/01-hero-map-full.webp') %>"
                       data-alt="Live map mid-session with zone and timers"
                       aria-label="Enlarge live map screenshot">
                 <%= image_tag "jetlag/01-hero-map.webp",
                       alt: "Live seeker map with play zone, location, and hiding timer",
                       class: "img-fluid",
+                      srcset: "#{asset_path('jetlag/01-hero-map-400.webp')} 400w, #{asset_path('jetlag/01-hero-map.webp')} 800w",
+                      sizes: "(min-width: 992px) 352px, 288px",
                       loading: "lazy",
-                      width: 390,
-                      height: 844 %>
+                      width: 800,
+                      height: 1731 %>
               </button>
               <div class="text-center mt-3">
                 <h3 class="h5 mb-2">Live map</h3>
@@ -222,15 +220,17 @@
                       class="gallery-item jetlag-phone-frame"
                       data-bs-toggle="modal"
                       data-bs-target="#jetlagImageModal"
-                      data-image="<%= asset_path('jetlag/04-answered.webp') %>"
+                      data-image="<%= asset_path('jetlag/04-answered-full.webp') %>"
                       data-alt="Game sheet showing answered Measure and Radar questions"
                       aria-label="Enlarge hunt narrowed screenshot">
                 <%= image_tag "jetlag/04-answered.webp",
                       alt: "Answered Measure and Radar questions narrowing the hunt on the map",
                       class: "img-fluid",
+                      srcset: "#{asset_path('jetlag/04-answered-400.webp')} 400w, #{asset_path('jetlag/04-answered.webp')} 800w",
+                      sizes: "(min-width: 992px) 352px, 288px",
                       loading: "lazy",
-                      width: 390,
-                      height: 844 %>
+                      width: 800,
+                      height: 1731 %>
               </button>
               <div class="text-center mt-3">
                 <h3 class="h5 mb-2">Hunt narrowed</h3>
