@@ -161,7 +161,7 @@
                         data-alt="Jet Lag Map Companion home screen with active session shortcut"
                         aria-label="Enlarge home screen screenshot">
                   <%= image_tag "jetlag/02-home.webp",
-                        alt: "Jet Lag Map Companion home screen with Create, Join, and active session DVWE",
+                        alt: "Jet Lag Map Companion home screen with Create, Join, and active session shortcut",
                         class: "img-fluid",
                         srcset: "#{asset_path('jetlag/02-home-400.webp')} 400w, #{asset_path('jetlag/02-home.webp')} 800w",
                         sizes: "(min-width: 992px) 20rem, min(100vw - 3rem, 18rem)",
@@ -371,21 +371,26 @@
 </div>
 
 <script>
-  document.addEventListener('turbo:load', function () {
-    const imageModal = document.getElementById('jetlagImageModal');
-    if (!imageModal || imageModal.dataset.jetlagLightboxBound === 'true') return;
+  (function () {
+    if (document.documentElement.dataset.jetlagLightboxListener === 'true') return;
+    document.documentElement.dataset.jetlagLightboxListener = 'true';
 
-    imageModal.dataset.jetlagLightboxBound = 'true';
-    imageModal.addEventListener('show.bs.modal', function (event) {
-      const trigger = event.relatedTarget;
-      if (!trigger) return;
-      const img = document.getElementById('jetlagModalImage');
-      const title = imageModal.querySelector('.modal-title');
-      img.src = trigger.getAttribute('data-image') || '';
-      img.alt = trigger.getAttribute('data-alt') || '';
-      img.removeAttribute('width');
-      img.removeAttribute('height');
-      if (title) title.textContent = trigger.getAttribute('data-alt') || 'Screenshot';
+    document.addEventListener('turbo:load', function () {
+      const imageModal = document.getElementById('jetlagImageModal');
+      if (!imageModal || imageModal.dataset.jetlagLightboxBound === 'true') return;
+
+      imageModal.dataset.jetlagLightboxBound = 'true';
+      imageModal.addEventListener('show.bs.modal', function (event) {
+        const trigger = event.relatedTarget;
+        if (!trigger) return;
+        const img = document.getElementById('jetlagModalImage');
+        const title = imageModal.querySelector('.modal-title');
+        img.src = trigger.getAttribute('data-image') || '';
+        img.alt = trigger.getAttribute('data-alt') || '';
+        img.removeAttribute('width');
+        img.removeAttribute('height');
+        if (title) title.textContent = trigger.getAttribute('data-alt') || 'Screenshot';
+      });
     });
-  });
+  })();
 </script>
