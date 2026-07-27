@@ -32,7 +32,7 @@ gem "googleauth"
 # Utilities
 gem "bootsnap", require: false
 gem "email_address", "~> 0.2"
-gem "image_processing", "~> 1.2"
+gem "image_processing", "~> 2.0"
 gem "mini_racer"
 gem "rack-attack", "~> 6.6"
 gem "rexml"
