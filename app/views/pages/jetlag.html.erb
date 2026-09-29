@@ -294,15 +294,22 @@
   </div>
 </section>
 
-<div class="modal fade" id="jetlagImageModal" tabindex="-1" aria-labelledby="jetlagImageModalLabel" aria-hidden="true">
+<div class="modal fade jetlag-lightbox" id="jetlagImageModal" tabindex="-1" aria-labelledby="jetlagImageModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content bg-dark border-0">
       <div class="modal-header border-secondary border-opacity-25">
         <h2 class="modal-title h5 text-white" id="jetlagImageModalLabel">Screenshot</h2>
+        <span class="jetlag-lightbox-counter text-light opacity-75 small ms-3" id="jetlagModalCounter" aria-live="polite"></span>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body text-center p-0">
-        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" class="img-fluid" id="jetlagModalImage" width="1" height="1">
+      <div class="modal-body">
+        <button type="button" class="jetlag-lightbox-nav jetlag-lightbox-prev" id="jetlagModalPrev" aria-label="Previous screenshot">
+          <i class="bx bx-chevron-left" aria-hidden="true"></i>
+        </button>
+        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" class="jetlag-lightbox-image" id="jetlagModalImage" width="1" height="1">
+        <button type="button" class="jetlag-lightbox-nav jetlag-lightbox-next" id="jetlagModalNext" aria-label="Next screenshot">
+          <i class="bx bx-chevron-right" aria-hidden="true"></i>
+        </button>
       </div>
     </div>
   </div>
@@ -318,16 +325,40 @@
       if (!imageModal || imageModal.dataset.jetlagLightboxBound === 'true') return;
 
       imageModal.dataset.jetlagLightboxBound = 'true';
+      const img = document.getElementById('jetlagModalImage');
+      const title = imageModal.querySelector('.modal-title');
+      const counter = document.getElementById('jetlagModalCounter');
+      let items = [];
+      let index = 0;
+
+      function show(i) {
+        index = (i + items.length) % items.length;
+        const item = items[index];
+        const alt = item.getAttribute('data-alt') || '';
+        img.src = item.getAttribute('data-image') || '';
+        img.alt = alt;
+        title.textContent = alt || 'Screenshot';
+        counter.textContent = (index + 1) + ' / ' + items.length;
+        // Warm the neighbours so prev/next swaps without a blank frame
+        [index - 1, index + 1].forEach(function (n) {
+          new Image().src = items[(n + items.length) % items.length].getAttribute('data-image');
+        });
+      }
+
       imageModal.addEventListener('show.bs.modal', function (event) {
         const trigger = event.relatedTarget;
         if (!trigger) return;
-        const img = document.getElementById('jetlagModalImage');
-        const title = imageModal.querySelector('.modal-title');
-        img.src = trigger.getAttribute('data-image') || '';
-        img.alt = trigger.getAttribute('data-alt') || '';
+        items = Array.from(document.querySelectorAll('[data-bs-target="#jetlagImageModal"]'));
         img.removeAttribute('width');
         img.removeAttribute('height');
-        if (title) title.textContent = trigger.getAttribute('data-alt') || 'Screenshot';
+        show(Math.max(items.indexOf(trigger), 0));
+      });
+
+      document.getElementById('jetlagModalPrev').addEventListener('click', function () { show(index - 1); });
+      document.getElementById('jetlagModalNext').addEventListener('click', function () { show(index + 1); });
+      imageModal.addEventListener('keydown', function (event) {
+        if (event.key === 'ArrowLeft') show(index - 1);
+        if (event.key === 'ArrowRight') show(index + 1);
       });
     });
   })();
