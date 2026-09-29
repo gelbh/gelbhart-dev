@@ -238,6 +238,75 @@
   }
 }
 
+// Live preview — real app in an iPhone-style bezel.
+// The iframe renders at a true 390×844 viewport and is scaled down, so the
+// app lays out as it would on a phone rather than as a narrow desktop.
+.jetlag-iphone {
+  --jetlag-iphone-scale: 0.72;
+  --jetlag-iphone-bezel: 0.75rem;
+
+  position: relative;
+  width: fit-content;
+  margin-inline: auto;
+  padding: var(--jetlag-iphone-bezel);
+  border-radius: 3.25rem;
+  background: linear-gradient(145deg, #2a2e3f, #0b0f19 60%);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.06),
+    0 0 0 1px rgba(0, 0, 0, 0.5),
+    0 2rem 4rem rgba(99, 102, 241, 0.3);
+
+  @media (min-width: 1200px) {
+    --jetlag-iphone-scale: 0.8;
+  }
+}
+
+.jetlag-iphone-island {
+  position: absolute;
+  top: calc(var(--jetlag-iphone-bezel) + 0.45rem);
+  left: 50%;
+  z-index: 2;
+  width: 5.5rem;
+  height: 1.5rem;
+  border-radius: 1rem;
+  background: #000;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+// ?embed=1 makes the app pad itself for the island (iframes report zero
+// safe-area insets), so the screen stays full-bleed like a real iPhone.
+.jetlag-iphone-screen {
+  position: relative;
+  width: calc(390px * var(--jetlag-iphone-scale));
+  height: calc(844px * var(--jetlag-iphone-scale));
+  overflow: hidden;
+  border-radius: 2.5rem;
+  background: #0e132c;
+
+  iframe {
+    display: block;
+    width: 390px;
+    height: 844px;
+    border: 0;
+    transform: scale(var(--jetlag-iphone-scale));
+    transform-origin: 0 0;
+  }
+}
+
+.jetlag-iphone-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.d-none {
+    display: none !important;
+  }
+}
+
 // Lightbox — image fits the viewport; no vertical scroll
 .jetlag-lightbox {
   .modal-title {

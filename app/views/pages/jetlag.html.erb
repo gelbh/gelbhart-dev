@@ -126,6 +126,38 @@
         </div>
       </div>
 
+      <div class="jetlag-live d-none d-md-block mb-5 fade-in-view delay-2">
+        <div class="row align-items-center g-5">
+          <div class="col-md-6 col-lg-5">
+            <div class="jetlag-iphone" data-controller="lazy-iframe">
+              <span class="jetlag-iphone-island" aria-hidden="true"></span>
+              <div class="jetlag-iphone-screen">
+                <div data-lazy-iframe-target="loading" class="jetlag-iphone-loading d-none">
+                  <div class="spinner-border text-secondary" role="status">
+                    <span class="visually-hidden">Loading live app…</span>
+                  </div>
+                </div>
+                <iframe
+                  data-lazy-iframe-target="iframe"
+                  data-src="https://jetlag.gelbhart.dev/?embed=1"
+                  title="Jet Lag Map Companion — live app"
+                  allow="geolocation; fullscreen"
+                  loading="lazy"></iframe>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-7">
+            <h2 class="h3 mb-2">Try it live</h2>
+            <p class="text-light opacity-75 mb-4" style="max-width: 32rem;">
+              This is the real app running on the page. Tap around, start a session, and poke the map tools — or open it full screen on your phone.
+            </p>
+            <a href="https://jetlag.gelbhart.dev" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary">
+              <i class="bx bx-link-external me-2" aria-hidden="true"></i>Open in a new tab
+            </a>
+          </div>
+        </div>
+      </div>
+
       <div class="jetlag-gallery mb-4 fade-in-view delay-2">
         <div class="jetlag-gallery-header mb-3 mb-lg-4">
           <h2 class="h3 mb-2">In the app</h2>
