@@ -137,31 +137,26 @@
   }
 }
 
-.jetlag-gallery-shot {
+.jetlag-gallery-grid {
   display: grid;
-  gap: 1.25rem;
-  align-items: center;
-  justify-items: center;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.75rem, 0.5rem + 1vw, 1.5rem);
 
-  @media (min-width: 768px) {
-    grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
-    gap: 2rem;
-    justify-items: stretch;
-    text-align: left;
-  }
-}
-
-.jetlag-gallery-caption {
-  max-width: 28rem;
-  text-align: center;
-
-  @media (min-width: 768px) {
-    text-align: left;
-    justify-self: start;
+  @media (min-width: 992px) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  h3 {
-    text-wrap: balance;
+  .jetlag-phone-frame {
+    max-width: none;
+    border-radius: 1rem;
+  }
+
+  .jetlag-gallery-zoom {
+    right: 0.5rem;
+    bottom: 0.5rem;
+    width: 2rem;
+    height: 2rem;
+    font-size: 1rem;
   }
 }
 
