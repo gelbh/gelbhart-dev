@@ -137,31 +137,26 @@
   }
 }
 
-.jetlag-gallery-shot {
+.jetlag-gallery-grid {
   display: grid;
-  gap: 1.25rem;
-  align-items: center;
-  justify-items: center;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.75rem, 0.5rem + 1vw, 1.5rem);
 
-  @media (min-width: 768px) {
-    grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
-    gap: 2rem;
-    justify-items: stretch;
-    text-align: left;
-  }
-}
-
-.jetlag-gallery-caption {
-  max-width: 28rem;
-  text-align: center;
-
-  @media (min-width: 768px) {
-    text-align: left;
-    justify-self: start;
+  @media (min-width: 992px) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  h3 {
-    text-wrap: balance;
+  .jetlag-phone-frame {
+    max-width: none;
+    border-radius: 1rem;
+  }
+
+  .jetlag-gallery-zoom {
+    right: 0.5rem;
+    bottom: 0.5rem;
+    width: 2rem;
+    height: 2rem;
+    font-size: 1rem;
   }
 }
 
@@ -241,6 +236,140 @@
   @media (min-width: 992px) {
     max-width: 22rem;
   }
+}
+
+// Live preview — real app in an iPhone-style bezel.
+// The iframe renders at a true 390×844 viewport and is scaled down, so the
+// app lays out as it would on a phone rather than as a narrow desktop.
+.jetlag-iphone {
+  --jetlag-iphone-scale: 0.72;
+  --jetlag-iphone-bezel: 0.75rem;
+
+  position: relative;
+  width: fit-content;
+  margin-inline: auto;
+  padding: var(--jetlag-iphone-bezel);
+  border-radius: 3.25rem;
+  background: linear-gradient(145deg, #2a2e3f, #0b0f19 60%);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.06),
+    0 0 0 1px rgba(0, 0, 0, 0.5),
+    0 2rem 4rem rgba(99, 102, 241, 0.3);
+
+  @media (min-width: 1200px) {
+    --jetlag-iphone-scale: 0.8;
+  }
+}
+
+.jetlag-iphone-island {
+  position: absolute;
+  top: calc(var(--jetlag-iphone-bezel) + 0.45rem);
+  left: 50%;
+  z-index: 2;
+  width: 5.5rem;
+  height: 1.5rem;
+  border-radius: 1rem;
+  background: #000;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+// ?embed=1 makes the app pad itself for the island (iframes report zero
+// safe-area insets), so the screen stays full-bleed like a real iPhone.
+.jetlag-iphone-screen {
+  position: relative;
+  width: calc(390px * var(--jetlag-iphone-scale));
+  height: calc(844px * var(--jetlag-iphone-scale));
+  overflow: hidden;
+  border-radius: 2.5rem;
+  background: #0e132c;
+
+  iframe {
+    display: block;
+    width: 390px;
+    height: 844px;
+    border: 0;
+    transform: scale(var(--jetlag-iphone-scale));
+    transform-origin: 0 0;
+  }
+}
+
+.jetlag-iphone-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Lightbox — image fits the viewport; no vertical scroll
+.jetlag-lightbox {
+  .modal-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .jetlag-lightbox-counter {
+    flex: 0 0 auto;
+    margin-right: 1rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .modal-body {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+}
+
+.jetlag-lightbox-image {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  // Dialog margins (3.5rem) + header (~4.5rem) + body padding (2rem) + breathing room
+  max-height: calc(100vh - 11rem);
+  max-height: calc(100dvh - 11rem);
+  border-radius: 1rem;
+}
+
+.jetlag-lightbox-nav {
+  position: absolute;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  border: 1px solid rgba(99, 102, 241, 0.45);
+  background: rgba(11, 15, 25, 0.82);
+  color: #fff;
+  font-size: 1.75rem;
+  transform: translateY(-50%);
+  transition: background-color var(--transition-fast) var(--ease-smooth);
+
+  &:hover {
+    background: rgba(99, 102, 241, 0.35);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+  }
+}
+
+.jetlag-lightbox-prev {
+  left: 1rem;
+}
+
+.jetlag-lightbox-next {
+  right: 1rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
