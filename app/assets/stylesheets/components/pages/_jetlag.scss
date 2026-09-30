@@ -301,10 +301,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
-  &.d-none {
-    display: none !important;
-  }
 }
 
 // Lightbox — image fits the viewport; no vertical scroll

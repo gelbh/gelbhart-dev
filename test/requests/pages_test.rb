@@ -103,6 +103,11 @@ class PagesTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: /Jet Lag Map Companion/
     assert_select "a[href='https://jetlag.gelbhart.dev']"
     assert_select "a[href='https://github.com/gelbh/jetlag']"
+    assert_select ".jetlag-gallery-grid", count: 4
+    assert_select "[data-bs-target='#jetlagImageModal']", count: 16
+    assert_select "#jetlagModalPrev"
+    assert_select "#jetlagModalNext"
+    assert_select "iframe[data-src='https://jetlag.gelbhart.dev/?embed=1'][title]"
   end
 
   test "GET /jetlag redirects to /projects/jetlag" do

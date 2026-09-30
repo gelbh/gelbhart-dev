@@ -141,8 +141,7 @@
                   data-lazy-iframe-target="iframe"
                   data-src="https://jetlag.gelbhart.dev/?embed=1"
                   title="Jet Lag Map Companion — live app"
-                  allow="geolocation; fullscreen"
-                  loading="lazy"></iframe>
+                  allow="geolocation; fullscreen"></iframe>
               </div>
             </div>
           </div>
@@ -331,7 +330,8 @@
     <div class="modal-content bg-dark border-0">
       <div class="modal-header border-secondary border-opacity-25">
         <h2 class="modal-title h5 text-white" id="jetlagImageModalLabel">Screenshot</h2>
-        <span class="jetlag-lightbox-counter text-light opacity-75 small ms-3" id="jetlagModalCounter" aria-live="polite"></span>
+        <span class="jetlag-lightbox-counter text-light opacity-75 small ms-3" id="jetlagModalCounter" aria-hidden="true"></span>
+        <span class="visually-hidden" id="jetlagModalStatus" aria-live="polite"></span>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -351,19 +351,24 @@
   (function () {
     if (document.documentElement.dataset.jetlagLightboxListener === 'true') return;
     document.documentElement.dataset.jetlagLightboxListener = 'true';
+    // Track bound nodes by identity, not a data attribute: Turbo restores
+    // cached snapshots as clones that keep attributes but lose listeners.
+    const boundModals = new WeakSet();
 
     document.addEventListener('turbo:load', function () {
       const imageModal = document.getElementById('jetlagImageModal');
-      if (!imageModal || imageModal.dataset.jetlagLightboxBound === 'true') return;
+      if (!imageModal || boundModals.has(imageModal)) return;
 
-      imageModal.dataset.jetlagLightboxBound = 'true';
+      boundModals.add(imageModal);
       const img = document.getElementById('jetlagModalImage');
       const title = imageModal.querySelector('.modal-title');
       const counter = document.getElementById('jetlagModalCounter');
+      const status = document.getElementById('jetlagModalStatus');
       let items = [];
       let index = 0;
 
       function show(i) {
+        if (!items.length) return;
         index = (i + items.length) % items.length;
         const item = items[index];
         const alt = item.getAttribute('data-alt') || '';
@@ -371,6 +376,7 @@
         img.alt = alt;
         title.textContent = alt || 'Screenshot';
         counter.textContent = (index + 1) + ' / ' + items.length;
+        status.textContent = (alt || 'Screenshot') + ', ' + (index + 1) + ' of ' + items.length;
         // Warm the neighbours so prev/next swaps without a blank frame
         [index - 1, index + 1].forEach(function (n) {
           new Image().src = items[(n + items.length) % items.length].getAttribute('data-image');
