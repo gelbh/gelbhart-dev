@@ -113,7 +113,9 @@ async function discoverSitemap() {
   throw new Error(`no non-empty sitemap at ${SITEMAP_PATHS.join(", ")} on ${origin}`);
 }
 
-function extract(html, pageUrl) {
+function extract(rawHtml, pageUrl) {
+  // The Rails baseline text was extracted from a literal "->", which the <[^>]+> tag strip cuts at; the static build escapes it.
+  const html = rawHtml.replace(/data-action="[^"]*"/g, (attr) => attr.replaceAll("-&gt;", "->"));
   const clean = html.replace(/<!--[\s\S]*?-->|<script\b[\s\S]*?<\/script>|<style\b[\s\S]*?<\/style>/gi, "");
   const meta = {};
   for (const a of tags(clean, "meta")) {
