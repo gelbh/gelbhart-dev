@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "gelbhart-dev",
+  "account_id": "578279c4ee8d8a1b0bda8ecf8ecc3f67",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-26",
   "compatibility_flags": ["nodejs_compat"],
