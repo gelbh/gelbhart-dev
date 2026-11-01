@@ -11,15 +11,11 @@ const heroBadge = { color: "secondary", badgeClass: "hero-badge", extraClasses: 
 <Base
   description="Tomer Gelbhart's developer portfolio showcasing full-stack web development projects, Ruby on Rails expertise, and professional software engineering work."
 >
-  <!-- Hero Section with Pac-Man Game -->
   <section class="position-relative overflow-hidden hero-section home-panel home-panel--hero"
            data-controller="pacman-game pacman-input pacman-menu">
-    <!-- Animated Gradient Background -->
     <div class="hero-gradient-bg"></div>
     <CircuitField fixed intensity={0.55} />
-    <!-- Tech Grid Background -->
     <div class="tech-grid-bg"></div>
-    <!-- Floating Code Snippets -->
     <div class="floating-code">
       <div class="code-snippet code-1">&lt;div&gt;</div>
       <div class="code-snippet code-2">{"{ }"}</div>
@@ -30,15 +26,11 @@ const heroBadge = { color: "secondary", badgeClass: "hero-badge", extraClasses: 
       <div class="code-snippet code-7">const</div>
       <div class="code-snippet code-8">&lt;/&gt;</div>
     </div>
-    <!-- Pac-Man Page Tint -->
     <div class="pacman-page-tint d-none d-lg-block" data-pacman-game-target="pageTint"></div>
-    <!-- Pac-Man Game Overlay -->
     <div class="pacman-game-container d-none d-lg-block" data-pacman-game-target="gameContainer">
-      <!-- Pac-Man character -->
       <div class="pacman-character" data-pacman-game-target="pacman">
         <img alt="Pac-Man" class="pacman-sprite" src="/assets/pacman-game/pacman/pacman_open_more.png" />
       </div>
-      <!-- Game HUD -->
       <div class="pacman-hud" data-pacman-game-target="hud">
         <div class="hud-item">
           <span class="hud-label">Score:</span>
@@ -64,7 +56,6 @@ const heroBadge = { color: "secondary", badgeClass: "hero-badge", extraClasses: 
     <div class="container position-relative zindex-5 pb-lg-5 mb-5">
       <div class="row pt-5 pt-lg-3 pb-3 py-lg-4">
         <div class="col-lg-10 col-xl-9 mx-auto text-center">
-          <!-- Pac-Man Game Start Hint -->
           <div class="pacman-idle-hint mb-3 d-none d-lg-inline-block" data-pacman-game-target="startHint" data-controller="pacman-preview">
             <div class="d-flex align-items-center justify-content-center gap-3 flex-wrap">
               <div class="pacman-preview">
@@ -85,19 +76,16 @@ const heroBadge = { color: "secondary", badgeClass: "hero-badge", extraClasses: 
               </div>
             </div>
           </div>
-          <!-- Main Heading with Animation -->
           <h1 class="display-2 mb-4 hero-heading">
             <span class="fade-in-up">Full-Stack Developer</span>
             <br>
             <span class="text-gradient d-inline-block fade-in-up delay-1">Building Modern Web Solutions</span>
           </h1>
-          <!-- Subheading with Animation -->
           <p class="fs-lg text-muted mb-4 pb-2 fade-in-up delay-2">
             MSc Computer Science student with expertise in front-end development and API integration.
             <br>
             Exploring AI, Machine Learning, Cloud Computing, Quantum Computing, and Full-Stack Engineering at UCD.
           </p>
-          <!-- CTA Buttons with Animation -->
           <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center pb-3 fade-in-up delay-3">
             <a href="#projects" class="btn btn-lg btn-primary shadow-primary btn-pulse">
               <i class="bx bx-code-alt fs-5 lh-1 me-2" aria-hidden="true"></i>
@@ -108,7 +96,6 @@ const heroBadge = { color: "secondary", badgeClass: "hero-badge", extraClasses: 
               Get in Touch
             </a>
           </div>
-          <!-- Tech Stack Badges with Animation -->
           <div class="d-flex flex-wrap gap-2 justify-content-center pt-4 mt-2 fade-in-up delay-4">
             <TechBadge {...heroBadge} text="JavaScript" icon="bxl-javascript" url="https://developer.mozilla.org/en-US/docs/Web/JavaScript" />
             <TechBadge {...heroBadge} text="Python" icon="bxl-python" url="https://www.python.org/" />
@@ -119,7 +106,6 @@ const heroBadge = { color: "secondary", badgeClass: "hero-badge", extraClasses: 
         </div>
       </div>
     </div>
-    <!-- Scroll Indicator -->
     <a href="#projects" class="scroll-indicator text-decoration-none fade-in-up delay-4">
       <div class="scroll-indicator-arrow">
         <i class="bx bx-chevron-down" aria-hidden="true"></i>
@@ -127,10 +113,8 @@ const heroBadge = { color: "secondary", badgeClass: "hero-badge", extraClasses: 
       <span class="d-block mt-2 fs-sm text-muted">Scroll to explore</span>
     </a>
   </section>
-  <!-- Projects Section -->
   <section id="projects" class="container py-5 home-panel home-panel--projects" data-controller="scroll-animation">
     <SectionHeader title="Featured Projects" />
-    <!-- Project cards -->
     <div class="row g-4 justify-content-center">
       {featuredProjects.map((project, index) => (
         <div class="col-lg-4 col-md-6 fade-in-view" style={`--i: ${index}`}>
@@ -139,10 +123,8 @@ const heroBadge = { color: "secondary", badgeClass: "hero-badge", extraClasses: 
       ))}
     </div>
   </section>
-  <!-- Technologies & Skills Section -->
   <section id="technologies" class="container py-5 my-5 home-panel home-panel--tech" data-controller="scroll-animation">
     <SectionHeader title="Technologies & Skills" subtitle="Programming languages, frameworks, and tools I work with" />
-    <!-- Programming Languages -->
     <div class="row g-4 mb-4">
       <div class="col-12 fade-in-view" style="--i: 0">
         <div class="tech-card">
@@ -162,7 +144,6 @@ const heroBadge = { color: "secondary", badgeClass: "hero-badge", extraClasses: 
         </div>
       </div>
     </div>
-    <!-- Frameworks & Libraries  -->
     <div class="row g-4 mb-4">
       <div class="col-lg-6 fade-in-view" style="--i: 1">
         <div class="tech-card h-100">
@@ -191,7 +172,6 @@ const heroBadge = { color: "secondary", badgeClass: "hero-badge", extraClasses: 
           </div>
         </div>
       </div>
-      <!-- Data/AI -->
       <div class="col-lg-6 fade-in-view" style="--i: 2">
         <div class="tech-card h-100">
           <div class="tech-card-icon bg-warning bg-opacity-10">
@@ -208,7 +188,6 @@ const heroBadge = { color: "secondary", badgeClass: "hero-badge", extraClasses: 
         </div>
       </div>
     </div>
-    <!-- Development Tools - Consolidated -->
     <div class="row g-4">
       <div class="col-lg-6 fade-in-view" style="--i: 3">
         <div class="tech-card h-100">
@@ -262,7 +241,6 @@ const heroBadge = { color: "secondary", badgeClass: "hero-badge", extraClasses: 
       </div>
     </div>
   </section>
-  <!-- Call-to-Action Section -->
   <section id="cta" class="position-relative py-5 my-5 home-panel home-panel--cta" data-controller="scroll-animation">
     <div class="container">
       <div class="row justify-content-center">
@@ -292,7 +270,6 @@ const heroBadge = { color: "secondary", badgeClass: "hero-badge", extraClasses: 
                 </div>
               </div>
             </div>
-            <!-- Context chips (not hero-metric columns) -->
             <ul class="cta-meta list-unstyled d-flex flex-wrap column-gap-4 row-gap-2 mt-4 pt-4 border-top border-secondary border-opacity-25">
               <li class="cta-meta-chip">
                 <i class="bx bx-code-alt" aria-hidden="true"></i>

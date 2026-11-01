@@ -22,7 +22,7 @@ const passThrough = (c: Context<AppEnv>) =>
 
 app.get("/contact", async (c) => {
   if (c.env.PAGES_ORIGIN !== "assets" || !c.env.ASSETS) return passThrough(c);
-  // Fetch by URL so the visitor's If-None-Match can't turn this per-request page into a 304; keep asset redirects.
+  // Fetch by URL so the visitor's If-None-Match can't turn this per-request page into a 304.
   const page = await c.env.ASSETS.fetch(c.req.url, { redirect: "manual" });
   if (page.status !== 200) return page;
   const alert = contactAlertHtml(new URL(c.req.url).searchParams);
