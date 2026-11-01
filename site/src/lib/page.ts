@@ -8,7 +8,6 @@ export function assetUrl(path: string): string {
   return path.startsWith("/") ? `${CANONICAL_BASE_URL}${path}` : `${CANONICAL_BASE_URL}/assets/${path}`;
 }
 
-// ERB::Util.html_escape, which content_for applies to plain strings before the layout reads them.
 export function htmlEscape(s: string): string {
   return s
     .replace(/&/g, "&amp;")

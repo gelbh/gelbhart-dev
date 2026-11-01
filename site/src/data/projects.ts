@@ -192,9 +192,8 @@ const byPosition = (a: Project, b: Project) => a.position - b.position;
 
 export const featuredProjects = projects.filter((p) => p.featured && p.published).sort(byPosition);
 
-// Each linkUrl is its route path.
 export const projectsWithPages = projects.filter((p) => p.published && p.routeName).sort(byPosition);
 
-// Rails image_tag resolves a bare image name under /assets; anything else is a Boxicons class.
+// Icons without an image extension are Boxicons class names.
 export const isImageIcon = (icon: string) => /\.(png|svg|webp|jpe?g)$/i.test(icon);
 export const iconSrc = (icon: string) => (icon.startsWith("/") ? icon : `/assets/${icon}`);

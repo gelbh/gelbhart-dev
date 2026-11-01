@@ -14,7 +14,6 @@ const absolute = (url: string) => (isAbsolute(url) ? url : `${CANONICAL_BASE_URL
 
 const absoluteAsset = (url: string) => (isAbsolute(url) ? url : assetUrl(url));
 
-// Ruby Time#iso8601: seconds precision, no milliseconds.
 const iso8601 = (d: DateLike) => (typeof d === "string" ? d : d.toISOString().replace(/\.\d{3}Z$/, "Z"));
 
 export function personStructuredData(): JsonObject {
@@ -109,7 +108,7 @@ export interface BreadcrumbItem {
   url?: string | null;
 }
 
-// Items without a url fall back to the current page URL (Rails used request.original_url).
+// Items without a url fall back to the current page URL.
 export function breadcrumbStructuredData(items: BreadcrumbItem[], currentUrl?: string): JsonObject {
   return {
     "@context": "https://schema.org",
@@ -352,7 +351,7 @@ export function imageObjectStructuredData({
   return data;
 }
 
-// render_structured_data: Rails to_json escapes <, > and & so the payload cannot close the script tag.
+// Escape <, > and & so the payload cannot close the script tag.
 export function jsonLd(data: unknown): string {
   return JSON.stringify(data)
     .replace(/</g, "\\u003c")

@@ -10,11 +10,9 @@ const projectsActive = projectsWithPages.some((p) => isCurrent(p.linkUrl));
 ---
 <header class="header bg-dark navbar navbar-expand-lg position-absolute navbar-sticky" data-bs-theme="dark">
   <div class="container px-3">
-    <!-- Mobile menu button -->
     <button class="navbar-toggler order-1" type="button" data-bs-toggle="modal" data-bs-target="#mobileMenu" aria-controls="mobileMenu" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <!-- Desktop navigation - Left side -->
     <div class="collapse navbar-collapse order-lg-1 d-none d-lg-flex" id="navbarNav">
       <ul class="navbar-nav">
         <li class="nav-item dropdown">
@@ -40,7 +38,6 @@ const projectsActive = projectsWithPages.some((p) => isCurrent(p.linkUrl));
         </li>
       </ul>
     </div>
-    <!-- Centered Logo -->
     <a href="/" class="navbar-brand order-2 order-lg-2 flex-shrink-1 mx-auto header-brand" aria-label="gelbhart.dev home">
       <div class="d-flex align-items-center justify-content-center">
         <Logo width={80} height={40} cssClass="header-logo" id="header" />
@@ -49,7 +46,6 @@ const projectsActive = projectsWithPages.some((p) => isCurrent(p.linkUrl));
     <div class="order-3 order-lg-3 flex-shrink-0"></div>
   </div>
 </header>
-<!-- Mobile Centered Popup Menu -->
 <div class="modal fade" id="mobileMenu" tabindex="-1" aria-labelledby="mobileMenuLabel" aria-hidden="true" data-bs-theme="dark">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content mobile-menu-popup">
