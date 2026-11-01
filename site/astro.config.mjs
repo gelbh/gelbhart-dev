@@ -1,17 +1,18 @@
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 import { glob, readFile, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const rails = (p) => fileURLToPath(new URL(`../app/${p}`, import.meta.url));
 
-// ponytail: Rails emits Stimulus data-action "->" unescaped and the parity baseline text depends on it; remove once the Rails parity gate is retired (PR 8).
+// ponytail: Rails emits Stimulus data-action "->" unescaped and the parity baseline text depends on it; remove once the Rails parity gate is retired.
 const unescapeStimulusArrows = {
   name: "unescape-stimulus-arrows",
   hooks: {
     "astro:build:done": async ({ dir }) => {
       for await (const file of glob("**/*.html", { cwd: fileURLToPath(dir) })) {
-        const path = fileURLToPath(new URL(file, dir));
+        const path = join(fileURLToPath(dir), file);
         const html = await readFile(path, "utf8");
         const fixed = html.replace(/data-action="[^"]*"/g, (attr) => attr.replaceAll("-&gt;", "->"));
         if (fixed !== html) await writeFile(path, fixed);
@@ -23,6 +24,7 @@ const unescapeStimulusArrows = {
 export default defineConfig({
   site: "https://gelbhart.dev",
   output: "static",
+  compressHTML: false,
   trailingSlash: "never",
   build: { format: "file" },
   integrations: [sitemap(), unescapeStimulusArrows],
