@@ -12,12 +12,13 @@ export default defineConfig({
   integrations: [sitemap()],
   vite: {
     resolve: {
-      alias: {
-        controllers: rails("javascript/controllers"),
-        lib: rails("javascript/lib"),
-        theme: rails("javascript/theme"),
-        "@hotwired/turbo-rails": fileURLToPath(import.meta.resolve("@hotwired/turbo")),
-      },
+      // theme matches extensionless JS specifiers only; SCSS url() rebasing yields theme/... asset paths.
+      alias: [
+        { find: "controllers", replacement: rails("javascript/controllers") },
+        { find: "lib", replacement: rails("javascript/lib") },
+        { find: /^theme\/([^.]+)$/, replacement: `${rails("javascript/theme")}/$1` },
+        { find: "@hotwired/turbo-rails", replacement: fileURLToPath(import.meta.resolve("@hotwired/turbo")) },
+      ],
     },
     css: {
       preprocessorOptions: {

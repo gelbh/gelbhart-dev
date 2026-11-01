@@ -1,0 +1,82 @@
+---
+import Logo from "./Logo.astro";
+import { requestPath } from "../lib/structuredData";
+import { iconSrc, isImageIcon, projectsWithPages } from "../data/projects";
+
+const path = requestPath(Astro.url.pathname);
+const isCurrent = (url: string) => path === url;
+const year = new Date().getFullYear();
+---
+<footer class="footer bg-dark py-5" data-bs-theme="dark">
+  <div class="container">
+    <div class="row justify-content-center text-center">
+      <!-- Logo and Brand Column -->
+      <div class="col-12 col-md-6 col-lg-4 mb-4">
+        <!-- Logo Container -->
+        <a href="/" class="navbar-brand d-flex flex-column align-items-center text-decoration-none p-0 w-100">
+          <div class="logo-wrapper rounded p-3">
+            <Logo width={80} height={40} id="footer" />
+          </div>
+          <span class="fs-4 text-white mt-2">gelbhart.dev</span>
+        </a>
+        <!-- Social Icons -->
+        <div class="d-flex justify-content-center gap-2 mt-3">
+          <a href="https://github.com/gelbh" class="btn btn-icon btn-secondary text-white social-btn social-github" target="_blank" rel="noopener" aria-label="GitHub">
+            <i class="bx bxl-github fs-5"></i>
+          </a>
+          <a href="https://linkedin.com/in/tomer-gelbhart" class="btn btn-icon btn-secondary text-white social-btn social-linkedin" target="_blank" rel="noopener" aria-label="LinkedIn">
+            <i class="bx bxl-linkedin fs-5"></i>
+          </a>
+          <a href="mailto:tomer@gelbhart.dev" class="btn btn-icon btn-secondary text-white social-btn social-email" aria-label="Email">
+            <i class="bx bx-envelope fs-5"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- Bottom row with links and copyright -->
+    <div class="row align-items-center mt-2">
+      <div class="col-md-6 col-12">
+        <ul class="nav justify-content-center justify-content-md-start mb-3 mb-md-0 flex-wrap">
+          <li class="nav-item dropdown footer-projects-dropdown">
+            <span class="nav-link text-white py-2 px-3 footer-link dropdown-toggle d-none d-md-inline-flex align-items-center" id="footerProjectsDropdown" role="button" aria-expanded="false">
+              Projects
+            </span>
+            <button class="nav-link text-white py-2 px-3 footer-link d-md-none d-flex align-items-center" type="button" data-bs-toggle="modal" data-bs-target="#mobileMenu" aria-label="Open mobile menu">
+              Projects
+            </button>
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="footerProjectsDropdown">
+              {projectsWithPages.map((project) => (
+                <li>
+                  <a href={project.linkUrl} class={`dropdown-item d-flex align-items-center ${isCurrent(project.linkUrl) ? "active" : ""}`}>
+                    {isImageIcon(project.icon) ? (
+                      <img src={iconSrc(project.icon)} alt={`${project.title} icon`} width="20" height="20" class="me-2 project-dropdown-icon-img" loading="lazy" />
+                    ) : (
+                      <i class={`bx ${project.icon} fs-lg me-2`}></i>
+                    )}
+                    {project.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a href="/contact" class="nav-link text-white py-2 px-3 footer-link">
+              Contact
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="col-md-6 col-12 text-center text-md-end">
+        <p class="text-white-50 mb-0">
+          <span>&copy; {year} gelbhart.dev. All rights reserved.</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+<!-- Back to Top Button -->
+<div data-controller="scroll-to-top">
+  <a href="#top" class="btn-scroll-top" data-scroll-to-top-target="button" data-action="click->scroll-to-top#scrollToTop" aria-label="Scroll to top">
+    <i class="bx bx-chevron-up"></i>
+  </a>
+</div>
