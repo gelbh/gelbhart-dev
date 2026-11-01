@@ -52,11 +52,10 @@ const jetbrainsMonoHref = "https://fonts.googleapis.com/css2?family=JetBrains+Mo
               <div id="contact-alert"></div>
 
               <form class="contact-form terminal-form" action="/contact" accept-charset="UTF-8" method="post">
-                <!-- Honeypot field - hidden from users, bots will fill it -->
+                {/* Honeypot: hidden from people, filled by bots; the Worker rejects non-empty values. */}
                 <div style="position: absolute; left: -5000px;" aria-hidden="true">
                   <input tabindex="-1" autocomplete="off" type="text" name="website" id="website" />
                 </div>
-                <!-- Timestamp for time-based validation -->
                 <input value="" autocomplete="off" type="hidden" name="form_timestamp" id="form_timestamp" />
 
                 <div class="cli-row">
