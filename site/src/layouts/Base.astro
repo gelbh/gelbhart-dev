@@ -1,5 +1,5 @@
 ---
-import "../../../app/assets/stylesheets/application.scss";
+import "@rails/assets/stylesheets/application.scss";
 import GoogleAnalytics from "../components/GoogleAnalytics.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
@@ -7,15 +7,17 @@ import {
   DEFAULT_META_DESCRIPTION,
   canonicalUrl,
   htmlEscape,
-  jsonLd,
   metaDescription,
   ogTypeFor,
-  organizationStructuredData,
   pageTitle,
   requestPath,
-  personStructuredData,
   socialImageDimensions,
   socialImageUrl,
+} from "../lib/page";
+import {
+  jsonLd,
+  organizationStructuredData,
+  personStructuredData,
   webpageStructuredData,
   websiteStructuredData,
 } from "../lib/structuredData";
@@ -155,15 +157,10 @@ const containerClass = ["container", !error && "mt-1 py-1 min-vh-100", isHome &&
     </style>
 
     <script is:inline>
-      window.assetPath = function(path) {
-        const assetPaths = {
-          "cbms-json-schema.json": "/assets/cbms-json-schema.json"
-        };
-        return assetPaths[path] || `/assets/${path}`;
-      };
+      window.assetPath = (path) => `/assets/${path}`;
     </script>
     <script>
-      import "../scripts/main.js";
+      import "@rails/javascript/application.js";
     </script>
   </head>
 

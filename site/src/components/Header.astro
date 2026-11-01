@@ -1,7 +1,8 @@
 ---
 import Logo from "./Logo.astro";
-import { requestPath } from "../lib/structuredData";
-import { iconSrc, isImageIcon, projectsWithPages } from "../data/projects";
+import ProjectNavIcon from "./ProjectNavIcon.astro";
+import { requestPath } from "../lib/page";
+import { projectsWithPages } from "../data/projects";
 
 const path = requestPath(Astro.url.pathname);
 const isCurrent = (url: string) => path === url;
@@ -25,11 +26,7 @@ const projectsActive = projectsWithPages.some((p) => isCurrent(p.linkUrl));
             {projectsWithPages.map((project) => (
               <li>
                 <a href={project.linkUrl} class={`dropdown-item d-flex align-items-center ${isCurrent(project.linkUrl) ? "active" : ""}`}>
-                  {isImageIcon(project.icon) ? (
-                    <img src={iconSrc(project.icon)} alt={`${project.title} icon`} width="20" height="20" class="me-2 project-dropdown-icon-img" loading="lazy" />
-                  ) : (
-                    <i class={`bx ${project.icon} fs-lg me-2`}></i>
-                  )}
+                  <ProjectNavIcon icon={project.icon} title={project.title} size={20} imgClass="me-2 project-dropdown-icon-img" iconClass="fs-lg me-2" />
                   {project.title}
                 </a>
               </li>
@@ -77,11 +74,7 @@ const projectsActive = projectsWithPages.some((p) => isCurrent(p.linkUrl));
                   {projectsWithPages.map((project) => (
                     <li>
                       <a href={project.linkUrl} class={`mobile-nav-sublink d-flex align-items-center ${isCurrent(project.linkUrl) ? "active" : ""}`} data-bs-dismiss="modal">
-                        {isImageIcon(project.icon) ? (
-                          <img src={iconSrc(project.icon)} alt={`${project.title} icon`} width="18" height="18" class="me-2 project-dropdown-icon-img" loading="lazy" />
-                        ) : (
-                          <i class={`bx ${project.icon} me-2`}></i>
-                        )}
+                        <ProjectNavIcon icon={project.icon} title={project.title} size={18} imgClass="me-2 project-dropdown-icon-img" iconClass="me-2" />
                         {project.title}
                       </a>
                     </li>

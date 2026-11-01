@@ -1,0 +1,18 @@
+---
+import { iconSrc, isImageIcon } from "../data/projects";
+
+interface Props {
+  icon: string;
+  title: string;
+  size: number;
+  iconClass: string;
+  imgClass?: string;
+  iconHidden?: boolean;
+}
+const { icon, title, size, iconClass, imgClass, iconHidden = false } = Astro.props;
+---
+{isImageIcon(icon) ? (
+  <img src={iconSrc(icon)} alt={`${title} icon`} width={size} height={size} class={imgClass} loading="lazy" />
+) : (
+  <i class={`bx ${icon} ${iconClass}`} aria-hidden={iconHidden ? "true" : undefined}></i>
+)}

@@ -1,70 +1,21 @@
-// Object key order must match the Rails JSON-LD output; the parity gate compares serialized JSON.
-
-export const CANONICAL_BASE_URL = "https://gelbhart.dev";
-export const DEFAULT_META_DESCRIPTION =
-  "Personal portfolio and development projects by Tomer Gelbhart. " +
-  "Full-stack developer specializing in Ruby on Rails and modern web applications.";
+import { CANONICAL_BASE_URL, DEFAULT_META_DESCRIPTION, assetUrl, socialImageDimensions } from "./page";
 
 type JsonObject = Record<string, unknown>;
 type DateLike = Date | string;
 
 const SAME_AS = ["https://www.linkedin.com/in/tomer-gelbhart/", "https://github.com/gelbh"];
 
-const present = (v: unknown): boolean =>
+const present = <T>(v: T | null | undefined | false): v is T =>
   v !== null && v !== undefined && v !== false && !(typeof v === "string" && v.trim() === "");
 
-const isAbsolute = (url: string | undefined | null): url is string => present(url) && url!.startsWith("http");
+const isAbsolute = (url: string | null | undefined): url is string => present(url) && url.startsWith("http");
 
 const absolute = (url: string) => (isAbsolute(url) ? url : `${CANONICAL_BASE_URL}${url}`);
 
+const absoluteAsset = (url: string) => (isAbsolute(url) ? url : assetUrl(url));
+
 // Ruby Time#iso8601: seconds precision, no milliseconds.
 const iso8601 = (d: DateLike) => (typeof d === "string" ? d : d.toISOString().replace(/\.\d{3}Z$/, "Z"));
-
-// Rails asset_url against the production host; the static build serves assets undigested.
-export function assetUrl(path: string): string {
-  return path.startsWith("/") ? `${CANONICAL_BASE_URL}${path}` : `${CANONICAL_BASE_URL}/assets/${path}`;
-}
-
-// ERB::Util.html_escape, which content_for applies to plain strings before the layout reads them.
-export function htmlEscape(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
-export function pageTitle(title: string): string {
-  const baseTitle = "gelbhart.dev";
-  return title === "" ? baseTitle : `${title} | ${baseTitle}`;
-}
-
-// Rails request.path for a built page: build.format "file" gives Astro.url.pathname like /index.html or /contact.html.
-export function requestPath(pathname: string): string {
-  const path = pathname.replace(/\.html$/, "").replace(/\/index$/, "");
-  return path === "" ? "/" : path;
-}
-
-export function canonicalUrl(path: string): string {
-  return `${CANONICAL_BASE_URL}${path || "/"}`;
-}
-
-// meta_description: String#truncate(157, separator: " ", omission: "") then strip.
-export function metaDescription(description: string): string {
-  if (description.length <= 157) return description.trim();
-  const stop = description.lastIndexOf(" ", 157);
-  return description.slice(0, stop === -1 ? 157 : stop).trim();
-}
-
-export function ogTypeFor(path: string): string {
-  if (path === "/") return "website";
-  if (path === "/contact") return "profile";
-  return /\/projects\/(video-captioner|nasa-exoplanet-explorer|hevy-tracker)/.test(path) ? "article" : "website";
-}
-
-export const socialImageUrl = () => assetUrl("logos/social/logo_social.png");
-export const socialImageDimensions = () => ({ width: 1200, height: 630 });
 
 export function personStructuredData(): JsonObject {
   return {
@@ -294,11 +245,11 @@ export function webpageStructuredData({
   };
 
   if (present(description)) data.description = description;
-  if (present(datePublished)) data.datePublished = iso8601(datePublished!);
-  if (present(dateModified)) data.dateModified = iso8601(dateModified!);
+  if (present(datePublished)) data.datePublished = iso8601(datePublished);
+  if (present(dateModified)) data.dateModified = iso8601(dateModified);
 
   data.author = present(author)
-    ? authorFor(author!)
+    ? authorFor(author)
     : { "@type": "Person", name: "Tomer Gelbhart", url: CANONICAL_BASE_URL };
 
   data.publisher = publisher();
@@ -341,25 +292,23 @@ export function articleStructuredData({
     description,
   };
 
-  if (present(datePublished)) data.datePublished = iso8601(datePublished!);
-  if (present(dateModified)) data.dateModified = iso8601(dateModified!);
+  if (present(datePublished)) data.datePublished = iso8601(datePublished);
+  if (present(dateModified)) data.dateModified = iso8601(dateModified);
   if (present(keywords)) data.keywords = keywords;
 
   data.author = present(author)
-    ? authorFor(author!)
+    ? authorFor(author)
     : { "@type": "Person", name: "Tomer Gelbhart", url: CANONICAL_BASE_URL, sameAs: [...SAME_AS] };
 
   data.publisher = publisher();
 
   if (present(image)) {
-    const imageUrl = typeof image === "object" ? image!.url : (image as string);
+    const imageUrl = typeof image === "object" ? image.url : image;
     const dims =
-      typeof image === "object" && image!.width
-        ? { width: image!.width, height: image!.height }
-        : socialImageDimensions();
+      typeof image === "object" && image.width ? { width: image.width, height: image.height } : socialImageDimensions();
     data.image = {
       "@type": "ImageObject",
-      url: isAbsolute(imageUrl) ? imageUrl : assetUrl(imageUrl),
+      url: absoluteAsset(imageUrl),
       width: dims.width,
       height: dims.height,
     };
@@ -389,14 +338,14 @@ export function imageObjectStructuredData({
   const data: JsonObject = {
     "@context": "https://schema.org",
     "@type": "ImageObject",
-    url: isAbsolute(url) ? url : assetUrl(url),
+    url: absoluteAsset(url),
     width: dims.width,
     height: dims.height,
   };
 
   if (present(caption)) data.caption = caption;
   if (present(altText)) data.alternateName = altText;
-  if (present(contentUrl)) data.contentUrl = isAbsolute(contentUrl) ? contentUrl : assetUrl(contentUrl!);
+  if (present(contentUrl)) data.contentUrl = absoluteAsset(contentUrl);
 
   data.license = CANONICAL_BASE_URL;
 

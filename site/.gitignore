@@ -1,15 +1,10 @@
 node_modules/
 dist/
 .astro/
-public/assets/
-public/sync/
-public/favicon.ico
-public/apple-touch-icon.png
-public/browserconfig.xml
-public/site.webmanifest
-public/icons/
-public/images/
-public/downloads/
+# public/ is filled by scripts/sync-public.mjs, apart from these
+public/*
+!public/_headers
+!public/_redirects
+!public/robots.txt
 # root .gitignore ignores scripts/
 !scripts/
-!src/scripts/

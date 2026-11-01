@@ -14,6 +14,7 @@ export default defineConfig({
     resolve: {
       // theme matches extensionless JS specifiers only; SCSS url() rebasing yields theme/... asset paths.
       alias: [
+        { find: "@rails", replacement: rails("").replace(/\/$/, "") },
         { find: "controllers", replacement: rails("javascript/controllers") },
         { find: "lib", replacement: rails("javascript/lib") },
         { find: /^theme\/([^.]+)$/, replacement: `${rails("javascript/theme")}/$1` },
@@ -40,6 +41,6 @@ export default defineConfig({
         },
       },
     },
-    server: { fs: { allow: [fileURLToPath(new URL("..", import.meta.url))] } },
+    server: { fs: { allow: [fileURLToPath(new URL(".", import.meta.url)), rails("")] } },
   },
 });
