@@ -26,6 +26,23 @@ const SPAM_KEYWORDS = [
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_PER_HOUR = 3;
 
+const ALERTS: Record<ContactOutcome, [kind: "success" | "danger", message: string]> = {
+  rate_limited: ["danger", "Too many submissions. Please try again later."],
+  error: ["danger", "Sorry, there was an error sending your message. Please try emailing directly."],
+  sent: ["success", "Thank you! Your message has been sent successfully."],
+};
+
+export function contactAlertHtml(query: URLSearchParams): string {
+  const outcome: ContactOutcome | null =
+    query.get("rate_limited") === "true" ? "rate_limited"
+    : query.get("error") === "1" ? "error"
+    : query.get("sent") === "1" ? "sent"
+    : null;
+  if (!outcome) return "";
+  const [kind, message] = ALERTS[outcome];
+  return `<div class="alert alert-${kind} alert-dismissible fade show terminal-alert" role="alert">${message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>`;
+}
+
 const field = (fd: FormData, key: string) => {
   const v = fd.get(key);
   return typeof v === "string" ? v : "";

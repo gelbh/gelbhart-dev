@@ -7,6 +7,7 @@ const rails = (p) => fileURLToPath(new URL(`../app/${p}`, import.meta.url));
 export default defineConfig({
   site: "https://gelbhart.dev",
   output: "static",
+  compressHTML: false,
   trailingSlash: "never",
   build: { format: "file" },
   integrations: [sitemap()],
