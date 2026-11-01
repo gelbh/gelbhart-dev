@@ -5,7 +5,7 @@
   "compatibility_date": "2026-10-26",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
-  "routes": [{ "pattern": "gelbhart.dev/contact", "zone_name": "gelbhart.dev" }],
+  "routes": [{ "pattern": "gelbhart.dev/contact*", "zone_name": "gelbhart.dev" }],
   "observability": { "enabled": true },
   "vars": { "PAGES_ORIGIN": "render" },
   "d1_databases": [

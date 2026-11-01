@@ -1,5 +1,4 @@
-// worker/src/index.ts
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 import type { Env } from "./env";
 import {
   handleContact, hashIp, parseContactForm, pruneContactAttempts, recordAttempt,
@@ -8,7 +7,9 @@ import {
 import { sendContactMail } from "./mail";
 import { verifyTurnstile } from "./turnstile";
 
-export const app = new Hono<{ Bindings: Env }>();
+type AppEnv = { Bindings: Env };
+
+export const app = new Hono<AppEnv>({ strict: false });
 
 const OUTCOME_PATHS: Record<ContactOutcome, string> = {
   sent: "/contact?sent=1",
@@ -16,12 +17,19 @@ const OUTCOME_PATHS: Record<ContactOutcome, string> = {
   rate_limited: "/contact?rate_limited=true",
 };
 
-app.get("/contact", (c) =>
-  c.env.PAGES_ORIGIN === "assets" && c.env.ASSETS ? c.env.ASSETS.fetch(c.req.raw) : fetch(c.req.raw),
-);
+const passThrough = (c: Context<AppEnv>) =>
+  c.env.PAGES_ORIGIN === "assets" && c.env.ASSETS ? c.env.ASSETS.fetch(c.req.raw) : fetch(c.req.raw);
+
+app.get("/contact", passThrough);
 
 app.post("/contact", async (c) => {
-  const form = parseContactForm(await c.req.formData());
+  let fd: FormData;
+  try {
+    fd = await c.req.formData();
+  } catch {
+    return c.redirect(OUTCOME_PATHS.error, 303);
+  }
+  const form = parseContactForm(fd);
   const ip = c.req.header("CF-Connecting-IP") ?? "";
   const outcome = await handleContact(form, ip, {
     verifyTurnstile: (token, remoteIp) => verifyTurnstile(c.env.TURNSTILE_SECRET_KEY, token, remoteIp),
@@ -32,6 +40,8 @@ app.post("/contact", async (c) => {
   });
   return c.redirect(OUTCOME_PATHS[outcome], 303);
 });
+
+app.all("*", passThrough);
 
 export default {
   fetch: app.fetch,
