@@ -1,0 +1,67 @@
+---
+import ProjectNavIcon from "./ProjectNavIcon.astro";
+import TechBadge from "./TechBadge.astro";
+import type { Badge } from "../data/projects";
+
+interface Props {
+  title: string;
+  subtitle: string;
+  description: string;
+  icon: string;
+  color: string;
+  linkText: string;
+  linkUrl: string;
+  badges: Badge[];
+  linkIcon?: string;
+  animationDelay?: string;
+  linkTarget?: string;
+  linkRel?: string;
+  githubUrl?: string;
+}
+const {
+  title,
+  subtitle,
+  description,
+  icon,
+  color,
+  linkText,
+  linkUrl,
+  badges,
+  linkIcon = "bx-right-arrow-alt",
+  animationDelay = "",
+  linkTarget,
+  linkRel,
+  githubUrl,
+} = Astro.props;
+---
+<article class={`card project-card h-100 ${animationDelay}`}>
+  <div class="card-body p-4">
+    <div class="d-flex align-items-center mb-3">
+      <div class="flex-shrink-0">
+        <div class={`project-icon bg-${color} bg-opacity-10 rounded-3 p-3`}>
+          <ProjectNavIcon icon={icon} title={title} size={40} iconClass={`fs-1 text-${color}`} iconHidden />
+        </div>
+      </div>
+      <div class="flex-grow-1 ms-3">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <h3 class="h5 mb-0">{title}</h3>
+            <span class="fs-sm text-muted">{subtitle}</span>
+          </div>
+          {githubUrl && (
+            <a href={githubUrl} target="_blank" rel="noopener noreferrer" class="btn btn-link text-muted icon-hit-area ms-2" title="View on GitHub" aria-label={`View ${title} on GitHub`} onclick="event.stopPropagation();">
+              <i class="bx bxl-github fs-5" aria-hidden="true"></i>
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+    <p class="card-text mb-4">{description}</p>
+    <div class="d-flex gap-2 mb-3 flex-wrap">
+      {badges.map((badge) => <TechBadge text={badge.text} color={badge.color} url={badge.url} />)}
+    </div>
+    <a href={linkUrl} target={linkTarget} rel={linkRel} class="btn btn-outline-primary stretched-link project-btn">
+      {linkText} <i class={`bx ${linkIcon} fs-5 ms-2 arrow-icon`} aria-hidden="true"></i>
+    </a>
+  </div>
+</article>

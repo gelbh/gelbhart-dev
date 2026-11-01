@@ -1,0 +1,15 @@
+---
+interface Props {
+  title: string;
+  subtitle?: string;
+  textAlign?: string;
+  animationDelay?: string;
+}
+const { title, subtitle, textAlign = "center", animationDelay = "" } = Astro.props;
+---
+<div class={`text-${textAlign} mb-5`}>
+  <h2 class={`h1 mb-3 fade-in-view reveal-heading ${animationDelay}`}>{title}</h2>
+  {subtitle && (
+    <p class="fs-lg text-muted fade-in-view reveal-heading" style="--i: 1">{subtitle}</p>
+  )}
+</div>

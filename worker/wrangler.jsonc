@@ -6,6 +6,13 @@
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
   "routes": [{ "pattern": "gelbhart.dev/contact*", "zone_name": "gelbhart.dev" }],
+  "build": { "command": "npm --prefix ../site run build" },
+  "assets": {
+    "directory": "../site/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*", "/contact*"]
+  },
   "observability": { "enabled": true },
   "vars": { "PAGES_ORIGIN": "render" },
   "d1_databases": [

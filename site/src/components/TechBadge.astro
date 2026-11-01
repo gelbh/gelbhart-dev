@@ -1,0 +1,68 @@
+---
+interface Props {
+  text: string;
+  color?: string;
+  url?: string;
+  icon?: string;
+  style?: string;
+  size?: string;
+  badgeClass?: string;
+  extraClasses?: string;
+  tooltip?: string;
+  description?: string;
+}
+const {
+  text,
+  color,
+  url,
+  icon,
+  style = "badge",
+  size = "md",
+  badgeClass = "project-badge",
+  extraClasses = "",
+  tooltip,
+  description: desc,
+} = Astro.props;
+const description = tooltip ?? desc;
+const sizeClasses: Record<string, string> = { sm: "fs-xs", md: "", lg: "fs-6" };
+const sizeClass = sizeClasses[size] ?? "";
+const allClasses = `badge ${badgeClass} bg-${color} bg-opacity-10 text-${color} ${sizeClass} ${extraClasses}`.trim();
+const isList = style === "list";
+const Tag = url ? "a" : "span";
+const link = url ? { href: url, target: "_blank", rel: "noopener noreferrer" } : {};
+const infoButton = {
+  type: "button" as const,
+  class: `tech-info-btn btn btn-link p-0 border-0 text-${color}`,
+  "data-bs-toggle": "popover",
+  "data-bs-trigger": "click",
+  "data-bs-placement": "top",
+  "data-bs-content": description,
+  "data-bs-html": "false",
+  "aria-label": `Learn more about ${text}`,
+};
+---
+{isList ? (
+  <li class="tech-item tech-item-wrapper">
+    {icon && <i class={`bx ${icon} text-${color} me-2`} aria-hidden="true"></i>}
+    <div class="d-inline-flex align-items-center">
+      <Tag {...link} class={url ? "text-decoration-none text-body" : "text-body"}>{text}</Tag>
+      {description && (
+        <button {...infoButton}>
+          <i class="bx bx-info-circle" aria-hidden="true"></i>
+        </button>
+      )}
+    </div>
+  </li>
+) : (
+  <div class="tech-badge-wrapper d-inline-flex align-items-center">
+    <Tag {...link} class={url ? `${allClasses} text-decoration-none` : allClasses}>
+      {icon && <i class={`bx ${icon} me-1`} aria-hidden="true"></i>}
+      {text}
+    </Tag>
+    {description && (
+      <button {...infoButton}>
+        <i class="bx bx-info-circle"></i>
+      </button>
+    )}
+  </div>
+)}

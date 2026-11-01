@@ -1,0 +1,29 @@
+---
+import { canonicalUrl, requestPath } from "../lib/page";
+import { breadcrumbStructuredData, jsonLd, type BreadcrumbItem } from "../lib/structuredData";
+
+interface Props {
+  items?: BreadcrumbItem[];
+}
+const { items = [] } = Astro.props;
+const currentUrl = canonicalUrl(requestPath(Astro.url.pathname));
+---
+{items.length > 0 && (
+  <nav aria-label="breadcrumb" class="mb-3 position-relative" style="z-index: 10;">
+    <ol class="breadcrumb mb-0">
+      {items.map((item, index) => {
+        const isLast = index === items.length - 1;
+        return (
+          <li class={`breadcrumb-item${isLast ? " active" : ""}`} aria-current={isLast ? "page" : undefined}>
+            {isLast || item.url == null ? item.name : (
+              <a href={item.url} class="text-decoration-none">{item.name}</a>
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  </nav>
+)}
+{items.length > 1 && (
+  <script is:inline type="application/ld+json" set:html={jsonLd(breadcrumbStructuredData(items, currentUrl))} />
+)}

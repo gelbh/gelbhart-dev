@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.astro/
+# public/ is filled by scripts/sync-public.mjs, apart from these
+public/*
+!public/_headers
+!public/_redirects
+!public/robots.txt
+# root .gitignore ignores scripts/
+!scripts/

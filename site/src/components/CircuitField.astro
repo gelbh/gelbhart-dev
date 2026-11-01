@@ -1,0 +1,16 @@
+---
+interface Props {
+  fixed?: boolean;
+  intensity?: number;
+}
+const { fixed = false, intensity = 1 } = Astro.props;
+---
+<div
+  class={`circuit-field${fixed ? " circuit-field--fixed" : ""}`}
+  data-controller="circuit-field"
+  data-circuit-field-fixed-value={fixed ? "true" : "false"}
+  data-circuit-field-intensity-value={String(intensity)}
+  aria-hidden="true"
+>
+  <canvas class="circuit-field__canvas" data-circuit-field-target="canvas"></canvas>
+</div>

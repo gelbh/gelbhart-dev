@@ -1,0 +1,38 @@
+<script is:inline>
+  window.dataLayer = window.dataLayer || [];
+  const gtag = (...args) => dataLayer.push(args);
+  gtag('js', new Date());
+  gtag('config', 'G-CN6KDZR57X');
+
+  (() => {
+    const GA_ID = 'G-CN6KDZR57X';
+    const IDLE_TIMEOUT = 5000;
+    let loaded = false;
+
+    const injectScript = () => {
+      if (loaded || document.querySelector(`script[src*="gtag/js?id=${GA_ID}"]`)) return;
+
+      loaded = true;
+      const script = Object.assign(document.createElement('script'), {
+        async: true,
+        src: `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`,
+        onerror: () => console.debug?.('GTM blocked or unavailable')
+      });
+
+      try { document.head.appendChild(script); } catch {}
+    };
+
+    const loadWhenIdle = () => {
+      window.requestIdleCallback?.(injectScript, { timeout: IDLE_TIMEOUT }) ??
+        setTimeout(injectScript, document.readyState === 'complete' ? 3000 : IDLE_TIMEOUT);
+    };
+
+    ['click', 'scroll', 'keydown', 'touchstart', 'mousemove'].forEach(event =>
+      document.addEventListener(event, injectScript, { once: true, passive: true })
+    );
+
+    document.readyState === 'loading'
+      ? document.addEventListener('DOMContentLoaded', loadWhenIdle)
+      : loadWhenIdle();
+  })();
+</script>

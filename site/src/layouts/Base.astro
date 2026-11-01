@@ -1,0 +1,186 @@
+---
+import "@rails/assets/stylesheets/application.scss";
+import GoogleAnalytics from "../components/GoogleAnalytics.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import {
+  DEFAULT_META_DESCRIPTION,
+  canonicalUrl,
+  htmlEscape,
+  metaDescription,
+  ogTypeFor,
+  pageTitle,
+  requestPath,
+  socialImageDimensions,
+  socialImageUrl,
+} from "../lib/page";
+import {
+  jsonLd,
+  organizationStructuredData,
+  personStructuredData,
+  webpageStructuredData,
+  websiteStructuredData,
+} from "../lib/structuredData";
+
+interface Props {
+  title?: string;
+  description?: string;
+  structuredData?: object[];
+  ogType?: string;
+  keywords?: string;
+  socialImage?: string;
+  updatedTime?: string;
+  datePublished?: Date | string;
+  dateModified?: Date | string;
+  error?: boolean;
+}
+
+const {
+  title = pageTitle(""),
+  description: rawDescription,
+  structuredData = [],
+  ogType: ogTypeProp,
+  keywords,
+  socialImage,
+  updatedTime = new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+  datePublished,
+  dateModified,
+  error = false,
+} = Astro.props;
+
+const path = requestPath(Astro.url.pathname);
+const description = rawDescription === undefined ? DEFAULT_META_DESCRIPTION : metaDescription(rawDescription);
+const url = canonicalUrl(path);
+const image = socialImage ?? socialImageUrl();
+const imageDimensions = socialImageDimensions();
+const ogType = ogTypeProp ?? ogTypeFor(path);
+const isHome = path === "/";
+
+// Rails content_for HTML-escaped title and description before the layout put them into the WebPage JSON-LD.
+const webpageData = webpageStructuredData({
+  name: htmlEscape(title),
+  url,
+  description: htmlEscape(description),
+  datePublished,
+  dateModified,
+});
+const ldBlocks = [
+  personStructuredData(),
+  websiteStructuredData(),
+  organizationStructuredData(),
+  webpageData,
+  ...structuredData,
+];
+const fontsHref = "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap";
+const containerClass = ["container", !error && "mt-1 py-1 min-vh-100", isHome && "home-deck"].filter(Boolean).join(" ");
+---
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <GoogleAnalytics />
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
+    <title>{title}</title>
+
+    <meta name="description" content={description} />
+    <meta name="author" content="Tomer Gelbhart - Full-Stack Developer, MSc Computer Science Student at UCD" />
+    <meta name="language" content="English" />
+    <meta name="robots" content="index, follow" />
+    {keywords && <meta name="keywords" content={keywords} />}
+    <link rel="canonical" href={url} />
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:locale" content="en_IE" />
+    <meta property="og:site_name" content="gelbhart.dev" />
+    <meta property="og:url" content={url} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={image} />
+    <meta property="og:image:secure_url" content={image.replaceAll("http://", "https://")} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content={String(imageDimensions.width)} />
+    <meta property="og:image:height" content={String(imageDimensions.height)} />
+    <meta property="og:image:alt" content="Tomer Gelbhart - Full-Stack Developer Portfolio" />
+    <meta property="og:updated_time" content={updatedTime} />
+    {ogType === "article" && <meta property="article:author" content="Tomer Gelbhart" />}
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={url} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
+    <meta name="twitter:image:alt" content="Tomer Gelbhart - Full-Stack Developer Portfolio" />
+
+    <meta name="theme-color" content="#0b0f19" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="/icons/favicons/favicon.svg" />
+    <link rel="icon" sizes="16x16" type="image/png" href="/icons/favicons/favicon-16x16.png" />
+    <link rel="icon" sizes="32x32" type="image/png" href="/icons/favicons/favicon-32x32.png" />
+    <link rel="icon" sizes="96x96" type="image/png" href="/icons/favicons/favicon-96x96.png" />
+    <link rel="apple-touch-icon" sizes="192x192" type="image/png" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="T. Gelbhart" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+
+    <link rel="dns-prefetch" href="https://unpkg.com" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://ga.jspm.io" />
+    <link rel="dns-prefetch" href="https://esm.sh" />
+
+    {path === "/projects/nasa-exoplanet-explorer" && (
+      <>
+        <link rel="preconnect" href="https://nasa-exoplanet-explorer.vercel.app" />
+        <link rel="dns-prefetch" href="https://nasa-exoplanet-explorer.onrender.com" />
+      </>
+    )}
+
+    <link href={fontsHref} rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript>
+      <link href={fontsHref} rel="stylesheet" />
+    </noscript>
+
+    <slot name="head" />
+
+    {ldBlocks.map((data) => <script is:inline type="application/ld+json" set:html={jsonLd(data)} />)}
+
+    <style is:inline>
+      :root{--si-primary:#6366f1;--si-font-sans-serif:"Manrope",sans-serif}body{font-family:var(--si-font-sans-serif);margin:0;padding:0;min-height:100vh}.page-wrapper{display:flex;flex-direction:column;min-height:100vh}.header{position:fixed;top:0;left:0;width:100%;z-index:1030;background-color:rgba(11,15,25,0.8);backdrop-filter:blur(8px);transition:background-color 0.2s ease-in-out}.container{width:100%;padding-right:1rem;padding-left:1rem;margin-right:auto;margin-left:auto}.header-logo{width:47px;height:47px;transition:transform 0.3s ease}.text-center{text-align:center}@media (min-width:992px){.container{max-width:960px}.text-lg-start{text-align:left}}
+    </style>
+
+    <script is:inline>
+      window.assetPath = (path) => `/assets/${path}`;
+    </script>
+    <script>
+      import "@rails/javascript/application.js";
+    </script>
+  </head>
+
+  <body class={isHome ? "page-home" : ""}>
+    <main class="page-wrapper">
+      {!error && <Header />}
+
+      <div class={containerClass}>
+        <slot />
+      </div>
+
+      {!error && (
+        <>
+          <Footer />
+          <a data-scroll="" class="btn-scroll-top" href="#top">
+            <span class="btn-scroll-top-tooltip text-muted fs-sm me-2">Top</span>
+            <i class="btn-scroll-top-icon bx bx-chevron-up"></i>
+          </a>
+        </>
+      )}
+    </main>
+  </body>
+</html>

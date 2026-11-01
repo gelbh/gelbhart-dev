@@ -1,0 +1,15 @@
+---
+interface Props {
+  icon: string;
+  color?: string;
+  size?: string;
+}
+const { icon, color = "primary", size = "md" } = Astro.props;
+const sizeClasses: Record<string, string> = { sm: "p-2", md: "p-3", lg: "p-4", xl: "p-5" };
+const iconSizes: Record<string, string> = { sm: "fs-5", md: "fs-3", lg: "fs-1", xl: "display-4" };
+const paddingClass = sizeClasses[size] ?? sizeClasses.md;
+const iconSize = iconSizes[size] ?? iconSizes.md;
+---
+<div class={`bg-${color} bg-opacity-10 rounded-circle ${paddingClass} d-inline-flex align-items-center justify-content-center`}>
+  <i class={`bx ${icon} ${iconSize} text-${color}`}></i>
+</div>
