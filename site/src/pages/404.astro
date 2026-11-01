@@ -1,0 +1,37 @@
+---
+import Base from "../layouts/Base.astro";
+import { pageTitle } from "../lib/page";
+
+const errorCode = 404;
+const errorMessage = "The page you are looking for was moved, removed or might have never existed.";
+---
+<Base
+  title={pageTitle(`Error ${errorCode}`)}
+  description={`${errorCode} error page. We couldn't find what you're looking for. Return to the homepage or contact support for assistance.`}
+  error={true}
+>
+  <section class="d-flex align-items-center bg-light error-page">
+    <div class="container text-md-start text-center">
+      <div class="row align-items-center">
+        <div class="col-xl-6 col-md-7 order-md-2 ms-n5">
+          <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.3/lottie.min.js"></script>
+          <div id="animation-container"></div>
+          <script is:inline>
+            var animation = bodymovin.loadAnimation({
+              container: document.getElementById('animation-container'),
+              renderer: 'svg',
+              loop: true,
+              autoplay: true,
+              path: '/assets/error.json'
+            });
+          </script>
+        </div>
+        <div class="col-md-5 offset-xl-1 order-md-1">
+          <h1 class="display-1 mb-sm-4 mt-n4 mt-sm-n5">Error {errorCode}</h1>
+          <p class="mb-4">{errorMessage}</p>
+          <a class="btn btn-lg btn-primary shadow-primary w-sm-auto w-100" href="/">Go to homepage</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
