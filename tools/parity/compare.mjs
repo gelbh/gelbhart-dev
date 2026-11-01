@@ -7,7 +7,12 @@ if (!baseDir || !candDir) {
 }
 
 const load = async (d) => JSON.parse(await readFile(`${d}/index.json`, "utf8")).results;
-const base = await load(baseDir);
+// Meta Rails gained after the baseline was captured; the candidate must still match it exactly.
+const BASELINE_META_ADDITIONS = { "/contact": { "turbo-cache-control": "no-cache" } };
+const sortByKey = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));
+const base = (await load(baseDir)).map((r) => (BASELINE_META_ADDITIONS[r.path] && r.meta
+  ? { ...r, meta: sortByKey({ ...r.meta, ...BASELINE_META_ADDITIONS[r.path] }) }
+  : r));
 const cand = new Map((await load(candDir)).map((r) => [r.path, r]));
 const FIELDS = [
   "status", "finalUrl", "redirects", "title", "canonical", "meta",
@@ -18,6 +23,8 @@ const ALLOWED = new Set([
   "/sitemap.xml finalUrl", "/sitemap.xml redirects",
   "/sitemap.xml.gz finalUrl", "/sitemap.xml.gz redirects",
 ]);
+// Baseline text keeps tag tails cut at a literal "->" (see crawl.mjs); Astro re-serializes `" />` and `" >` as `">`.
+const normalizeTagTails = (text) => text?.replace(/"\s*\/?>/g, '">');
 // The robots Sitemap line may move to the Astro index file, but must still point at a prod sitemap.
 const VALID_SITEMAP_REF = /^Sitemap: https:\/\/gelbhart\.dev\/(sitemap\.xml\.gz|sitemap-index\.xml|sitemap\.xml)$/;
 const show = (v) => JSON.stringify(v)?.slice(0, 300);
@@ -51,8 +58,10 @@ for (const b of base) {
       continue;
     }
     if (ALLOWED.has(`${b.path} ${f}`)) continue;
-    if (JSON.stringify(b[f]) !== JSON.stringify(c[f])) {
-      report(b.path, f, b[f], c[f]);
+    const norm = f === "text" ? normalizeTagTails : (v) => v;
+    const [bv, cv] = [norm(b[f]), norm(c[f])];
+    if (JSON.stringify(bv) !== JSON.stringify(cv)) {
+      report(b.path, f, bv, cv);
       failures++;
     }
   }

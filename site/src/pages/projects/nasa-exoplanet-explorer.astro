@@ -1,0 +1,228 @@
+---
+import Base from "../../layouts/Base.astro";
+import Breadcrumb from "../../components/Breadcrumb.astro";
+import CircuitField from "../../components/CircuitField.astro";
+import FeatureCard from "../../components/FeatureCard.astro";
+import IconCircle from "../../components/IconCircle.astro";
+import TechBadge from "../../components/TechBadge.astro";
+import { pageTitle } from "../../lib/page";
+import {
+  articleStructuredData,
+  faqStructuredData,
+  softwareApplicationStructuredData,
+} from "../../lib/structuredData";
+
+const nasaArticleData = articleStructuredData({
+  title: "NASA Exoplanet Explorer",
+  url: "https://gelbhart.dev/projects/nasa-exoplanet-explorer",
+  description: "Interactive 3D visualization tool for exploring 5000+ confirmed exoplanets from NASA's Exoplanet Archive. Built with React, Three.js, and Express. Features interactive search, filtering, and 3D rendering of exoplanetary systems.",
+  keywords: "NASA exoplanets, exoplanet explorer, 3D visualization, Three.js, React, space exploration, astronomy, NASA Exoplanet Archive",
+  image: "logos/social/logo_social.png",
+});
+
+const structuredData = [
+  softwareApplicationStructuredData({
+    name: "NASA Exoplanet Explorer",
+    description: "Interactive 3D visualization tool for exploring 5000+ confirmed exoplanets from NASA's Exoplanet Archive. Built with React, Three.js, and Express. Features interactive search, filtering, and 3D rendering of exoplanetary systems.",
+    url: "https://nasa-exoplanet-explorer.vercel.app",
+    applicationCategory: "WebApplication",
+    operatingSystem: "Web",
+    offers: {
+      price: "0",
+      priceCurrency: "USD",
+    },
+  }),
+  faqStructuredData([
+    {
+      question: "What is NASA Exoplanet Explorer?",
+      answer: "NASA Exoplanet Explorer is an interactive 3D visualization tool that allows you to explore 5000+ confirmed exoplanets from NASA's Exoplanet Archive. It provides a 3D view of exoplanetary systems using Three.js for rendering.",
+    },
+    {
+      question: "What data does NASA Exoplanet Explorer use?",
+      answer: "All exoplanet data is sourced directly from NASA's official Exoplanet Archive TAP API, ensuring accuracy and up-to-date information about confirmed exoplanets.",
+    },
+    {
+      question: "What technologies is NASA Exoplanet Explorer built with?",
+      answer: "The application is built with React for the frontend, Three.js for 3D graphics rendering, and Express for the backend API server. It provides an interactive, immersive experience for exploring exoplanetary data.",
+    },
+    {
+      question: "Is NASA Exoplanet Explorer free to use?",
+      answer: "Yes, NASA Exoplanet Explorer is completely free to use. You can access it online and explore all 5000+ confirmed exoplanets from NASA's database.",
+    },
+  ]),
+  nasaArticleData,
+];
+
+---
+<Base
+  title={pageTitle("NASA Exoplanet Explorer")}
+  description="Interactive 3D visualization tool for exploring 5000+ confirmed exoplanets from NASA's Exoplanet Archive. Built with React, Three.js, and Express."
+  structuredData={structuredData}
+>
+<section class="position-relative nasa-exoplanet-explorer-hero" data-controller="scroll-animation">
+  <div class="nasa-exoplanet-explorer-gradient-bg"></div>
+  <CircuitField intensity={0.85} />
+  <div class="container py-4 position-relative zindex-5">
+    <div class="row justify-content-center text-center">
+      <div class="col-lg-8 fade-in-view">
+        <IconCircle icon="bx-planet" color="info" size="lg" />
+        <h1 class="display-5 mb-2 mt-3">NASA Exoplanet Explorer</h1>
+        <p class="lead text-light mb-2">3D Visualization Tool</p>
+        <p class="text-light opacity-75 mb-0">
+          Interactive 3D visualization tool for exploring 5000+ confirmed exoplanets from NASA's Exoplanet Archive. Built with React, Three.js, and Express.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="container pt-4">
+  <Breadcrumb items={[
+    { name: "Home", url: "/" },
+    { name: "Projects", url: null },
+    { name: "NASA Exoplanet Explorer", url: null },
+  ]} />
+</div>
+<section class="container py-5 mt-4" data-controller="scroll-animation">
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+      <div class="card nasa-exoplanet-explorer-card border-0 shadow-lg mb-4 fade-in-view delay-1">
+        <div class="card-body p-4 p-lg-5">
+          <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+            <div class="d-flex align-items-center">
+              <div class="me-3">
+                <IconCircle icon="bx-planet" color="info" size="md" />
+              </div>
+              <h2 class="h3 mb-0">Interactive 3D Explorer</h2>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+              <a href="https://nasa-exoplanet-explorer.vercel.app" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary">
+                <i class="bx bx-link-external me-2"></i><span class="d-none d-sm-inline">Open in New Tab</span><span class="d-inline d-sm-none">Open</span>
+              </a>
+              <a href="https://github.com/gelbh/nasa-exoplanet-explorer" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary">
+                <i class="bx bxl-github me-2"></i><span class="d-none d-sm-inline">View on GitHub</span><span class="d-inline d-sm-none">GitHub</span>
+              </a>
+            </div>
+          </div>
+          <div class="d-md-none mb-4">
+            <div class="alert alert-info mb-4">
+              <div class="d-flex">
+                <i class="bx bx-mobile fs-4 me-3 flex-shrink-0"></i>
+                <div>
+                  <strong>Mobile Notice:</strong> The interactive 3D explorer works best on desktop. Open it in a new tab for the full experience.
+                </div>
+              </div>
+            </div>
+            <div class="d-grid gap-2">
+              <a href="https://nasa-exoplanet-explorer.vercel.app" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg">
+                <i class="bx bx-planet me-2"></i>Open Interactive Explorer
+              </a>
+              <a href="https://github.com/gelbh/nasa-exoplanet-explorer" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary">
+                <i class="bx bxl-github me-2"></i>View on GitHub
+              </a>
+            </div>
+          </div>
+          <div class="d-none d-md-block position-relative nasa-iframe-container" 
+               style="padding-bottom: 75%; height: 0; overflow: hidden; border-radius: 0.5rem; background: #000; min-height: 400px;"
+               data-controller="lazy-iframe">
+            <div data-lazy-iframe-target="placeholder" class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: #000; border-radius: 0.5rem;">
+              <div class="text-center text-light">
+                <div class="spinner-border text-info mb-3" role="status" style="width: 3rem; height: 3rem;">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mb-0">Loading 3D Explorer...</p>
+              </div>
+            </div>
+            <div data-lazy-iframe-target="loading" class="position-absolute top-50 start-50 translate-middle d-none" style="z-index: 10;">
+              <div class="spinner-border text-info" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+            <iframe
+              data-lazy-iframe-target="iframe"
+              data-src="https://nasa-exoplanet-explorer.vercel.app"
+              width="100%"
+              height="100%"
+              style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+              title="NASA Exoplanet Explorer - 3D Visualization Tool"
+              allow="fullscreen"
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+      </div>
+      <div class="row g-4 mb-4 fade-in-view delay-2">
+        <div class="col-md-6">
+          <FeatureCard
+            icon="bx-planet"
+            color="info"
+            title="5000+ Exoplanets"
+            description="Explore all confirmed exoplanets from NASA's Exoplanet Archive in an interactive 3D environment."
+            cardClasses="nasa-exoplanet-explorer-card"
+          />
+        </div>
+        <div class="col-md-6">
+          <FeatureCard
+            icon="bx-cube"
+            color="warning"
+            title="3D Visualization"
+            description="Powered by Three.js for smooth, interactive 3D rendering of exoplanetary systems."
+            cardClasses="nasa-exoplanet-explorer-card"
+          />
+        </div>
+        <div class="col-md-6">
+          <FeatureCard
+            icon="bx-search-alt"
+            color="primary"
+            title="Interactive Search"
+            description="Filter and search through exoplanets by various parameters and properties."
+            cardClasses="nasa-exoplanet-explorer-card"
+          />
+        </div>
+        <div class="col-md-6">
+          <FeatureCard
+            icon="bx-data"
+            color="success"
+            title="Real NASA Data"
+            description="All data is sourced directly from NASA's Exoplanet Archive API, ensuring accuracy and up-to-date information."
+            cardClasses="nasa-exoplanet-explorer-card"
+          />
+        </div>
+      </div>
+      <div class="card nasa-exoplanet-explorer-card border-0 shadow mb-4 fade-in-view delay-3">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+              <IconCircle icon="bx-code-alt" color="info" size="md" />
+            </div>
+            <h3 class="h4 mb-0">Powered By</h3>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <TechBadge text="React" color="primary" url="https://react.dev/" extraClasses="px-3 py-2" />
+            <TechBadge text="Three.js" color="warning" url="https://threejs.org/" extraClasses="px-3 py-2" />
+            <TechBadge text="Node.js" color="success" url="https://nodejs.org/" extraClasses="px-3 py-2" />
+            <TechBadge text="Express" color="info" url="https://expressjs.com/" extraClasses="px-3 py-2" />
+            <TechBadge text="NASA API" color="danger" url="https://exoplanetarchive.ipac.caltech.edu/docs/TAP/usingTAP.html" extraClasses="px-3 py-2" badgeClass="project-badge" />
+          </div>
+        </div>
+      </div>
+      <div class="card nasa-exoplanet-explorer-card border-0 shadow mb-4 fade-in-view delay-4">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+              <IconCircle icon="bx-info-circle" color="info" size="md" />
+            </div>
+            <h3 class="h4 mb-0">About This Project</h3>
+          </div>
+          <p class="text-muted mb-3">
+            This project is an interactive 3D visualization tool for exploring 5000+ confirmed exoplanets from NASA's Exoplanet Archive.
+          </p>
+          <p class="text-muted mb-0">
+            The application is built with React for the frontend, Three.js for 3D graphics rendering, and Express 
+            for the backend API server. All exoplanet data is sourced directly from <a href="https://exoplanetarchive.ipac.caltech.edu/docs/TAP/usingTAP.html" target="_blank" rel="noopener" class="text-primary">NASA's official Exoplanet Archive TAP API</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</Base>

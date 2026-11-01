@@ -10,7 +10,8 @@ export default defineConfig({
   compressHTML: false,
   trailingSlash: "never",
   build: { format: "file" },
-  integrations: [sitemap()],
+  // The Rails sitemap never listed the torch inspector page.
+  integrations: [sitemap({ filter: (page) => new URL(page).pathname !== "/projects/vscode-torch-checkpoint-inspector" })],
   vite: {
     resolve: {
       // theme matches extensionless JS specifiers only; SCSS url() rebasing yields theme/... asset paths.

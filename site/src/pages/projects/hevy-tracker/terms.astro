@@ -1,0 +1,106 @@
+---
+import Base from "../../../layouts/Base.astro";
+import CircuitField from "../../../components/CircuitField.astro";
+import IconCircle from "../../../components/IconCircle.astro";
+import { pageTitle } from "../../../lib/page";
+---
+<Base
+  title={pageTitle("Hevy Tracker | TOS")}
+  description="Terms of service for Hevy Tracker for Google Sheets. Understand our service terms, usage guidelines, and requirements for using our workout data sync tool."
+>
+
+<section class="position-relative hevy-tracker-hero" data-controller="scroll-animation" style="min-height: 40vh; padding-top: 6rem; padding-bottom: 2rem;">
+    <div class="hevy-tracker-gradient-bg"></div>
+    <CircuitField intensity={0.75} />
+
+    <div class="container py-3 position-relative zindex-5">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-8 fade-in-view">
+                <IconCircle icon="bx-file-blank" color="primary" size="lg" />
+                <h1 class="display-6 mb-2 mt-3">Terms of Service</h1>
+                <p class="text-light opacity-75 mb-0">Hevy Tracker for Google Sheets™</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container py-5 mt-4" data-controller="scroll-animation">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <a href="/projects/hevy-tracker" class="btn btn-outline-primary mb-4 d-none d-lg-inline-flex align-items-center">
+                <i class="bx bx-arrow-back me-2"></i>Back to Hevy Tracker
+            </a>
+
+            <a href="/projects/hevy-tracker" class="btn btn-outline-primary mb-4 d-lg-none d-flex align-items-center justify-content-center">
+                <i class="bx bx-arrow-back me-2"></i>Back
+            </a>
+
+            <div class="card hevy-tracker-card border-0 shadow-lg mb-4 fade-in-view delay-1">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="me-3">
+                            <IconCircle icon="bx-check-shield" color="primary" size="sm" />
+                        </div>
+                        <h2 class="h4 mb-0">1. Terms</h2>
+                    </div>
+                    <p class="text-muted mb-0">By accessing Hevy Tracker for Google Sheets™, you agree to be bound by these terms of service. Please read them carefully.</p>
+                </div>
+            </div>
+
+            <div class="card hevy-tracker-card border-0 shadow-lg mb-4 fade-in-view delay-2">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="me-3">
+                            <IconCircle icon="bx-key" color="info" size="sm" />
+                        </div>
+                        <h2 class="h4 mb-0">2. Use License</h2>
+                    </div>
+                    <p class="text-muted mb-0">This addon requires a valid Hevy Pro subscription and API key. Your license to use this addon is contingent on maintaining an active subscription.</p>
+                </div>
+            </div>
+
+            <div class="card hevy-tracker-card border-0 shadow-lg mb-4 fade-in-view delay-3">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="me-3">
+                            <IconCircle icon="bx-error" color="warning" size="sm" />
+                        </div>
+                        <h2 class="h4 mb-0">3. Disclaimer</h2>
+                    </div>
+                    <p class="text-muted mb-0">The addon is provided "as is". We make no warranties about the completeness, reliability, or accuracy of the data sync process.</p>
+                </div>
+            </div>
+
+            <div class="card hevy-tracker-card border-0 shadow-lg mb-4 fade-in-view delay-4">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="me-3">
+                            <IconCircle icon="bx-block" color="danger" size="sm" />
+                        </div>
+                        <h2 class="h4 mb-0">4. Limitations</h2>
+                    </div>
+                    <p class="text-muted mb-0">We are not liable for any data loss or interruption of service. You are responsible for maintaining backups of your workout data.</p>
+                </div>
+            </div>
+
+            <div class="card hevy-tracker-card border-0 shadow-lg mb-4 fade-in-view delay-5">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="me-3">
+                            <IconCircle icon="bx-refresh" color="success" size="sm" />
+                        </div>
+                        <h2 class="h4 mb-0">5. Revisions</h2>
+                    </div>
+                    <p class="text-muted mb-0">We may revise these terms at any time. By using this addon, you agree to be bound by the current version of these terms of service.</p>
+                </div>
+            </div>
+
+            <div class="text-center mt-5 fade-in-view delay-6">
+                <p class="text-muted">
+                    Have questions? <a href="/contact" class="text-primary">Contact us</a> or read our <a href="/projects/hevy-tracker/privacy" class="text-primary">Privacy Policy</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+</Base>
