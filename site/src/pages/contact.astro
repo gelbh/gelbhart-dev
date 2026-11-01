@@ -1,0 +1,169 @@
+---
+import Base from "../layouts/Base.astro";
+import Breadcrumb from "../components/Breadcrumb.astro";
+import { pageTitle } from "../lib/page";
+import { contactPageStructuredData } from "../lib/structuredData";
+
+const jetbrainsMonoHref = "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap";
+---
+<Base
+  title={pageTitle("Contact")}
+  description="Get in touch with Tomer Gelbhart for work, collaboration, or open-source projects. Full-stack developer, MSc Computer Science at UCD Dublin."
+  structuredData={[contactPageStructuredData()]}
+>
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href={jetbrainsMonoHref} rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href={jetbrainsMonoHref} rel="stylesheet" /></noscript>
+    <meta name="turbo-cache-control" content="no-cache" />
+    <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad" async defer></script>
+  </Fragment>
+
+  <section class="terminal-contact-section">
+    <div class="container">
+      <Breadcrumb items={[
+        { name: "Home", url: "/" },
+        { name: "Contact", url: null },
+      ]} />
+
+      <div class="row justify-content-center">
+        <div class="col-xxl-7 col-xl-8 col-lg-9 col-md-11">
+          <div class="terminal-window">
+            <div class="terminal-bar">
+              <span class="terminal-dots" aria-hidden="true">
+                <i></i><i></i><i></i>
+              </span>
+              <span class="terminal-title">tomer@gelbhart.dev:&nbsp;~/contact</span>
+            </div>
+
+            <div class="terminal-body">
+              <p class="terminal-line">
+                <span class="cli-prompt-str" aria-hidden="true"><span class="p-user">tomer@gelbhart.dev</span><span class="p-colon">:</span><span class="p-path">~/contact</span><span class="p-sigil">$</span></span>
+                ./say-hello
+              </p>
+              <h1 class="terminal-heading">Let&rsquo;s work together<span class="terminal-caret" aria-hidden="true"></span></h1>
+              <p class="terminal-output">
+                Got work, a collaboration, or an open-source idea? Send a message below,
+                or email me directly at
+                <a href="mailto:tomer@gelbhart.dev" class="terminal-mail">tomer@gelbhart.dev</a>.
+              </p>
+
+              <div id="contact-alert"></div>
+
+              <form class="contact-form terminal-form" action="/contact" accept-charset="UTF-8" method="post">
+                <!-- Honeypot field - hidden from users, bots will fill it -->
+                <div style="position: absolute; left: -5000px;" aria-hidden="true">
+                  <input tabindex="-1" autocomplete="off" type="text" name="website" id="website" />
+                </div>
+                <!-- Timestamp for time-based validation -->
+                <input value="" autocomplete="off" type="hidden" name="form_timestamp" id="form_timestamp" />
+
+                <div class="cli-row">
+                  <label class="cli-label" for="name">
+                    <span class="cli-prompt" aria-hidden="true"><span class="p-path">~/contact</span> <span class="p-sigil">$</span></span> name
+                  </label>
+                  <div class="cli-input-line">
+                    <span class="cli-chevron" aria-hidden="true">&rsaquo;</span>
+                    <input class="cli-input" placeholder="your name" required="required" autocomplete="name" type="text" name="name" id="name" />
+                  </div>
+                </div>
+
+                <div class="cli-row">
+                  <label class="cli-label" for="email">
+                    <span class="cli-prompt" aria-hidden="true"><span class="p-path">~/contact</span> <span class="p-sigil">$</span></span> email
+                  </label>
+                  <div class="cli-input-line">
+                    <span class="cli-chevron" aria-hidden="true">&rsaquo;</span>
+                    <input class="cli-input" placeholder="you@example.com" required="required" autocomplete="email" type="email" name="email" id="email" />
+                  </div>
+                </div>
+
+                <div class="cli-row">
+                  <label class="cli-label" for="message">
+                    <span class="cli-prompt" aria-hidden="true"><span class="p-path">~/contact</span> <span class="p-sigil">$</span></span> message
+                  </label>
+                  <div class="cli-input-line cli-input-line--block">
+                    <span class="cli-chevron" aria-hidden="true">&rsaquo;</span>
+                    <textarea rows="5" class="cli-input cli-textarea" placeholder="what&#39;s on your mind?" required="required" name="message" id="message"></textarea>
+                  </div>
+                </div>
+
+                <div class="cli-row">
+                  <div id="contact-turnstile" class="cf-turnstile" data-sitekey="0x4AAAAAAFvTAP3ic4Rba0Jv"></div>
+                </div>
+                <script is:inline>
+                  (function () {
+                    function renderTurnstile() {
+                      var el = document.getElementById("contact-turnstile");
+                      if (el && window.turnstile && !el.dataset.rendered) {
+                        window.turnstile.render(el);
+                        el.dataset.rendered = "1";
+                      }
+                    }
+                    window.onTurnstileLoad = renderTurnstile;
+                    document.addEventListener("turbo:load", renderTurnstile);
+                  })();
+                </script>
+                <script is:inline>
+                  (function () {
+                    var MESSAGES = {
+                      sent: ["success", "Thank you! Your message has been sent successfully."],
+                      error: ["danger", "Sorry, there was an error sending your message. Please try emailing directly."],
+                      rate_limited: ["danger", "Too many submissions. Please try again later."],
+                    };
+                    function onLoad() {
+                      var ts = document.querySelector('input[name="form_timestamp"]');
+                      if (ts) ts.value = String(Math.floor(Date.now() / 1000));
+                      var params = new URLSearchParams(location.search);
+                      var key = params.get("sent") === "1" ? "sent" : params.get("error") === "1" ? "error"
+                        : params.get("rate_limited") === "true" ? "rate_limited" : null;
+                      var slot = document.getElementById("contact-alert");
+                      if (!key || !slot || slot.childElementCount) return;
+                      var div = document.createElement("div");
+                      div.className = "alert alert-" + MESSAGES[key][0] + " alert-dismissible fade show terminal-alert";
+                      div.setAttribute("role", "alert");
+                      div.textContent = MESSAGES[key][1];
+                      var close = document.createElement("button");
+                      close.type = "button"; close.className = "btn-close";
+                      close.setAttribute("data-bs-dismiss", "alert"); close.setAttribute("aria-label", "Close");
+                      div.appendChild(close);
+                      slot.appendChild(div);
+                    }
+                    document.addEventListener("turbo:load", onLoad);
+                  })();
+                </script>
+
+                <div class="cli-actions">
+                  <button type="submit" class="btn btn-primary terminal-send">
+                    <span aria-hidden="true">$</span> ./send_message
+                  </button>
+                </div>
+              </form>
+
+              <div class="terminal-links">
+                <span class="cli-prompt" aria-hidden="true"><span class="p-path">~/contact</span> <span class="p-sigil">$</span></span>
+                <span class="terminal-links-label">ls ./links</span>
+                <a href="https://www.linkedin.com/in/tomer-gelbhart/" target="_blank" rel="noopener" class="terminal-social" aria-label="LinkedIn">
+                  <i class="bx bxl-linkedin" aria-hidden="true"></i><span>linkedin</span>
+                </a>
+                <a href="https://github.com/gelbh" target="_blank" rel="noopener" class="terminal-social" aria-label="GitHub">
+                  <i class="bx bxl-github" aria-hidden="true"></i><span>github</span>
+                </a>
+              </div>
+            </div>
+
+            <div class="terminal-statusbar" aria-hidden="true">
+              <span class="status-seg status-mode">NORMAL</span>
+              <span class="status-seg">contact.sh</span>
+              <span class="status-gap"></span>
+              <span class="status-seg status-optional">utf-8</span>
+              <span class="status-seg status-optional">ln 1, col 1</span>
+              <span class="status-seg status-ok">&#9679;&nbsp;ready</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
