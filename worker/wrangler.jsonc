@@ -4,8 +4,9 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-10-26",
   "compatibility_flags": ["nodejs_compat"],
-  "workers_dev": true,
-  "routes": [{ "pattern": "gelbhart.dev/contact*", "zone_name": "gelbhart.dev" }],
+  "workers_dev": false,
+  "preview_urls": true,
+  "routes": [{ "pattern": "gelbhart.dev", "custom_domain": true }],
   "build": { "command": "npm --prefix ../site run build" },
   "assets": {
     "directory": "../site/dist",
@@ -14,7 +15,7 @@
     "run_worker_first": ["/api/*", "/contact*"]
   },
   "observability": { "enabled": true },
-  "vars": { "PAGES_ORIGIN": "render" },
+  "vars": { "PAGES_ORIGIN": "assets" },
   "d1_databases": [
     {
       "binding": "DB",
