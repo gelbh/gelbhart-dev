@@ -23,7 +23,7 @@ const {
   tooltip,
   description: desc,
 } = Astro.props;
-const description = tooltip || desc;
+const description = tooltip ?? desc;
 const sizeClasses: Record<string, string> = { sm: "fs-xs", md: "", lg: "fs-6" };
 const sizeClass = sizeClasses[size] ?? "";
 const allClasses = `badge ${badgeClass} bg-${color} bg-opacity-10 text-${color} ${sizeClass} ${extraClasses}`.trim();

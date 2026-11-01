@@ -192,7 +192,7 @@ const byPosition = (a: Project, b: Project) => a.position - b.position;
 
 export const featuredProjects = projects.filter((p) => p.featured && p.published).sort(byPosition);
 
-// Project.with_pages: published, has a route, ordered by position. Each linkUrl is its route path.
+// Each linkUrl is its route path.
 export const projectsWithPages = projects.filter((p) => p.published && p.routeName).sort(byPosition);
 
 // Rails image_tag resolves a bare image name under /assets; anything else is a Boxicons class.

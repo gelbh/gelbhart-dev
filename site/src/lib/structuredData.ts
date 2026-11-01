@@ -1,4 +1,4 @@
-// Port of app/helpers/application_helper.rb. Object key order follows the Ruby hash order.
+// Object key order must match the Rails JSON-LD output; the parity gate compares serialized JSON.
 
 export const CANONICAL_BASE_URL = "https://gelbhart.dev";
 export const DEFAULT_META_DESCRIPTION =
@@ -57,7 +57,6 @@ export function metaDescription(description: string): string {
   return description.slice(0, stop === -1 ? 157 : stop).trim();
 }
 
-// og_type for a request path when the page does not set one.
 export function ogTypeFor(path: string): string {
   if (path === "/") return "website";
   if (path === "/contact") return "profile";
