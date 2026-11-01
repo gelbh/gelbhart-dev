@@ -47,12 +47,11 @@ jobs:
         working-directory: worker
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      # wrangler's build.command rebuilds the site, so the public key must reach this step too.
-      - run: npm run deploy
+      # Uploads the site built above; never run the build where the token is in scope.
+      - run: npx wrangler deploy
         working-directory: worker
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          PUBLIC_SNAZZY_MAPS_API_KEY: ${{ secrets.SNAZZY_MAPS_API_KEY }}
       - name: Ping IndexNow
         continue-on-error: true
         run: |

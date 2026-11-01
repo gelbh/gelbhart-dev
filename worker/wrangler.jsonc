@@ -8,7 +8,6 @@
   "workers_dev": false,
   "preview_urls": true,
   "routes": [{ "pattern": "gelbhart.dev", "custom_domain": true }],
-  "build": { "command": "npm --prefix ../site run build" },
   "assets": {
     "directory": "../site/dist",
     "binding": "ASSETS",
