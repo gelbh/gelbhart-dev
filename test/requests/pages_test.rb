@@ -115,4 +115,21 @@ class PagesTest < ActionDispatch::IntegrationTest
     assert_redirected_to "/projects/jetlag"
     assert_response :moved_permanently
   end
+
+  test "GET /contact?sent=1 shows the success message" do
+    get contact_path(sent: 1)
+    assert_response :success
+    assert_includes response.body, "Thank you! Your message has been sent successfully."
+  end
+
+  test "GET /contact?error=1 shows the error message" do
+    get contact_path(error: 1)
+    assert_response :success
+    assert_includes response.body, "Sorry, there was an error sending your message. Please try emailing directly."
+  end
+
+  test "GET /contact renders the Turnstile widget" do
+    get contact_path
+    assert_includes response.body, 'id="contact-turnstile"'
+  end
 end

@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
+  <meta name="turbo-cache-control" content="no-cache">
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad" async defer></script>
 <% end %>
 
 <section class="terminal-contact-section">
@@ -89,6 +91,23 @@
                   <%= f.text_area :message, rows: 5, class: "cli-input cli-textarea", placeholder: "what's on your mind?", required: true %>
                 </div>
               </div>
+
+              <div class="cli-row">
+                <div id="contact-turnstile" class="cf-turnstile" data-sitekey="<%= TURNSTILE_SITE_KEY %>"></div>
+              </div>
+              <script>
+                (function () {
+                  function renderTurnstile() {
+                    var el = document.getElementById("contact-turnstile");
+                    if (el && window.turnstile && !el.dataset.rendered) {
+                      window.turnstile.render(el);
+                      el.dataset.rendered = "1";
+                    }
+                  }
+                  window.onTurnstileLoad = renderTurnstile;
+                  document.addEventListener("turbo:load", renderTurnstile);
+                })();
+              </script>
 
               <div class="cli-actions">
                 <button type="submit" class="btn btn-primary terminal-send">
