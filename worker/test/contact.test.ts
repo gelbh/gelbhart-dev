@@ -67,8 +67,11 @@ describe("handleContact", () => {
   });
 
   it("returns error when sending throws", async () => {
+    const logged = vi.spyOn(console, "error").mockImplementation(() => {});
     const d = deps({ send: async () => { throw new Error("boom"); } });
     expect(await handleContact(form(), "6.6.6.6", d)).toBe("error");
+    expect(logged).toHaveBeenCalledWith("contact failed", expect.any(Error));
+    logged.mockRestore();
   });
 });
 

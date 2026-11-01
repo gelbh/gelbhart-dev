@@ -1,11 +1,6 @@
 {
   "name": "gelbhart-dev-worker",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
   "scripts": {
     "test": "vitest run",
     "dev": "wrangler dev",
@@ -14,9 +9,6 @@
     "db:migrate:local": "wrangler d1 migrations apply gelbhart-dev --local",
     "db:migrate:remote": "wrangler d1 migrations apply gelbhart-dev --remote"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "type": "module",
   "private": true,
   "engines": {
