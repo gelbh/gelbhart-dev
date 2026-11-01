@@ -7,7 +7,7 @@ runs:
       shell: bash
       # Repo tracks bin/* as 100644; CI needs +x for bin/rails, bin/rubocop, etc.
       run: chmod +x bin/*
-    - uses: ruby/setup-ruby@26e5b7d197ebf60545ee9667bcbace0be11ccaec # v1.334.0
+    - uses: ruby/setup-ruby@7f797815d8adceb1c412e7abefdd1ab4abc47a5f # v1.335.0
       with:
         ruby-version: "3.3.10"
         # Hosted Ruby 3.3.10 default error_highlight 0.6.0 vs Gemfile 0.7.0;
