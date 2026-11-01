@@ -1,0 +1,483 @@
+---
+import Base from "../../layouts/Base.astro";
+import Breadcrumb from "../../components/Breadcrumb.astro";
+import CircuitField from "../../components/CircuitField.astro";
+import FeatureCard from "../../components/FeatureCard.astro";
+import IconCircle from "../../components/IconCircle.astro";
+import { pageTitle } from "../../lib/page";
+import {
+  articleStructuredData,
+  faqStructuredData,
+  softwareApplicationStructuredData,
+} from "../../lib/structuredData";
+
+const flagIconsHref = "https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css";
+
+const softwareData = softwareApplicationStructuredData({
+  name: "Hevy Tracker",
+  description: "Google Workspace add-on that connects your Hevy workout data to Google Sheets™ with secure OAuth integration. Sync your fitness tracking data automatically.",
+  url: "https://gelbhart.dev/projects/hevy-tracker",
+  applicationCategory: "WebApplication",
+  operatingSystem: "Web",
+  offers: {
+    price: "0",
+    priceCurrency: "USD",
+  },
+});
+const faqData = faqStructuredData([
+  {
+    question: "What is Hevy Tracker?",
+    answer: "Hevy Tracker is a Google Workspace add-on that securely connects your Hevy workout data to Google Sheets™ using OAuth 2.0 authentication. It automatically syncs your fitness tracking data so you can analyze it in spreadsheets.",
+  },
+  {
+    question: "How do I set up Hevy Tracker?",
+    answer: "Setup takes about 2 minutes: 1) Copy the spreadsheet template to your Google Drive, 2) Install the add-on from the Google Workspace Marketplace, 3) Get your API key from Hevy Settings, and 4) Grant OAuth consent to connect and sync.",
+  },
+  {
+    question: "Do I need a Hevy Pro subscription?",
+    answer: "Yes, Hevy Tracker requires a Hevy Pro subscription and an API key from Hevy's Developer Settings to access your workout data.",
+  },
+  {
+    question: "Is my data secure?",
+    answer: "Yes, Hevy Tracker uses industry-standard OAuth 2.0 authentication. Your data is only used to sync between Hevy and your personal Google Sheets™. We don't store or share your information with any third parties.",
+  },
+]);
+const hevyArticleData = articleStructuredData({
+  title: "Hevy Tracker",
+  url: "https://gelbhart.dev/projects/hevy-tracker",
+  description: "Google Workspace add-on that connects your Hevy workout data to Google Sheets™ with secure OAuth integration. Sync your fitness tracking data automatically.",
+  keywords: "Hevy Tracker, Google Sheets, fitness tracking, workout data, Google Workspace add-on, OAuth, Hevy integration, fitness analytics",
+  image: "logos/social/logo_social.png",
+});
+---
+<Base
+  title={pageTitle("Hevy Tracker")}
+  description="Connect your Hevy workout data to Google Sheets™ with our secure OAuth integration. Easy setup guide for syncing fitness tracking between platforms."
+  structuredData={[softwareData, faqData, hevyArticleData]}
+>
+  <Fragment slot="head">
+    {/* flag-icons only renders in the country-stats widget on this page; loaded here (non-render-blocking) instead of in the global layout. */}
+    <link rel="stylesheet" href={flagIconsHref} media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href={flagIconsHref} /></noscript>
+  </Fragment>
+
+<section class="position-relative hevy-tracker-hero" data-controller="scroll-animation">
+  <div class="hevy-tracker-gradient-bg"></div>
+  <CircuitField intensity={0.85} />
+  <div class="container py-4 position-relative zindex-5">
+    <div class="row justify-content-center text-center">
+      <div class="col-lg-8 fade-in-view">
+        <img src="/assets/hevy-tracker/hevy-tracker-logo.svg" width="80" height="80" class="mb-3" alt="Hevy Tracker" loading="lazy" />
+        <h1 class="display-5 mb-2">Hevy Tracker</h1>
+        <p class="lead text-light mb-2">Connect Hevy to Google Sheets™</p>
+        <p class="text-light opacity-75 mb-0">
+          Sync your workout data from Hevy to Google Sheets™ with secure OAuth integration. Track your fitness progress with the power of spreadsheets.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="container pt-4">
+  <Breadcrumb items={[
+    { name: "Home", url: "/" },
+    { name: "Projects", url: null },
+    { name: "Hevy Tracker", url: null },
+  ]} />
+</div>
+<section class="container py-5 mt-4" data-controller="scroll-animation">
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+      <div class="card hevy-tracker-card border-0 shadow-lg mb-4 fade-in-view delay-1">
+        <div class="card-body p-4 p-lg-5">
+          <div class="d-flex align-items-center mb-4">
+            <div class="me-3">
+              <IconCircle icon="bx-rocket" color="primary" size="md" />
+            </div>
+            <h2 class="h3 mb-0">Getting Started</h2>
+          </div>
+          <div class="steps steps-sm steps-horizontal-md steps-center mb-4">
+            <div class="step">
+              <div class="step-number">
+                <div class="step-number-inner">1</div>
+              </div>
+              <div class="step-body">
+                <h5 class="mb-2">Copy Template</h5>
+                <p class="mb-0 text-muted small">
+                  <a href="/projects/hevy-tracker/spreadsheet" class="text-primary fw-semibold">Copy spreadsheet</a> to Drive
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-number">
+                <div class="step-number-inner">2</div>
+              </div>
+              <div class="step-body">
+                <h5 class="mb-2">Install Add-on</h5>
+                <p class="mb-0 text-muted small">
+                  From Extensions menu
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-number">
+                <div class="step-number-inner">3</div>
+              </div>
+              <div class="step-body">
+                <h5 class="mb-2">Get API Key</h5>
+                <p class="mb-0 text-muted small">
+                  From <a href="https://hevy.com/settings?developer" target="_blank" rel="noopener" class="text-primary fw-semibold">Hevy Settings</a>
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-number">
+                <div class="step-number-inner">4</div>
+              </div>
+              <div class="step-body">
+                <h5 class="mb-2">Connect & Sync</h5>
+                <p class="mb-0 text-muted small">
+                  Grant OAuth consent
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="text-center pt-3">
+            <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+              <a href="https://workspace.google.com/marketplace/app/hevy_tracker/221696974247" target="_blank" rel="noopener" class="btn btn-primary btn-lg">
+                <i class="bx bx-download me-2"></i>Install Add-on
+              </a>
+              <a href="https://github.com/gelbh/hevy-tracker" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-lg">
+                <i class="bx bxl-github me-2"></i><span class="d-none d-sm-inline">View on GitHub</span><span class="d-inline d-sm-none">GitHub</span>
+              </a>
+            </div>
+            <p class="text-muted small mt-3 mb-0">
+              <i class="bx bx-time-five me-1"></i>Setup takes ~2 minutes
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="card hevy-tracker-card border-0 shadow-lg mb-4 fade-in-view delay-3" data-controller="analytics-stats">
+        <div class="card-body p-4 p-lg-5">
+          <div class="text-center mb-4">
+            <h2 class="h3 mb-2">Trusted by Fitness Enthusiasts Worldwide</h2>
+            <p class="text-muted">Join hundreds of users tracking their progress with Hevy Tracker</p>
+          </div>
+          <div class="row g-4 text-center mb-4">
+            <div class="col-6 col-lg-3">
+              <div class="p-3 stat-container">
+                <div class="display-fluid-4 text-primary mb-2"
+                                     data-controller="counter"
+                                     data-counter-duration-value="2000"
+                                     data-analytics-stats-target="activeUsers">
+                  0
+                </div>
+                <div class="text-muted small">Active Users</div>
+                <div class="text-muted" style="font-size: 0.75rem;">Since Nov 2024</div>
+              </div>
+            </div>
+            <div class="col-6 col-lg-3">
+              <div class="p-3 stat-container">
+                <div class="display-fluid-4 text-success mb-2"
+                                     data-controller="counter"
+                                     data-counter-duration-value="2000"
+                                     data-analytics-stats-target="installCount">
+                  0
+                </div>
+                <div class="text-muted small">Workspace Downloads</div>
+                <div class="text-muted" style="font-size: 0.75rem;">Google Marketplace</div>
+              </div>
+            </div>
+            <div class="col-6 col-lg-3">
+              <div class="p-3 stat-container">
+                <div class="display-fluid-4 text-info mb-2"
+                                     data-controller="counter"
+                                     data-counter-duration-value="2000"
+                                     data-analytics-stats-target="countries">
+                  0
+                </div>
+                <div class="text-muted small">Countries</div>
+                <div class="text-muted" style="font-size: 0.75rem;">Global reach</div>
+              </div>
+            </div>
+            <div class="col-6 col-lg-3">
+              <div class="p-3 stat-container">
+                <div class="display-fluid-4 text-warning mb-2"
+                                     data-controller="counter"
+                                     data-counter-suffix-value="%"
+                                     data-counter-duration-value="2000"
+                                     data-analytics-stats-target="engagementRate">
+                  0%
+                </div>
+                <div class="text-muted small">Engagement Rate</div>
+                <div class="text-muted" style="font-size: 0.75rem;">Highly engaged</div>
+              </div>
+            </div>
+          </div>
+          <div class="border-top pt-4">
+            <h5 class="text-center mb-4">Top Countries Using Hevy Tracker</h5>
+            <div class="row g-3" data-analytics-stats-target="countriesList">
+            </div>
+            <div class="text-center mt-4">
+              <button class="btn btn-sm btn-outline-primary"
+                                    data-analytics-stats-target="expandButton"
+                                    data-action="click->analytics-stats#toggleCountries">
+                <i class="bx bx-chevron-down me-1"></i>Show All Countries
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card hevy-tracker-card border-0 shadow-lg mb-4 fade-in-view delay-4">
+        <div class="card-body p-4 p-lg-5">
+          <div class="text-center mb-4">
+            <div class="d-flex align-items-center justify-content-center mb-3">
+              <div class="me-3">
+                <IconCircle icon="bx-spreadsheet" color="primary" size="md" />
+              </div>
+              <h3 class="h4 mb-0">Spreadsheet Interface</h3>
+            </div>
+            <p class="text-muted mb-4">
+              A comprehensive view of your Hevy workout data in Google Sheets™, featuring automatic data organization and ready-to-use analytics.
+            </p>
+          </div>
+          <div class="mb-4">
+            <ul class="nav nav-tabs mb-3" id="spreadsheetTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#main-view" type="button" role="tab" aria-controls="main-view" aria-selected="true">
+                  <i class="bx bx-table me-2"></i>Main View
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tier-tab" data-bs-toggle="tab" data-bs-target="#tier-view" type="button" role="tab" aria-controls="tier-view" aria-selected="false">
+                  <i class="bx bx-trophy me-2"></i>Tier List
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="routine-builder-tab" data-bs-toggle="tab" data-bs-target="#routine-builder-view" type="button" role="tab" aria-controls="routine-builder-view" aria-selected="false">
+                  <i class="bx bx-edit me-2"></i>Routine Builder
+                </button>
+              </li>
+            </ul>
+            <div class="tab-content" id="spreadsheetTabContent">
+              <div class="tab-pane fade show active" id="main-view" role="tabpanel" aria-labelledby="main-tab">
+                <div class="gallery-item rounded-3 overflow-hidden position-relative" 
+                                     data-bs-toggle="modal" 
+                                     data-bs-target="#imageModal" 
+                                     data-image="/assets/hevy-tracker/main.webp" 
+                                     data-alt="Hevy Tracker main spreadsheet interface">
+                  <img src="/assets/hevy-tracker/main.webp"
+                                        alt="Hevy Tracker main spreadsheet interface showing workout data organized in Google Sheets"
+                                        class="img-fluid rounded-3"
+                                        loading="lazy" />
+                </div>
+                <div class="text-center mt-3 pb-3">
+                  <h5 class="mb-2">Main Spreadsheet View</h5>
+                  <p class="text-muted mb-0 small">Your complete workout history organized and ready for analysis</p>
+                </div>
+              </div>
+              <div class="tab-pane fade" id="tier-view" role="tabpanel" aria-labelledby="tier-tab">
+                <div class="gallery-item rounded-3 overflow-hidden position-relative" 
+                                     data-bs-toggle="modal" 
+                                     data-bs-target="#imageModal" 
+                                     data-image="/assets/hevy-tracker/tier-list.webp" 
+                                     data-alt="Hevy Tracker tier list">
+                  <img src="/assets/hevy-tracker/tier-list.webp"
+                                        alt="Hevy Tracker tier list showing exercise performance rankings"
+                                        class="img-fluid rounded-3"
+                                        loading="lazy" />
+                </div>
+                <div class="text-center mt-3 pb-3">
+                  <h5 class="mb-2">Exercise Tier List</h5>
+                  <p class="text-muted mb-0 small">Visualize your exercise performance and progress rankings</p>
+                </div>
+              </div>
+              <div class="tab-pane fade" id="routine-builder-view" role="tabpanel" aria-labelledby="routine-builder-tab">
+                <div class="gallery-item rounded-3 overflow-hidden position-relative" 
+                                     data-bs-toggle="modal" 
+                                     data-bs-target="#imageModal" 
+                                     data-image="/assets/hevy-tracker/routine-builder.webp" 
+                                     data-alt="Hevy Tracker routine builder">
+                  <img src="/assets/hevy-tracker/routine-builder.webp"
+                                        alt="Hevy Tracker routine builder interface"
+                                        class="img-fluid rounded-3"
+                                        loading="lazy" />
+                </div>
+                <div class="text-center mt-3 pb-3">
+                  <h5 class="mb-2">Routine Builder</h5>
+                  <p class="text-muted mb-0 small">Create and manage your workout routines</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row g-3 pt-3 border-top">
+            <div class="col-md-4 text-center">
+              <i class="bx bx-table text-primary fs-4 mb-2 d-block"></i>
+              <div class="fw-semibold small">Organized Data</div>
+              <div class="text-muted small">Clean table structure</div>
+            </div>
+            <div class="col-md-4 text-center">
+              <i class="bx bx-bar-chart text-success fs-4 mb-2 d-block"></i>
+              <div class="fw-semibold small">Ready Analytics</div>
+              <div class="text-muted small">Built-in visualizations</div>
+            </div>
+            <div class="col-md-4 text-center">
+              <i class="bx bx-sync text-info fs-4 mb-2 d-block"></i>
+              <div class="fw-semibold small">Auto Updates</div>
+              <div class="text-muted small">Always in sync</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row g-4 mb-4 fade-in-view delay-2">
+        <div class="col-md-6">
+          <FeatureCard
+            icon="bx-lock-alt"
+            color="success"
+            title="Secure OAuth"
+            description="Industry-standard OAuth 2.0 authentication ensures your data remains private and secure."
+            cardClasses="hevy-tracker-card"
+          />
+        </div>
+        <div class="col-md-6">
+          <FeatureCard
+            icon="bx-sync"
+            color="info"
+            title="Auto Sync"
+            description="Automatically sync your workout data from Hevy to your personal spreadsheet."
+            cardClasses="hevy-tracker-card"
+          />
+        </div>
+        <div class="col-md-6">
+          <FeatureCard
+            icon="bx-spreadsheet"
+            color="warning"
+            title="Google Sheets™"
+            description="Leverage the power of spreadsheets to analyze and visualize your fitness data."
+            cardClasses="hevy-tracker-card"
+          />
+        </div>
+        <div class="col-md-6">
+          <FeatureCard
+            icon="bx-dumbbell"
+            color="danger"
+            title="Hevy Pro"
+            description="Works seamlessly with your Hevy Pro subscription and API access."
+            cardClasses="hevy-tracker-card"
+          />
+        </div>
+      </div>
+      <div class="card hevy-tracker-card border-0 shadow mb-4 fade-in-view delay-5">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center mb-4">
+            <div class="me-3">
+              <IconCircle icon="bx-shield-alt-2" color="primary" size="md" />
+            </div>
+            <h3 class="h4 mb-0">Required Permissions</h3>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="d-flex align-items-start">
+                <div class="me-3 flex-shrink-0">
+                  <IconCircle icon="bx-spreadsheet" color="primary" size="sm" />
+                </div>
+                <div>
+                  <strong class="d-block mb-1">View and manage spreadsheets</strong>
+                  <p class="text-muted small mb-0">To update your workout tracking spreadsheet with Hevy data</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex align-items-start">
+                <div class="me-3 flex-shrink-0">
+                  <IconCircle icon="bx-cloud" color="primary" size="sm" />
+                </div>
+                <div>
+                  <strong class="d-block mb-1">External API access</strong>
+                  <p class="text-muted small mb-0">To sync workout data from Hevy's servers</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card hevy-tracker-card border-0 shadow mb-4 fade-in-view delay-6">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+              <IconCircle icon="bx-list-check" color="primary" size="md" />
+            </div>
+            <h3 class="h4 mb-0">Requirements</h3>
+          </div>
+          <ul class="list-unstyled mb-0">
+            <li class="d-flex align-items-center mb-2">
+              <i class="bx bx-check-circle text-success me-3 fs-5"></i>
+              <span>Hevy Pro subscription</span>
+            </li>
+            <li class="d-flex align-items-center">
+              <i class="bx bx-check-circle text-success me-3 fs-5"></i>
+              <span>Hevy API key (from <a href="https://hevy.com/settings?developer" target="_blank" rel="noopener" class="text-primary">Developer Settings</a>)</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="card hevy-tracker-card border-0 shadow mb-4 fade-in-view delay-7">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-start">
+            <div class="bg-success bg-opacity-10 rounded-circle p-3 me-3 flex-shrink-0">
+              <i class="bx bx-lock-alt fs-4 text-success"></i>
+            </div>
+            <div>
+              <h3 class="h5 mb-2">Privacy & Security</h3>
+              <p class="text-muted mb-0">Your data is only used to sync between Hevy and your personal Google Sheets™. We don't store or share your information with any third parties. All data transfer uses secure OAuth 2.0 authentication.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="text-center mt-4 fade-in-view delay-8">
+        <p class="text-muted">
+          By using this add-on, you agree to our <a href="/projects/hevy-tracker/terms" class="text-primary">Terms of Service</a> and <a href="/projects/hevy-tracker/privacy" class="text-primary">Privacy Policy</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content bg-dark border-0">
+      <div class="modal-header border-0">
+        <h5 class="modal-title text-white" id="imageModalLabel">Screenshot</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <img id="modalImage" src="" alt="" class="img-fluid w-100">
+      </div>
+    </div>
+  </div>
+</div>
+<script is:inline>
+  // Handle image modal zoom
+  document.addEventListener('turbo:load', function() {
+      const imageModal = document.getElementById('imageModal');
+
+      if (imageModal) {
+          imageModal.addEventListener('show.bs.modal', function (event) {
+              const trigger = event.relatedTarget;
+              if (trigger) {
+                  const imageSrc = trigger.dataset.image || trigger.closest('[data-image]')?.dataset.image;
+                  const imageAlt = trigger.dataset.alt || trigger.closest('[data-alt]')?.dataset.alt;
+                  const modalImage = document.getElementById('modalImage');
+                  const modalTitle = imageModal.querySelector('.modal-title');
+
+                  if (modalImage && imageSrc) {
+                      modalImage.src = imageSrc;
+                      modalImage.alt = imageAlt || '';
+                      if (modalTitle) {
+                          modalTitle.textContent = imageAlt || 'Screenshot';
+                      }
+                  }
+              }
+          });
+      }
+  }, { once: true });
+</script>
+</Base>

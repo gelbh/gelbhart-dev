@@ -18,6 +18,12 @@ const ALLOWED = new Set([
   "/sitemap.xml finalUrl", "/sitemap.xml redirects",
   "/sitemap.xml.gz finalUrl", "/sitemap.xml.gz redirects",
 ]);
+// Meta keys added to Rails after the baseline was captured (#45).
+const ALLOWED_META = new Set(["/contact turbo-cache-control"]);
+const omitAllowedMeta = (path, meta) =>
+  meta && Object.fromEntries(Object.entries(meta).filter(([k]) => !ALLOWED_META.has(`${path} ${k}`)));
+// Baseline text keeps tag tails cut at a literal "->" (see crawl.mjs); Astro re-serializes `" />` and `" >` as `">`.
+const normalizeTagTails = (text) => text?.replace(/\s*\/?>/g, ">");
 // The robots Sitemap line may move to the Astro index file, but must still point at a prod sitemap.
 const VALID_SITEMAP_REF = /^Sitemap: https:\/\/gelbhart\.dev\/(sitemap\.xml\.gz|sitemap-index\.xml|sitemap\.xml)$/;
 const show = (v) => JSON.stringify(v)?.slice(0, 300);
@@ -51,8 +57,11 @@ for (const b of base) {
       continue;
     }
     if (ALLOWED.has(`${b.path} ${f}`)) continue;
-    if (JSON.stringify(b[f]) !== JSON.stringify(c[f])) {
-      report(b.path, f, b[f], c[f]);
+    const [bv, cv] = f === "meta" ? [omitAllowedMeta(b.path, b[f]), omitAllowedMeta(b.path, c[f])]
+      : f === "text" ? [normalizeTagTails(b[f]), normalizeTagTails(c[f])]
+      : [b[f], c[f]];
+    if (JSON.stringify(bv) !== JSON.stringify(cv)) {
+      report(b.path, f, bv, cv);
       failures++;
     }
   }
