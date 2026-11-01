@@ -17,9 +17,12 @@ class PagesController < ApplicationController
   end
 
   def contact
-    # Check if redirected here due to rate limiting
     if params[:rate_limited] == "true"
-      flash[:alert] = "Too many submissions. Please try again later."
+      flash.now[:alert] = "Too many submissions. Please try again later."
+    elsif params[:error] == "1"
+      flash.now[:alert] = "Sorry, there was an error sending your message. Please try emailing directly."
+    elsif params[:sent] == "1"
+      flash.now[:notice] = "Thank you! Your message has been sent successfully."
     end
   end
 

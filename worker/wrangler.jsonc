@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "gelbhart-dev",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-26",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "routes": [{ "pattern": "gelbhart.dev/contact*", "zone_name": "gelbhart.dev" }],
+  "observability": { "enabled": true },
+  "vars": { "PAGES_ORIGIN": "render" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "gelbhart-dev",
+      "database_id": "d9fcd706-12b3-4585-b34f-bea627d662d7",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "send_email": [{ "name": "SEND_EMAIL", "destination_address": "gelbharttomer@gmail.com" }],
+  "triggers": { "crons": ["*/30 * * * *"] }
+}
