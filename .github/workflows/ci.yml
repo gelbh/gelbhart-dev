@@ -22,7 +22,7 @@ env:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -35,7 +35,7 @@ jobs:
       - run: bundle exec brakeman --quiet --no-pager --exit-on-warn --exit-on-error
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:16
@@ -61,7 +61,7 @@ jobs:
         run: env -u DATABASE_URL CI=true bin/test-changed
 
   system:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:16
@@ -88,7 +88,7 @@ jobs:
         run: env -u DATABASE_URL bin/rails test:system
 
   seeds:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:16
