@@ -5,43 +5,15 @@ import ProjectCard from "../components/ProjectCard.astro";
 import SectionHeader from "../components/SectionHeader.astro";
 import TechBadge from "../components/TechBadge.astro";
 import { featuredProjects } from "../data/projects";
-import { pageTitle } from "../lib/page";
-
-const pacmanAssets = [
-  "pacman-game/pacman/pacman_open_more.png",
-  "pacman-game/pacman/pacman_open_less.png",
-  "pacman-game/pacman/pacman_closed.png",
-  "pacman-game/sounds/pacman_beginning.wav",
-  "pacman-game/sounds/pacman_chomp.wav",
-  "pacman-game/sounds/pacman_death.wav",
-  "pacman-game/sounds/pacman_eatfruit.wav",
-  "pacman-game/sounds/pacman_eatghost.wav",
-  "pacman-game/sounds/pacman_extrapac.wav",
-  "pacman-game/sounds/pacman_intermission.wav",
-  ...["blinky", "pinky", "inky", "clyde"].flatMap((ghost) =>
-    ["right-1", "right-2", "down-1", "down-2", "up-1", "up-2"].map((frame) => `pacman-game/ghosts/${ghost}-${frame}.png`),
-  ),
-  "pacman-game/ghosts/frightened-blue-1.png",
-  "pacman-game/ghosts/frightened-blue-2.png",
-  "pacman-game/ghosts/frightened-white-1.png",
-  "pacman-game/ghosts/frightened-white-2.png",
-  "pacman-game/ghosts/eyes-right.png",
-  "pacman-game/ghosts/eyes-down.png",
-  "pacman-game/ghosts/eyes-up.png",
-  "pacman-game/items/key.png",
-];
-const pacmanAssetManifest = JSON.stringify(Object.fromEntries(pacmanAssets.map((path) => [path, `/assets/${path}`])));
 
 const heroBadge = { color: "secondary", badgeClass: "hero-badge", extraClasses: "text-body fs-sm fw-normal px-3 py-2 badge-hover" };
 ---
 <Base
-  title={pageTitle("")}
   description="Tomer Gelbhart's developer portfolio showcasing full-stack web development projects, Ruby on Rails expertise, and professional software engineering work."
 >
   <!-- Hero Section with Pac-Man Game -->
   <section class="position-relative overflow-hidden hero-section home-panel home-panel--hero"
-           data-controller="pacman-game pacman-input pacman-menu"
-           data-pacman-game-asset-manifest-value={pacmanAssetManifest}>
+           data-controller="pacman-game pacman-input pacman-menu">
     <!-- Animated Gradient Background -->
     <div class="hero-gradient-bg"></div>
     <CircuitField fixed intensity={0.55} />
@@ -93,7 +65,7 @@ const heroBadge = { color: "secondary", badgeClass: "hero-badge", extraClasses: 
       <div class="row pt-5 pt-lg-3 pb-3 py-lg-4">
         <div class="col-lg-10 col-xl-9 mx-auto text-center">
           <!-- Pac-Man Game Start Hint -->
-          <div class="pacman-idle-hint mb-3 d-none d-lg-inline-block" data-pacman-game-target="startHint" data-controller="pacman-preview" data-pacman-preview-asset-manifest-value={pacmanAssetManifest}>
+          <div class="pacman-idle-hint mb-3 d-none d-lg-inline-block" data-pacman-game-target="startHint" data-controller="pacman-preview">
             <div class="d-flex align-items-center justify-content-center gap-3 flex-wrap">
               <div class="pacman-preview">
                 <img alt="Pac-Man" class="pacman-preview-sprite" data-pacman-preview-target="sprite" src="/assets/pacman-game/pacman/pacman_open_more.png" />
@@ -162,20 +134,7 @@ const heroBadge = { color: "secondary", badgeClass: "hero-badge", extraClasses: 
     <div class="row g-4 justify-content-center">
       {featuredProjects.map((project, index) => (
         <div class="col-lg-4 col-md-6 fade-in-view" style={`--i: ${index}`}>
-          <ProjectCard
-            icon={project.icon}
-            color={project.color}
-            title={project.title}
-            subtitle={project.subtitle}
-            description={project.description}
-            badges={project.badges}
-            linkText={project.linkText}
-            linkUrl={project.linkUrl}
-            linkIcon={project.linkIcon}
-            linkTarget={project.linkTarget}
-            linkRel={project.linkRel}
-            githubUrl={project.githubUrl}
-          />
+          <ProjectCard {...project} />
         </div>
       ))}
     </div>
