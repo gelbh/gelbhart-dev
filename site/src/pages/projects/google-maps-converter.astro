@@ -47,6 +47,7 @@ const structuredData = [
   googleMapsConverterArticleData,
 ];
 
+// Build-time env (site/.env locally, CI secret on deploy); without it style search gets "Invalid API key".
 const snazzyMapsApiKey = import.meta.env.PUBLIC_SNAZZY_MAPS_API_KEY ?? "";
 ---
 <Base
