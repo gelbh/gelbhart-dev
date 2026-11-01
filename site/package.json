@@ -1,0 +1,41 @@
+{
+  "name": "gelbhart-dev-site",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "predev": "node scripts/sync-public.mjs",
+    "dev": "astro dev",
+    "prebuild": "node scripts/sync-public.mjs",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "private": "true",
+  "engines": {
+    "node": ">=24"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "@hotwired/stimulus": "^3.2.2",
+    "@hotwired/turbo": "^8.0.23",
+    "@popperjs/core": "^2.11.8",
+    "ajv": "^8.20.0",
+    "astro": "^7.4.4",
+    "axios": "^1.21.0",
+    "bootstrap": "^5.3.8",
+    "date-fns": "^4.4.0",
+    "diacritics": "^1.3.0",
+    "eases": "^1.0.8",
+    "he": "^2.0.0",
+    "i18n-iso-countries": "^7.14.0",
+    "localforage": "^1.10.0",
+    "lodash.debounce": "^4.0.8",
+    "lodash.throttle": "^4.1.1",
+    "sass": "^1.107.1"
+  }
+}
