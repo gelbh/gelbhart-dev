@@ -1,0 +1,360 @@
+---
+import Base from "../layouts/Base.astro";
+import CircuitField from "../components/CircuitField.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import SectionHeader from "../components/SectionHeader.astro";
+import TechBadge from "../components/TechBadge.astro";
+import { featuredProjects } from "../data/projects";
+import { pageTitle } from "../lib/page";
+
+const pacmanAssets = [
+  "pacman-game/pacman/pacman_open_more.png",
+  "pacman-game/pacman/pacman_open_less.png",
+  "pacman-game/pacman/pacman_closed.png",
+  "pacman-game/sounds/pacman_beginning.wav",
+  "pacman-game/sounds/pacman_chomp.wav",
+  "pacman-game/sounds/pacman_death.wav",
+  "pacman-game/sounds/pacman_eatfruit.wav",
+  "pacman-game/sounds/pacman_eatghost.wav",
+  "pacman-game/sounds/pacman_extrapac.wav",
+  "pacman-game/sounds/pacman_intermission.wav",
+  ...["blinky", "pinky", "inky", "clyde"].flatMap((ghost) =>
+    ["right-1", "right-2", "down-1", "down-2", "up-1", "up-2"].map((frame) => `pacman-game/ghosts/${ghost}-${frame}.png`),
+  ),
+  "pacman-game/ghosts/frightened-blue-1.png",
+  "pacman-game/ghosts/frightened-blue-2.png",
+  "pacman-game/ghosts/frightened-white-1.png",
+  "pacman-game/ghosts/frightened-white-2.png",
+  "pacman-game/ghosts/eyes-right.png",
+  "pacman-game/ghosts/eyes-down.png",
+  "pacman-game/ghosts/eyes-up.png",
+  "pacman-game/items/key.png",
+];
+const pacmanAssetManifest = JSON.stringify(Object.fromEntries(pacmanAssets.map((path) => [path, `/assets/${path}`])));
+
+const heroBadge = { color: "secondary", badgeClass: "hero-badge", extraClasses: "text-body fs-sm fw-normal px-3 py-2 badge-hover" };
+---
+<Base
+  title={pageTitle("")}
+  description="Tomer Gelbhart's developer portfolio showcasing full-stack web development projects, Ruby on Rails expertise, and professional software engineering work."
+>
+  <!-- Hero Section with Pac-Man Game -->
+  <section class="position-relative overflow-hidden hero-section home-panel home-panel--hero"
+           data-controller="pacman-game pacman-input pacman-menu"
+           data-pacman-game-asset-manifest-value={pacmanAssetManifest}>
+    <!-- Animated Gradient Background -->
+    <div class="hero-gradient-bg"></div>
+    <CircuitField fixed intensity={0.55} />
+    <!-- Tech Grid Background -->
+    <div class="tech-grid-bg"></div>
+    <!-- Floating Code Snippets -->
+    <div class="floating-code">
+      <div class="code-snippet code-1">&lt;div&gt;</div>
+      <div class="code-snippet code-2">{"{ }"}</div>
+      <div class="code-snippet code-3">function()</div>
+      <div class="code-snippet code-4">=&gt;</div>
+      <div class="code-snippet code-5">class</div>
+      <div class="code-snippet code-6">import</div>
+      <div class="code-snippet code-7">const</div>
+      <div class="code-snippet code-8">&lt;/&gt;</div>
+    </div>
+    <!-- Pac-Man Page Tint -->
+    <div class="pacman-page-tint d-none d-lg-block" data-pacman-game-target="pageTint"></div>
+    <!-- Pac-Man Game Overlay -->
+    <div class="pacman-game-container d-none d-lg-block" data-pacman-game-target="gameContainer">
+      <!-- Pac-Man character -->
+      <div class="pacman-character" data-pacman-game-target="pacman">
+        <img alt="Pac-Man" class="pacman-sprite" src="/assets/pacman-game/pacman/pacman_open_more.png" />
+      </div>
+      <!-- Game HUD -->
+      <div class="pacman-hud" data-pacman-game-target="hud">
+        <div class="hud-item">
+          <span class="hud-label">Score:</span>
+          <span class="hud-value" data-pacman-game-target="score">0</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">Lives:</span>
+          <span class="hud-value" data-pacman-game-target="lives" aria-label="3 lives"><span aria-hidden="true">❤️❤️❤️</span></span>
+        </div>
+        <div class="hud-item hud-progress" data-pacman-game-target="progressItem">
+          <span class="hud-label" data-pacman-game-target="progressLabel">Next:</span>
+          <span class="hud-value" data-pacman-game-target="progressValue">300</span>
+        </div>
+        <div class="hud-muted-indicator" data-pacman-game-target="mutedIndicator" style="display: none;">
+          <i class="bx bx-volume-mute"></i>
+        </div>
+        <div class="hud-settings-hint">
+          <kbd class="hud-key">Esc</kbd>
+          <span class="hud-hint-label">Menu</span>
+        </div>
+      </div>
+    </div>
+    <div class="container position-relative zindex-5 pb-lg-5 mb-5">
+      <div class="row pt-5 pt-lg-3 pb-3 py-lg-4">
+        <div class="col-lg-10 col-xl-9 mx-auto text-center">
+          <!-- Pac-Man Game Start Hint -->
+          <div class="pacman-idle-hint mb-3 d-none d-lg-inline-block" data-pacman-game-target="startHint" data-controller="pacman-preview" data-pacman-preview-asset-manifest-value={pacmanAssetManifest}>
+            <div class="d-flex align-items-center justify-content-center gap-3 flex-wrap">
+              <div class="pacman-preview">
+                <img alt="Pac-Man" class="pacman-preview-sprite" data-pacman-preview-target="sprite" src="/assets/pacman-game/pacman/pacman_open_more.png" />
+              </div>
+              <div class="hint-text">
+                <span class="hint-label">Use</span>
+                <kbd class="kbd-key">W</kbd>
+                <kbd class="kbd-key">A</kbd>
+                <kbd class="kbd-key">S</kbd>
+                <kbd class="kbd-key">D</kbd>
+                <span class="hint-label">or</span>
+                <kbd class="kbd-key">←</kbd>
+                <kbd class="kbd-key">↑</kbd>
+                <kbd class="kbd-key">↓</kbd>
+                <kbd class="kbd-key">→</kbd>
+                <span class="hint-label">to play</span>
+              </div>
+            </div>
+          </div>
+          <!-- Main Heading with Animation -->
+          <h1 class="display-2 mb-4 hero-heading">
+            <span class="fade-in-up">Full-Stack Developer</span>
+            <br>
+            <span class="text-gradient d-inline-block fade-in-up delay-1">Building Modern Web Solutions</span>
+          </h1>
+          <!-- Subheading with Animation -->
+          <p class="fs-lg text-muted mb-4 pb-2 fade-in-up delay-2">
+            MSc Computer Science student with expertise in front-end development and API integration.
+            <br>
+            Exploring AI, Machine Learning, Cloud Computing, Quantum Computing, and Full-Stack Engineering at UCD.
+          </p>
+          <!-- CTA Buttons with Animation -->
+          <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center pb-3 fade-in-up delay-3">
+            <a href="#projects" class="btn btn-lg btn-primary shadow-primary btn-pulse">
+              <i class="bx bx-code-alt fs-5 lh-1 me-2" aria-hidden="true"></i>
+              View Projects
+            </a>
+            <a href="/contact" class="btn btn-lg btn-outline-secondary">
+              <i class="bx bx-envelope fs-5 lh-1 me-2" aria-hidden="true"></i>
+              Get in Touch
+            </a>
+          </div>
+          <!-- Tech Stack Badges with Animation -->
+          <div class="d-flex flex-wrap gap-2 justify-content-center pt-4 mt-2 fade-in-up delay-4">
+            <TechBadge {...heroBadge} text="JavaScript" icon="bxl-javascript" url="https://developer.mozilla.org/en-US/docs/Web/JavaScript" />
+            <TechBadge {...heroBadge} text="Python" icon="bxl-python" url="https://www.python.org/" />
+            <TechBadge {...heroBadge} text="Ruby on Rails" icon="bx-server" url="https://rubyonrails.org/" />
+            <TechBadge {...heroBadge} text="Java" icon="bxl-java" url="https://www.java.com/" />
+            <TechBadge {...heroBadge} text="AI/ML" icon="bx-brain" url="https://www.ibm.com/topics/artificial-intelligence" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Scroll Indicator -->
+    <a href="#projects" class="scroll-indicator text-decoration-none fade-in-up delay-4">
+      <div class="scroll-indicator-arrow">
+        <i class="bx bx-chevron-down" aria-hidden="true"></i>
+      </div>
+      <span class="d-block mt-2 fs-sm text-muted">Scroll to explore</span>
+    </a>
+  </section>
+  <!-- Projects Section -->
+  <section id="projects" class="container py-5 home-panel home-panel--projects" data-controller="scroll-animation">
+    <SectionHeader title="Featured Projects" />
+    <!-- Project cards -->
+    <div class="row g-4 justify-content-center">
+      {featuredProjects.map((project, index) => (
+        <div class="col-lg-4 col-md-6 fade-in-view" style={`--i: ${index}`}>
+          <ProjectCard
+            icon={project.icon}
+            color={project.color}
+            title={project.title}
+            subtitle={project.subtitle}
+            description={project.description}
+            badges={project.badges}
+            linkText={project.linkText}
+            linkUrl={project.linkUrl}
+            linkIcon={project.linkIcon}
+            linkTarget={project.linkTarget}
+            linkRel={project.linkRel}
+            githubUrl={project.githubUrl}
+          />
+        </div>
+      ))}
+    </div>
+  </section>
+  <!-- Technologies & Skills Section -->
+  <section id="technologies" class="container py-5 my-5 home-panel home-panel--tech" data-controller="scroll-animation">
+    <SectionHeader title="Technologies & Skills" subtitle="Programming languages, frameworks, and tools I work with" />
+    <!-- Programming Languages -->
+    <div class="row g-4 mb-4">
+      <div class="col-12 fade-in-view" style="--i: 0">
+        <div class="tech-card">
+          <div class="tech-card-icon bg-primary bg-opacity-10">
+            <i class="bx bx-code-alt text-primary"></i>
+          </div>
+          <h3 class="h5 mb-4">Programming Languages</h3>
+          <div class="d-flex flex-wrap gap-2 justify-content-center">
+            <TechBadge text="JavaScript" icon="bxl-javascript" color="warning" url="https://developer.mozilla.org/en-US/docs/Web/JavaScript" badgeClass="tech-badge" tooltip="Dynamic programming language for web development" />
+            <TechBadge text="Python" icon="bxl-python" color="primary" url="https://www.python.org/" badgeClass="tech-badge" tooltip="Versatile language for data science, AI, and backend development" />
+            <TechBadge text="Java" icon="bxl-java" color="danger" url="https://www.java.com/" badgeClass="tech-badge" tooltip="Object-oriented programming language for enterprise applications" />
+            <TechBadge text="Ruby" icon="bx-server" color="danger" url="https://www.ruby-lang.org/" badgeClass="tech-badge" tooltip="Dynamic, object-oriented programming language" />
+            <TechBadge text="C" icon="bx-code-curly" color="info" url="https://en.cppreference.com/w/c" badgeClass="tech-badge" tooltip="Low-level systems programming language" />
+            <TechBadge text="SQL" icon="bx-data" color="info" url="https://www.w3schools.com/sql/" badgeClass="tech-badge" tooltip="Structured Query Language for database management" />
+            <TechBadge text="HTML/CSS" icon="bxl-html5" color="danger" url="https://developer.mozilla.org/en-US/docs/Web/HTML" badgeClass="tech-badge" tooltip="Markup and styling languages for web pages" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Frameworks & Libraries  -->
+    <div class="row g-4 mb-4">
+      <div class="col-lg-6 fade-in-view" style="--i: 1">
+        <div class="tech-card h-100">
+          <div class="tech-card-icon bg-primary bg-opacity-10">
+            <i class="bx bx-code-block text-primary"></i>
+          </div>
+          <h3 class="h5 mb-4">Web & Mobile Frameworks</h3>
+          <div class="row">
+            <div class="col-6">
+              <p class="text-muted fw-semibold mb-2 fs-sm">Frontend</p>
+              <ul class="list-unstyled mb-3">
+                <TechBadge text="Bootstrap" icon="bxl-bootstrap" color="purple" url="https://getbootstrap.com/" style="list" tooltip="Frontend CSS framework for responsive web design" />
+              </ul>
+              <p class="text-muted fw-semibold mb-2 fs-sm">Backend</p>
+              <ul class="list-unstyled mb-0">
+                <TechBadge text="Ruby on Rails" icon="bx-server" color="danger" url="https://rubyonrails.org/" style="list" tooltip="Full-stack web application framework" />
+              </ul>
+            </div>
+            <div class="col-6">
+              <p class="text-muted fw-semibold mb-2 fs-sm">Mobile</p>
+              <ul class="list-unstyled mb-0">
+                <TechBadge text="Flutter" icon="bx-mobile-alt" color="info" url="https://flutter.dev/" style="list" tooltip="Cross-platform mobile app development framework" />
+                <TechBadge text="SwiftUI" icon="bxl-apple" color="secondary" url="https://developer.apple.com/swiftui/" style="list" tooltip="Apple's declarative UI framework for iOS development" />
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Data/AI -->
+      <div class="col-lg-6 fade-in-view" style="--i: 2">
+        <div class="tech-card h-100">
+          <div class="tech-card-icon bg-warning bg-opacity-10">
+            <i class="bx bx-brain text-warning"></i>
+          </div>
+          <h3 class="h5 mb-4">Data Science & AI</h3>
+          <ul class="list-unstyled mb-0">
+            <TechBadge text="TensorFlow" icon="bx-scatter-chart" color="primary" url="https://www.tensorflow.org/" style="list" tooltip="Open-source machine learning platform by Google" />
+            <TechBadge text="PyTorch" icon="bx-brain" color="warning" url="https://pytorch.org/" style="list" tooltip="Deep learning framework with dynamic computation graphs" />
+            <TechBadge text="Pandas" icon="bx-data" color="info" url="https://pandas.pydata.org/" style="list" tooltip="Data manipulation and analysis library for Python" />
+            <TechBadge text="NumPy" icon="bx-bar-chart" color="success" url="https://numpy.org/" style="list" tooltip="Fundamental package for numerical computing in Python" />
+            <TechBadge text="Scikit-learn" icon="bx-line-chart" color="danger" url="https://scikit-learn.org/" style="list" tooltip="Machine learning library for Python" />
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- Development Tools - Consolidated -->
+    <div class="row g-4">
+      <div class="col-lg-6 fade-in-view" style="--i: 3">
+        <div class="tech-card h-100">
+          <div class="tech-card-icon bg-success bg-opacity-10">
+            <i class="bx bx-git-branch text-success"></i>
+          </div>
+          <h3 class="h5 mb-4">Development Tools</h3>
+          <div class="row">
+            <div class="col-6">
+              <p class="text-muted fw-semibold mb-2 fs-sm">Version Control</p>
+              <ul class="list-unstyled mb-3">
+                <TechBadge text="Git" icon="bxl-git" color="danger" url="https://git-scm.com/" style="list" tooltip="Distributed version control system" />
+                <TechBadge text="GitHub Actions" icon="bxl-github" color="secondary" url="https://github.com/features/actions" style="list" tooltip="CI/CD platform integrated with GitHub" />
+                <TechBadge text="GitLab CI/CD" icon="bxl-gitlab" color="warning" url="https://docs.gitlab.com/ee/ci/" style="list" tooltip="Continuous integration and deployment platform" />
+              </ul>
+            </div>
+            <div class="col-6">
+              <p class="text-muted fw-semibold mb-2 fs-sm">Testing & Build</p>
+              <ul class="list-unstyled mb-0">
+                <TechBadge text="pytest" icon="bx-check-circle" color="success" url="https://docs.pytest.org/" style="list" tooltip="Testing framework for Python" />
+                <TechBadge text="npm" icon="bxl-nodejs" color="success" url="https://www.npmjs.com/" style="list" tooltip="Package manager for JavaScript and Node.js" />
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 fade-in-view" style="--i: 4">
+        <div class="tech-card h-100">
+          <div class="tech-card-icon bg-info bg-opacity-10">
+            <i class="bx bx-cloud text-info"></i>
+          </div>
+          <h3 class="h5 mb-4">IDEs & Cloud Platforms</h3>
+          <div class="row">
+            <div class="col-6">
+              <p class="text-muted fw-semibold mb-2 fs-sm">IDEs</p>
+              <ul class="list-unstyled mb-0">
+                <TechBadge text="VS Code" icon="bx-code-block" color="primary" url="https://code.visualstudio.com/" style="list" tooltip="Popular code editor by Microsoft" />
+                <TechBadge text="Xcode" icon="bx-laptop" color="secondary" url="https://developer.apple.com/xcode/" style="list" tooltip="Apple's integrated development environment" />
+                <TechBadge text="Eclipse" icon="bx-code-alt" color="warning" url="https://www.eclipse.org/" style="list" tooltip="Open-source IDE for Java and other languages" />
+              </ul>
+            </div>
+            <div class="col-6">
+              <p class="text-muted fw-semibold mb-2 fs-sm">Cloud</p>
+              <ul class="list-unstyled mb-0">
+                <TechBadge text="Vercel" icon="bx-cloud" color="primary" url="https://vercel.com/" style="list" tooltip="Platform for frontend deployment and hosting" />
+                <TechBadge text="Heroku" icon="bx-cloud" color="purple" url="https://www.heroku.com/" style="list" tooltip="Cloud platform for deploying applications" />
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Call-to-Action Section -->
+  <section id="cta" class="position-relative py-5 my-5 home-panel home-panel--cta" data-controller="scroll-animation">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-10">
+          <div class="cta-card fade-in-view">
+            <div class="row align-items-center g-4">
+              <div class="col-lg-8">
+                <div class="cta-icon-wrapper mb-3">
+                  <i class="bx bx-briefcase cta-icon" aria-hidden="true"></i>
+                </div>
+                <h2 class="h2 mb-3">Let&rsquo;s Connect</h2>
+                <p class="fs-lg mb-0 text-muted">
+                  I&rsquo;m currently completing an internship and always happy to connect.
+                  Feel free to reach out about collaborations, open-source, or future opportunities.
+                </p>
+              </div>
+              <div class="col-lg-4 text-lg-end">
+                <div class="d-flex flex-column gap-3">
+                  <a class="btn btn-lg btn-primary shadow-primary" href="/contact">
+                    <i class="bx bx-envelope fs-5 me-2" aria-hidden="true"></i>
+                    Get in Touch
+                  </a>
+                  <a href="mailto:tomer@gelbhart.dev" class="btn btn-lg btn-outline-primary">
+                    <i class="bx bx-send fs-5 me-2" aria-hidden="true"></i>
+                    Email Me
+                  </a>
+                </div>
+              </div>
+            </div>
+            <!-- Context chips (not hero-metric columns) -->
+            <ul class="cta-meta list-unstyled d-flex flex-wrap column-gap-4 row-gap-2 mt-4 pt-4 border-top border-secondary border-opacity-25">
+              <li class="cta-meta-chip">
+                <i class="bx bx-code-alt" aria-hidden="true"></i>
+                <span>Full-stack development</span>
+              </li>
+              <li class="cta-meta-chip">
+                <i class="bx bx-calendar" aria-hidden="true"></i>
+                <span>Currently interning</span>
+              </li>
+              <li class="cta-meta-chip">
+                <i class="bx bx-map" aria-hidden="true"></i>
+                <span>Dublin, IE</span>
+              </li>
+              <li class="cta-meta-chip">
+                <i class="bx bx-user" aria-hidden="true"></i>
+                <span>MSc student, UCD</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
