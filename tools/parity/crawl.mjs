@@ -13,6 +13,7 @@ const REDIRECT_PATHS = [
   "/video-captioner", "/nim-quantum-ml", "/nasa-exoplanet-explorer",
   "/google-maps-converter", "/vscode-torch-checkpoint-inspector", "/jetlag",
   "/sitemap.xml", "/robots.txt", "/does-not-exist",
+  "/hevy-tracker/spreadsheet", "/sitemap.xml.gz",
 ];
 
 async function sitemapPaths() {
@@ -42,16 +43,29 @@ const paths = pathsFromDir
   ? JSON.parse(await readFile(`${pathsFromDir}/index.json`, "utf8")).map((r) => r.path)
   : [...new Set([...(await sitemapPaths()), ...REDIRECT_PATHS])].sort();
 const results = [];
+
+// Follows same-origin redirects; stops at the first hop that leaves the origin,
+// because off-site pages (e.g. Google sign-in) are not part of parity.
+async function follow(url) {
+  const home = new URL(origin).origin;
+  for (let hops = 0; hops < 10; hops++) {
+    const res = await fetch(url, { redirect: "manual" });
+    const location = res.headers.get("location");
+    if (res.status < 300 || res.status >= 400 || !location) {
+      return { res, finalUrl: new URL(url).pathname, external: false };
+    }
+    const next = new URL(location, url);
+    if (next.origin !== home) return { res, finalUrl: next.href, external: true };
+    url = next.href;
+  }
+  throw new Error(`too many redirects for ${url}`);
+}
+
 for (const path of paths) {
-  const res = await fetch(origin + path, { redirect: "follow" });
+  const { res, finalUrl, external } = await follow(origin + path);
   const type = res.headers.get("content-type") ?? "";
-  const html = type.includes("html") ? await res.text() : "";
-  results.push({
-    path,
-    status: res.status,
-    finalUrl: new URL(res.url).pathname,
-    ...(html ? extract(html) : {}),
-  });
+  const html = !external && type.includes("html") ? await res.text() : "";
+  results.push({ path, status: res.status, finalUrl, ...(html ? extract(html) : {}) });
 }
 await mkdir(outDir, { recursive: true });
 await writeFile(`${outDir}/index.json`, JSON.stringify(results, null, 2));
