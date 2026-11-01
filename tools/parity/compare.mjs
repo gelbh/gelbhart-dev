@@ -6,7 +6,7 @@ if (!baseDir || !candDir) {
   process.exit(2);
 }
 
-const load = async (d) => JSON.parse(await readFile(`${d}/index.json`, "utf8"));
+const load = async (d) => JSON.parse(await readFile(`${d}/index.json`, "utf8")).results;
 const base = await load(baseDir);
 const cand = new Map((await load(candDir)).map((r) => [r.path, r]));
 const FIELDS = [
@@ -17,8 +17,9 @@ const FIELDS = [
 const ALLOWED = new Set([
   "/sitemap.xml finalUrl", "/sitemap.xml redirects",
   "/sitemap.xml.gz finalUrl", "/sitemap.xml.gz redirects",
-  "/robots.txt sitemapRefs",
 ]);
+// The robots Sitemap line may move to the Astro index file, but must still point at a prod sitemap.
+const VALID_SITEMAP_REF = /^Sitemap: https:\/\/gelbhart\.dev\/(sitemap\.xml\.gz|sitemap-index\.xml|sitemap\.xml)$/;
 const show = (v) => JSON.stringify(v)?.slice(0, 300);
 const isPlainObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
 
@@ -41,6 +42,14 @@ for (const b of base) {
   cand.delete(b.path);
   if (!c) { console.log(`MISSING ${b.path}`); failures++; continue; }
   for (const f of FIELDS) {
+    if (b.path === "/robots.txt" && f === "sitemapRefs") {
+      const refs = c[f];
+      if (!Array.isArray(refs) || !refs.length || !refs.every((r) => VALID_SITEMAP_REF.test(r))) {
+        report(b.path, f, b[f], refs);
+        failures++;
+      }
+      continue;
+    }
     if (ALLOWED.has(`${b.path} ${f}`)) continue;
     if (JSON.stringify(b[f]) !== JSON.stringify(c[f])) {
       report(b.path, f, b[f], c[f]);

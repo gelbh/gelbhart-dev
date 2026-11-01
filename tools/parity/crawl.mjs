@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { gunzipSync } from "node:zlib";
 
 const [origin, outDir, pathsFromDir] = process.argv.slice(2);
@@ -8,8 +8,9 @@ if (!origin || !outDir) {
 }
 
 const HOME = new URL(origin).origin;
-// Rails emits absolute Locations and links on the prod hosts; the preview emits relative ones.
-const SAME_SITE = new Set([HOME, "https://gelbhart.dev", "https://www.gelbhart.dev"]);
+const PROD = "https://gelbhart.dev";
+// Rails emits absolute prod Locations, Cloudflare relative ones, and a server may answer with its own host.
+const REDIRECT_SAME_SITE = new Set([HOME, PROD]);
 const SITEMAP_PATHS = ["/sitemap.xml.gz", "/sitemap-index.xml", "/sitemap.xml"];
 const REDIRECT_PATHS = [
   "/hevy-tracker", "/hevy-tracker/privacy", "/hevy-tracker/terms",
@@ -32,10 +33,15 @@ const stripDigests = (s) => s?.replace(/-[0-9a-f]{64}(\.\w+)/g, "$1") ?? null;
 const collapse = (s) => s.replace(/\s+/g, " ").trim();
 const fetchOpts = () => ({ redirect: "manual", signal: AbortSignal.timeout(20000) });
 
+const pathOf = (url) => url.pathname + url.search + url.hash;
+
+// Only prod-host absolute URLs and relative ones become paths; any other host (the preview's own
+// included) stays absolute so a hardcoded preview or www link shows up as a difference.
 function localize(raw, base) {
   let url;
   try { url = new URL(raw, base); } catch { return raw; }
-  return SAME_SITE.has(url.origin) ? url.pathname + url.search + url.hash : url.href;
+  const relative = !/^([a-z][a-z\d+.-]*:|\/\/)/i.test(raw.trim());
+  return url.origin === PROD || (relative && url.origin === base.origin) ? pathOf(url) : url.href;
 }
 
 function sortKeys(v) {
@@ -69,8 +75,8 @@ async function follow(path) {
     }
     await res.body?.cancel();
     const next = new URL(location, url);
-    redirects.push({ status: res.status, location: localize(next.href) });
-    if (!SAME_SITE.has(next.origin)) return { res, redirects, finalUrl: next.href, external: true };
+    redirects.push({ status: res.status, location: REDIRECT_SAME_SITE.has(next.origin) ? pathOf(next) : next.href });
+    if (!REDIRECT_SAME_SITE.has(next.origin)) return { res, redirects, finalUrl: next.href, external: true };
     url = new URL(next.pathname + next.search, origin);
   }
   throw new Error(`too many redirects for ${path}`);
@@ -79,7 +85,7 @@ async function follow(path) {
 async function locsFrom(buf, seen = new Set()) {
   const xml = (buf[0] === 0x1f && buf[1] === 0x8b ? gunzipSync(buf) : buf).toString("utf8");
   const locs = [...xml.matchAll(/<loc>\s*([^<]+?)\s*<\/loc>/g)].map((m) => decode(m[1]));
-  if (!/<sitemapindex[\s>]/.test(xml)) return locs.map((l) => new URL(l, origin).pathname);
+  if (!/<sitemapindex[\s>]/.test(xml)) return locs.map((l) => localize(l, new URL(origin)));
   const out = [];
   for (const loc of locs) {
     const child = new URL(loc, origin);
@@ -100,7 +106,9 @@ async function discoverSitemap() {
     const { res, external } = await follow(path);
     if (external || res.status !== 200) { await res.body?.cancel(); continue; }
     const locs = await locsFrom(Buffer.from(await res.arrayBuffer()));
-    if (locs.length) return sortedSet(locs);
+    // Foreign-host locs are not crawled; they still differ in the recorded `locs` field.
+    const crawlable = locs.map((l) => new URL(l, origin)).filter((u) => REDIRECT_SAME_SITE.has(u.origin));
+    if (locs.length) return sortedSet(crawlable.map((u) => u.pathname + u.search));
   }
   throw new Error(`no non-empty sitemap at ${SITEMAP_PATHS.join(", ")} on ${origin}`);
 }
@@ -109,7 +117,7 @@ function extract(html, pageUrl) {
   const clean = html.replace(/<!--[\s\S]*?-->|<script\b[\s\S]*?<\/script>|<style\b[\s\S]*?<\/style>/gi, "");
   const meta = {};
   for (const a of tags(clean, "meta")) {
-    const key = a.name ?? a.property;
+    const key = (a.name ?? a.property)?.toLowerCase();
     if (!key || a.content === undefined || DROPPED_META.has(key)) continue;
     const value = VOLATILE_META.has(key) ? "<volatile>" : stripDigests(a.content);
     meta[key] = key in meta ? [meta[key], value].flat() : value;
@@ -153,9 +161,12 @@ async function crawl(path) {
   return record;
 }
 
-const sitemap = pathsFromDir ? await discoverSitemap().catch(() => []) : await discoverSitemap();
+await rm(`${outDir}/index.json`, { force: true });
+const sitemap = pathsFromDir
+  ? await discoverSitemap().catch((err) => { console.error(`candidate sitemap not found: ${err.message}`); return []; })
+  : await discoverSitemap();
 const paths = pathsFromDir
-  ? sortedSet([...JSON.parse(await readFile(`${pathsFromDir}/index.json`, "utf8")).map((r) => r.path), ...sitemap])
+  ? sortedSet([...JSON.parse(await readFile(`${pathsFromDir}/index.json`, "utf8")).results.map((r) => r.path), ...sitemap])
   : sortedSet([...sitemap, ...REDIRECT_PATHS]);
 
 const results = [];
@@ -180,5 +191,5 @@ if (!pathsFromDir) {
 }
 
 await mkdir(outDir, { recursive: true });
-await writeFile(`${outDir}/index.json`, JSON.stringify(results, null, 2));
+await writeFile(`${outDir}/index.json`, JSON.stringify({ origin: HOME, crawledAt: new Date().toISOString(), results }, null, 2));
 console.log(`crawled ${results.length} paths into ${outDir}`);
