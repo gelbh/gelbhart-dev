@@ -19,6 +19,18 @@ export default defineConfig({
         { find: /^theme\/([^.]+)$/, replacement: `${rails("javascript/theme")}/$1` },
         { find: "@hotwired/turbo-rails", replacement: fileURLToPath(import.meta.resolve("@hotwired/turbo")) },
       ],
+      // Bare imports from ../app/javascript must resolve from site/node_modules, not the repo root.
+      dedupe: [
+        "@hotwired/stimulus",
+        "axios",
+        "bootstrap",
+        "date-fns",
+        "eases",
+        "he",
+        "i18n-iso-countries",
+        "localforage",
+        "lodash.throttle",
+      ],
     },
     css: {
       preprocessorOptions: {
