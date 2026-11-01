@@ -102,35 +102,7 @@ const jetbrainsMonoHref = "https://fonts.googleapis.com/css2?family=JetBrains+Mo
                       }
                     }
                     window.onTurnstileLoad = renderTurnstile;
-                    document.addEventListener("turbo:load", renderTurnstile);
-                  })();
-                </script>
-                <script is:inline>
-                  (function () {
-                    var MESSAGES = {
-                      sent: ["success", "Thank you! Your message has been sent successfully."],
-                      error: ["danger", "Sorry, there was an error sending your message. Please try emailing directly."],
-                      rate_limited: ["danger", "Too many submissions. Please try again later."],
-                    };
-                    function onLoad() {
-                      var ts = document.querySelector('input[name="form_timestamp"]');
-                      if (ts) ts.value = String(Math.floor(Date.now() / 1000));
-                      var params = new URLSearchParams(location.search);
-                      var key = params.get("sent") === "1" ? "sent" : params.get("error") === "1" ? "error"
-                        : params.get("rate_limited") === "true" ? "rate_limited" : null;
-                      var slot = document.getElementById("contact-alert");
-                      if (!key || !slot || slot.childElementCount) return;
-                      var div = document.createElement("div");
-                      div.className = "alert alert-" + MESSAGES[key][0] + " alert-dismissible fade show terminal-alert";
-                      div.setAttribute("role", "alert");
-                      div.textContent = MESSAGES[key][1];
-                      var close = document.createElement("button");
-                      close.type = "button"; close.className = "btn-close";
-                      close.setAttribute("data-bs-dismiss", "alert"); close.setAttribute("aria-label", "Close");
-                      div.appendChild(close);
-                      slot.appendChild(div);
-                    }
-                    document.addEventListener("turbo:load", onLoad);
+                    document.addEventListener("turbo:load", renderTurnstile, { once: true });
                   })();
                 </script>
 

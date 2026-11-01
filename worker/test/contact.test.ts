@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createTestDb } from "./d1";
 import {
-  handleContact, recordAttempt, pruneContactAttempts, type ContactDeps, type ContactForm,
+  contactAlertHtml, handleContact, recordAttempt, pruneContactAttempts, type ContactDeps, type ContactForm,
 } from "../src/contact";
 
 const NOW = new Date("2026-11-01T12:00:00Z");
@@ -83,5 +83,28 @@ describe("pruneContactAttempts", () => {
     await pruneContactAttempts(db, NOW);
     expect(await recordAttempt(db, "old", "2026-10-30T11")).toBe(1);
     expect(await recordAttempt(db, "new", "2026-11-01T11")).toBe(2);
+  });
+});
+
+describe("contactAlertHtml", () => {
+  const alert = (query: string) => contactAlertHtml(new URLSearchParams(query));
+  const markup = (kind: string, message: string) =>
+    `<div class="alert alert-${kind} alert-dismissible fade show terminal-alert" role="alert">${message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>`;
+
+  it.each([
+    ["sent=1", markup("success", "Thank you! Your message has been sent successfully.")],
+    ["error=1", markup("danger", "Sorry, there was an error sending your message. Please try emailing directly.")],
+    ["rate_limited=true", markup("danger", "Too many submissions. Please try again later.")],
+  ])("renders the alert for %s", (query, html) => {
+    expect(alert(query)).toBe(html);
+  });
+
+  it("prefers rate_limited over error over sent", () => {
+    expect(alert("sent=1&error=1&rate_limited=true")).toBe(alert("rate_limited=true"));
+    expect(alert("sent=1&error=1")).toBe(alert("error=1"));
+  });
+
+  it.each(["", "sent=0", "error=true", "rate_limited=1", "other=1"])("renders nothing for %j", (query) => {
+    expect(alert(query)).toBe("");
   });
 });
