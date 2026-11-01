@@ -6,5 +6,6 @@ public/*
 !public/_headers
 !public/_redirects
 !public/robots.txt
+!public/8de9b96283bfad3b30524d9c9f79dcb7.txt
 # root .gitignore ignores scripts/
 !scripts/
