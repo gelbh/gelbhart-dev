@@ -141,7 +141,10 @@ async function crawl(path) {
   if (path === "/sitemap.xml" || path === "/sitemap.xml.gz") {
     record.locs = res.status === 200 ? sortedSet(await locsFrom(Buffer.from(await res.arrayBuffer()))) : null;
   } else if (type.includes("text/plain")) {
-    record.body = (await res.text()).split("\n").map(collapse).join("\n").trim();
+    const lines = (await res.text()).split("\n").map(collapse);
+    const isRef = (l) => /^sitemap:/i.test(l);
+    record.body = lines.filter((l) => !isRef(l)).join("\n").trim();
+    record.sitemapRefs = lines.filter(isRef).sort();
   } else if (type.includes("html")) {
     Object.assign(record, extract(await res.text(), new URL(finalUrl, origin)));
   } else {
