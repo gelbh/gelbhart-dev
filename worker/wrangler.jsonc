@@ -15,7 +15,7 @@
     "run_worker_first": ["/api/*", "/contact*"]
   },
   "observability": { "enabled": true },
-  "vars": { "PAGES_ORIGIN": "assets" },
+  "vars": { "PAGES_ORIGIN": "assets", "GA_PROPERTY_ID": "468479218" },
   "d1_databases": [
     {
       "binding": "DB",
