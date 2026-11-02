@@ -5,4 +5,7 @@ export interface Env {
   PAGES_ORIGIN: "render" | "assets";
   TURNSTILE_SECRET_KEY: string;
   IP_SALT: string;
+  SCORE_LIMITER: RateLimit;
+  GA_SERVICE_ACCOUNT_KEY?: string;
+  GA_PROPERTY_ID?: string;
 }

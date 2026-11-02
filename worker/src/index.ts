@@ -1,5 +1,7 @@
 import { Hono, type Context } from "hono";
 import type { Env } from "./env";
+import { refreshAnalytics } from "./analytics";
+import { api } from "./api";
 import {
   contactAlertHtml, handleContact, hashIp, parseContactForm, pruneContactAttempts, recordAttempt,
   type ContactOutcome,
@@ -17,8 +19,11 @@ const OUTCOME_PATHS: Record<ContactOutcome, string> = {
   rate_limited: "/contact?rate_limited=true",
 };
 
-const passThrough = (c: Context<AppEnv>) =>
-  c.env.PAGES_ORIGIN === "assets" && c.env.ASSETS ? c.env.ASSETS.fetch(c.req.raw) : fetch(c.req.raw);
+const passThrough = async (c: Context<AppEnv>) => {
+  const res = await (c.env.PAGES_ORIGIN === "assets" && c.env.ASSETS ? c.env.ASSETS.fetch(c.req.raw) : fetch(c.req.raw));
+  // Fetched responses have immutable headers, which secureHeaders on /api/* must be able to set.
+  return new Response(res.body, res);
+};
 
 app.get("/contact", async (c) => {
   if (c.env.PAGES_ORIGIN !== "assets" || !c.env.ASSETS) return passThrough(c);
@@ -56,11 +61,13 @@ app.post("/contact", async (c) => {
   return c.redirect(OUTCOME_PATHS[outcome], 303);
 });
 
+app.route("/api", api);
+
 app.all("*", passThrough);
 
 export default {
   fetch: app.fetch,
   async scheduled(_event, env, ctx) {
-    ctx.waitUntil(pruneContactAttempts(env.DB, new Date()));
+    ctx.waitUntil(Promise.all([pruneContactAttempts(env.DB, new Date()), refreshAnalytics(env)]));
   },
 } satisfies ExportedHandler<Env>;

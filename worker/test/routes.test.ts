@@ -12,6 +12,7 @@ let fetchMock: ReturnType<typeof vi.fn>;
 const env = (): Env => ({
   DB: createTestDb(),
   SEND_EMAIL: {} as SendEmail,
+  SCORE_LIMITER: { limit: async () => ({ success: true }) },
   PAGES_ORIGIN: "render",
   TURNSTILE_SECRET_KEY: "secret",
   IP_SALT: "salt",
@@ -128,9 +129,9 @@ describe("routes in assets mode", () => {
   });
 
   it("passes other paths to the assets binding, not the network", async () => {
-    const res = await app.request("https://gelbhart.dev/api/leaderboard", {}, assetsEnv());
+    const res = await app.request("https://gelbhart.dev/projects/hevy-tracker", {}, assetsEnv());
     expect(assetsFetch).toHaveBeenCalledOnce();
-    expect((assetsFetch.mock.calls[0][0] as Request).url).toBe("https://gelbhart.dev/api/leaderboard");
+    expect((assetsFetch.mock.calls[0][0] as Request).url).toBe("https://gelbhart.dev/projects/hevy-tracker");
     expect(fetchMock).not.toHaveBeenCalled();
     expect(res.status).toBe(200);
   });
