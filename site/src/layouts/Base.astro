@@ -1,6 +1,5 @@
 ---
 import "@rails/assets/stylesheets/application.scss";
-import GoogleAnalytics from "../components/GoogleAnalytics.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import {
@@ -78,8 +77,6 @@ const containerClass = ["container", !error && "mt-1 py-1 min-vh-100", isHome &&
 <html lang="en" data-bs-theme="dark">
   <head>
     <meta charset="utf-8" />
-    <GoogleAnalytics />
-
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
     <title>{title}</title>
 
@@ -128,9 +125,6 @@ const containerClass = ["container", !error && "mt-1 py-1 min-vh-100", isHome &&
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-    <link rel="dns-prefetch" href="https://www.google-analytics.com" />
-
     <link rel="dns-prefetch" href="https://unpkg.com" />
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
     <link rel="dns-prefetch" href="https://ga.jspm.io" />
