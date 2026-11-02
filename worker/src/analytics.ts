@@ -59,7 +59,7 @@ async function accessToken(creds: GaCreds, fetchFn: typeof fetch): Promise<strin
       assertion: `${unsigned}.${b64url(sig)}`,
     }),
   });
-  if (!res.ok) throw new Error(`token request failed: ${res.status}`);
+  if (!res.ok) throw new Error(`token request failed: ${res.status} ${(await res.text()).slice(0, 300)}`);
   return ((await res.json()) as { access_token: string }).access_token;
 }
 
@@ -74,7 +74,7 @@ export async function fetchGaStats(creds: GaCreds, fetchFn: typeof fetch): Promi
         body: JSON.stringify({ dateRanges: DATE_RANGES, ...body }),
       },
     );
-    if (!res.ok) throw new Error(`runReport failed: ${res.status}`);
+    if (!res.ok) throw new Error(`runReport failed: ${res.status} ${(await res.text()).slice(0, 300)}`);
     return (await res.json()) as Report;
   };
   const first = (r: Report) => r.rows?.[0]?.metricValues?.[0]?.value ?? "0";
@@ -133,17 +133,30 @@ export async function refreshAnalytics(env: Env, fetchFn: typeof fetch = fetch):
   }
 }
 
-export async function analyticsResponse(db: D1Database): Promise<Record<string, unknown>> {
-  const row = await db
-    .prepare("SELECT data, fetched_at FROM analytics_cache WHERE key = ?")
-    .bind(CACHE_KEY)
-    .first<{ data: string; fetched_at: string }>();
-  if (!row) return { ...DEFAULT_STATS, source: "defaults", stale: true };
-  const stale = Date.now() - Date.parse(row.fetched_at) > STALE_AFTER_MS;
-  return {
-    ...(JSON.parse(row.data) as Stats),
-    source: stale ? "fallback" : "fresh",
-    fetched_at: row.fetched_at,
-    ...(stale ? { stale: true } : {}),
-  };
+export type AnalyticsResponse = Stats & {
+  source: "fresh" | "fallback" | "defaults";
+  fetched_at?: string;
+  stale?: true;
+};
+
+/** Never throws; falls back to DEFAULT_STATS when there is no readable snapshot. */
+export async function analyticsResponse(db: D1Database, now = Date.now()): Promise<AnalyticsResponse> {
+  try {
+    const row = await db
+      .prepare("SELECT data, fetched_at FROM analytics_cache WHERE key = ?")
+      .bind(CACHE_KEY)
+      .first<{ data: string; fetched_at: string }>();
+    if (row) {
+      const stale = now - Date.parse(row.fetched_at) > STALE_AFTER_MS;
+      return {
+        ...(JSON.parse(row.data) as Stats),
+        source: stale ? "fallback" : "fresh",
+        fetched_at: row.fetched_at,
+        ...(stale ? { stale: true as const } : {}),
+      };
+    }
+  } catch (err) {
+    console.error("analytics read failed", err);
+  }
+  return { ...DEFAULT_STATS, source: "defaults", stale: true };
 }

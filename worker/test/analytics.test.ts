@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { createTestDb } from "./d1";
 import { analyticsResponse, DEFAULT_STATS, fetchGaStats, refreshAnalytics, type GaCreds } from "../src/analytics";
 import type { Env } from "../src/env";
@@ -19,41 +19,25 @@ beforeAll(async () => {
   creds = { clientEmail: "ga@test.iam.gserviceaccount.com", privateKey, propertyId: "123" };
 });
 
+afterEach(() => vi.restoreAllMocks());
+
 const b64urlDecode = (s: string) => Buffer.from(s, "base64url");
 
-async function assertValidAssertion(assertion: string) {
-  const [header, claims, sig] = assertion.split(".");
-  const ok = await crypto.subtle.verify(
-    "RSASSA-PKCS1-v1_5", publicKey, b64urlDecode(sig), new TextEncoder().encode(`${header}.${claims}`),
-  );
-  expect(ok).toBe(true);
-  expect(JSON.parse(b64urlDecode(claims).toString())).toMatchObject({
-    iss: creds.clientEmail,
-    scope: "https://www.googleapis.com/auth/analytics.readonly",
-    aud: TOKEN_URL,
-  });
-}
+type Call = { url: string; init?: RequestInit };
 
-function fakeGa(): typeof fetch {
+function fakeGa(calls: Call[] = []): typeof fetch {
   return (async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input);
-    if (url === TOKEN_URL) {
-      const form = new URLSearchParams(String(init?.body));
-      expect(form.get("grant_type")).toBe("urn:ietf:params:oauth:grant-type:jwt-bearer");
-      await assertValidAssertion(form.get("assertion") ?? "");
-      return Response.json({ access_token: "at" });
-    }
-    expect(url).toBe("https://analyticsdata.googleapis.com/v1beta/properties/123:runReport");
-    expect(new Headers(init?.headers).get("authorization")).toBe("Bearer at");
+    calls.push({ url, init });
+    if (url === TOKEN_URL) return Response.json({ access_token: "at" });
     const body = JSON.parse(String(init?.body));
-    const metric = body.metrics[0].name;
     if (body.dimensions?.[0]?.name === "country") {
       return Response.json({
         rows: [{ dimensionValues: [{ value: "Ireland" }], metricValues: [{ value: "7" }] }],
         rowCount: 1,
       });
     }
-    const value = { totalUsers: "1979", engagementRate: "0.4712", eventCount: "757" }[metric as string];
+    const value = { totalUsers: "1979", engagementRate: "0.4712", eventCount: "757" }[body.metrics[0].name as string];
     return Response.json({ rows: [{ metricValues: [{ value }] }] });
   }) as typeof fetch;
 }
@@ -73,6 +57,28 @@ describe("fetchGaStats", () => {
       install_count: 757,
     });
   });
+
+  it("gets a token with a signed service-account JWT and sends it to the property", async () => {
+    const calls: Call[] = [];
+    await fetchGaStats(creds, fakeGa(calls));
+
+    const form = new URLSearchParams(String(calls[0].init?.body));
+    expect(calls[0].url).toBe(TOKEN_URL);
+    expect(form.get("grant_type")).toBe("urn:ietf:params:oauth:grant-type:jwt-bearer");
+    const [header, claims, sig] = (form.get("assertion") ?? "").split(".");
+    const signed = new TextEncoder().encode(`${header}.${claims}`);
+    expect(await crypto.subtle.verify("RSASSA-PKCS1-v1_5", publicKey, b64urlDecode(sig), signed)).toBe(true);
+    expect(JSON.parse(b64urlDecode(claims).toString())).toMatchObject({
+      iss: creds.clientEmail,
+      scope: "https://www.googleapis.com/auth/analytics.readonly",
+      aud: TOKEN_URL,
+    });
+
+    for (const call of calls.slice(1)) {
+      expect(call.url).toBe("https://analyticsdata.googleapis.com/v1beta/properties/123:runReport");
+      expect(new Headers(call.init?.headers).get("authorization")).toBe("Bearer at");
+    }
+  });
 });
 
 describe("analyticsResponse", () => {
@@ -80,18 +86,29 @@ describe("analyticsResponse", () => {
     expect(await analyticsResponse(createTestDb())).toEqual({ ...DEFAULT_STATS, source: "defaults", stale: true });
   });
 
-  it("returns the stored snapshot after a refresh", async () => {
+  it("returns the stored snapshot after a refresh, then marks it stale after two hours", async () => {
     const db = createTestDb();
     await refreshAnalytics(gaEnv(db), fakeGa());
-    const res = await analyticsResponse(db);
-    expect(res).toMatchObject({ active_users: 1979, install_count: 757, source: "fresh" });
-    expect(res.fetched_at).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
+    const fresh = await analyticsResponse(db);
+    expect(fresh).toMatchObject({ active_users: 1979, install_count: 757, source: "fresh" });
+    expect(fresh.fetched_at).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
+
+    const later = Date.parse(fresh.fetched_at!) + 2 * 3600 * 1000 + 1;
+    expect(await analyticsResponse(db, later)).toMatchObject({ active_users: 1979, source: "fallback", stale: true });
   });
 
   it("keeps the previous snapshot when GA4 fails", async () => {
     const db = createTestDb();
+    const logged = vi.spyOn(console, "error").mockImplementation(() => {});
     await refreshAnalytics(gaEnv(db), fakeGa());
     await refreshAnalytics(gaEnv(db), (async () => new Response("nope", { status: 500 })) as typeof fetch);
-    expect(await analyticsResponse(db)).toMatchObject({ active_users: 1979 });
+    expect(logged).toHaveBeenCalledWith("analytics refresh failed", expect.any(Error));
+    expect(await analyticsResponse(db)).toMatchObject({ active_users: 1979, source: "fresh" });
+  });
+
+  it("falls back to defaults when the database read fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const db = { prepare: () => { throw new Error("d1 down"); } } as unknown as D1Database;
+    expect(await analyticsResponse(db)).toEqual({ ...DEFAULT_STATS, source: "defaults", stale: true });
   });
 });

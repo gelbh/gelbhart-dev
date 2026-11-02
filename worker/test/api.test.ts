@@ -1,22 +1,26 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTestDb } from "./d1";
 import { app } from "../src/index";
 import type { Env } from "../src/env";
 
 vi.mock("../src/mail", () => ({ sendContactMail: vi.fn() }));
 
-const env = (): Env => ({
+afterEach(() => vi.restoreAllMocks());
+
+const env = (overrides: Partial<Env> = {}): Env => ({
   DB: createTestDb(),
   SEND_EMAIL: {} as SendEmail,
+  SCORE_LIMITER: { limit: async () => ({ success: true }) },
   PAGES_ORIGIN: "assets",
   TURNSTILE_SECRET_KEY: "secret",
   IP_SALT: "salt",
+  ...overrides,
 });
 
 const postScore = (e: Env, body: unknown) =>
   app.request("/api/pacman_scores", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "CF-Connecting-IP": "1.1.1.1" },
     body: JSON.stringify(body),
   }, e);
 
@@ -41,6 +45,12 @@ describe("api routes", () => {
     expect(await res.json()).toMatchObject({ player_name: "ada l", scores: [{ score: 7, is_win: false }] });
   });
 
+  it("returns 400 for a blank player name", async () => {
+    const res = await app.request("/api/pacman_scores/player/%20", {}, env());
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ success: false, error: "Player name is required" });
+  });
+
   it("returns 422 with Rails-style errors for an invalid score", async () => {
     const res = await postScore(env(), { pacman_score: { player_name: "", score: -1, is_win: false } });
     expect(res.status).toBe(422);
@@ -51,12 +61,22 @@ describe("api routes", () => {
     expect((await postScore(env(), {})).status).toBe(400);
   });
 
-  it("returns a 503 json error when the database fails", async () => {
-    const e = { ...env(), DB: { prepare: () => { throw new Error("d1 down"); } } as unknown as D1Database };
-    vi.spyOn(console, "error").mockImplementationOnce(() => {});
+  it("returns 429 without writing when the client IP is over the score limit", async () => {
+    const limit = vi.fn(async () => ({ success: false }));
+    const e = env({ SCORE_LIMITER: { limit } });
+    const res = await postScore(e, { pacman_score: { player_name: "tom", score: 1, is_win: false } });
+    expect(res.status).toBe(429);
+    expect(limit).toHaveBeenCalledWith({ key: "1.1.1.1" });
+    expect((await (await app.request("/api/pacman_scores/global", {}, e)).json()).leaderboard).toEqual([]);
+  });
+
+  it("returns a 500 json error with security headers when the database fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const e = env({ DB: { prepare: () => { throw new Error("d1 down"); } } as unknown as D1Database });
     const res = await app.request("/api/pacman_scores/global", {}, e);
-    expect(res.status).toBe(503);
+    expect(res.status).toBe(500);
     expect(await res.json()).toEqual({ success: false });
+    expect(res.headers.get("x-frame-options")).toBe("SAMEORIGIN");
   });
 
   it("serves default analytics with a 5 minute public cache", async () => {
@@ -69,7 +89,7 @@ describe("api routes", () => {
     const immutable = Response.redirect("https://gelbhart.dev/api/other", 301);
     expect(() => immutable.headers.set("x", "y")).toThrow();
     const assets = { fetch: vi.fn(async () => immutable) } as unknown as Fetcher;
-    const res = await app.request("https://gelbhart.dev/api/nope", {}, { ...env(), ASSETS: assets });
+    const res = await app.request("https://gelbhart.dev/api/nope", {}, env({ ASSETS: assets }));
     expect(res.status).toBe(301);
     expect(res.headers.get("x-frame-options")).toBe("SAMEORIGIN");
   });
