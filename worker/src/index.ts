@@ -1,11 +1,11 @@
 import { Hono, type Context } from "hono";
+import { secureHeaders } from "hono/secure-headers";
 import type { Env } from "./env";
 import { analyticsResponse, DEFAULT_STATS, refreshAnalytics } from "./analytics";
 import {
   contactAlertHtml, handleContact, hashIp, parseContactForm, pruneContactAttempts, recordAttempt,
   type ContactOutcome,
 } from "./contact";
-import { securityHeaders } from "./headers";
 import { sendContactMail } from "./mail";
 import {
   globalLeaderboard, insertScore, isGlobalHighScore, playerScores, toJson, validateScore,
@@ -22,8 +22,11 @@ const OUTCOME_PATHS: Record<ContactOutcome, string> = {
   rate_limited: "/contact?rate_limited=true",
 };
 
-const passThrough = (c: Context<AppEnv>) =>
-  c.env.PAGES_ORIGIN === "assets" && c.env.ASSETS ? c.env.ASSETS.fetch(c.req.raw) : fetch(c.req.raw);
+const passThrough = async (c: Context<AppEnv>) => {
+  const res = await (c.env.PAGES_ORIGIN === "assets" && c.env.ASSETS ? c.env.ASSETS.fetch(c.req.raw) : fetch(c.req.raw));
+  // Fetched responses have immutable headers, which secureHeaders on /api/* must be able to set.
+  return new Response(res.body, res);
+};
 
 app.get("/contact", async (c) => {
   if (c.env.PAGES_ORIGIN !== "assets" || !c.env.ASSETS) return passThrough(c);
@@ -61,7 +64,7 @@ app.post("/contact", async (c) => {
   return c.redirect(OUTCOME_PATHS[outcome], 303);
 });
 
-app.use("/api/*", securityHeaders);
+app.use("/api/*", secureHeaders({ referrerPolicy: "strict-origin-when-cross-origin" }));
 
 app.onError((err, c) => {
   console.error(err);
