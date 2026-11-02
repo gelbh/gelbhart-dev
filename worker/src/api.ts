@@ -26,9 +26,6 @@ api.get("/pacman_scores/player/:player_name", async (c) => {
 });
 
 api.post("/pacman_scores", async (c) => {
-  // Every insert spends D1 writes that the contact form shares on the Free plan.
-  const { success } = await c.env.SCORE_LIMITER.limit({ key: c.req.header("CF-Connecting-IP") ?? "" });
-  if (!success) return c.json({ success: false, errors: ["Too many scores submitted, try again in a minute"] }, 429);
   const body = (await c.req.json().catch(() => null)) as { pacman_score?: unknown } | null;
   if (!body?.pacman_score) {
     return c.json({ success: false, errors: ["param is missing or the value is empty: pacman_score"] }, 400);

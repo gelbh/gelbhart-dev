@@ -10,7 +10,6 @@ afterEach(() => vi.restoreAllMocks());
 const env = (overrides: Partial<Env> = {}): Env => ({
   DB: createTestDb(),
   SEND_EMAIL: {} as SendEmail,
-  SCORE_LIMITER: { limit: async () => ({ success: true }) },
   PAGES_ORIGIN: "assets",
   TURNSTILE_SECRET_KEY: "secret",
   IP_SALT: "salt",
@@ -20,7 +19,7 @@ const env = (overrides: Partial<Env> = {}): Env => ({
 const postScore = (e: Env, body: unknown) =>
   app.request("/api/pacman_scores", {
     method: "POST",
-    headers: { "Content-Type": "application/json", "CF-Connecting-IP": "1.1.1.1" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   }, e);
 
@@ -59,15 +58,6 @@ describe("api routes", () => {
 
   it("returns 400 when pacman_score is missing", async () => {
     expect((await postScore(env(), {})).status).toBe(400);
-  });
-
-  it("returns 429 without writing when the client IP is over the score limit", async () => {
-    const limit = vi.fn(async () => ({ success: false }));
-    const e = env({ SCORE_LIMITER: { limit } });
-    const res = await postScore(e, { pacman_score: { player_name: "tom", score: 1, is_win: false } });
-    expect(res.status).toBe(429);
-    expect(limit).toHaveBeenCalledWith({ key: "1.1.1.1" });
-    expect((await (await app.request("/api/pacman_scores/global", {}, e)).json()).leaderboard).toEqual([]);
   });
 
   it("returns a 500 json error with security headers when the database fails", async () => {

@@ -24,7 +24,6 @@
       "migrations_dir": "migrations"
     }
   ],
-  "ratelimits": [{ "name": "SCORE_LIMITER", "namespace_id": "1001", "simple": { "limit": 10, "period": 60 } }],
   "send_email": [{ "name": "SEND_EMAIL", "destination_address": "gelbharttomer@gmail.com" }],
   "triggers": { "crons": ["*/30 * * * *"] }
 }

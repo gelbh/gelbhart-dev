@@ -12,7 +12,6 @@ let fetchMock: ReturnType<typeof vi.fn>;
 const env = (): Env => ({
   DB: createTestDb(),
   SEND_EMAIL: {} as SendEmail,
-  SCORE_LIMITER: { limit: async () => ({ success: true }) },
   PAGES_ORIGIN: "render",
   TURNSTILE_SECRET_KEY: "secret",
   IP_SALT: "salt",
