@@ -74,3 +74,64 @@ describe("routes", () => {
     },
   );
 });
+
+describe("routes in assets mode", () => {
+  type Edit = [selector: string, op: "set" | "append", ...args: string[]];
+  let edits: Edit[];
+  let assetsFetch: ReturnType<typeof vi.fn>;
+
+  // Node has no HTMLRewriter; this stub records what the handlers write. Preview parity covers the real rewrite.
+  class RecordingRewriter {
+    private handlers: [string, { element(el: unknown): void }][] = [];
+    on(selector: string, handler: { element(el: unknown): void }) {
+      this.handlers.push([selector, handler]);
+      return this;
+    }
+    transform(res: Response) {
+      for (const [selector, handler] of this.handlers) {
+        handler.element({
+          setAttribute: (name: string, value: string) => edits.push([selector, "set", name, value]),
+          append: (content: string) => edits.push([selector, "append", content]),
+        });
+      }
+      return res;
+    }
+  }
+
+  const assetsEnv = (): Env => ({ ...env(), PAGES_ORIGIN: "assets", ASSETS: { fetch: assetsFetch } as unknown as Fetcher });
+
+  beforeEach(() => {
+    edits = [];
+    assetsFetch = vi.fn(async () => new Response("<form></form>", { status: 200, headers: { ETag: '"abc"' } }));
+    vi.stubGlobal("HTMLRewriter", RecordingRewriter);
+  });
+
+  it("serves GET /contact from assets with a fresh timestamp, the alert and no-store", async () => {
+    const res = await app.request("https://gelbhart.dev/contact?sent=1", {}, assetsEnv());
+    expect(assetsFetch).toHaveBeenCalledWith("https://gelbhart.dev/contact?sent=1", { redirect: "manual" });
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(res.status).toBe(200);
+    expect(res.headers.get("cache-control")).toBe("no-store");
+    expect(res.headers.get("etag")).toBeNull();
+    const [timestamp, alert] = edits;
+    expect(timestamp.slice(0, 3)).toEqual(['input[name="form_timestamp"]', "set", "value"]);
+    expect(Number(timestamp[3])).toBeCloseTo(Date.now() / 1000, -1);
+    expect(alert.slice(0, 2)).toEqual(["#contact-alert", "append"]);
+    expect(alert[2]).not.toBe("");
+  });
+
+  it("returns a non-200 contact asset untouched", async () => {
+    assetsFetch.mockResolvedValueOnce(new Response(null, { status: 307, headers: { location: "/contact" } }));
+    const res = await app.request("https://gelbhart.dev/contact/", {}, assetsEnv());
+    expect(res.status).toBe(307);
+    expect(edits).toEqual([]);
+  });
+
+  it("passes other paths to the assets binding, not the network", async () => {
+    const res = await app.request("https://gelbhart.dev/api/leaderboard", {}, assetsEnv());
+    expect(assetsFetch).toHaveBeenCalledOnce();
+    expect((assetsFetch.mock.calls[0][0] as Request).url).toBe("https://gelbhart.dev/api/leaderboard");
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(res.status).toBe(200);
+  });
+});

@@ -1,0 +1,60 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  INDEXNOW_KEY: 8de9b96283bfad3b30524d9c9f79dcb7
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: worker/.nvmrc
+          cache: npm
+          cache-dependency-path: |
+            site/package-lock.json
+            worker/package-lock.json
+      - name: Require the Snazzy Maps key
+        env:
+          SNAZZY_MAPS_API_KEY: ${{ secrets.SNAZZY_MAPS_API_KEY }}
+        run: test -n "$SNAZZY_MAPS_API_KEY" || { echo "::error::Set the SNAZZY_MAPS_API_KEY repository secret"; exit 1; }
+      - run: npm ci
+        working-directory: site
+      - run: npm ci
+        working-directory: worker
+      - run: npm test && npm run typecheck
+        working-directory: worker
+      - run: npm run check && npm run build
+        working-directory: site
+        env:
+          PUBLIC_SNAZZY_MAPS_API_KEY: ${{ secrets.SNAZZY_MAPS_API_KEY }}
+      - run: npm run db:migrate:remote
+        working-directory: worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      # Uploads the site built above; never run the build where the token is in scope.
+      - run: npx wrangler deploy
+        working-directory: worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Ping IndexNow
+        continue-on-error: true
+        run: |
+          curl -fsS -X POST https://api.indexnow.org/IndexNow \
+            -H "Content-Type: application/json; charset=utf-8" \
+            -d "{\"host\":\"gelbhart.dev\",\"key\":\"$INDEXNOW_KEY\",\"urlList\":[\"https://gelbhart.dev/\"]}"

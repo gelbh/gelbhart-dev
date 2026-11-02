@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "scripts": {
     "test": "vitest run",
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "build": "npm --prefix ../site run build",
+    "dev": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy",
+    "preview": "npm run build && wrangler versions upload",
     "typecheck": "tsc --noEmit",
     "db:migrate:local": "wrangler d1 migrations apply gelbhart-dev --local",
     "db:migrate:remote": "wrangler d1 migrations apply gelbhart-dev --remote"
